@@ -30,23 +30,27 @@ type AvatarProps struct {
 
 // Initials are the first letters of the first and last word of the name.
 //
+// First and LAST, not the first two: "Ada B. Lovelace" is AL, and the version
+// that walked forwards until it had two letters answered AB -- a middle initial
+// where a surname belongs. Nobody would have noticed from looking at the
+// component; the letters are the right shape either way.
+//
 // It walks runes rather than bytes: a name starting with É is one letter to a
 // person and two bytes to Go, and slicing bytes would print half a character.
 func (p AvatarProps) Initials() string {
-	var out []rune
-	for i, word := range strings.Fields(p.Name) {
-		if i > 0 && len(out) > 0 {
-			out = out[:1]
-		}
-		out = append(out, []rune(word)[0])
-		if len(out) == 2 {
-			break
-		}
+	words := strings.Fields(p.Name)
+	if len(words) == 0 {
+		return ""
+	}
+
+	out := []rune{[]rune(words[0])[0]}
+	if len(words) > 1 {
+		out = append(out, []rune(words[len(words)-1])[0])
 	}
 	return strings.ToUpper(string(out))
 }
 
-//line components/avatar.go:50
+//line components/avatar.go:54
 
 // Avatar renders the avatar component.
 func Avatar(props AvatarProps) template.HTML {
@@ -57,16 +61,16 @@ func Avatar(props AvatarProps) template.HTML {
 	if err == nil {
 		_, err = io.WriteString(w, "<span class=\"avatar\"\n")
 	}
-//line components/avatar.kyse.go:42
+//line components/avatar.kyse.go:46
 	if d.Size != "" {
-//line components/avatar.go:63
+//line components/avatar.go:67
 		if err == nil {
 			_, err = io.WriteString(w, "\t\tdata-size=\"")
 		}
 		if err == nil {
-//line components/avatar.kyse.go:43
+//line components/avatar.kyse.go:47
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Size)))
-//line components/avatar.go:70
+//line components/avatar.go:74
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
@@ -75,39 +79,39 @@ func Avatar(props AvatarProps) template.HTML {
 	if err == nil {
 		_, err = io.WriteString(w, ">\n")
 	}
-//line components/avatar.kyse.go:46
+//line components/avatar.kyse.go:50
 	if d.ImageURL != "" {
-//line components/avatar.go:81
+//line components/avatar.go:85
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t<img src=\"")
 		}
 		if err == nil {
-//line components/avatar.kyse.go:47
+//line components/avatar.kyse.go:51
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.ImageURL)))
-//line components/avatar.go:88
+//line components/avatar.go:92
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\" alt=\"")
 		}
 		if err == nil {
-//line components/avatar.kyse.go:47
+//line components/avatar.kyse.go:51
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/avatar.go:96
+//line components/avatar.go:100
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\">\n")
 		}
 	}
-//line components/avatar.kyse.go:49
+//line components/avatar.kyse.go:53
 	if d.ImageURL == "" {
-//line components/avatar.go:104
+//line components/avatar.go:108
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t<span aria-hidden=\"true\">")
 		}
 		if err == nil {
-//line components/avatar.kyse.go:50
+//line components/avatar.kyse.go:54
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Initials())))
-//line components/avatar.go:111
+//line components/avatar.go:115
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</span>\n")
@@ -116,9 +120,9 @@ func Avatar(props AvatarProps) template.HTML {
 			_, err = io.WriteString(w, "\t\t<span class=\"sr-only\">")
 		}
 		if err == nil {
-//line components/avatar.kyse.go:51
+//line components/avatar.kyse.go:55
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/avatar.go:122
+//line components/avatar.go:126
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</span>\n")

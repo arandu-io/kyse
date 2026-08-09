@@ -21,18 +21,22 @@ type AvatarProps struct {
 
 // Initials are the first letters of the first and last word of the name.
 //
+// First and LAST, not the first two: "Ada B. Lovelace" is AL, and the version
+// that walked forwards until it had two letters answered AB -- a middle initial
+// where a surname belongs. Nobody would have noticed from looking at the
+// component; the letters are the right shape either way.
+//
 // It walks runes rather than bytes: a name starting with É is one letter to a
 // person and two bytes to Go, and slicing bytes would print half a character.
 func (p AvatarProps) Initials() string {
-	var out []rune
-	for i, word := range strings.Fields(p.Name) {
-		if i > 0 && len(out) > 0 {
-			out = out[:1]
-		}
-		out = append(out, []rune(word)[0])
-		if len(out) == 2 {
-			break
-		}
+	words := strings.Fields(p.Name)
+	if len(words) == 0 {
+		return ""
+	}
+
+	out := []rune{[]rune(words[0])[0]}
+	if len(words) > 1 {
+		out = append(out, []rune(words[len(words)-1])[0])
 	}
 	return strings.ToUpper(string(out))
 }
