@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/logo.png" alt="Arandu" width="140" height="140">
+</p>
+
 <h1 align="center">arandu-io/kyse</h1>
 
 <p align="center">The component library for Arandu. Import it and draw a screen.</p>
