@@ -63,7 +63,10 @@ jobs:
       # of them.
       - name: one dependency
         run: |
-          extra=$(grep -E '^\s+[a-z].*/' go.mod | grep -v 'arandu-io/framework' || true)
+          # Direct requires only. What the framework pulls in is the
+          # framework's to answer for, and listing it here would make this step
+          # fail every time it takes a dependency of its own.
+          extra=$(grep -E '^\s+[a-z].*/' go.mod | grep -v '// indirect' | grep -v 'arandu-io/framework' || true)
           if [ -n "$extra" ]; then
             echo "this module took a dependency beyond the framework:"
             echo "$extra"
