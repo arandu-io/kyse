@@ -54,26 +54,33 @@ jobs:
       # somebody's project. A change to them has to show up as a diff in review
       # rather than as a surprise in a checkout, so a run that rewrites them and
       # leaves the tree dirty is a failure.
-      - name: the golden files are the ones in the tree
+      # One dependency, and it is the framework.
+      #
+      # A component compiles to a function that calls view.Text and returns
+      # template.HTML, so the framework is not optional here -- it is what the
+      # output is made of. Anything else is: this module is imported by every
+      # project that draws a button, and a second require is a download for all
+      # of them.
+      - name: one dependency
         run: |
-          go test . -update
-          if [ -n "$(git status --porcelain testdata)" ]; then
-            echo "the golden files do not match what the templates produce:"
-            git --no-pager diff --stat testdata
+          extra=$(grep -E '^\s+[a-z].*/' go.mod | grep -v 'arandu-io/framework' || true)
+          if [ -n "$extra" ]; then
+            echo "this module took a dependency beyond the framework:"
+            echo "$extra"
             exit 1
           fi
 
-      # This module has to stay dependency-free.
+      # The generated views are committed, and a stale one ships.
       #
-      # It is run as `go run github.com/arandu-io/ui@latest auth`, from inside
-      # somebody's project, and every require here is something they download to
-      # publish nine views. The renderer is a copy of the CLI's for exactly this
-      # reason (see publish.go).
-      - name: no dependencies
+      # go get has no build step to run, so what is in the repository is what
+      # every project imports. This rebuilds them and fails if the tree moved.
+      - name: the compiled components are the ones in the tree
         run: |
-          if grep -qE '^\s*require' go.mod; then
-            echo "this module took a dependency:"
-            grep -A20 require go.mod
+          go install github.com/arandu-io/aru@latest
+          "$(go env GOPATH)/bin/aru" view:build
+          if [ -n "$(git status --porcelain components)" ]; then
+            echo "the committed components do not match their sources:"
+            git --no-pager diff --stat components
             exit 1
           fi
 
