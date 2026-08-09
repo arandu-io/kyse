@@ -39,6 +39,9 @@ func Empty(props EmptyProps) template.HTML {
 	w := &strings.Builder{}
 	var err error
 	if err == nil {
+		_, err = io.WriteString(w, "\n")
+	}
+	if err == nil {
 		_, err = io.WriteString(w, "<div class=\"empty\">\n")
 	}
 	if err == nil {
@@ -50,21 +53,21 @@ func Empty(props EmptyProps) template.HTML {
 	if err == nil {
 //line components/empty.kyse.go:25
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Title)))
-//line components/empty.go:54
+//line components/empty.go:57
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</h2>\n")
 	}
 //line components/empty.kyse.go:26
 	if d.Message != "" {
-//line components/empty.go:61
+//line components/empty.go:64
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\t<p>")
 		}
 		if err == nil {
 //line components/empty.kyse.go:27
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Message)))
-//line components/empty.go:68
+//line components/empty.go:71
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</p>\n")
@@ -75,7 +78,7 @@ func Empty(props EmptyProps) template.HTML {
 	}
 //line components/empty.kyse.go:30
 	if d.ActionURL != "" {
-//line components/empty.go:79
+//line components/empty.go:82
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t<section>\n")
 		}
@@ -85,7 +88,7 @@ func Empty(props EmptyProps) template.HTML {
 		if err == nil {
 //line components/empty.kyse.go:32
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.ActionURL)))
-//line components/empty.go:89
+//line components/empty.go:92
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\">")
@@ -93,7 +96,7 @@ func Empty(props EmptyProps) template.HTML {
 		if err == nil {
 //line components/empty.kyse.go:32
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.ActionLabel)))
-//line components/empty.go:97
+//line components/empty.go:100
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</a>\n")
@@ -104,6 +107,9 @@ func Empty(props EmptyProps) template.HTML {
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</div>\n")
+	}
+	if err == nil {
+		_, err = io.WriteString(w, "\n")
 	}
 	_ = err
 	return template.HTML(w.String())

@@ -17,6 +17,9 @@ func ThemeToggle() template.HTML {
 	w := &strings.Builder{}
 	var err error
 	if err == nil {
+		_, err = io.WriteString(w, "\n")
+	}
+	if err == nil {
 		_, err = io.WriteString(w, "<div class=\"dropdown-menu\" x-data>\n")
 	}
 	if err == nil {
@@ -30,6 +33,9 @@ func ThemeToggle() template.HTML {
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\t</button>\n")
+	}
+	if err == nil {
+		_, err = io.WriteString(w, "\n")
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\t<div data-popover aria-hidden=\"true\" class=\"w-44\">\n")
@@ -47,7 +53,13 @@ func ThemeToggle() template.HTML {
 		_, err = io.WriteString(w, "\t\t\t</button>\n")
 	}
 	if err == nil {
+		_, err = io.WriteString(w, "\n")
+	}
+	if err == nil {
 		_, err = io.WriteString(w, "\t\t\t<hr role=\"separator\">\n")
+	}
+	if err == nil {
+		_, err = io.WriteString(w, "\n")
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\t\t\t<template x-for=\"a in $store.theme.accents\" :key=\"a\">\n")
@@ -78,6 +90,9 @@ func ThemeToggle() template.HTML {
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</div>\n")
+	}
+	if err == nil {
+		_, err = io.WriteString(w, "\n")
 	}
 	_ = err
 	return template.HTML(w.String())

@@ -46,6 +46,9 @@ func Alert(props AlertProps) template.HTML {
 	w := &strings.Builder{}
 	var err error
 	if err == nil {
+		_, err = io.WriteString(w, "\n")
+	}
+	if err == nil {
 		_, err = io.WriteString(w, "<div\n")
 	}
 	if err == nil {
@@ -57,21 +60,21 @@ func Alert(props AlertProps) template.HTML {
 	if err == nil {
 //line components/alert.kyse.go:32
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Role())))
-//line components/alert.go:61
+//line components/alert.go:64
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\"\n")
 	}
 //line components/alert.kyse.go:33
 	if d.Variant != "" {
-//line components/alert.go:68
+//line components/alert.go:71
 		if err == nil {
 			_, err = io.WriteString(w, "\t\tdata-variant=\"")
 		}
 		if err == nil {
 //line components/alert.kyse.go:34
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Variant)))
-//line components/alert.go:75
+//line components/alert.go:78
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
@@ -86,21 +89,21 @@ func Alert(props AlertProps) template.HTML {
 	if err == nil {
 //line components/alert.kyse.go:37
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Title)))
-//line components/alert.go:90
+//line components/alert.go:93
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</h2>\n")
 	}
 //line components/alert.kyse.go:38
 	if d.Message != "" {
-//line components/alert.go:97
+//line components/alert.go:100
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t<section>")
 		}
 		if err == nil {
 //line components/alert.kyse.go:39
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Message)))
-//line components/alert.go:104
+//line components/alert.go:107
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</section>\n")
@@ -108,6 +111,9 @@ func Alert(props AlertProps) template.HTML {
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</div>\n")
+	}
+	if err == nil {
+		_, err = io.WriteString(w, "\n")
 	}
 	_ = err
 	return template.HTML(w.String())

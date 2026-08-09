@@ -59,6 +59,9 @@ func Textarea(props TextareaProps) template.HTML {
 	w := &strings.Builder{}
 	var err error
 	if err == nil {
+		_, err = io.WriteString(w, "\n")
+	}
+	if err == nil {
 		_, err = io.WriteString(w, "<div class=\"field\">\n")
 	}
 	if err == nil {
@@ -67,7 +70,7 @@ func Textarea(props TextareaProps) template.HTML {
 	if err == nil {
 //line components/textarea.kyse.go:44
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/textarea.go:71
+//line components/textarea.go:74
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\">")
@@ -75,7 +78,7 @@ func Textarea(props TextareaProps) template.HTML {
 	if err == nil {
 //line components/textarea.kyse.go:44
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Label)))
-//line components/textarea.go:79
+//line components/textarea.go:82
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</label>\n")
@@ -92,7 +95,7 @@ func Textarea(props TextareaProps) template.HTML {
 	if err == nil {
 //line components/textarea.kyse.go:47
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/textarea.go:96
+//line components/textarea.go:99
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\"\n")
@@ -103,21 +106,21 @@ func Textarea(props TextareaProps) template.HTML {
 	if err == nil {
 //line components/textarea.kyse.go:48
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/textarea.go:107
+//line components/textarea.go:110
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\"\n")
 	}
 //line components/textarea.kyse.go:49
 	if d.Rows > 0 {
-//line components/textarea.go:114
+//line components/textarea.go:117
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\trows=\"")
 		}
 		if err == nil {
 //line components/textarea.kyse.go:50
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Rows)))
-//line components/textarea.go:121
+//line components/textarea.go:124
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
@@ -125,14 +128,14 @@ func Textarea(props TextareaProps) template.HTML {
 	}
 //line components/textarea.kyse.go:52
 	if d.Placeholder != "" {
-//line components/textarea.go:129
+//line components/textarea.go:132
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\tplaceholder=\"")
 		}
 		if err == nil {
 //line components/textarea.kyse.go:53
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Placeholder)))
-//line components/textarea.go:136
+//line components/textarea.go:139
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
@@ -140,14 +143,14 @@ func Textarea(props TextareaProps) template.HTML {
 	}
 //line components/textarea.kyse.go:55
 	if d.DescribedBy() != "" {
-//line components/textarea.go:144
+//line components/textarea.go:147
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\taria-describedby=\"")
 		}
 		if err == nil {
 //line components/textarea.kyse.go:56
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.DescribedBy())))
-//line components/textarea.go:151
+//line components/textarea.go:154
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
@@ -155,14 +158,14 @@ func Textarea(props TextareaProps) template.HTML {
 	}
 //line components/textarea.kyse.go:58
 	if d.Error != "" {
-//line components/textarea.go:159
+//line components/textarea.go:162
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\taria-invalid=\"true\"\n")
 		}
 	}
 //line components/textarea.kyse.go:61
 	if d.Required {
-//line components/textarea.go:166
+//line components/textarea.go:169
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\trequired\n")
 		}
@@ -173,21 +176,21 @@ func Textarea(props TextareaProps) template.HTML {
 	if err == nil {
 //line components/textarea.kyse.go:64
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Value)))
-//line components/textarea.go:177
+//line components/textarea.go:180
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</textarea>\n")
 	}
 //line components/textarea.kyse.go:65
 	if d.Error != "" {
-//line components/textarea.go:184
+//line components/textarea.go:187
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t<p id=\"")
 		}
 		if err == nil {
 //line components/textarea.kyse.go:66
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/textarea.go:191
+//line components/textarea.go:194
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "-error\" class=\"text-destructive text-sm\">")
@@ -195,7 +198,7 @@ func Textarea(props TextareaProps) template.HTML {
 		if err == nil {
 //line components/textarea.kyse.go:66
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Error)))
-//line components/textarea.go:199
+//line components/textarea.go:202
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</p>\n")
@@ -203,17 +206,17 @@ func Textarea(props TextareaProps) template.HTML {
 	}
 //line components/textarea.kyse.go:68
 	if d.Error == "" {
-//line components/textarea.go:207
+//line components/textarea.go:210
 //line components/textarea.kyse.go:69
 		if d.Hint != "" {
-//line components/textarea.go:210
+//line components/textarea.go:213
 			if err == nil {
 				_, err = io.WriteString(w, "\t\t\t<p id=\"")
 			}
 			if err == nil {
 //line components/textarea.kyse.go:70
 				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/textarea.go:217
+//line components/textarea.go:220
 			}
 			if err == nil {
 				_, err = io.WriteString(w, "-hint\" class=\"text-muted-foreground text-sm\">")
@@ -221,7 +224,7 @@ func Textarea(props TextareaProps) template.HTML {
 			if err == nil {
 //line components/textarea.kyse.go:70
 				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Hint)))
-//line components/textarea.go:225
+//line components/textarea.go:228
 			}
 			if err == nil {
 				_, err = io.WriteString(w, "</p>\n")
@@ -230,6 +233,9 @@ func Textarea(props TextareaProps) template.HTML {
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</div>\n")
+	}
+	if err == nil {
+		_, err = io.WriteString(w, "\n")
 	}
 	_ = err
 	return template.HTML(w.String())

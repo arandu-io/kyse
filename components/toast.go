@@ -68,30 +68,33 @@ func Toast(props ToastProps) template.HTML {
 	_ = d
 	w := &strings.Builder{}
 	var err error
+	if err == nil {
+		_, err = io.WriteString(w, "\n")
+	}
 //line components/toast.kyse.go:53
 	if d.Title != "" {
-//line components/toast.go:74
+//line components/toast.go:77
 		if err == nil {
 			_, err = io.WriteString(w, "\t<div class=\"toast\" role=\"status\" aria-live=\"")
 		}
 		if err == nil {
 //line components/toast.kyse.go:54
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Live())))
-//line components/toast.go:81
+//line components/toast.go:84
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
 		}
 //line components/toast.kyse.go:55
 		if d.Category != "" {
-//line components/toast.go:88
+//line components/toast.go:91
 			if err == nil {
 				_, err = io.WriteString(w, "\t\t\tdata-category=\"")
 			}
 			if err == nil {
 //line components/toast.kyse.go:56
 				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Category)))
-//line components/toast.go:95
+//line components/toast.go:98
 			}
 			if err == nil {
 				_, err = io.WriteString(w, "\"\n")
@@ -99,14 +102,14 @@ func Toast(props ToastProps) template.HTML {
 		}
 //line components/toast.kyse.go:58
 		if d.Duration != 0 {
-//line components/toast.go:103
+//line components/toast.go:106
 			if err == nil {
 				_, err = io.WriteString(w, "\t\t\tdata-duration=\"")
 			}
 			if err == nil {
 //line components/toast.kyse.go:59
 				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Duration)))
-//line components/toast.go:110
+//line components/toast.go:113
 			}
 			if err == nil {
 				_, err = io.WriteString(w, "\"\n")
@@ -127,21 +130,21 @@ func Toast(props ToastProps) template.HTML {
 		if err == nil {
 //line components/toast.kyse.go:64
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Title)))
-//line components/toast.go:131
+//line components/toast.go:134
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</h2>\n")
 		}
 //line components/toast.kyse.go:65
 		if d.Message != "" {
-//line components/toast.go:138
+//line components/toast.go:141
 			if err == nil {
 				_, err = io.WriteString(w, "\t\t\t\t\t<p>")
 			}
 			if err == nil {
 //line components/toast.kyse.go:66
 				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Message)))
-//line components/toast.go:145
+//line components/toast.go:148
 			}
 			if err == nil {
 				_, err = io.WriteString(w, "</p>\n")
@@ -155,7 +158,7 @@ func Toast(props ToastProps) template.HTML {
 		}
 //line components/toast.kyse.go:70
 		if d.ActionURL != "" {
-//line components/toast.go:159
+//line components/toast.go:162
 			if err == nil {
 				_, err = io.WriteString(w, "\t\t\t\t<footer>\n")
 			}
@@ -168,7 +171,7 @@ func Toast(props ToastProps) template.HTML {
 			if err == nil {
 //line components/toast.kyse.go:73
 				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.ActionURL)))
-//line components/toast.go:172
+//line components/toast.go:175
 			}
 			if err == nil {
 				_, err = io.WriteString(w, "\" hx-swap=\"none\">")
@@ -176,7 +179,7 @@ func Toast(props ToastProps) template.HTML {
 			if err == nil {
 //line components/toast.kyse.go:73
 				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.ActionLabel)))
-//line components/toast.go:180
+//line components/toast.go:183
 			}
 			if err == nil {
 				_, err = io.WriteString(w, "</button>\n")
@@ -191,6 +194,9 @@ func Toast(props ToastProps) template.HTML {
 		if err == nil {
 			_, err = io.WriteString(w, "\t</div>\n")
 		}
+	}
+	if err == nil {
+		_, err = io.WriteString(w, "\n")
 	}
 	_ = err
 	return template.HTML(w.String())

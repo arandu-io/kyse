@@ -33,6 +33,9 @@ func Badge(props BadgeProps) template.HTML {
 	w := &strings.Builder{}
 	var err error
 	if err == nil {
+		_, err = io.WriteString(w, "\n")
+	}
+	if err == nil {
 		_, err = io.WriteString(w, "<span\n")
 	}
 	if err == nil {
@@ -40,14 +43,14 @@ func Badge(props BadgeProps) template.HTML {
 	}
 //line components/badge.kyse.go:19
 	if d.Variant != "" {
-//line components/badge.go:44
+//line components/badge.go:47
 		if err == nil {
 			_, err = io.WriteString(w, "\t\tdata-variant=\"")
 		}
 		if err == nil {
 //line components/badge.kyse.go:20
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Variant)))
-//line components/badge.go:51
+//line components/badge.go:54
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
@@ -59,10 +62,13 @@ func Badge(props BadgeProps) template.HTML {
 	if err == nil {
 //line components/badge.kyse.go:22
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Label)))
-//line components/badge.go:63
+//line components/badge.go:66
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</span>\n")
+	}
+	if err == nil {
+		_, err = io.WriteString(w, "\n")
 	}
 	_ = err
 	return template.HTML(w.String())
