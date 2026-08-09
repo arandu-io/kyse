@@ -87,6 +87,20 @@ jobs:
             exit 1
           fi
 
+      # The same argument for the icons, which are vendored rather than
+      # compiled: the pin is a commit of phosphor-icons/core written into
+      # internal/icongen, so regenerating has to produce byte-for-byte what is
+      # committed. A run that moves the tree means somebody hand-edited an icon
+      # -- which compiles, and which the next regeneration would silently undo.
+      - name: the vendored icons are the ones upstream published
+        run: |
+          go generate ./...
+          if [ -n "$(git status --porcelain icons)" ]; then
+            echo "the committed icons do not match the pinned Phosphor commit:"
+            git --no-pager diff --stat icons
+            exit 1
+          fi
+
       - name: no Node
         run: |
           found=$(find . -name package.json -o -name node_modules -o -name 'vite.config.*' | grep -v '^./.git' || true)

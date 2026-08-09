@@ -88,6 +88,29 @@ space and a 500.
 Eleven, and the catalogue upstream has eighty-two. What is here is what has been
 adapted, not what is planned.
 
+## Icons
+
+[Phosphor](https://github.com/phosphor-icons/core) (MIT), regular weight, as
+1512 exported functions in `github.com/arandu-io/kyse/icons`:
+
+```go
+{!! icons.Trash(icons.Props{Label: "Delete this post"}) !!}
+```
+
+One function per icon, rather than `go:embed` or a map keyed by name, because
+the linker can prove a function is unreachable and cannot prove that about a map
+lookup. Measured on a program that draws one icon: 176 bytes. The same icon
+reached through a name-keyed map costs 1.24 MB, because the map keeps all 1512
+alive. See [ADR 0033](https://github.com/arandu-io/docs).
+
+No `Label` means the icon is decorative and is marked `aria-hidden`; a `Label`
+makes it the accessible name, which is what an icon-only button needs. There is
+no size and no colour prop: the svg is `currentColor` at `1em`, and both lose to
+the stylesheet rule of whatever contains it.
+
+The paths are regenerated from a pinned commit with `go generate ./...`, and
+Phosphor's licence sits in `icons/LICENSE.md` beside them.
+
 ## The stylesheet
 
 The markup carries semantic class names — `btn`, `field`, `card` — and the rules
@@ -119,8 +142,10 @@ it writes.
 The component set, the `data-variant` / `data-size` attribute API and the HTMX
 patterns are adapted from [shadcn-htmx](https://github.com/productdevbook/shadcn-htmx)
 (MIT). The stylesheet is [Basecoat](https://github.com/hunvreus/basecoat) (MIT).
-Both licences travel with what was taken: Basecoat's beside the vendored CSS in
-the skeleton, and this project's own in [LICENSE.md](LICENSE.md).
+The icons are [Phosphor](https://github.com/phosphor-icons/core) (MIT). Every
+licence travels with what was taken: Basecoat's beside the vendored CSS in the
+skeleton, Phosphor's in [icons/LICENSE.md](icons/LICENSE.md), and this project's
+own in [LICENSE.md](LICENSE.md).
 
 Nothing arrives through npm and nothing is fetched from a CDN. There is no
 `package.json` in an Arandu project and the Content-Security-Policy is
