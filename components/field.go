@@ -21,27 +21,38 @@ import (
 // attributes that tie them together -- eleven lines that are identical on every
 // field of every form, and the two attributes are the ones people forget.
 //
-// Error being set does three things at once: it draws the message, marks the
-// input invalid for the stylesheet, and points aria-describedby at the message
-// so a screen reader announces it. That is why it is one field and not three.
+// A message being there does three things at once: it draws the sentence, marks
+// the input invalid for the stylesheet, and points aria-describedby at the
+// sentence so a screen reader announces it. That is why it is one answer and not
+// three.
+//
+// # Where the message and the typed value come from
+//
+// From Page, by Name, and not from two more props beside it. See the Page
+// interface for the failure that shape prevents: a name written three times in
+// one call is a name two of the three can disagree with, silently, on the screen
+// where a missing message is the complaint.
 type FieldProps struct {
-	// Name is the form field name, and the id everything else is hung off.
+	// Name is the form field name, the id everything else is hung off, and what
+	// Page is asked about.
 	Name string
 	// Label is the text above the input.
 	Label string
 	// Type is the input type: "text", "email", "password", "date", "url".
 	// Empty means "text".
 	Type string
-	// Value is what the input starts with. It is what makes a rejected form come
-	// back filled in rather than blank.
+	// Value is what the input starts with when nothing was rejected: the stored
+	// record on an edit form, and empty on a create form. What was typed on a
+	// rejected attempt takes precedence over it -- see Current.
 	Value string
 	// Placeholder is the grey text inside an empty input. It is not a label:
 	// it disappears as soon as somebody types.
 	Placeholder string
 	// Hint is the sentence under the input that is always there.
 	Hint string
-	// Error is what came back from validation. Empty means the field is fine.
-	Error string
+	// Page is the screen's own view.Page, which is what this input asks for its
+	// message and for what was typed. Nil draws no message and keeps Value.
+	Page Page
 	// Required marks the input required, in the markup and to the browser.
 	Required bool
 	// Autofocus puts the cursor here on load. At most one per screen.
@@ -59,10 +70,32 @@ func (p FieldProps) InputType() string {
 	return p.Type
 }
 
+// Message is what validation left for this input, or empty.
+func (p FieldProps) Message() string {
+	if p.Page == nil {
+		return ""
+	}
+	return p.Page.FieldError(p.Name)
+}
+
+// Current is what the input is drawn with: what was typed on the rejected
+// attempt, and Value when there was none.
+//
+// A password is never among what was typed -- the flash drops the value and
+// keeps the message -- so this answers empty for one, which is the intended
+// behaviour and not an omission: the box comes back blank and the sentence under
+// it says why.
+func (p FieldProps) Current() string {
+	if p.Page == nil {
+		return p.Value
+	}
+	return p.Page.OldOr(p.Name, p.Value)
+}
+
 // DescribedBy names the element that explains this input, so the error and the
 // hint are announced rather than only shown.
 func (p FieldProps) DescribedBy() string {
-	if p.Error != "" {
+	if p.Message() != "" {
 		return p.Name + "-error"
 	}
 	if p.Hint != "" {
@@ -71,7 +104,7 @@ func (p FieldProps) DescribedBy() string {
 	return ""
 }
 
-//line components/field.go:75
+//line components/field.go:108
 
 // Field renders the field component.
 func Field(props FieldProps) template.HTML {
@@ -89,17 +122,17 @@ func Field(props FieldProps) template.HTML {
 		_, err = io.WriteString(w, "\t<label class=\"label\" for=\"")
 	}
 	if err == nil {
-//line components/field.kyse.go:65
+//line components/field.kyse.go:98
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/field.go:95
+//line components/field.go:128
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\">")
 	}
 	if err == nil {
-//line components/field.kyse.go:65
+//line components/field.kyse.go:98
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Label)))
-//line components/field.go:103
+//line components/field.go:136
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</label>\n")
@@ -114,9 +147,9 @@ func Field(props FieldProps) template.HTML {
 		_, err = io.WriteString(w, "\t\ttype=\"")
 	}
 	if err == nil {
-//line components/field.kyse.go:68
+//line components/field.kyse.go:101
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.InputType())))
-//line components/field.go:120
+//line components/field.go:153
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\"\n")
@@ -125,9 +158,9 @@ func Field(props FieldProps) template.HTML {
 		_, err = io.WriteString(w, "\t\tid=\"")
 	}
 	if err == nil {
-//line components/field.kyse.go:69
+//line components/field.kyse.go:102
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/field.go:131
+//line components/field.go:164
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\"\n")
@@ -136,9 +169,9 @@ func Field(props FieldProps) template.HTML {
 		_, err = io.WriteString(w, "\t\tname=\"")
 	}
 	if err == nil {
-//line components/field.kyse.go:70
+//line components/field.kyse.go:103
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/field.go:142
+//line components/field.go:175
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\"\n")
@@ -147,75 +180,75 @@ func Field(props FieldProps) template.HTML {
 		_, err = io.WriteString(w, "\t\tvalue=\"")
 	}
 	if err == nil {
-//line components/field.kyse.go:71
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Value)))
-//line components/field.go:153
+//line components/field.kyse.go:104
+		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Current())))
+//line components/field.go:186
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\"\n")
 	}
-//line components/field.kyse.go:72
+//line components/field.kyse.go:105
 	if d.Placeholder != "" {
-//line components/field.go:160
+//line components/field.go:193
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\tplaceholder=\"")
 		}
 		if err == nil {
-//line components/field.kyse.go:73
+//line components/field.kyse.go:106
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Placeholder)))
-//line components/field.go:167
+//line components/field.go:200
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
 		}
 	}
-//line components/field.kyse.go:75
+//line components/field.kyse.go:108
 	if d.Autocomplete != "" {
-//line components/field.go:175
+//line components/field.go:208
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\tautocomplete=\"")
 		}
 		if err == nil {
-//line components/field.kyse.go:76
+//line components/field.kyse.go:109
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Autocomplete)))
-//line components/field.go:182
+//line components/field.go:215
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
 		}
 	}
-//line components/field.kyse.go:78
+//line components/field.kyse.go:111
 	if d.DescribedBy() != "" {
-//line components/field.go:190
+//line components/field.go:223
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\taria-describedby=\"")
 		}
 		if err == nil {
-//line components/field.kyse.go:79
+//line components/field.kyse.go:112
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.DescribedBy())))
-//line components/field.go:197
+//line components/field.go:230
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
 		}
 	}
-//line components/field.kyse.go:81
-	if d.Error != "" {
-//line components/field.go:205
+//line components/field.kyse.go:114
+	if d.Message() != "" {
+//line components/field.go:238
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/field.kyse.go:84
+//line components/field.kyse.go:117
 	if d.Required {
-//line components/field.go:212
+//line components/field.go:245
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\trequired\n")
 		}
 	}
-//line components/field.kyse.go:87
+//line components/field.kyse.go:120
 	if d.Autofocus {
-//line components/field.go:219
+//line components/field.go:252
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\tautofocus\n")
 		}
@@ -223,50 +256,50 @@ func Field(props FieldProps) template.HTML {
 	if err == nil {
 		_, err = io.WriteString(w, "\t>\n")
 	}
-//line components/field.kyse.go:91
-	if d.Error != "" {
-//line components/field.go:229
+//line components/field.kyse.go:124
+	if d.Message() != "" {
+//line components/field.go:262
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t<p id=\"")
 		}
 		if err == nil {
-//line components/field.kyse.go:92
+//line components/field.kyse.go:125
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/field.go:236
+//line components/field.go:269
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "-error\" class=\"text-destructive text-sm\">")
 		}
 		if err == nil {
-//line components/field.kyse.go:92
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Error)))
-//line components/field.go:244
+//line components/field.kyse.go:125
+			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Message())))
+//line components/field.go:277
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</p>\n")
 		}
 	}
-//line components/field.kyse.go:94
-	if d.Error == "" {
-//line components/field.go:252
-//line components/field.kyse.go:95
+//line components/field.kyse.go:127
+	if d.Message() == "" {
+//line components/field.go:285
+//line components/field.kyse.go:128
 		if d.Hint != "" {
-//line components/field.go:255
+//line components/field.go:288
 			if err == nil {
 				_, err = io.WriteString(w, "\t\t\t<p id=\"")
 			}
 			if err == nil {
-//line components/field.kyse.go:96
+//line components/field.kyse.go:129
 				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/field.go:262
+//line components/field.go:295
 			}
 			if err == nil {
 				_, err = io.WriteString(w, "-hint\" class=\"text-muted-foreground text-sm\">")
 			}
 			if err == nil {
-//line components/field.kyse.go:96
+//line components/field.kyse.go:129
 				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Hint)))
-//line components/field.go:270
+//line components/field.go:303
 			}
 			if err == nil {
 				_, err = io.WriteString(w, "</p>\n")

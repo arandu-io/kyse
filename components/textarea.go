@@ -25,23 +25,42 @@ type TextareaProps struct {
 	Name string
 	// Label is the text above the box.
 	Label string
-	// Value is what the box starts with.
+	// Value is what the box starts with when nothing was rejected. What was
+	// typed on a rejected attempt takes precedence -- see Current.
 	Value string
 	// Placeholder is the grey text inside an empty box.
 	Placeholder string
 	// Hint is the sentence under the box.
 	Hint string
-	// Error is what came back from validation.
-	Error string
+	// Page is the screen's own view.Page, which is what this box asks for its
+	// message and for what was typed. Nil draws no message and keeps Value.
+	Page Page
 	// Rows is the height in lines. Zero draws the browser default.
 	Rows int
 	// Required marks the box required.
 	Required bool
 }
 
+// Message is what validation left for this box, or empty.
+func (p TextareaProps) Message() string {
+	if p.Page == nil {
+		return ""
+	}
+	return p.Page.FieldError(p.Name)
+}
+
+// Current is what the box is drawn with: what was typed on the rejected
+// attempt, and Value when there was none.
+func (p TextareaProps) Current() string {
+	if p.Page == nil {
+		return p.Value
+	}
+	return p.Page.OldOr(p.Name, p.Value)
+}
+
 // DescribedBy names the element that explains this box.
 func (p TextareaProps) DescribedBy() string {
-	if p.Error != "" {
+	if p.Message() != "" {
 		return p.Name + "-error"
 	}
 	if p.Hint != "" {
@@ -50,7 +69,7 @@ func (p TextareaProps) DescribedBy() string {
 	return ""
 }
 
-//line components/textarea.go:54
+//line components/textarea.go:73
 
 // Textarea renders the textarea component.
 func Textarea(props TextareaProps) template.HTML {
@@ -68,17 +87,17 @@ func Textarea(props TextareaProps) template.HTML {
 		_, err = io.WriteString(w, "\t<label class=\"label\" for=\"")
 	}
 	if err == nil {
-//line components/textarea.kyse.go:44
+//line components/textarea.kyse.go:63
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/textarea.go:74
+//line components/textarea.go:93
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\">")
 	}
 	if err == nil {
-//line components/textarea.kyse.go:44
+//line components/textarea.kyse.go:63
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Label)))
-//line components/textarea.go:82
+//line components/textarea.go:101
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</label>\n")
@@ -93,9 +112,9 @@ func Textarea(props TextareaProps) template.HTML {
 		_, err = io.WriteString(w, "\t\tid=\"")
 	}
 	if err == nil {
-//line components/textarea.kyse.go:47
+//line components/textarea.kyse.go:66
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/textarea.go:99
+//line components/textarea.go:118
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\"\n")
@@ -104,68 +123,68 @@ func Textarea(props TextareaProps) template.HTML {
 		_, err = io.WriteString(w, "\t\tname=\"")
 	}
 	if err == nil {
-//line components/textarea.kyse.go:48
+//line components/textarea.kyse.go:67
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/textarea.go:110
+//line components/textarea.go:129
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\"\n")
 	}
-//line components/textarea.kyse.go:49
+//line components/textarea.kyse.go:68
 	if d.Rows > 0 {
-//line components/textarea.go:117
+//line components/textarea.go:136
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\trows=\"")
 		}
 		if err == nil {
-//line components/textarea.kyse.go:50
+//line components/textarea.kyse.go:69
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Rows)))
-//line components/textarea.go:124
+//line components/textarea.go:143
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
 		}
 	}
-//line components/textarea.kyse.go:52
+//line components/textarea.kyse.go:71
 	if d.Placeholder != "" {
-//line components/textarea.go:132
+//line components/textarea.go:151
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\tplaceholder=\"")
 		}
 		if err == nil {
-//line components/textarea.kyse.go:53
+//line components/textarea.kyse.go:72
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Placeholder)))
-//line components/textarea.go:139
+//line components/textarea.go:158
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
 		}
 	}
-//line components/textarea.kyse.go:55
+//line components/textarea.kyse.go:74
 	if d.DescribedBy() != "" {
-//line components/textarea.go:147
+//line components/textarea.go:166
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\taria-describedby=\"")
 		}
 		if err == nil {
-//line components/textarea.kyse.go:56
+//line components/textarea.kyse.go:75
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.DescribedBy())))
-//line components/textarea.go:154
+//line components/textarea.go:173
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
 		}
 	}
-//line components/textarea.kyse.go:58
-	if d.Error != "" {
-//line components/textarea.go:162
+//line components/textarea.kyse.go:77
+	if d.Message() != "" {
+//line components/textarea.go:181
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/textarea.kyse.go:61
+//line components/textarea.kyse.go:80
 	if d.Required {
-//line components/textarea.go:169
+//line components/textarea.go:188
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\trequired\n")
 		}
@@ -174,57 +193,57 @@ func Textarea(props TextareaProps) template.HTML {
 		_, err = io.WriteString(w, "\t>")
 	}
 	if err == nil {
-//line components/textarea.kyse.go:64
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Value)))
-//line components/textarea.go:180
+//line components/textarea.kyse.go:83
+		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Current())))
+//line components/textarea.go:199
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</textarea>\n")
 	}
-//line components/textarea.kyse.go:65
-	if d.Error != "" {
-//line components/textarea.go:187
+//line components/textarea.kyse.go:84
+	if d.Message() != "" {
+//line components/textarea.go:206
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t<p id=\"")
 		}
 		if err == nil {
-//line components/textarea.kyse.go:66
+//line components/textarea.kyse.go:85
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/textarea.go:194
+//line components/textarea.go:213
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "-error\" class=\"text-destructive text-sm\">")
 		}
 		if err == nil {
-//line components/textarea.kyse.go:66
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Error)))
-//line components/textarea.go:202
+//line components/textarea.kyse.go:85
+			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Message())))
+//line components/textarea.go:221
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</p>\n")
 		}
 	}
-//line components/textarea.kyse.go:68
-	if d.Error == "" {
-//line components/textarea.go:210
-//line components/textarea.kyse.go:69
+//line components/textarea.kyse.go:87
+	if d.Message() == "" {
+//line components/textarea.go:229
+//line components/textarea.kyse.go:88
 		if d.Hint != "" {
-//line components/textarea.go:213
+//line components/textarea.go:232
 			if err == nil {
 				_, err = io.WriteString(w, "\t\t\t<p id=\"")
 			}
 			if err == nil {
-//line components/textarea.kyse.go:70
+//line components/textarea.kyse.go:89
 				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/textarea.go:220
+//line components/textarea.go:239
 			}
 			if err == nil {
 				_, err = io.WriteString(w, "-hint\" class=\"text-muted-foreground text-sm\">")
 			}
 			if err == nil {
-//line components/textarea.kyse.go:70
+//line components/textarea.kyse.go:89
 				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Hint)))
-//line components/textarea.go:228
+//line components/textarea.go:247
 			}
 			if err == nil {
 				_, err = io.WriteString(w, "</p>\n")

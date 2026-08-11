@@ -182,3 +182,114 @@ func TestTheGeneratedFilesMatchTheirSources(t *testing.T) {
 		}
 	}
 }
+
+// page is a stand-in for framework/view.Page, so this module can be tested
+// without importing the framework it is deliberately independent of.
+//
+// It answers the two questions components.Page asks, in the same shape view.Page
+// does: the first message for a name, and what was typed falling back to what
+// the caller passed.
+type page struct {
+	errs map[string]string
+	old  map[string]string
+}
+
+func (p page) FieldError(name string) string { return p.errs[name] }
+
+func (p page) OldOr(name, fallback string) string {
+	if v, typed := p.old[name]; typed {
+		return v
+	}
+	return fallback
+}
+
+// TestAFieldAsksThePageByItsOwnName is the property the Page prop exists for.
+//
+// The name is written once. A field that took its message as a separate prop
+// took the name three times in one call, and nothing checked that the three
+// agreed -- so a box labelled "Confirm password" could draw the message of
+// "password", or none, and look correct in review.
+func TestAFieldAsksThePageByItsOwnName(t *testing.T) {
+	state := page{
+		errs: map[string]string{"password": "must be at least 12 characters"},
+		old:  map[string]string{"email": "ada@example.com"},
+	}
+
+	password := string(components.Field(components.FieldProps{
+		Name: "password", Label: "Password", Type: "password", Page: state,
+	}))
+	if !strings.Contains(password, "must be at least 12 characters") {
+		t.Errorf("the message for this field was not drawn:\n%s", password)
+	}
+	if !strings.Contains(password, `aria-invalid="true"`) {
+		t.Errorf("a field with a message is not marked invalid:\n%s", password)
+	}
+	if !strings.Contains(password, `aria-describedby="password-error"`) {
+		t.Errorf("the message is shown and not announced:\n%s", password)
+	}
+
+	// The other field of the same form was accepted, and asks the same page.
+	email := string(components.Field(components.FieldProps{
+		Name: "email", Label: "Email", Type: "email", Page: state,
+	}))
+	if strings.Contains(email, "must be at least") {
+		t.Errorf("a field drew another field's message:\n%s", email)
+	}
+	if !strings.Contains(email, `value="ada@example.com"`) {
+		t.Errorf("what was typed did not come back:\n%s", email)
+	}
+}
+
+// TestAPasswordComesBackEmptyAndSaysWhy.
+//
+// The flash carries the message for a password and never the value, so the box
+// is blank and the sentence under it is not. A blank box with nothing under it
+// is the failure this whole path was built to end.
+func TestAPasswordComesBackEmptyAndSaysWhy(t *testing.T) {
+	html := string(components.Field(components.FieldProps{
+		Name: "password", Label: "Password", Type: "password",
+		Page: page{errs: map[string]string{"password": "must be at least 12 characters"}},
+	}))
+
+	if !strings.Contains(html, `value=""`) {
+		t.Errorf("the password box came back carrying a value:\n%s", html)
+	}
+	if !strings.Contains(html, "must be at least 12 characters") {
+		t.Errorf("the empty box does not say why it was rejected:\n%s", html)
+	}
+}
+
+// TestWhatWasTypedBeatsTheStoredValue is the edit form: the box starts at the
+// row and comes back carrying the change somebody was in the middle of making.
+func TestWhatWasTypedBeatsTheStoredValue(t *testing.T) {
+	stored := components.FieldProps{Name: "title", Label: "Title", Value: "Stored title"}
+
+	if html := string(components.Field(stored)); !strings.Contains(html, `value="Stored title"`) {
+		t.Errorf("a field with no page behind it lost its value:\n%s", html)
+	}
+
+	stored.Page = page{old: map[string]string{"title": "What I was typing"}}
+	if html := string(components.Field(stored)); !strings.Contains(html, `value="What I was typing"`) {
+		t.Errorf("the rejected edit reverted to the stored row:\n%s", html)
+	}
+}
+
+// TestATextareaAsksThePageToo: the long-text half of a form is the same
+// question, and a component that answered it differently would be the second way
+// to draw a message.
+func TestATextareaAsksThePageToo(t *testing.T) {
+	html := string(components.Textarea(components.TextareaProps{
+		Name: "body", Label: "Body",
+		Page: page{
+			errs: map[string]string{"body": "is required"},
+			old:  map[string]string{"body": "half a paragraph"},
+		},
+	}))
+
+	if !strings.Contains(html, "is required") {
+		t.Errorf("the message was not drawn:\n%s", html)
+	}
+	if !strings.Contains(html, "half a paragraph") {
+		t.Errorf("what was typed did not come back:\n%s", html)
+	}
+}

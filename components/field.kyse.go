@@ -10,27 +10,38 @@ package components
 // attributes that tie them together -- eleven lines that are identical on every
 // field of every form, and the two attributes are the ones people forget.
 //
-// Error being set does three things at once: it draws the message, marks the
-// input invalid for the stylesheet, and points aria-describedby at the message
-// so a screen reader announces it. That is why it is one field and not three.
+// A message being there does three things at once: it draws the sentence, marks
+// the input invalid for the stylesheet, and points aria-describedby at the
+// sentence so a screen reader announces it. That is why it is one answer and not
+// three.
+//
+// # Where the message and the typed value come from
+//
+// From Page, by Name, and not from two more props beside it. See the Page
+// interface for the failure that shape prevents: a name written three times in
+// one call is a name two of the three can disagree with, silently, on the screen
+// where a missing message is the complaint.
 type FieldProps struct {
-	// Name is the form field name, and the id everything else is hung off.
+	// Name is the form field name, the id everything else is hung off, and what
+	// Page is asked about.
 	Name string
 	// Label is the text above the input.
 	Label string
 	// Type is the input type: "text", "email", "password", "date", "url".
 	// Empty means "text".
 	Type string
-	// Value is what the input starts with. It is what makes a rejected form come
-	// back filled in rather than blank.
+	// Value is what the input starts with when nothing was rejected: the stored
+	// record on an edit form, and empty on a create form. What was typed on a
+	// rejected attempt takes precedence over it -- see Current.
 	Value string
 	// Placeholder is the grey text inside an empty input. It is not a label:
 	// it disappears as soon as somebody types.
 	Placeholder string
 	// Hint is the sentence under the input that is always there.
 	Hint string
-	// Error is what came back from validation. Empty means the field is fine.
-	Error string
+	// Page is the screen's own view.Page, which is what this input asks for its
+	// message and for what was typed. Nil draws no message and keeps Value.
+	Page Page
 	// Required marks the input required, in the markup and to the browser.
 	Required bool
 	// Autofocus puts the cursor here on load. At most one per screen.
@@ -48,10 +59,32 @@ func (p FieldProps) InputType() string {
 	return p.Type
 }
 
+// Message is what validation left for this input, or empty.
+func (p FieldProps) Message() string {
+	if p.Page == nil {
+		return ""
+	}
+	return p.Page.FieldError(p.Name)
+}
+
+// Current is what the input is drawn with: what was typed on the rejected
+// attempt, and Value when there was none.
+//
+// A password is never among what was typed -- the flash drops the value and
+// keeps the message -- so this answers empty for one, which is the intended
+// behaviour and not an omission: the box comes back blank and the sentence under
+// it says why.
+func (p FieldProps) Current() string {
+	if p.Page == nil {
+		return p.Value
+	}
+	return p.Page.OldOr(p.Name, p.Value)
+}
+
 // DescribedBy names the element that explains this input, so the error and the
 // hint are announced rather than only shown.
 func (p FieldProps) DescribedBy() string {
-	if p.Error != "" {
+	if p.Message() != "" {
 		return p.Name + "-error"
 	}
 	if p.Hint != "" {
@@ -68,7 +101,7 @@ func (p FieldProps) DescribedBy() string {
 		type="{{ .InputType() }}"
 		id="{{ .Name }}"
 		name="{{ .Name }}"
-		value="{{ .Value }}"
+		value="{{ .Current() }}"
 		@if(.Placeholder != "")
 			placeholder="{{ .Placeholder }}"
 		@endif
@@ -78,7 +111,7 @@ func (p FieldProps) DescribedBy() string {
 		@if(.DescribedBy() != "")
 			aria-describedby="{{ .DescribedBy() }}"
 		@endif
-		@if(.Error != "")
+		@if(.Message() != "")
 			aria-invalid="true"
 		@endif
 		@if(.Required)
@@ -88,10 +121,10 @@ func (p FieldProps) DescribedBy() string {
 			autofocus
 		@endif
 	>
-	@if(.Error != "")
-		<p id="{{ .Name }}-error" class="text-destructive text-sm">{{ .Error }}</p>
+	@if(.Message() != "")
+		<p id="{{ .Name }}-error" class="text-destructive text-sm">{{ .Message() }}</p>
 	@endif
-	@if(.Error == "")
+	@if(.Message() == "")
 		@if(.Hint != "")
 			<p id="{{ .Name }}-hint" class="text-muted-foreground text-sm">{{ .Hint }}</p>
 		@endif
