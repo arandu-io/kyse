@@ -10,6 +10,8 @@ github.com/arandu-io/framework v0.25.2 h1:4kiUkDcDC3IsUW/tmGZxTCUOO4ZGnm7VKpWPLK
 github.com/arandu-io/framework v0.25.2/go.mod h1:c0r4p08puM7BwQ4NJg4M/Yjf5ECeYeheis0F+j6a7X8=
 github.com/arandu-io/framework v0.25.3 h1:ih5t+oMUJ+vkSJo+E6g/vossvkkO7fct27PiKkqXiAI=
 github.com/arandu-io/framework v0.25.3/go.mod h1:c0r4p08puM7BwQ4NJg4M/Yjf5ECeYeheis0F+j6a7X8=
+github.com/arandu-io/framework v0.25.4 h1:q786eDC0JVgWdUNoQt0xLoTQc8Q+iovUT8z1HatpFgk=
+github.com/arandu-io/framework v0.25.4/go.mod h1:c0r4p08puM7BwQ4NJg4M/Yjf5ECeYeheis0F+j6a7X8=
 golang.org/x/crypto v0.31.0 h1:ihbySMvVjLAeSH1IbfcRTkD/iNscyz8rGzjF/E5hV6U=
 golang.org/x/crypto v0.31.0/go.mod h1:kDsLvtWBEx7MV9tJOj9bnXsPbxwJQ6csT/x4KIN4Ssk=
 golang.org/x/sys v0.28.0 h1:Fksou7UEQUWlKvIdsqzJmUmCX3cZuD2+P3XyyzwMhlA=
