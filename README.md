@@ -4,7 +4,7 @@
 
 <h1 align="center">arandu-io/kyse</h1>
 
-<p align="center">The component library for Arandu. Import it and draw a screen.</p>
+<p align="center">The component library kyse views import to draw a screen.</p>
 
 <p align="center">
 <a href="https://github.com/arandu-io/kyse/actions/workflows/ci.yml"><img src="https://github.com/arandu-io/kyse/actions/workflows/ci.yml/badge.svg" alt="Build Status"></a>
@@ -15,13 +15,15 @@
 
 ## What this is
 
-The components a screen is made of, written in kyse and adapted from
-shadcn/ui by way of shadcn-htmx.
+kyse names two things, and the name is overloaded on purpose. One is the
+template language an Arandu view is written in: a `.kyse.go` file, compiled to
+plain Go by the compiler in `aru/internal/kyse` — a build step, run by
+`aru view:build`, never a runtime a request passes through. The other is this
+repository: the library of components, written in that language, that a view
+imports to draw a screen.
 
-The name is the view language they are written in: a `.kyse.go` is what an
-Arandu view is, and this is the library of them. The compiler that turns one
-into Go is part of `aru` and stays there — it is a build step, not a
-dependency, and a project already has it.
+The components themselves are adapted from shadcn/ui by way of shadcn-htmx, and
+importing the second is how a view writes the first.
 
 ## Install
 
@@ -151,6 +153,22 @@ Nothing arrives through npm and nothing is fetched from a CDN. There is no
 `package.json` in an Arandu project and the Content-Security-Policy is
 `script-src 'self'`, so a script from another host would not run even if one were
 referenced.
+
+## Learning Arandu
+
+The API reference is generated from the doc comments and lives on
+[pkg.go.dev](https://pkg.go.dev/github.com/arandu-io/framework). Every exported
+symbol carries one, and that is deliberate: it is the documentation that cannot
+drift from the code, because it sits in the same file.
+
+The CLI documents itself. `aru help` lists every command, and each one explains
+what it writes and what to do with it. `aru doctor` explains what it found and
+what breaks, not which rule was violated.
+
+A guide and a website do not exist yet, and that is a decision rather than a
+gap: a guide written against an API that still moves is work done twice, and the
+second time is worse — there is wrong documentation published. The site is the
+next phase, and it will be an Arandu application.
 
 ## Contributing
 
