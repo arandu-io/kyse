@@ -1,0 +1,13 @@
+# What this library declares about itself.
+
+name = "arandu-io/kyse"
+framework = ">= 0.21"
+profiles = ["conventional", "performance"]
+
+[permissions]
+# A component renders markup. It never calls out, touches disk, execs a
+# program or owns a table.
+network = false
+filesystem = false
+exec = false
+migrations = false
