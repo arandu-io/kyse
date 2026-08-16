@@ -29,8 +29,7 @@ import (
 // fetched would be a component deciding who may see what.
 //
 // It keeps no history. No peak, no average, no window, no chart. Those are what
-// separate a panel from an APM product, and building an APM product is a
-// decision this project took the other way (ADR 0055).
+// separate a panel from an APM product, and this is a panel.
 //
 // It does not format. Values arrive as strings that are already what they
 // should read as, because a thousands separator is a local decision and a

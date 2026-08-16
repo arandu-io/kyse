@@ -38,10 +38,9 @@
 // a logo delivered that way is a broken-image box on the first impression --
 // which, for a verification mail, is the whole job. The brand is set in type.
 //
-// No markdown. Laravel has markdown mailables because Blade cannot easily
-// produce an HTML and a text part from one source; kyse produces whatever the
-// view produces, and a second templating language for e-mail is the second way
-// to draw something that RULE 9 refuses.
+// No markdown. A view already produces both the HTML and the text part, so a
+// second templating language for e-mail would be a second way to draw the same
+// message.
 package mailui
 
 import (

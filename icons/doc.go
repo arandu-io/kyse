@@ -9,7 +9,7 @@
 // -- because the linker cannot prove a map lookup will not ask for the rest.
 // One function per icon it can prove: an icon nobody calls is dead code, and
 // dead code and its string data are dropped. A program that draws one icon
-// carries 176 bytes of this package. See ADR 0033.
+// carries 176 bytes of this package.
 //
 // It is also the same argument the components package makes. icons.Trahs is
 // undefined at the line of the .kyse.go that wrote it, where an icon named by

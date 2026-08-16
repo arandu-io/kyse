@@ -39,9 +39,9 @@ const (
 	phosphorVersion = "2.1.1"
 )
 
-// weight is the one weight this library ships. See ADR 0033: six weights is six
-// names for the same idea, and the icon set is a design decision the library
-// makes once, like the stylesheet.
+// weight is the one weight this library ships. Six weights would be six names
+// for the same idea, and the icon set is a design decision the library makes
+// once, like the stylesheet.
 const weight = "regular"
 
 // wrapper is every regular Phosphor SVG, exactly. The generator asserts it

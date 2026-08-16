@@ -16,7 +16,7 @@
 // The files are committed to the repository and embedded in the binary. The CSP
 // is default-src 'self' with font-src 'self' spelled out beside it, and a font
 // from a CDN would mean loosening it in order to look different. There is no
-// package.json anywhere near this (RULE 13).
+// package.json anywhere near this.
 package fonts
 
 import (
