@@ -18,7 +18,7 @@ Run this before opening. CI runs the same thing, and a formatting difference is
 a failure rather than a comment.
 
 ```
-gofmt -l .        # no output
+gofmt -l $(find . -name '*.go' -not -path '*/testdata/*' -not -name '*.kyse.go')   # no output
 go vet ./...
 go test -race ./...
 ```
