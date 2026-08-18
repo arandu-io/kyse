@@ -117,7 +117,7 @@ func StatCard(props StatCardProps) template.HTML {
 		}
 		if err == nil {
 //line components/stat-card.kyse.go:83
-			_, err = io.WriteString(w, view.Text(Empty(d.Empty)))
+			_, err = io.WriteString(w, view.UnsafeText(Empty(d.Empty)))
 //line components/stat-card.go:122
 		}
 		if err == nil {
@@ -225,5 +225,6 @@ var (
 	_ = template.HTMLEscapeString
 	_ = io.WriteString
 	_ = view.Text
+	_ = view.UnsafeText
 	_ = strings.Builder{}
 )

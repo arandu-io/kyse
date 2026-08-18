@@ -105,7 +105,7 @@ func Card(props CardProps) template.HTML {
 		}
 		if err == nil {
 //line components/card.kyse.go:40
-			_, err = io.WriteString(w, view.Text(Badge(BadgeProps{Label: d.Badge, Variant: d.BadgeVariant})))
+			_, err = io.WriteString(w, view.UnsafeText(Badge(BadgeProps{Label: d.Badge, Variant: d.BadgeVariant})))
 //line components/card.go:110
 		}
 		if err == nil {
@@ -162,5 +162,6 @@ var (
 	_ = template.HTMLEscapeString
 	_ = io.WriteString
 	_ = view.Text
+	_ = view.UnsafeText
 	_ = strings.Builder{}
 )

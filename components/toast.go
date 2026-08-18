@@ -206,5 +206,6 @@ var (
 	_ = template.HTMLEscapeString
 	_ = io.WriteString
 	_ = view.Text
+	_ = view.UnsafeText
 	_ = strings.Builder{}
 )
