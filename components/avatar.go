@@ -5,6 +5,7 @@
 package components
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 	"strings"
@@ -50,7 +51,7 @@ func (p AvatarProps) Initials() string {
 	return strings.ToUpper(string(out))
 }
 
-//line components/avatar.go:54
+//line components/avatar.go:55
 
 // Avatar renders the avatar component.
 func Avatar(props AvatarProps) template.HTML {
@@ -66,14 +67,14 @@ func Avatar(props AvatarProps) template.HTML {
 	}
 //line components/avatar.kyse.go:46
 	if d.Size != "" {
-//line components/avatar.go:70
+//line components/avatar.go:71
 		if err == nil {
 			_, err = io.WriteString(w, "\t\tdata-size=\"")
 		}
 		if err == nil {
 //line components/avatar.kyse.go:47
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Size)))
-//line components/avatar.go:77
+			_, err = io.WriteString(w, view.TextAttr(d.Size))
+//line components/avatar.go:78
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
@@ -84,22 +85,28 @@ func Avatar(props AvatarProps) template.HTML {
 	}
 //line components/avatar.kyse.go:50
 	if d.ImageURL != "" {
-//line components/avatar.go:88
+//line components/avatar.go:89
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t<img src=\"")
 		}
 		if err == nil {
+			var s string
 //line components/avatar.kyse.go:51
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.ImageURL)))
-//line components/avatar.go:95
+			s, err = view.TextURL(d.ImageURL)
+//line components/avatar.go:97
+			if err != nil {
+				err = fmt.Errorf("%s: %w", "components/avatar.kyse.go:51", err)
+			} else {
+				_, err = io.WriteString(w, s)
+			}
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\" alt=\"")
 		}
 		if err == nil {
 //line components/avatar.kyse.go:51
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/avatar.go:103
+			_, err = io.WriteString(w, view.TextAttr(d.Name))
+//line components/avatar.go:110
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\">\n")
@@ -107,14 +114,14 @@ func Avatar(props AvatarProps) template.HTML {
 	}
 //line components/avatar.kyse.go:53
 	if d.ImageURL == "" {
-//line components/avatar.go:111
+//line components/avatar.go:118
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t<span aria-hidden=\"true\">")
 		}
 		if err == nil {
 //line components/avatar.kyse.go:54
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Initials())))
-//line components/avatar.go:118
+//line components/avatar.go:125
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</span>\n")
@@ -125,7 +132,7 @@ func Avatar(props AvatarProps) template.HTML {
 		if err == nil {
 //line components/avatar.kyse.go:55
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/avatar.go:129
+//line components/avatar.go:136
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</span>\n")

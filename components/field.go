@@ -123,7 +123,7 @@ func Field(props FieldProps) template.HTML {
 	}
 	if err == nil {
 //line components/field.kyse.go:98
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
+		_, err = io.WriteString(w, view.TextAttr(d.Name))
 //line components/field.go:128
 	}
 	if err == nil {
@@ -148,7 +148,7 @@ func Field(props FieldProps) template.HTML {
 	}
 	if err == nil {
 //line components/field.kyse.go:101
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.InputType())))
+		_, err = io.WriteString(w, view.TextAttr(d.InputType()))
 //line components/field.go:153
 	}
 	if err == nil {
@@ -159,7 +159,7 @@ func Field(props FieldProps) template.HTML {
 	}
 	if err == nil {
 //line components/field.kyse.go:102
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
+		_, err = io.WriteString(w, view.TextAttr(d.Name))
 //line components/field.go:164
 	}
 	if err == nil {
@@ -170,7 +170,7 @@ func Field(props FieldProps) template.HTML {
 	}
 	if err == nil {
 //line components/field.kyse.go:103
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
+		_, err = io.WriteString(w, view.TextAttr(d.Name))
 //line components/field.go:175
 	}
 	if err == nil {
@@ -181,7 +181,7 @@ func Field(props FieldProps) template.HTML {
 	}
 	if err == nil {
 //line components/field.kyse.go:104
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Current())))
+		_, err = io.WriteString(w, view.TextAttr(d.Current()))
 //line components/field.go:186
 	}
 	if err == nil {
@@ -195,7 +195,7 @@ func Field(props FieldProps) template.HTML {
 		}
 		if err == nil {
 //line components/field.kyse.go:106
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Placeholder)))
+			_, err = io.WriteString(w, view.TextAttr(d.Placeholder))
 //line components/field.go:200
 		}
 		if err == nil {
@@ -210,7 +210,7 @@ func Field(props FieldProps) template.HTML {
 		}
 		if err == nil {
 //line components/field.kyse.go:109
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Autocomplete)))
+			_, err = io.WriteString(w, view.TextAttr(d.Autocomplete))
 //line components/field.go:215
 		}
 		if err == nil {
@@ -225,7 +225,7 @@ func Field(props FieldProps) template.HTML {
 		}
 		if err == nil {
 //line components/field.kyse.go:112
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.DescribedBy())))
+			_, err = io.WriteString(w, view.TextAttr(d.DescribedBy()))
 //line components/field.go:230
 		}
 		if err == nil {
@@ -264,7 +264,7 @@ func Field(props FieldProps) template.HTML {
 		}
 		if err == nil {
 //line components/field.kyse.go:125
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
+			_, err = io.WriteString(w, view.TextAttr(d.Name))
 //line components/field.go:269
 		}
 		if err == nil {
@@ -290,7 +290,7 @@ func Field(props FieldProps) template.HTML {
 			}
 			if err == nil {
 //line components/field.kyse.go:129
-				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
+				_, err = io.WriteString(w, view.TextAttr(d.Name))
 //line components/field.go:295
 			}
 			if err == nil {

@@ -88,7 +88,7 @@ func Textarea(props TextareaProps) template.HTML {
 	}
 	if err == nil {
 //line components/textarea.kyse.go:63
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
+		_, err = io.WriteString(w, view.TextAttr(d.Name))
 //line components/textarea.go:93
 	}
 	if err == nil {
@@ -113,7 +113,7 @@ func Textarea(props TextareaProps) template.HTML {
 	}
 	if err == nil {
 //line components/textarea.kyse.go:66
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
+		_, err = io.WriteString(w, view.TextAttr(d.Name))
 //line components/textarea.go:118
 	}
 	if err == nil {
@@ -124,7 +124,7 @@ func Textarea(props TextareaProps) template.HTML {
 	}
 	if err == nil {
 //line components/textarea.kyse.go:67
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
+		_, err = io.WriteString(w, view.TextAttr(d.Name))
 //line components/textarea.go:129
 	}
 	if err == nil {
@@ -138,7 +138,7 @@ func Textarea(props TextareaProps) template.HTML {
 		}
 		if err == nil {
 //line components/textarea.kyse.go:69
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Rows)))
+			_, err = io.WriteString(w, view.TextAttr(d.Rows))
 //line components/textarea.go:143
 		}
 		if err == nil {
@@ -153,7 +153,7 @@ func Textarea(props TextareaProps) template.HTML {
 		}
 		if err == nil {
 //line components/textarea.kyse.go:72
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Placeholder)))
+			_, err = io.WriteString(w, view.TextAttr(d.Placeholder))
 //line components/textarea.go:158
 		}
 		if err == nil {
@@ -168,7 +168,7 @@ func Textarea(props TextareaProps) template.HTML {
 		}
 		if err == nil {
 //line components/textarea.kyse.go:75
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.DescribedBy())))
+			_, err = io.WriteString(w, view.TextAttr(d.DescribedBy()))
 //line components/textarea.go:173
 		}
 		if err == nil {
@@ -208,7 +208,7 @@ func Textarea(props TextareaProps) template.HTML {
 		}
 		if err == nil {
 //line components/textarea.kyse.go:85
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
+			_, err = io.WriteString(w, view.TextAttr(d.Name))
 //line components/textarea.go:213
 		}
 		if err == nil {
@@ -234,7 +234,7 @@ func Textarea(props TextareaProps) template.HTML {
 			}
 			if err == nil {
 //line components/textarea.kyse.go:89
-				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
+				_, err = io.WriteString(w, view.TextAttr(d.Name))
 //line components/textarea.go:239
 			}
 			if err == nil {

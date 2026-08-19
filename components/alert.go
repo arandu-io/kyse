@@ -59,7 +59,7 @@ func Alert(props AlertProps) template.HTML {
 	}
 	if err == nil {
 //line components/alert.kyse.go:32
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Role())))
+		_, err = io.WriteString(w, view.TextAttr(d.Role()))
 //line components/alert.go:64
 	}
 	if err == nil {
@@ -73,7 +73,7 @@ func Alert(props AlertProps) template.HTML {
 		}
 		if err == nil {
 //line components/alert.kyse.go:34
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Variant)))
+			_, err = io.WriteString(w, view.TextAttr(d.Variant))
 //line components/alert.go:78
 		}
 		if err == nil {

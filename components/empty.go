@@ -5,6 +5,7 @@
 package components
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 	"strings"
@@ -30,7 +31,7 @@ type EmptyProps struct {
 	ActionURL   string
 }
 
-//line components/empty.go:34
+//line components/empty.go:35
 
 // Empty renders the empty component.
 func Empty(props EmptyProps) template.HTML {
@@ -53,21 +54,21 @@ func Empty(props EmptyProps) template.HTML {
 	if err == nil {
 //line components/empty.kyse.go:25
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Title)))
-//line components/empty.go:57
+//line components/empty.go:58
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</h2>\n")
 	}
 //line components/empty.kyse.go:26
 	if d.Message != "" {
-//line components/empty.go:64
+//line components/empty.go:65
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\t<p>")
 		}
 		if err == nil {
 //line components/empty.kyse.go:27
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Message)))
-//line components/empty.go:71
+//line components/empty.go:72
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</p>\n")
@@ -78,7 +79,7 @@ func Empty(props EmptyProps) template.HTML {
 	}
 //line components/empty.kyse.go:30
 	if d.ActionURL != "" {
-//line components/empty.go:82
+//line components/empty.go:83
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t<section>\n")
 		}
@@ -86,9 +87,15 @@ func Empty(props EmptyProps) template.HTML {
 			_, err = io.WriteString(w, "\t\t\t<a class=\"btn\" data-variant=\"outline\" href=\"")
 		}
 		if err == nil {
+			var s string
 //line components/empty.kyse.go:32
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.ActionURL)))
-//line components/empty.go:92
+			s, err = view.TextURL(d.ActionURL)
+//line components/empty.go:94
+			if err != nil {
+				err = fmt.Errorf("%s: %w", "components/empty.kyse.go:32", err)
+			} else {
+				_, err = io.WriteString(w, s)
+			}
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\">")
@@ -96,7 +103,7 @@ func Empty(props EmptyProps) template.HTML {
 		if err == nil {
 //line components/empty.kyse.go:32
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.ActionLabel)))
-//line components/empty.go:100
+//line components/empty.go:107
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</a>\n")

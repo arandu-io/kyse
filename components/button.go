@@ -5,6 +5,7 @@
 package components
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 	"strings"
@@ -55,7 +56,7 @@ func (p ButtonProps) ButtonType() string {
 	return p.Type
 }
 
-//line components/button.go:59
+//line components/button.go:60
 
 // Button renders the button component.
 func Button(props ButtonProps) template.HTML {
@@ -74,8 +75,8 @@ func Button(props ButtonProps) template.HTML {
 	}
 	if err == nil {
 //line components/button.kyse.go:49
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.ButtonType())))
-//line components/button.go:79
+		_, err = io.WriteString(w, view.TextAttr(d.ButtonType()))
+//line components/button.go:80
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\"\n")
@@ -85,14 +86,14 @@ func Button(props ButtonProps) template.HTML {
 	}
 //line components/button.kyse.go:51
 	if d.Variant != "" {
-//line components/button.go:89
+//line components/button.go:90
 		if err == nil {
 			_, err = io.WriteString(w, "\t\tdata-variant=\"")
 		}
 		if err == nil {
 //line components/button.kyse.go:52
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Variant)))
-//line components/button.go:96
+			_, err = io.WriteString(w, view.TextAttr(d.Variant))
+//line components/button.go:97
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
@@ -100,14 +101,14 @@ func Button(props ButtonProps) template.HTML {
 	}
 //line components/button.kyse.go:54
 	if d.Size != "" {
-//line components/button.go:104
+//line components/button.go:105
 		if err == nil {
 			_, err = io.WriteString(w, "\t\tdata-size=\"")
 		}
 		if err == nil {
 //line components/button.kyse.go:55
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Size)))
-//line components/button.go:111
+			_, err = io.WriteString(w, view.TextAttr(d.Size))
+//line components/button.go:112
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
@@ -115,21 +116,27 @@ func Button(props ButtonProps) template.HTML {
 	}
 //line components/button.kyse.go:57
 	if d.Disabled {
-//line components/button.go:119
+//line components/button.go:120
 		if err == nil {
 			_, err = io.WriteString(w, "\t\tdisabled\n")
 		}
 	}
 //line components/button.kyse.go:60
 	if d.HxPost != "" {
-//line components/button.go:126
+//line components/button.go:127
 		if err == nil {
 			_, err = io.WriteString(w, "\t\thx-post=\"")
 		}
 		if err == nil {
+			var s string
 //line components/button.kyse.go:61
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.HxPost)))
-//line components/button.go:133
+			s, err = view.TextURL(d.HxPost)
+//line components/button.go:135
+			if err != nil {
+				err = fmt.Errorf("%s: %w", "components/button.kyse.go:61", err)
+			} else {
+				_, err = io.WriteString(w, s)
+			}
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
@@ -137,14 +144,20 @@ func Button(props ButtonProps) template.HTML {
 	}
 //line components/button.kyse.go:63
 	if d.HxGet != "" {
-//line components/button.go:141
+//line components/button.go:148
 		if err == nil {
 			_, err = io.WriteString(w, "\t\thx-get=\"")
 		}
 		if err == nil {
+			var s string
 //line components/button.kyse.go:64
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.HxGet)))
-//line components/button.go:148
+			s, err = view.TextURL(d.HxGet)
+//line components/button.go:156
+			if err != nil {
+				err = fmt.Errorf("%s: %w", "components/button.kyse.go:64", err)
+			} else {
+				_, err = io.WriteString(w, s)
+			}
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
@@ -152,14 +165,14 @@ func Button(props ButtonProps) template.HTML {
 	}
 //line components/button.kyse.go:66
 	if d.HxTarget != "" {
-//line components/button.go:156
+//line components/button.go:169
 		if err == nil {
 			_, err = io.WriteString(w, "\t\thx-target=\"")
 		}
 		if err == nil {
 //line components/button.kyse.go:67
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.HxTarget)))
-//line components/button.go:163
+			_, err = io.WriteString(w, view.TextAttr(d.HxTarget))
+//line components/button.go:176
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
@@ -167,14 +180,14 @@ func Button(props ButtonProps) template.HTML {
 	}
 //line components/button.kyse.go:69
 	if d.HxSwap != "" {
-//line components/button.go:171
+//line components/button.go:184
 		if err == nil {
 			_, err = io.WriteString(w, "\t\thx-swap=\"")
 		}
 		if err == nil {
 //line components/button.kyse.go:70
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.HxSwap)))
-//line components/button.go:178
+			_, err = io.WriteString(w, view.TextAttr(d.HxSwap))
+//line components/button.go:191
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
@@ -182,14 +195,14 @@ func Button(props ButtonProps) template.HTML {
 	}
 //line components/button.kyse.go:72
 	if d.HxConfirm != "" {
-//line components/button.go:186
+//line components/button.go:199
 		if err == nil {
 			_, err = io.WriteString(w, "\t\thx-confirm=\"")
 		}
 		if err == nil {
 //line components/button.kyse.go:73
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.HxConfirm)))
-//line components/button.go:193
+			_, err = io.WriteString(w, view.TextAttr(d.HxConfirm))
+//line components/button.go:206
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
@@ -201,7 +214,7 @@ func Button(props ButtonProps) template.HTML {
 	if err == nil {
 //line components/button.kyse.go:75
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Label)))
-//line components/button.go:205
+//line components/button.go:218
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</button>\n")

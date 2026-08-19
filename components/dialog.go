@@ -5,6 +5,7 @@
 package components
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 	"strings"
@@ -76,7 +77,7 @@ func (p DialogProps) FormMethod() string {
 	return p.Method
 }
 
-//line components/dialog.go:80
+//line components/dialog.go:81
 
 // Dialog renders the dialog component.
 func Dialog(props DialogProps) template.HTML {
@@ -92,16 +93,16 @@ func Dialog(props DialogProps) template.HTML {
 	}
 	if err == nil {
 //line components/dialog.kyse.go:69
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.ID)))
-//line components/dialog.go:97
+		_, err = io.WriteString(w, view.TextAttr(d.ID))
+//line components/dialog.go:98
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\" class=\"dialog\" aria-labelledby=\"")
 	}
 	if err == nil {
 //line components/dialog.kyse.go:69
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.ID)))
-//line components/dialog.go:105
+		_, err = io.WriteString(w, view.TextAttr(d.ID))
+//line components/dialog.go:106
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "-title\">\n")
@@ -117,8 +118,8 @@ func Dialog(props DialogProps) template.HTML {
 	}
 	if err == nil {
 //line components/dialog.kyse.go:72
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.ID)))
-//line components/dialog.go:122
+		_, err = io.WriteString(w, view.TextAttr(d.ID))
+//line components/dialog.go:123
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "-title\">")
@@ -126,21 +127,21 @@ func Dialog(props DialogProps) template.HTML {
 	if err == nil {
 //line components/dialog.kyse.go:72
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Title)))
-//line components/dialog.go:130
+//line components/dialog.go:131
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</h2>\n")
 	}
 //line components/dialog.kyse.go:73
 	if d.Message != "" {
-//line components/dialog.go:137
+//line components/dialog.go:138
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\t\t<p class=\"text-muted-foreground text-sm\">")
 		}
 		if err == nil {
 //line components/dialog.kyse.go:74
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Message)))
-//line components/dialog.go:144
+//line components/dialog.go:145
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</p>\n")
@@ -164,7 +165,7 @@ func Dialog(props DialogProps) template.HTML {
 	if err == nil {
 //line components/dialog.kyse.go:80
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Cancel())))
-//line components/dialog.go:168
+//line components/dialog.go:169
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</button>\n")
@@ -177,16 +178,22 @@ func Dialog(props DialogProps) template.HTML {
 	}
 	if err == nil {
 //line components/dialog.kyse.go:82
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.FormMethod())))
-//line components/dialog.go:182
+		_, err = io.WriteString(w, view.TextAttr(d.FormMethod()))
+//line components/dialog.go:183
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\" action=\"")
 	}
 	if err == nil {
+		var s string
 //line components/dialog.kyse.go:82
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Action)))
-//line components/dialog.go:190
+		s, err = view.TextURL(d.Action)
+//line components/dialog.go:192
+		if err != nil {
+			err = fmt.Errorf("%s: %w", "components/dialog.kyse.go:82", err)
+		} else {
+			_, err = io.WriteString(w, s)
+		}
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\">\n")
@@ -196,8 +203,8 @@ func Dialog(props DialogProps) template.HTML {
 	}
 	if err == nil {
 //line components/dialog.kyse.go:83
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Token)))
-//line components/dialog.go:201
+		_, err = io.WriteString(w, view.TextAttr(d.Token))
+//line components/dialog.go:208
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\">\n")
@@ -207,8 +214,8 @@ func Dialog(props DialogProps) template.HTML {
 	}
 	if err == nil {
 //line components/dialog.kyse.go:84
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.ConfirmVariant)))
-//line components/dialog.go:212
+		_, err = io.WriteString(w, view.TextAttr(d.ConfirmVariant))
+//line components/dialog.go:219
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\">")
@@ -216,7 +223,7 @@ func Dialog(props DialogProps) template.HTML {
 	if err == nil {
 //line components/dialog.kyse.go:84
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Confirm())))
-//line components/dialog.go:220
+//line components/dialog.go:227
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</button>\n")

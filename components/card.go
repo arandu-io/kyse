@@ -5,6 +5,7 @@
 package components
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 	"strings"
@@ -36,7 +37,7 @@ type CardProps struct {
 	BadgeVariant string
 }
 
-//line components/card.go:40
+//line components/card.go:41
 
 // Card renders the card component.
 func Card(props CardProps) template.HTML {
@@ -58,14 +59,20 @@ func Card(props CardProps) template.HTML {
 	}
 //line components/card.kyse.go:32
 	if d.Href != "" {
-//line components/card.go:62
+//line components/card.go:63
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\t\t<a class=\"hover:underline\" href=\"")
 		}
 		if err == nil {
+			var s string
 //line components/card.kyse.go:33
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Href)))
-//line components/card.go:69
+			s, err = view.TextURL(d.Href)
+//line components/card.go:71
+			if err != nil {
+				err = fmt.Errorf("%s: %w", "components/card.kyse.go:33", err)
+			} else {
+				_, err = io.WriteString(w, s)
+			}
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\">")
@@ -73,7 +80,7 @@ func Card(props CardProps) template.HTML {
 		if err == nil {
 //line components/card.kyse.go:33
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Title)))
-//line components/card.go:77
+//line components/card.go:84
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</a>\n")
@@ -81,14 +88,14 @@ func Card(props CardProps) template.HTML {
 	}
 //line components/card.kyse.go:35
 	if d.Href == "" {
-//line components/card.go:85
+//line components/card.go:92
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\t\t")
 		}
 		if err == nil {
 //line components/card.kyse.go:36
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Title)))
-//line components/card.go:92
+//line components/card.go:99
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\n")
@@ -99,14 +106,14 @@ func Card(props CardProps) template.HTML {
 	}
 //line components/card.kyse.go:39
 	if d.Badge != "" {
-//line components/card.go:103
+//line components/card.go:110
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t\t")
 		}
 		if err == nil {
 //line components/card.kyse.go:40
 			_, err = io.WriteString(w, view.UnsafeText(Badge(BadgeProps{Label: d.Badge, Variant: d.BadgeVariant})))
-//line components/card.go:110
+//line components/card.go:117
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\n")
@@ -120,14 +127,14 @@ func Card(props CardProps) template.HTML {
 	}
 //line components/card.kyse.go:44
 	if d.Description != "" {
-//line components/card.go:124
+//line components/card.go:131
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t<p class=\"text-muted-foreground mt-2 text-sm\">")
 		}
 		if err == nil {
 //line components/card.kyse.go:45
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Description)))
-//line components/card.go:131
+//line components/card.go:138
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</p>\n")
@@ -135,14 +142,14 @@ func Card(props CardProps) template.HTML {
 	}
 //line components/card.kyse.go:47
 	if d.Meta != "" {
-//line components/card.go:139
+//line components/card.go:146
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t<p class=\"text-muted-foreground mt-3 text-xs\">")
 		}
 		if err == nil {
 //line components/card.kyse.go:48
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Meta)))
-//line components/card.go:146
+//line components/card.go:153
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</p>\n")

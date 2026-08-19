@@ -5,6 +5,7 @@
 package components
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 	"strings"
@@ -60,7 +61,7 @@ func (p ToastProps) Live() string {
 	return "polite"
 }
 
-//line components/toast.go:64
+//line components/toast.go:65
 
 // Toast renders the toast component.
 func Toast(props ToastProps) template.HTML {
@@ -73,28 +74,28 @@ func Toast(props ToastProps) template.HTML {
 	}
 //line components/toast.kyse.go:53
 	if d.Title != "" {
-//line components/toast.go:77
+//line components/toast.go:78
 		if err == nil {
 			_, err = io.WriteString(w, "\t<div class=\"toast\" role=\"status\" aria-live=\"")
 		}
 		if err == nil {
 //line components/toast.kyse.go:54
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Live())))
-//line components/toast.go:84
+			_, err = io.WriteString(w, view.TextAttr(d.Live()))
+//line components/toast.go:85
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "\"\n")
 		}
 //line components/toast.kyse.go:55
 		if d.Category != "" {
-//line components/toast.go:91
+//line components/toast.go:92
 			if err == nil {
 				_, err = io.WriteString(w, "\t\t\tdata-category=\"")
 			}
 			if err == nil {
 //line components/toast.kyse.go:56
-				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Category)))
-//line components/toast.go:98
+				_, err = io.WriteString(w, view.TextAttr(d.Category))
+//line components/toast.go:99
 			}
 			if err == nil {
 				_, err = io.WriteString(w, "\"\n")
@@ -102,14 +103,14 @@ func Toast(props ToastProps) template.HTML {
 		}
 //line components/toast.kyse.go:58
 		if d.Duration != 0 {
-//line components/toast.go:106
+//line components/toast.go:107
 			if err == nil {
 				_, err = io.WriteString(w, "\t\t\tdata-duration=\"")
 			}
 			if err == nil {
 //line components/toast.kyse.go:59
-				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Duration)))
-//line components/toast.go:113
+				_, err = io.WriteString(w, view.TextAttr(d.Duration))
+//line components/toast.go:114
 			}
 			if err == nil {
 				_, err = io.WriteString(w, "\"\n")
@@ -130,21 +131,21 @@ func Toast(props ToastProps) template.HTML {
 		if err == nil {
 //line components/toast.kyse.go:64
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Title)))
-//line components/toast.go:134
+//line components/toast.go:135
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</h2>\n")
 		}
 //line components/toast.kyse.go:65
 		if d.Message != "" {
-//line components/toast.go:141
+//line components/toast.go:142
 			if err == nil {
 				_, err = io.WriteString(w, "\t\t\t\t\t<p>")
 			}
 			if err == nil {
 //line components/toast.kyse.go:66
 				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Message)))
-//line components/toast.go:148
+//line components/toast.go:149
 			}
 			if err == nil {
 				_, err = io.WriteString(w, "</p>\n")
@@ -158,7 +159,7 @@ func Toast(props ToastProps) template.HTML {
 		}
 //line components/toast.kyse.go:70
 		if d.ActionURL != "" {
-//line components/toast.go:162
+//line components/toast.go:163
 			if err == nil {
 				_, err = io.WriteString(w, "\t\t\t\t<footer>\n")
 			}
@@ -169,9 +170,15 @@ func Toast(props ToastProps) template.HTML {
 				_, err = io.WriteString(w, "\t\t\t\t\t\thx-post=\"")
 			}
 			if err == nil {
+				var s string
 //line components/toast.kyse.go:73
-				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.ActionURL)))
-//line components/toast.go:175
+				s, err = view.TextURL(d.ActionURL)
+//line components/toast.go:177
+				if err != nil {
+					err = fmt.Errorf("%s: %w", "components/toast.kyse.go:73", err)
+				} else {
+					_, err = io.WriteString(w, s)
+				}
 			}
 			if err == nil {
 				_, err = io.WriteString(w, "\" hx-swap=\"none\">")
@@ -179,7 +186,7 @@ func Toast(props ToastProps) template.HTML {
 			if err == nil {
 //line components/toast.kyse.go:73
 				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.ActionLabel)))
-//line components/toast.go:183
+//line components/toast.go:190
 			}
 			if err == nil {
 				_, err = io.WriteString(w, "</button>\n")

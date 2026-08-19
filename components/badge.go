@@ -49,7 +49,7 @@ func Badge(props BadgeProps) template.HTML {
 		}
 		if err == nil {
 //line components/badge.kyse.go:20
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Variant)))
+			_, err = io.WriteString(w, view.TextAttr(d.Variant))
 //line components/badge.go:54
 		}
 		if err == nil {
