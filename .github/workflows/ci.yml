@@ -110,6 +110,99 @@ jobs:
             exit 1
           fi
 
+      # The API surface, compared against the last release.
+      #
+      # This module is imported and never copied, which is what makes the gate
+      # necessary here: a project draws a button by requiring a version of this
+      # module, so a field that stops existing is a build that stops in somebody
+      # else's repository. It has happened -- two removals in v0.6.0 took out
+      # thirty-one call sites in one project and the whole installer of another,
+      # and neither found out until they upgraded.
+      #
+      # It does not forbid breaking. While the version starts with v0. it is
+      # allowed to, and freezing a shape this early is worse. What it forbids is
+      # breaking QUIETLY: an incompatible change with no entry in UPGRADE.md
+      # fails here, in a diff a reviewer is looking at, rather than in somebody's
+      # build weeks later.
+      #
+      # No view build runs in this step, on either side, and that is deliberate.
+      # The compiled components are committed, and go get has no build step, so
+      # the .go files in the tree ARE the surface every consumer imports. The
+      # step above already proved the committed generation matches its sources,
+      # which leaves nothing for a rebuild here to discover; and rebuilding the
+      # old tag would be wrong rather than redundant, because today's aru would
+      # produce a surface that release never shipped.
+      - name: api diff against the last release
+        run: |
+          set -euo pipefail
+          latest=$(git tag --list 'v*' --sort=-v:refname | head -1)
+          if [ -z "$latest" ]; then
+            echo "no release to compare against yet"
+            exit 0
+          fi
+          echo "comparing the working tree against $latest"
+
+          old=$(mktemp -d)
+          git worktree add -q --detach "$old" "$latest"
+
+          broke=""
+          for pkg in $(go list ./... | sed 's|github.com/arandu-io/kyse|.|'); do
+            # apidiff refuses an internal package, and nothing outside this
+            # module can import one anyway.
+            case "$pkg" in ./internal | ./internal/*) continue ;; esac
+            # A package that did not exist in the release is an addition, and an
+            # addition breaks nobody.
+            [ -d "$old/${pkg#./}" ] || continue
+            # A release that does not load is not a comparison that failed. It
+            # is what v0.4.0 was: fonts against a framework tag that did not
+            # have RegisterAsset yet, which is why v0.4.1 exists. Say so and
+            # move on rather than reporting every symbol in it as removed.
+            if ! (cd "$old" && go run golang.org/x/exp/cmd/apidiff@latest -w "$old/api.out" "$pkg") >/dev/null 2>&1; then
+              echo "$pkg does not load at $latest; nothing to compare"
+              continue
+            fi
+            # The awk drops one shape of line and only that one: "changed from T
+            # to T", the same text on both sides. It is not a change to this
+            # module's API -- it is what apidiff reports when a type this module
+            # hands through comes from a different version of the module
+            # underneath. fonts.Registered returns []view.Asset, and every
+            # framework bump gives that type a new identity without touching its
+            # shape. A line where the two halves differ is a real break and stays.
+            diff=$(go run golang.org/x/exp/cmd/apidiff@latest -incompatible "$old/api.out" "$pkg" 2>/dev/null \
+                     | grep '^- ' \
+                     | awk '{
+                         i = index($0, " changed from ")
+                         if (i) {
+                           rest = substr($0, i + 14)
+                           half = (length(rest) - 4) / 2
+                           if (half > 0 && half == int(half) &&
+                               substr(rest, half + 1, 4) == " to " &&
+                               substr(rest, 1, half) == substr(rest, half + 5)) next
+                         }
+                         print
+                       }' || true)
+            if [ -n "$diff" ]; then
+              echo "$pkg:"
+              echo "$diff" | sed 's/^/    /'
+              broke="yes"
+            fi
+          done
+          git worktree remove --force "$old"
+
+          if [ -z "$broke" ]; then
+            echo "no incompatible change since $latest"
+            exit 0
+          fi
+          # Broken is allowed. Broken and unwritten is not.
+          if git diff --quiet "$latest" -- UPGRADE.md; then
+            echo
+            echo "there are incompatible changes and UPGRADE.md was not touched since $latest."
+            echo "Write what somebody has to write instead, and why. That file is the whole mechanism."
+            exit 1
+          fi
+          echo
+          echo "incompatible changes, and UPGRADE.md was updated. Read the entry in review."
+
       # Required by doc 24: a known vulnerability blocks the merge rather than
       # showing up in a report nobody reads.
       - name: govulncheck
