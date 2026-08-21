@@ -1,4 +1,4 @@
-package fonts_test
+package unit
 
 import (
 	"strings"

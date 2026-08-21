@@ -1,4 +1,4 @@
-package mailui_test
+package unit
 
 import (
 	"strings"
