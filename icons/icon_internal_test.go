@@ -264,12 +264,12 @@ func TestTheGeneratedIconsAreTheOnesInTheTree(t *testing.T) {
 
 	for name := range declared {
 		if _, listed := all[name]; !listed {
-			t.Errorf("%s is an icon no test covers: it is missing from all_test.go", name)
+			t.Errorf("%s is an icon no test covers: it is missing from all_internal_test.go", name)
 		}
 	}
 	for name := range all {
 		if !declared[name] {
-			t.Errorf("all_test.go lists %s and no file declares it", name)
+			t.Errorf("all_internal_test.go lists %s and no file declares it", name)
 		}
 	}
 	if len(all) != 1512 {

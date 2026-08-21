@@ -398,7 +398,7 @@ func write(out, src string, icons []icon) error {
 			return err
 		}
 	}
-	return emit(filepath.Join(out, "all_test.go"), registry(icons))
+	return emit(filepath.Join(out, "all_internal_test.go"), registry(icons))
 }
 
 // emit gofmts and writes one file.
