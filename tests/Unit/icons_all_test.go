@@ -7,7 +7,7 @@
 // The paths are MIT, Copyright (c) 2023 Phosphor Icons. The licence is in
 // LICENSE.md beside this file.
 
-package icons_test
+package unit
 
 import (
 	"html/template"

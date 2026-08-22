@@ -102,9 +102,14 @@ jobs:
       - name: the vendored icons are the ones upstream published
         run: |
           go generate ./...
-          if [ -n "$(git status --porcelain icons)" ]; then
+          # The registry of every icon is generated too, and it is the one
+          # output that does not land in icons/: it reaches nothing unexported,
+          # so the layout guard keeps it under tests/. Naming it here is what
+          # keeps it inside this check rather than outside it.
+          generated="icons tests/Unit/icons_all_test.go"
+          if [ -n "$(git status --porcelain $generated)" ]; then
             echo "the committed icons do not match the pinned Phosphor commit:"
-            git --no-pager diff --stat icons
+            git --no-pager diff --stat $generated
             exit 1
           fi
 

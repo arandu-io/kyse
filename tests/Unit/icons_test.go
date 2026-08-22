@@ -1,4 +1,4 @@
-package icons_test
+package unit
 
 import (
 	"encoding/xml"
@@ -22,6 +22,13 @@ import (
 //
 // Every test walks the whole set. A sample would pass on the day one file is
 // different, which is the only day any of this matters.
+
+// iconsDir is the icons package, read from this one's working directory.
+//
+// Two tests read the shipped tree rather than a rendered string -- the
+// generated sources and the upstream licence -- and `go test` runs a test from
+// the directory of the package it belongs to, which is this one.
+const iconsDir = "../../icons"
 
 // elements returns the elements of a rendered icon, in document order, and
 // fails if it is not well-formed XML.
@@ -214,8 +221,8 @@ func TestALabelIsEscaped(t *testing.T) {
 
 // TestTheGeneratedIconsAreTheOnesInTheTree.
 //
-// The set is generated from a pinned commit, so the only way a file here can
-// stop matching upstream is somebody editing it. That edit compiles.
+// The set is generated from a pinned commit, so the only way a generated file
+// can stop matching upstream is somebody editing it. That edit compiles.
 //
 // Two halves. Every generated file has to still name the commit it came from --
 // a file with the header removed is a file nobody can regenerate. And the
@@ -224,7 +231,7 @@ func TestALabelIsEscaped(t *testing.T) {
 func TestTheGeneratedIconsAreTheOnesInTheTree(t *testing.T) {
 	const pin = "2b75f3ad12b420c9504ef05df8d2564a28f8500e"
 
-	matches, err := filepath.Glob("icons_*.go")
+	matches, err := filepath.Glob(filepath.Join(iconsDir, "icons_*.go"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -266,12 +273,12 @@ func TestTheGeneratedIconsAreTheOnesInTheTree(t *testing.T) {
 
 	for name := range declared {
 		if _, listed := all[name]; !listed {
-			t.Errorf("%s is an icon no test covers: it is missing from all_test.go", name)
+			t.Errorf("%s is an icon no test covers: it is missing from icons_all_test.go", name)
 		}
 	}
 	for name := range all {
 		if !declared[name] {
-			t.Errorf("all_test.go lists %s and no file declares it", name)
+			t.Errorf("icons_all_test.go lists %s and no file declares it", name)
 		}
 	}
 	if len(all) != 1512 {
@@ -281,12 +288,12 @@ func TestTheGeneratedIconsAreTheOnesInTheTree(t *testing.T) {
 
 // TestTheUpstreamLicenceIsHere.
 //
-// The paths in this directory are somebody else's work under the MIT licence,
-// and the one condition it puts on using them is that the notice travels with
-// them. A directory of vendored artwork that lost its licence file is a licence
-// violation that nothing else in the build would notice.
+// The paths in the icons package are somebody else's work under the MIT
+// licence, and the one condition it puts on using them is that the notice
+// travels with them. A directory of vendored artwork that lost its licence file
+// is a licence violation that nothing else in the build would notice.
 func TestTheUpstreamLicenceIsHere(t *testing.T) {
-	body, err := os.ReadFile("LICENSE.md")
+	body, err := os.ReadFile(filepath.Join(iconsDir, "LICENSE.md"))
 	if err != nil {
 		t.Fatal(err)
 	}
