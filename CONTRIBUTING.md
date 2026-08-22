@@ -35,25 +35,37 @@ dependency needs to argue for it first, in an issue.
 
 ## Where a test goes
 
-Beside the code it tests, named `*_test.go`, in the same directory. There is no
-`tests/` directory, and that is not style: `go test` attributes coverage per
-directory, so a test filed elsewhere leaves the package under test reporting
-0% -- and it can only reach what the package exports.
+Under `tests/`, in one of its capitalized category directories, declaring a
+lowercase package -- `tests/Unit` holds `package unit`. The exception is a test
+that needs something the package does not export: that one goes beside the code
+it tests, named `*_internal_test.go`, and the suffix is how it says so. This is
+not a preference. `tests/test-layout-guard.sh` runs in CI and rejects a
+`*_test.go` file that is neither.
 
-Which package the test declares is a real choice, and it answers one question:
+Which of the two you are writing answers one question:
 
-| declare | when |
+| where | when |
 |---|---|
-| `package X_test` | this is the **contract**. The test sees what a caller sees, which is the point |
-| `package X` | this is the **implementation**, and the test genuinely needs something the package does not export |
+| `tests/`, importing the package | this is the **contract**. The test sees what a caller sees, which is the point |
+| beside the code, `*_internal_test.go` in `package X` | this is the **implementation**, and the test genuinely needs something the package does not export |
+
+The second one is beside the code because there is nowhere else it can be. A
+file reaches what a package does not export only by compiling into that package,
+and `go test` attributes coverage per directory -- so the package's own
+directory is also the only place where what a test exercises is credited to the
+code it exercises. A suite under `tests/` is credited to `tests/`, and short of
+`-coverpkg` the package it imports reports what its own files reach. That is
+what the first row costs, and for a contract test it is the right price: what it
+measures is the exported surface, which is all a caller ever has.
 
 Prefer the first. Take the second only when you use it -- `plans/testpackages.go`
 in the arandu-io working tree checks exactly that, by intersecting the
 identifiers a test names with what its package declares unexported, and the
-checklist runs it across every repository.
+checklist runs it across every Go repository in the project.
 
-A `package main` has no external form: it cannot be imported, so its tests are
-internal and that is the end of it.
+A `package main` has no external form: it cannot be imported, so nothing under
+`tests/` can reach it. Its tests are internal, and they carry the suffix for the
+reason every internal test carries it.
 
 ## What the commit message says
 
