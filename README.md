@@ -108,7 +108,7 @@ One function per icon, rather than `go:embed` or a map keyed by name, because
 the linker can prove a function is unreachable and cannot prove that about a map
 lookup. Measured on a program that draws one icon: 176 bytes. The same icon
 reached through a name-keyed map costs 1.24 MB, because the map keeps all 1512
-alive. See [ADR 0033](https://github.com/arandu-io/docs).
+alive. See [ADR 0033](https://arandu.io/docs).
 
 No `Label` means the icon is decorative and is marked `aria-hidden`; a `Label`
 makes it the accessible name, which is what an icon-only button needs. There is
