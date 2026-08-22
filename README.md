@@ -51,8 +51,8 @@ import "github.com/arandu-io/kyse/components"
 		{!! components.Field(components.FieldProps{
 			Name:     "title",
 			Label:    "Title",
-			Value:    .Form.Title,
-			Error:    .Errors.First("title"),
+			Value:    .Post.Title,
+			Page:     .,
 			Required: true,
 		}) !!}
 
@@ -83,12 +83,17 @@ space and a 500.
 | `Dialog` | a confirmation, in a `<dialog>` the browser manages |
 | `Empty` | what a list draws when it has nothing in it |
 | `Field` | a labelled input, with its error and its hint |
+| `StatCard` | a table of numbers with a heading over it |
 | `Textarea` | the same, for a textarea |
 | `ThemeToggle` | light, dark and six accents, kept on the device |
 | `Toast` | a flash message HTMX appends to the tray |
 
-Eleven, and the catalogue upstream has eighty-two. What is here is what has been
-adapted, not what is planned.
+Twelve. What is here is what has been adapted, not what is planned.
+
+Two more packages travel in the same module and neither draws a page. `mailui`
+draws the messages an application sends, in tables and inline attributes,
+because a stylesheet does not survive a mail client. `fonts` serves the faces a
+project vendored and writes the preload links for them.
 
 ## Icons
 
