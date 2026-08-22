@@ -1,4 +1,4 @@
-package icons
+package icons_test
 
 import (
 	"encoding/xml"
@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/arandu-io/kyse/icons"
 )
 
 // What is checked here is what vendoring 1512 pictures from another project can
@@ -62,7 +64,7 @@ func attr(e xml.StartElement, name string) (string, bool) {
 // wrong somewhere else.
 func TestEveryIconIsOneWellFormedSVG(t *testing.T) {
 	for name, icon := range all {
-		markup := string(icon(Props{}))
+		markup := string(icon(icons.Props{}))
 		els := elements(t, name, markup)
 
 		if len(els) != 2 {
@@ -91,7 +93,7 @@ func TestEveryIconIsOneWellFormedSVG(t *testing.T) {
 // xlink:href=, this is what says so.
 func TestNoIconCarriesMarkup(t *testing.T) {
 	for name, icon := range all {
-		els := elements(t, name, string(icon(Props{})))
+		els := elements(t, name, string(icon(icons.Props{})))
 		if len(els) < 2 {
 			continue // already reported by the well-formed test
 		}
@@ -120,7 +122,7 @@ func TestNoIconCarriesMarkup(t *testing.T) {
 // was tried -- and wrong everywhere else.
 func TestEveryIconTakesTheColourOfItsText(t *testing.T) {
 	for name, icon := range all {
-		els := elements(t, name, string(icon(Props{})))
+		els := elements(t, name, string(icon(icons.Props{})))
 		if len(els) == 0 {
 			continue
 		}
@@ -142,7 +144,7 @@ func TestEveryIconTakesTheColourOfItsText(t *testing.T) {
 // attribute, so it is the fallback and loses to the stylesheet rule of whatever
 // contains it.
 func TestSizeComesFromTheLineOrTheStylesheet(t *testing.T) {
-	els := elements(t, "House", string(House(Props{})))
+	els := elements(t, "House", string(icons.House(icons.Props{})))
 
 	for attribute, want := range map[string]string{"width": "1em", "height": "1em"} {
 		if got, _ := attr(els[0], attribute); got != want {
@@ -159,7 +161,7 @@ func TestSizeComesFromTheLineOrTheStylesheet(t *testing.T) {
 // TestAnIconWithNoLabelIsHiddenFromScreenReaders: it sits beside the word that
 // already says what it means, and announcing both reads the button twice.
 func TestAnIconWithNoLabelIsHiddenFromScreenReaders(t *testing.T) {
-	els := elements(t, "Trash", string(Trash(Props{})))
+	els := elements(t, "Trash", string(icons.Trash(icons.Props{})))
 
 	if hidden, _ := attr(els[0], "aria-hidden"); hidden != "true" {
 		t.Errorf("a decorative icon is not aria-hidden: %q", hidden)
@@ -176,7 +178,7 @@ func TestAnIconWithNoLabelIsHiddenFromScreenReaders(t *testing.T) {
 // This is the icon-only button. Without a name it is announced as "button", and
 // the page offers no way to find out which one.
 func TestAnIconWithALabelIsAnnounced(t *testing.T) {
-	els := elements(t, "Trash", string(Trash(Props{Label: "Delete this post"})))
+	els := elements(t, "Trash", string(icons.Trash(icons.Props{Label: "Delete this post"})))
 
 	if role, _ := attr(els[0], "role"); role != "img" {
 		t.Errorf("a labelled icon has role %q, want img", role)
@@ -200,7 +202,7 @@ func TestAnIconWithALabelIsAnnounced(t *testing.T) {
 func TestALabelIsEscaped(t *testing.T) {
 	const payload = `"><script>alert(1)</script>`
 
-	markup := string(Trash(Props{Label: payload}))
+	markup := string(icons.Trash(icons.Props{Label: payload}))
 	if strings.Contains(markup, "<script>") {
 		t.Errorf("a label wrote a script tag through:\n%s", markup)
 	}
@@ -264,12 +266,12 @@ func TestTheGeneratedIconsAreTheOnesInTheTree(t *testing.T) {
 
 	for name := range declared {
 		if _, listed := all[name]; !listed {
-			t.Errorf("%s is an icon no test covers: it is missing from all_internal_test.go", name)
+			t.Errorf("%s is an icon no test covers: it is missing from all_test.go", name)
 		}
 	}
 	for name := range all {
 		if !declared[name] {
-			t.Errorf("all_internal_test.go lists %s and no file declares it", name)
+			t.Errorf("all_test.go lists %s and no file declares it", name)
 		}
 	}
 	if len(all) != 1512 {
