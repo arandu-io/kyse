@@ -25,10 +25,13 @@ go vet ./...
 go test -race ./...
 ```
 
-CI runs exactly this, plus a check that no new dependency entered the core: the
-framework depends on the standard library and `golang.org/x/crypto`, and nothing
-else. A pull request that adds a dependency there needs to argue for it first,
-in an issue.
+CI runs these three, and then a number of checks this file does not list --
+`.github/workflows/ci.yml` is the one that decides, and a copy of it here would
+only be a second list to keep in step. One of those checks is worth knowing
+before you write the patch: this module requires `arandu-io/framework` and
+nothing else, because it is imported by every project that draws a button, and
+a second require is a download for all of them. A pull request that adds a
+dependency needs to argue for it first, in an issue.
 
 ## Where a test goes
 
