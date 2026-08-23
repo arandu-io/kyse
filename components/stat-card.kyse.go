@@ -58,7 +58,7 @@ type StatRow struct {
 		@endif
 	</header>
 
-	@forelse(.Rows as row)
+	@if(len(.Rows) > 0)
 		<table class="mt-4 w-full text-sm">
 			<thead>
 				<tr class="text-muted-foreground text-left text-xs">
@@ -79,7 +79,7 @@ type StatRow struct {
 				@endforeach
 			</tbody>
 		</table>
-	@empty
+	@else
 		<div class="mt-4">{!! Empty(.Empty) !!}</div>
-	@endforelse
+	@endif
 </article>

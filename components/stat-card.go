@@ -110,105 +110,100 @@ func StatCard(props StatCardProps) template.HTML {
 		_, err = io.WriteString(w, "\n")
 	}
 //line components/stat-card.kyse.go:61
-	if len(d.Rows) == 0 {
+	if len(d.Rows) > 0 {
 //line components/stat-card.go:115
+		if err == nil {
+			_, err = io.WriteString(w, "\t\t<table class=\"mt-4 w-full text-sm\">\n")
+		}
+		if err == nil {
+			_, err = io.WriteString(w, "\t\t\t<thead>\n")
+		}
+		if err == nil {
+			_, err = io.WriteString(w, "\t\t\t\t<tr class=\"text-muted-foreground text-left text-xs\">\n")
+		}
+		if err == nil {
+			_, err = io.WriteString(w, "\t\t\t\t\t<th class=\"font-medium\">Name</th>\n")
+		}
+//line components/stat-card.kyse.go:66
+		for _, column := range d.Columns {
+			_ = column
+//line components/stat-card.go:131
+			if err == nil {
+				_, err = io.WriteString(w, "\t\t\t\t\t\t<th class=\"font-medium text-right\">")
+			}
+			if err == nil {
+//line components/stat-card.kyse.go:67
+				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(column)))
+//line components/stat-card.go:138
+			}
+			if err == nil {
+				_, err = io.WriteString(w, "</th>\n")
+			}
+		}
+		if err == nil {
+			_, err = io.WriteString(w, "\t\t\t\t</tr>\n")
+		}
+		if err == nil {
+			_, err = io.WriteString(w, "\t\t\t</thead>\n")
+		}
+		if err == nil {
+			_, err = io.WriteString(w, "\t\t\t<tbody class=\"divide-y\">\n")
+		}
+//line components/stat-card.kyse.go:72
+		for _, row := range d.Rows {
+			_ = row
+//line components/stat-card.go:156
+			if err == nil {
+				_, err = io.WriteString(w, "\t\t\t\t\t<tr>\n")
+			}
+			if err == nil {
+				_, err = io.WriteString(w, "\t\t\t\t\t\t<td class=\"py-2\">")
+			}
+			if err == nil {
+//line components/stat-card.kyse.go:74
+				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(row.Label)))
+//line components/stat-card.go:166
+			}
+			if err == nil {
+				_, err = io.WriteString(w, "</td>\n")
+			}
+//line components/stat-card.kyse.go:75
+			for _, value := range row.Values {
+				_ = value
+//line components/stat-card.go:174
+				if err == nil {
+					_, err = io.WriteString(w, "\t\t\t\t\t\t\t<td class=\"py-2 text-right tabular-nums\">")
+				}
+				if err == nil {
+//line components/stat-card.kyse.go:76
+					_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(value)))
+//line components/stat-card.go:181
+				}
+				if err == nil {
+					_, err = io.WriteString(w, "</td>\n")
+				}
+			}
+			if err == nil {
+				_, err = io.WriteString(w, "\t\t\t\t\t</tr>\n")
+			}
+		}
+		if err == nil {
+			_, err = io.WriteString(w, "\t\t\t</tbody>\n")
+		}
+		if err == nil {
+			_, err = io.WriteString(w, "\t\t</table>\n")
+		}
+	} else {
 		if err == nil {
 			_, err = io.WriteString(w, "\t\t<div class=\"mt-4\">")
 		}
 		if err == nil {
 //line components/stat-card.kyse.go:83
 			_, err = io.WriteString(w, view.UnsafeText(Empty(d.Empty)))
-//line components/stat-card.go:122
+//line components/stat-card.go:204
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</div>\n")
-		}
-	} else {
-//line components/stat-card.kyse.go:61
-		for _, row := range d.Rows {
-//line components/stat-card.go:130
-			_ = row
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t<table class=\"mt-4 w-full text-sm\">\n")
-			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t<thead>\n")
-			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t<tr class=\"text-muted-foreground text-left text-xs\">\n")
-			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t<th class=\"font-medium\">Name</th>\n")
-			}
-//line components/stat-card.kyse.go:66
-			for _, column := range d.Columns {
-				_ = column
-//line components/stat-card.go:147
-				if err == nil {
-					_, err = io.WriteString(w, "\t\t\t\t\t\t<th class=\"font-medium text-right\">")
-				}
-				if err == nil {
-//line components/stat-card.kyse.go:67
-					_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(column)))
-//line components/stat-card.go:154
-				}
-				if err == nil {
-					_, err = io.WriteString(w, "</th>\n")
-				}
-			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t</tr>\n")
-			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t</thead>\n")
-			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t<tbody class=\"divide-y\">\n")
-			}
-//line components/stat-card.kyse.go:72
-			for _, row := range d.Rows {
-				_ = row
-//line components/stat-card.go:172
-				if err == nil {
-					_, err = io.WriteString(w, "\t\t\t\t\t<tr>\n")
-				}
-				if err == nil {
-					_, err = io.WriteString(w, "\t\t\t\t\t\t<td class=\"py-2\">")
-				}
-				if err == nil {
-//line components/stat-card.kyse.go:74
-					_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(row.Label)))
-//line components/stat-card.go:182
-				}
-				if err == nil {
-					_, err = io.WriteString(w, "</td>\n")
-				}
-//line components/stat-card.kyse.go:75
-				for _, value := range row.Values {
-					_ = value
-//line components/stat-card.go:190
-					if err == nil {
-						_, err = io.WriteString(w, "\t\t\t\t\t\t\t<td class=\"py-2 text-right tabular-nums\">")
-					}
-					if err == nil {
-//line components/stat-card.kyse.go:76
-						_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(value)))
-//line components/stat-card.go:197
-					}
-					if err == nil {
-						_, err = io.WriteString(w, "</td>\n")
-					}
-				}
-				if err == nil {
-					_, err = io.WriteString(w, "\t\t\t\t\t</tr>\n")
-				}
-			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t</tbody>\n")
-			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t</table>\n")
-			}
 		}
 	}
 	if err == nil {
