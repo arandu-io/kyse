@@ -73,22 +73,24 @@ space and a 500.
 
 ## What is here
 
-| | |
+| group | components |
 |---|---|
-| `Alert` | a message about what happened, or is about to |
-| `Avatar` | who somebody is, in a circle, falling back to initials |
-| `Badge` | a small piece of status beside something else |
-| `Button` | six variants, five sizes, and the HTMX attributes |
-| `Card` | one item in a list: a title, a sentence, where it goes |
-| `Dialog` | a confirmation, in a `<dialog>` the browser manages |
-| `Empty` | what a list draws when it has nothing in it |
-| `Field` | a labelled input, with its error and its hint |
-| `StatCard` | a table of numbers with a heading over it |
-| `Textarea` | the same, for a textarea |
-| `ThemeToggle` | light, dark and six accents, kept on the device |
-| `Toast` | a flash message HTMX appends to the tray |
+| Actions | `Button` `ButtonGroup` |
+| Forms | `Field` `Input` `Label` `Textarea` `Checkbox` `RadioGroup` `Switch` `Select` `Combobox` `InputGroup` `RangeSlider` |
+| Layout | `Card` `Item` `Separator` `Sidebar` |
+| Display | `Avatar` `Badge` `Kbd` `Skeleton` `Table` `StatCard` |
+| Feedback | `Alert` `Toast` `Progress` `Empty` `Dialog` |
+| Overlays | `Drawer` `Popover` `DropdownMenu` `Command` `Collapsible` |
+| Navigation | `Accordion` `Breadcrumb` `Tabs` `ThemeToggle` |
 
-Twelve. What is here is what has been adapted, not what is planned.
+Thirty-seven. What is here is what has been adapted, not what is planned.
+
+Three that were asked for are not here, each for a reason in the tree rather
+than a preference. An alert dialog is a boolean on `Dialog`, because a component
+whose whole difference is derived from one decision is that decision. A tooltip
+is not deliverable: the stylesheet hides the bubble on keyboard focus and its
+text is generated content rather than a node, so it would serve a mouse and
+nobody else. An autosizing textarea needs a script.
 
 Two more packages travel in the same module and neither draws a page. `mailui`
 draws the messages an application sends, in tables and inline attributes,

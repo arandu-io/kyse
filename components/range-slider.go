@@ -5,7 +5,6 @@
 package components
 
 import (
-	kyse__fmt "fmt"
 	kyse__template "html/template"
 	kyse__io "io"
 	kyse__strings "strings"
@@ -130,14 +129,35 @@ func (p RangeSliderProps) Current() string {
 	return strconv.Itoa(p.At())
 }
 
-// Fill is how much of the track is coloured, as a percentage, so the slider is
-// painted right on the first frame rather than on the first drag.
-func (p RangeSliderProps) Fill() string {
+// sliderFills are the twenty-one positions the filled half of the track is
+// drawn at, one every five percent.
+//
+// They are written out rather than built from the number, because a class name
+// assembled at run time never appears in the source the stylesheet is compiled
+// from, and the rule for it is never emitted.
+var sliderFills = [21]string{
+	"slider-fill-0", "slider-fill-5", "slider-fill-10", "slider-fill-15", "slider-fill-20",
+	"slider-fill-25", "slider-fill-30", "slider-fill-35", "slider-fill-40", "slider-fill-45",
+	"slider-fill-50", "slider-fill-55", "slider-fill-60", "slider-fill-65", "slider-fill-70",
+	"slider-fill-75", "slider-fill-80", "slider-fill-85", "slider-fill-90", "slider-fill-95",
+	"slider-fill-100",
+}
+
+// FillClass is how much of the track is coloured, as the class that draws it,
+// so the slider is painted right on the first frame rather than on the first
+// drag.
+//
+// A class and not a style attribute: the policy this renders under allows no
+// inline style, so a value written into one is dropped by the browser and the
+// track paints unfilled. The cost is that it starts in steps of five percent
+// until the pointer takes over. What is announced, and what is submitted, is
+// the exact value.
+func (p RangeSliderProps) FillClass() string {
 	span := p.Ceiling() - p.Floor()
 	if span <= 0 {
-		return "0%"
+		return sliderFills[0]
 	}
-	return strconv.Itoa((p.At()-p.Floor())*100/span) + "%"
+	return sliderFills[((p.At()-p.Floor())*100/span+2)/5]
 }
 
 // DescribedBy names the element that explains this slider, so the error and
@@ -152,7 +172,7 @@ func (p RangeSliderProps) DescribedBy() string {
 	return ""
 }
 
-//line components/range-slider.go:156
+//line components/range-slider.go:176
 
 // RangeSlider renders the range-slider component.
 func RangeSlider(kyse__props RangeSliderProps) kyse__template.HTML {
@@ -172,17 +192,17 @@ func RangeSlider(kyse__props RangeSliderProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<label class=\"label\" for=\"")
 	}
 	if kyse__err == nil {
-//line components/range-slider.kyse.go:150
+//line components/range-slider.kyse.go:171
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/range-slider.go:178
+//line components/range-slider.go:198
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\">")
 	}
 	if kyse__err == nil {
-//line components/range-slider.kyse.go:150
+//line components/range-slider.kyse.go:171
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
-//line components/range-slider.go:186
+//line components/range-slider.go:206
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</label>\n")
@@ -203,9 +223,9 @@ func RangeSlider(kyse__props RangeSliderProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/range-slider.kyse.go:155
+//line components/range-slider.kyse.go:176
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/range-slider.go:209
+//line components/range-slider.go:229
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -214,9 +234,9 @@ func RangeSlider(kyse__props RangeSliderProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tname=\"")
 	}
 	if kyse__err == nil {
-//line components/range-slider.kyse.go:156
+//line components/range-slider.kyse.go:177
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/range-slider.go:220
+//line components/range-slider.go:240
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -225,9 +245,9 @@ func RangeSlider(kyse__props RangeSliderProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tvalue=\"")
 	}
 	if kyse__err == nil {
-//line components/range-slider.kyse.go:157
+//line components/range-slider.kyse.go:178
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Current()))
-//line components/range-slider.go:231
+//line components/range-slider.go:251
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -236,9 +256,9 @@ func RangeSlider(kyse__props RangeSliderProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tmin=\"")
 	}
 	if kyse__err == nil {
-//line components/range-slider.kyse.go:158
+//line components/range-slider.kyse.go:179
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Floor()))
-//line components/range-slider.go:242
+//line components/range-slider.go:262
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -247,9 +267,9 @@ func RangeSlider(kyse__props RangeSliderProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tmax=\"")
 	}
 	if kyse__err == nil {
-//line components/range-slider.kyse.go:159
+//line components/range-slider.kyse.go:180
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Ceiling()))
-//line components/range-slider.go:253
+//line components/range-slider.go:273
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -258,26 +278,20 @@ func RangeSlider(kyse__props RangeSliderProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tstep=\"")
 	}
 	if kyse__err == nil {
-//line components/range-slider.kyse.go:160
+//line components/range-slider.kyse.go:181
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Tick()))
-//line components/range-slider.go:264
+//line components/range-slider.go:284
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tstyle=\"--slider-value: ")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-		var kyse__v1 string
-//line components/range-slider.kyse.go:161
-		kyse__v1, kyse__err = kyse__view.TextCSS(kyse__d.Fill())
-//line components/range-slider.go:276
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/range-slider.kyse.go:161", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-		}
+//line components/range-slider.kyse.go:182
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.FillClass()))
+//line components/range-slider.go:295
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -285,31 +299,31 @@ func RangeSlider(kyse__props RangeSliderProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-slider-track\n")
 	}
-//line components/range-slider.kyse.go:163
+//line components/range-slider.kyse.go:184
 	if kyse__d.DescribedBy() != "" {
-//line components/range-slider.go:291
+//line components/range-slider.go:305
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/range-slider.kyse.go:164
+//line components/range-slider.kyse.go:185
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/range-slider.go:298
+//line components/range-slider.go:312
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/range-slider.kyse.go:166
+//line components/range-slider.kyse.go:187
 	if kyse__d.Message() != "" {
-//line components/range-slider.go:306
+//line components/range-slider.go:320
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/range-slider.kyse.go:169
+//line components/range-slider.kyse.go:190
 	if kyse__d.Disabled {
-//line components/range-slider.go:313
+//line components/range-slider.go:327
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdisabled\n")
 		}
@@ -320,9 +334,9 @@ func RangeSlider(kyse__props RangeSliderProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/range-slider.kyse.go:174
+//line components/range-slider.kyse.go:195
 	if kyse__d.ShowValue {
-//line components/range-slider.go:326
+//line components/range-slider.go:340
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<p class=\"text-muted-foreground text-sm\">\n")
 		}
@@ -330,31 +344,31 @@ func RangeSlider(kyse__props RangeSliderProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<output for=\"")
 		}
 		if kyse__err == nil {
-//line components/range-slider.kyse.go:176
+//line components/range-slider.kyse.go:197
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/range-slider.go:336
+//line components/range-slider.go:350
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\" data-slider-output>")
 		}
 		if kyse__err == nil {
-//line components/range-slider.kyse.go:176
+//line components/range-slider.kyse.go:197
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Current())))
-//line components/range-slider.go:344
+//line components/range-slider.go:358
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</output>\n")
 		}
-//line components/range-slider.kyse.go:177
+//line components/range-slider.kyse.go:198
 		if kyse__d.Unit != "" {
-//line components/range-slider.go:351
+//line components/range-slider.go:365
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t")
 			}
 			if kyse__err == nil {
-//line components/range-slider.kyse.go:178
+//line components/range-slider.kyse.go:199
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Unit)))
-//line components/range-slider.go:358
+//line components/range-slider.go:372
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
@@ -367,50 +381,50 @@ func RangeSlider(kyse__props RangeSliderProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/range-slider.kyse.go:183
+//line components/range-slider.kyse.go:204
 	if kyse__d.Message() != "" {
-//line components/range-slider.go:373
+//line components/range-slider.go:387
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<p id=\"")
 		}
 		if kyse__err == nil {
-//line components/range-slider.kyse.go:184
+//line components/range-slider.kyse.go:205
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/range-slider.go:380
+//line components/range-slider.go:394
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "-error\" class=\"text-destructive text-sm\">")
 		}
 		if kyse__err == nil {
-//line components/range-slider.kyse.go:184
+//line components/range-slider.kyse.go:205
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message())))
-//line components/range-slider.go:388
+//line components/range-slider.go:402
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
 		}
 	}
-//line components/range-slider.kyse.go:186
+//line components/range-slider.kyse.go:207
 	if kyse__d.Message() == "" {
-//line components/range-slider.go:396
-//line components/range-slider.kyse.go:187
+//line components/range-slider.go:410
+//line components/range-slider.kyse.go:208
 		if kyse__d.Hint != "" {
-//line components/range-slider.go:399
+//line components/range-slider.go:413
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<p id=\"")
 			}
 			if kyse__err == nil {
-//line components/range-slider.kyse.go:188
+//line components/range-slider.kyse.go:209
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/range-slider.go:406
+//line components/range-slider.go:420
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "-hint\" class=\"text-muted-foreground text-sm\">")
 			}
 			if kyse__err == nil {
-//line components/range-slider.kyse.go:188
+//line components/range-slider.kyse.go:209
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Hint)))
-//line components/range-slider.go:414
+//line components/range-slider.go:428
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")

@@ -119,14 +119,35 @@ func (p RangeSliderProps) Current() string {
 	return strconv.Itoa(p.At())
 }
 
-// Fill is how much of the track is coloured, as a percentage, so the slider is
-// painted right on the first frame rather than on the first drag.
-func (p RangeSliderProps) Fill() string {
+// sliderFills are the twenty-one positions the filled half of the track is
+// drawn at, one every five percent.
+//
+// They are written out rather than built from the number, because a class name
+// assembled at run time never appears in the source the stylesheet is compiled
+// from, and the rule for it is never emitted.
+var sliderFills = [21]string{
+	"slider-fill-0", "slider-fill-5", "slider-fill-10", "slider-fill-15", "slider-fill-20",
+	"slider-fill-25", "slider-fill-30", "slider-fill-35", "slider-fill-40", "slider-fill-45",
+	"slider-fill-50", "slider-fill-55", "slider-fill-60", "slider-fill-65", "slider-fill-70",
+	"slider-fill-75", "slider-fill-80", "slider-fill-85", "slider-fill-90", "slider-fill-95",
+	"slider-fill-100",
+}
+
+// FillClass is how much of the track is coloured, as the class that draws it,
+// so the slider is painted right on the first frame rather than on the first
+// drag.
+//
+// A class and not a style attribute: the policy this renders under allows no
+// inline style, so a value written into one is dropped by the browser and the
+// track paints unfilled. The cost is that it starts in steps of five percent
+// until the pointer takes over. What is announced, and what is submitted, is
+// the exact value.
+func (p RangeSliderProps) FillClass() string {
 	span := p.Ceiling() - p.Floor()
 	if span <= 0 {
-		return "0%"
+		return sliderFills[0]
 	}
-	return strconv.Itoa((p.At() - p.Floor()) * 100 / span) + "%"
+	return sliderFills[((p.At()-p.Floor())*100/span+2)/5]
 }
 
 // DescribedBy names the element that explains this slider, so the error and
@@ -158,7 +179,7 @@ func (p RangeSliderProps) DescribedBy() string {
 		min="{{ .Floor() }}"
 		max="{{ .Ceiling() }}"
 		step="{{ .Tick() }}"
-		style="--slider-value: {{ .Fill() }}"
+		class="{{ .FillClass() }}"
 		data-slider-track
 		@if(.DescribedBy() != "")
 			aria-describedby="{{ .DescribedBy() }}"
