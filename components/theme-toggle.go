@@ -13,28 +13,10 @@ import (
 	"github.com/arandu-io/kyse/icons"
 )
 
-//line components/theme-toggle.kyse.go:7
-
-// ThemeAccents are the accent colours the toggle offers, in the order they are
-// read.
-//
-// The list is here because the swatches are markup and the server draws markup:
-// six buttons, each carrying the name it sets. The script that applies a theme
-// keeps a list of its own and checks a name against it before anything reaches
-// the document, so a name that is on one list and not the other sets nothing --
-// it draws a swatch that does not answer, never an unchecked value applied to
-// the page.
-var ThemeAccents = []string{"slate", "blue", "green", "amber", "rose", "violet"}
-
-//line components/theme-toggle.go:30
-
 // ThemeToggle renders the theme-toggle component.
 func ThemeToggle() kyse__template.HTML {
 	kyse__w := &kyse__strings.Builder{}
 	var kyse__err error
-	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
-	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
@@ -51,9 +33,9 @@ func ThemeToggle() kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<span aria-hidden=\"true\" class=\"block size-[18px]\" data-theme-glyph=\"light\">")
 	}
 	if kyse__err == nil {
-//line components/theme-toggle.kyse.go:45
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(icons.Moon(icons.Props{})))
-//line components/theme-toggle.go:57
+//line components/theme-toggle.kyse.go:39
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(icons.Sun(icons.Props{})))
+//line components/theme-toggle.go:39
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
@@ -62,9 +44,9 @@ func ThemeToggle() kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<span aria-hidden=\"true\" class=\"block size-[18px]\" data-theme-glyph=\"dark\">")
 	}
 	if kyse__err == nil {
-//line components/theme-toggle.kyse.go:46
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(icons.Sun(icons.Props{})))
-//line components/theme-toggle.go:68
+//line components/theme-toggle.kyse.go:40
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(icons.Moon(icons.Props{})))
+//line components/theme-toggle.go:50
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
@@ -76,71 +58,70 @@ func ThemeToggle() kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<div data-popover aria-hidden=\"true\" class=\"w-44\">\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<div data-popover aria-hidden=\"true\" class=\"w-40\">\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<div role=\"menu\">\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<div role=\"radiogroup\" aria-label=\"Theme\">\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<button type=\"button\" role=\"menuitem\" data-theme-dark>\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<button type=\"button\" role=\"radio\" aria-checked=\"true\" data-theme-mode=\"auto\">\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<span data-theme-glyph=\"light\">Dark</span>\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<span aria-hidden=\"true\" class=\"block size-4\">")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<span data-theme-glyph=\"dark\">Light</span>\n")
+//line components/theme-toggle.kyse.go:46
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(icons.Desktop(icons.Props{})))
+//line components/theme-toggle.go:76
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<span>Auto</span>\n")
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t</button>\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<button type=\"button\" role=\"radio\" aria-checked=\"false\" data-theme-mode=\"light\">\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<hr role=\"separator\">\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<span aria-hidden=\"true\" class=\"block size-4\">")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+//line components/theme-toggle.kyse.go:50
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(icons.Sun(icons.Props{})))
+//line components/theme-toggle.go:96
 	}
-//line components/theme-toggle.kyse.go:60
-	for at := 0; at < len(ThemeAccents); at++ {
-//line components/theme-toggle.go:108
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<button type=\"button\" role=\"menuitem\" data-theme-accent=\"")
-		}
-		if kyse__err == nil {
-//line components/theme-toggle.kyse.go:61
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(ThemeAccents[at]))
-//line components/theme-toggle.go:115
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<span class=\"size-3 rounded-full border swatch-")
-		}
-		if kyse__err == nil {
-//line components/theme-toggle.kyse.go:69
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(ThemeAccents[at]))
-//line components/theme-toggle.go:126
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\" data-theme-swatch></span>\n")
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<span>")
-		}
-		if kyse__err == nil {
-//line components/theme-toggle.kyse.go:70
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(ThemeAccents[at])))
-//line components/theme-toggle.go:137
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t</button>\n")
-		}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<span>Light</span>\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t</button>\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<button type=\"button\" role=\"radio\" aria-checked=\"false\" data-theme-mode=\"dark\">\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<span aria-hidden=\"true\" class=\"block size-4\">")
+	}
+	if kyse__err == nil {
+//line components/theme-toggle.kyse.go:54
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(icons.Moon(icons.Props{})))
+//line components/theme-toggle.go:116
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<span>Dark</span>\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t</button>\n")
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t</div>\n")
