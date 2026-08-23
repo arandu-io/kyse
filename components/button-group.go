@@ -5,11 +5,11 @@
 package components
 
 import (
-	"html/template"
-	"io"
-	"strings"
+	kyse__template "html/template"
+	kyse__io "io"
+	kyse__strings "strings"
 
-	"github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/framework/view"
 )
 
 //line components/button-group.kyse.go:5
@@ -61,86 +61,88 @@ func (p ButtonGroupProps) Orientation() string {
 //line components/button-group.go:62
 
 // ButtonGroup renders the button-group component.
-func ButtonGroup(props ButtonGroupProps) template.HTML {
-	d := props
+func ButtonGroup(kyse__props ButtonGroupProps) kyse__template.HTML {
+	kyse__d := kyse__props
+	_ = kyse__d
+	d := kyse__d
 	_ = d
-	w := &strings.Builder{}
-	var err error
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	kyse__w := &kyse__strings.Builder{}
+	var kyse__err error
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "<div class=\"button-group\" role=\"group\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "<div class=\"button-group\" role=\"group\"\n")
 	}
 //line components/button-group.kyse.go:52
-	if d.Label != "" {
-//line components/button-group.go:78
-		if err == nil {
-			_, err = io.WriteString(w, "\t\taria-label=\"")
+	if kyse__d.Label != "" {
+//line components/button-group.go:80
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-label=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/button-group.kyse.go:53
-			_, err = io.WriteString(w, view.TextAttr(d.Label))
-//line components/button-group.go:85
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
+//line components/button-group.go:87
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
 //line components/button-group.kyse.go:55
-	if d.Orientation() != "" {
-//line components/button-group.go:93
-		if err == nil {
-			_, err = io.WriteString(w, "\t\tdata-orientation=\"")
+	if kyse__d.Orientation() != "" {
+//line components/button-group.go:95
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-orientation=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/button-group.kyse.go:56
-			_, err = io.WriteString(w, view.TextAttr(d.Orientation()))
-//line components/button-group.go:100
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Orientation()))
+//line components/button-group.go:102
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, ">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")
 	}
 //line components/button-group.kyse.go:59
-	for at := 0; at < len(d.Buttons); at++ {
-//line components/button-group.go:111
+	for at := 0; at < len(kyse__d.Buttons); at++ {
+//line components/button-group.go:113
 //line components/button-group.kyse.go:60
-		if d.Separated && at > 0 {
-//line components/button-group.go:114
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t<hr role=\"separator\">\n")
+		if kyse__d.Separated && at > 0 {
+//line components/button-group.go:116
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<hr role=\"separator\">\n")
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/button-group.kyse.go:63
-			_, err = io.WriteString(w, view.UnsafeText(Button(d.Buttons[at])))
-//line components/button-group.go:125
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(Button(kyse__d.Buttons[at])))
+//line components/button-group.go:127
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "</div>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "</div>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	_ = err
-	return template.HTML(w.String())
+	_ = kyse__err
+	return kyse__template.HTML(kyse__w.String())
 }
 
 var (
-	_ = template.HTMLEscapeString
-	_ = io.WriteString
-	_ = view.Text
-	_ = view.UnsafeText
-	_ = strings.Builder{}
+	_ = kyse__template.HTMLEscapeString
+	_ = kyse__io.WriteString
+	_ = kyse__view.Text
+	_ = kyse__view.UnsafeText
+	_ = kyse__strings.Builder{}
 )

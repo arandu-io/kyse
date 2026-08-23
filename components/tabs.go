@@ -5,11 +5,12 @@
 package components
 
 import (
-	"html/template"
-	"io"
-	"strings"
+	kyse__template "html/template"
+	kyse__io "io"
+	kyse__strings "strings"
 
-	"github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/framework/view"
+	"html/template"
 )
 
 //line components/tabs.kyse.go:7
@@ -118,228 +119,230 @@ func (p TabsProps) Orientation() string {
 	return "horizontal"
 }
 
-//line components/tabs.go:122
+//line components/tabs.go:123
 
 // Tabs renders the tabs component.
-func Tabs(props TabsProps) template.HTML {
-	d := props
+func Tabs(kyse__props TabsProps) kyse__template.HTML {
+	kyse__d := kyse__props
+	_ = kyse__d
+	d := kyse__d
 	_ = d
-	w := &strings.Builder{}
-	var err error
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	kyse__w := &kyse__strings.Builder{}
+	var kyse__err error
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "<div class=\"tabs\" id=\"")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "<div class=\"tabs\" id=\"")
 	}
-	if err == nil {
+	if kyse__err == nil {
 //line components/tabs.kyse.go:113
-		_, err = io.WriteString(w, view.TextAttr(d.ID))
-//line components/tabs.go:139
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
+//line components/tabs.go:142
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t<div\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<div\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\trole=\"tablist\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\trole=\"tablist\"\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\taria-orientation=\"")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-orientation=\"")
 	}
-	if err == nil {
+	if kyse__err == nil {
 //line components/tabs.kyse.go:116
-		_, err = io.WriteString(w, view.TextAttr(d.Orientation()))
-//line components/tabs.go:156
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Orientation()))
+//line components/tabs.go:159
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 //line components/tabs.kyse.go:117
-	if d.Label != "" {
-//line components/tabs.go:163
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\taria-label=\"")
+	if kyse__d.Label != "" {
+//line components/tabs.go:166
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-label=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/tabs.kyse.go:118
-			_, err = io.WriteString(w, view.TextAttr(d.Label))
-//line components/tabs.go:170
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
+//line components/tabs.go:173
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
 //line components/tabs.kyse.go:120
-	if d.Variant != "" {
-//line components/tabs.go:178
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\tdata-variant=\"")
+	if kyse__d.Variant != "" {
+//line components/tabs.go:181
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-variant=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/tabs.kyse.go:121
-			_, err = io.WriteString(w, view.TextAttr(d.Variant))
-//line components/tabs.go:185
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Variant))
+//line components/tabs.go:188
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
 	}
 //line components/tabs.kyse.go:124
-	for _, tab := range d.Tabs {
+	for _, tab := range kyse__d.Tabs {
 		_ = tab
-//line components/tabs.go:197
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t<button\n")
+//line components/tabs.go:200
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<button\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t\ttype=\"button\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\ttype=\"button\"\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t\trole=\"tab\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\trole=\"tab\"\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t\tid=\"")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tid=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/tabs.kyse.go:128
-			_, err = io.WriteString(w, view.TextAttr(d.TabID(tab)))
-//line components/tabs.go:213
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.TabID(tab)))
+//line components/tabs.go:216
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t\taria-controls=\"")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-controls=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/tabs.kyse.go:129
-			_, err = io.WriteString(w, view.TextAttr(d.PanelID(tab)))
-//line components/tabs.go:224
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PanelID(tab)))
+//line components/tabs.go:227
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t\taria-selected=\"")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-selected=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/tabs.kyse.go:130
-			_, err = io.WriteString(w, view.TextAttr(d.Selected(tab)))
-//line components/tabs.go:235
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Selected(tab)))
+//line components/tabs.go:238
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t\ttabindex=\"")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\ttabindex=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/tabs.kyse.go:131
-			_, err = io.WriteString(w, view.TextAttr(d.TabIndex(tab)))
-//line components/tabs.go:246
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.TabIndex(tab)))
+//line components/tabs.go:249
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 //line components/tabs.kyse.go:132
 		if tab.Disabled {
-//line components/tabs.go:253
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\taria-disabled=\"true\"\n")
+//line components/tabs.go:256
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-disabled=\"true\"\n")
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t>")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/tabs.kyse.go:135
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(tab.Label)))
-//line components/tabs.go:264
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(tab.Label)))
+//line components/tabs.go:267
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "</button>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</button>\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t</div>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t</div>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
 //line components/tabs.kyse.go:139
-	for _, tab := range d.Tabs {
+	for _, tab := range kyse__d.Tabs {
 		_ = tab
-//line components/tabs.go:279
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t<div\n")
+//line components/tabs.go:282
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<div\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\trole=\"tabpanel\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\trole=\"tabpanel\"\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\tid=\"")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/tabs.kyse.go:142
-			_, err = io.WriteString(w, view.TextAttr(d.PanelID(tab)))
-//line components/tabs.go:292
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PanelID(tab)))
+//line components/tabs.go:295
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\taria-labelledby=\"")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-labelledby=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/tabs.kyse.go:143
-			_, err = io.WriteString(w, view.TextAttr(d.TabID(tab)))
-//line components/tabs.go:303
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.TabID(tab)))
+//line components/tabs.go:306
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\ttabindex=\"0\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\ttabindex=\"0\"\n")
 		}
 //line components/tabs.kyse.go:145
-		if d.Folded(tab) {
-//line components/tabs.go:313
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\thidden\n")
+		if kyse__d.Folded(tab) {
+//line components/tabs.go:316
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thidden\n")
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t>")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/tabs.kyse.go:148
-			_, err = io.WriteString(w, view.UnsafeText(tab.Panel))
-//line components/tabs.go:324
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(tab.Panel))
+//line components/tabs.go:327
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "</div>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</div>\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "</div>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "</div>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	_ = err
-	return template.HTML(w.String())
+	_ = kyse__err
+	return kyse__template.HTML(kyse__w.String())
 }
 
 var (
-	_ = template.HTMLEscapeString
-	_ = io.WriteString
-	_ = view.Text
-	_ = view.UnsafeText
-	_ = strings.Builder{}
+	_ = kyse__template.HTMLEscapeString
+	_ = kyse__io.WriteString
+	_ = kyse__view.Text
+	_ = kyse__view.UnsafeText
+	_ = kyse__strings.Builder{}
 )

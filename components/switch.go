@@ -5,11 +5,11 @@
 package components
 
 import (
-	"html/template"
-	"io"
-	"strings"
+	kyse__template "html/template"
+	kyse__io "io"
+	kyse__strings "strings"
 
-	"github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/framework/view"
 )
 
 //line components/switch.kyse.go:5
@@ -118,217 +118,219 @@ func (p SwitchProps) DescribedBy() string {
 //line components/switch.go:119
 
 // Switch renders the switch component.
-func Switch(props SwitchProps) template.HTML {
-	d := props
+func Switch(kyse__props SwitchProps) kyse__template.HTML {
+	kyse__d := kyse__props
+	_ = kyse__d
+	d := kyse__d
 	_ = d
-	w := &strings.Builder{}
-	var err error
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	kyse__w := &kyse__strings.Builder{}
+	var kyse__err error
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "<div\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "<div\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\tclass=\"field\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"field\"\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\tdata-orientation=\"horizontal\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tdata-orientation=\"horizontal\"\n")
 	}
 //line components/switch.kyse.go:111
-	if d.Message() != "" {
-//line components/switch.go:141
-		if err == nil {
-			_, err = io.WriteString(w, "\t\tdata-invalid=\"true\"\n")
+	if kyse__d.Message() != "" {
+//line components/switch.go:143
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-invalid=\"true\"\n")
 		}
 	}
 //line components/switch.kyse.go:114
-	if d.Disabled {
-//line components/switch.go:148
-		if err == nil {
-			_, err = io.WriteString(w, "\t\tdata-disabled=\"true\"\n")
+	if kyse__d.Disabled {
+//line components/switch.go:150
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-disabled=\"true\"\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, ">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t<section>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<section>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t<label class=\"label\" for=\"")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<label class=\"label\" for=\"")
 	}
-	if err == nil {
+	if kyse__err == nil {
 //line components/switch.kyse.go:119
-		_, err = io.WriteString(w, view.TextAttr(d.ElementID()))
-//line components/switch.go:165
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
+//line components/switch.go:167
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\">")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\">")
 	}
-	if err == nil {
+	if kyse__err == nil {
 //line components/switch.kyse.go:119
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Label)))
-//line components/switch.go:173
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
+//line components/switch.go:175
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "</label>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "</label>\n")
 	}
 //line components/switch.kyse.go:120
-	if d.Message() != "" {
-//line components/switch.go:180
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t<p id=\"")
+	if kyse__d.Message() != "" {
+//line components/switch.go:182
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<p id=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/switch.kyse.go:121
-			_, err = io.WriteString(w, view.TextAttr(d.ElementID()))
-//line components/switch.go:187
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
+//line components/switch.go:189
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "-error\" class=\"text-destructive text-sm\">")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "-error\" class=\"text-destructive text-sm\">")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/switch.kyse.go:121
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Message())))
-//line components/switch.go:195
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message())))
+//line components/switch.go:197
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "</p>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
 		}
 	}
 //line components/switch.kyse.go:123
-	if d.Message() == "" {
-//line components/switch.go:203
+	if kyse__d.Message() == "" {
+//line components/switch.go:205
 //line components/switch.kyse.go:124
-		if d.Hint != "" {
-//line components/switch.go:206
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t<p id=\"")
+		if kyse__d.Hint != "" {
+//line components/switch.go:208
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<p id=\"")
 			}
-			if err == nil {
+			if kyse__err == nil {
 //line components/switch.kyse.go:125
-				_, err = io.WriteString(w, view.TextAttr(d.ElementID()))
-//line components/switch.go:213
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
+//line components/switch.go:215
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "-hint\" class=\"text-muted-foreground text-sm\">")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "-hint\" class=\"text-muted-foreground text-sm\">")
 			}
-			if err == nil {
+			if kyse__err == nil {
 //line components/switch.kyse.go:125
-				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Hint)))
-//line components/switch.go:221
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Hint)))
+//line components/switch.go:223
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "</p>\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
 			}
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t</section>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t</section>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t<input\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<input\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\tclass=\"input\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"input\"\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\ttype=\"checkbox\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\ttype=\"checkbox\"\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\trole=\"switch\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\trole=\"switch\"\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\tid=\"")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tid=\"")
 	}
-	if err == nil {
+	if kyse__err == nil {
 //line components/switch.kyse.go:133
-		_, err = io.WriteString(w, view.TextAttr(d.ElementID()))
-//line components/switch.go:249
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
+//line components/switch.go:251
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\tname=\"")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tname=\"")
 	}
-	if err == nil {
+	if kyse__err == nil {
 //line components/switch.kyse.go:134
-		_, err = io.WriteString(w, view.TextAttr(d.Name))
-//line components/switch.go:260
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
+//line components/switch.go:262
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 //line components/switch.kyse.go:135
-	if d.Value != "" {
-//line components/switch.go:267
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\tvalue=\"")
+	if kyse__d.Value != "" {
+//line components/switch.go:269
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tvalue=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/switch.kyse.go:136
-			_, err = io.WriteString(w, view.TextAttr(d.Value))
-//line components/switch.go:274
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Value))
+//line components/switch.go:276
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
 //line components/switch.kyse.go:138
-	if d.Current() {
-//line components/switch.go:282
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\tchecked\n")
+	if kyse__d.Current() {
+//line components/switch.go:284
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tchecked\n")
 		}
 	}
 //line components/switch.kyse.go:141
-	if d.DescribedBy() != "" {
-//line components/switch.go:289
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\taria-describedby=\"")
+	if kyse__d.DescribedBy() != "" {
+//line components/switch.go:291
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-describedby=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/switch.kyse.go:142
-			_, err = io.WriteString(w, view.TextAttr(d.DescribedBy()))
-//line components/switch.go:296
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
+//line components/switch.go:298
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
 //line components/switch.kyse.go:144
-	if d.Message() != "" {
-//line components/switch.go:304
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\taria-invalid=\"true\"\n")
+	if kyse__d.Message() != "" {
+//line components/switch.go:306
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-invalid=\"true\"\n")
 		}
 	}
 //line components/switch.kyse.go:147
-	if d.Disabled {
-//line components/switch.go:311
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\tdisabled\n")
+	if kyse__d.Disabled {
+//line components/switch.go:313
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdisabled\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "</div>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "</div>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	_ = err
-	return template.HTML(w.String())
+	_ = kyse__err
+	return kyse__template.HTML(kyse__w.String())
 }
 
 var (
-	_ = template.HTMLEscapeString
-	_ = io.WriteString
-	_ = view.Text
-	_ = view.UnsafeText
-	_ = strings.Builder{}
+	_ = kyse__template.HTMLEscapeString
+	_ = kyse__io.WriteString
+	_ = kyse__view.Text
+	_ = kyse__view.UnsafeText
+	_ = kyse__strings.Builder{}
 )

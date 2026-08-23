@@ -5,11 +5,11 @@
 package components
 
 import (
-	"html/template"
-	"io"
-	"strings"
+	kyse__template "html/template"
+	kyse__io "io"
+	kyse__strings "strings"
 
-	"github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/framework/view"
 )
 
 //line components/separator.kyse.go:5
@@ -59,61 +59,63 @@ func (p SeparatorProps) Direction() string {
 //line components/separator.go:60
 
 // Separator renders the separator component.
-func Separator(props SeparatorProps) template.HTML {
-	d := props
+func Separator(kyse__props SeparatorProps) kyse__template.HTML {
+	kyse__d := kyse__props
+	_ = kyse__d
+	d := kyse__d
 	_ = d
-	w := &strings.Builder{}
-	var err error
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	kyse__w := &kyse__strings.Builder{}
+	var kyse__err error
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "<hr\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "<hr\n")
 	}
 //line components/separator.kyse.go:50
-	if d.Decorative {
-//line components/separator.go:76
-		if err == nil {
-			_, err = io.WriteString(w, "\t\trole=\"none\" aria-hidden=\"true\"\n")
+	if kyse__d.Decorative {
+//line components/separator.go:78
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\trole=\"none\" aria-hidden=\"true\"\n")
 		}
 	} else {
-		if err == nil {
-			_, err = io.WriteString(w, "\t\trole=\"separator\" aria-orientation=\"")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\trole=\"separator\" aria-orientation=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/separator.kyse.go:53
-			_, err = io.WriteString(w, view.TextAttr(d.Direction()))
-//line components/separator.go:87
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Direction()))
+//line components/separator.go:89
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
 //line components/separator.kyse.go:55
-	if d.Direction() == "vertical" {
-//line components/separator.go:95
-		if err == nil {
-			_, err = io.WriteString(w, "\t\tclass=\"bg-border w-px shrink-0 self-stretch border-0\"\n")
+	if kyse__d.Direction() == "vertical" {
+//line components/separator.go:97
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"bg-border w-px shrink-0 self-stretch border-0\"\n")
 		}
 	} else {
-		if err == nil {
-			_, err = io.WriteString(w, "\t\tclass=\"bg-border h-px w-full shrink-0 border-0\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"bg-border h-px w-full shrink-0 border-0\"\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, ">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	_ = err
-	return template.HTML(w.String())
+	_ = kyse__err
+	return kyse__template.HTML(kyse__w.String())
 }
 
 var (
-	_ = template.HTMLEscapeString
-	_ = io.WriteString
-	_ = view.Text
-	_ = view.UnsafeText
-	_ = strings.Builder{}
+	_ = kyse__template.HTMLEscapeString
+	_ = kyse__io.WriteString
+	_ = kyse__view.Text
+	_ = kyse__view.UnsafeText
+	_ = kyse__strings.Builder{}
 )

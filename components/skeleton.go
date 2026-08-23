@@ -5,11 +5,11 @@
 package components
 
 import (
-	"html/template"
-	"io"
-	"strings"
+	kyse__template "html/template"
+	kyse__io "io"
+	kyse__strings "strings"
 
-	"github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/framework/view"
 )
 
 //line components/skeleton.kyse.go:5
@@ -81,70 +81,72 @@ func (p SkeletonProps) Geometry() string {
 //line components/skeleton.go:82
 
 // Skeleton renders the skeleton component.
-func Skeleton(props SkeletonProps) template.HTML {
-	d := props
+func Skeleton(kyse__props SkeletonProps) kyse__template.HTML {
+	kyse__d := kyse__props
+	_ = kyse__d
+	d := kyse__d
 	_ = d
-	w := &strings.Builder{}
-	var err error
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	kyse__w := &kyse__strings.Builder{}
+	var kyse__err error
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "<div\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "<div\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\tclass=\"skeleton ")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"skeleton ")
 	}
-	if err == nil {
+	if kyse__err == nil {
 //line components/skeleton.kyse.go:72
-		_, err = io.WriteString(w, view.TextAttr(d.Geometry()))
-//line components/skeleton.go:102
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Geometry()))
+//line components/skeleton.go:104
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 //line components/skeleton.kyse.go:73
-	if d.Label != "" {
-//line components/skeleton.go:109
-		if err == nil {
-			_, err = io.WriteString(w, "\t\trole=\"status\"\n")
+	if kyse__d.Label != "" {
+//line components/skeleton.go:111
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\trole=\"status\"\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\taria-busy=\"true\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-busy=\"true\"\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\taria-label=\"")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-label=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/skeleton.kyse.go:76
-			_, err = io.WriteString(w, view.TextAttr(d.Label))
-//line components/skeleton.go:122
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
+//line components/skeleton.go:124
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
 //line components/skeleton.kyse.go:78
-	if d.Label == "" {
-//line components/skeleton.go:130
-		if err == nil {
-			_, err = io.WriteString(w, "\t\taria-hidden=\"true\"\n")
+	if kyse__d.Label == "" {
+//line components/skeleton.go:132
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-hidden=\"true\"\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "></div>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "></div>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	_ = err
-	return template.HTML(w.String())
+	_ = kyse__err
+	return kyse__template.HTML(kyse__w.String())
 }
 
 var (
-	_ = template.HTMLEscapeString
-	_ = io.WriteString
-	_ = view.Text
-	_ = view.UnsafeText
-	_ = strings.Builder{}
+	_ = kyse__template.HTMLEscapeString
+	_ = kyse__io.WriteString
+	_ = kyse__view.Text
+	_ = kyse__view.UnsafeText
+	_ = kyse__strings.Builder{}
 )

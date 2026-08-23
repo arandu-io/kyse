@@ -5,11 +5,12 @@
 package components
 
 import (
-	"html/template"
-	"io"
-	"strings"
+	kyse__template "html/template"
+	kyse__io "io"
+	kyse__strings "strings"
 
-	"github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/framework/view"
+	"html/template"
 )
 
 //line components/popover.kyse.go:7
@@ -60,223 +61,225 @@ func (p PopoverProps) TriggerID() string { return p.ID + "-trigger" }
 // PanelID is the id of the panel it opens.
 func (p PopoverProps) PanelID() string { return p.ID + "-popover" }
 
-//line components/popover.go:64
+//line components/popover.go:65
 
 // Popover renders the popover component.
-func Popover(props PopoverProps) template.HTML {
-	d := props
+func Popover(kyse__props PopoverProps) kyse__template.HTML {
+	kyse__d := kyse__props
+	_ = kyse__d
+	d := kyse__d
 	_ = d
-	w := &strings.Builder{}
-	var err error
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	kyse__w := &kyse__strings.Builder{}
+	var kyse__err error
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "<div class=\"popover\" id=\"")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "<div class=\"popover\" id=\"")
 	}
-	if err == nil {
+	if kyse__err == nil {
 //line components/popover.kyse.go:55
-		_, err = io.WriteString(w, view.TextAttr(d.ID))
-//line components/popover.go:81
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
+//line components/popover.go:84
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t<button\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<button\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\ttype=\"button\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\ttype=\"button\"\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\tclass=\"btn\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"btn\"\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\tid=\"")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tid=\"")
 	}
-	if err == nil {
+	if kyse__err == nil {
 //line components/popover.kyse.go:59
-		_, err = io.WriteString(w, view.TextAttr(d.TriggerID()))
-//line components/popover.go:101
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.TriggerID()))
+//line components/popover.go:104
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\taria-controls=\"")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-controls=\"")
 	}
-	if err == nil {
+	if kyse__err == nil {
 //line components/popover.kyse.go:60
-		_, err = io.WriteString(w, view.TextAttr(d.PanelID()))
-//line components/popover.go:112
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PanelID()))
+//line components/popover.go:115
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\taria-expanded=\"false\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-expanded=\"false\"\n")
 	}
 //line components/popover.kyse.go:62
-	if d.Variant != "" {
-//line components/popover.go:122
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\tdata-variant=\"")
+	if kyse__d.Variant != "" {
+//line components/popover.go:125
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-variant=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/popover.kyse.go:63
-			_, err = io.WriteString(w, view.TextAttr(d.Variant))
-//line components/popover.go:129
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Variant))
+//line components/popover.go:132
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
 //line components/popover.kyse.go:65
-	if d.Size != "" {
-//line components/popover.go:137
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\tdata-size=\"")
+	if kyse__d.Size != "" {
+//line components/popover.go:140
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-size=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/popover.kyse.go:66
-			_, err = io.WriteString(w, view.TextAttr(d.Size))
-//line components/popover.go:144
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Size))
+//line components/popover.go:147
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t>")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>")
 	}
-	if err == nil {
+	if kyse__err == nil {
 //line components/popover.kyse.go:68
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Label)))
-//line components/popover.go:156
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
+//line components/popover.go:159
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "</button>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "</button>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t<div\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<div\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\tid=\"")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tid=\"")
 	}
-	if err == nil {
+	if kyse__err == nil {
 //line components/popover.kyse.go:71
-		_, err = io.WriteString(w, view.TextAttr(d.PanelID()))
-//line components/popover.go:173
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PanelID()))
+//line components/popover.go:176
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\tdata-popover\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-popover\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\taria-hidden=\"true\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-hidden=\"true\"\n")
 	}
 //line components/popover.kyse.go:74
-	if d.Side != "" {
-//line components/popover.go:186
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\tdata-side=\"")
+	if kyse__d.Side != "" {
+//line components/popover.go:189
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-side=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/popover.kyse.go:75
-			_, err = io.WriteString(w, view.TextAttr(d.Side))
-//line components/popover.go:193
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Side))
+//line components/popover.go:196
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
 //line components/popover.kyse.go:77
-	if d.Align != "" {
-//line components/popover.go:201
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\tdata-align=\"")
+	if kyse__d.Align != "" {
+//line components/popover.go:204
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-align=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/popover.kyse.go:78
-			_, err = io.WriteString(w, view.TextAttr(d.Align))
-//line components/popover.go:208
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Align))
+//line components/popover.go:211
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
 	}
 //line components/popover.kyse.go:81
-	if d.Title != "" {
-//line components/popover.go:219
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t<header>\n")
+	if kyse__d.Title != "" {
+//line components/popover.go:222
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<header>\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t\t<h3>")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<h3>")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/popover.kyse.go:83
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Title)))
-//line components/popover.go:229
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Title)))
+//line components/popover.go:232
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "</h3>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</h3>\n")
 		}
 //line components/popover.kyse.go:84
-		if d.Description != "" {
-//line components/popover.go:236
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t<p>")
+		if kyse__d.Description != "" {
+//line components/popover.go:239
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<p>")
 			}
-			if err == nil {
+			if kyse__err == nil {
 //line components/popover.kyse.go:85
-				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Description)))
-//line components/popover.go:243
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Description)))
+//line components/popover.go:246
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "</p>\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t</header>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t</header>\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t")
 	}
-	if err == nil {
+	if kyse__err == nil {
 //line components/popover.kyse.go:89
-		_, err = io.WriteString(w, view.UnsafeText(d.Content))
-//line components/popover.go:259
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(kyse__d.Content))
+//line components/popover.go:262
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t</div>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t</div>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "</div>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "</div>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	_ = err
-	return template.HTML(w.String())
+	_ = kyse__err
+	return kyse__template.HTML(kyse__w.String())
 }
 
 var (
-	_ = template.HTMLEscapeString
-	_ = io.WriteString
-	_ = view.Text
-	_ = view.UnsafeText
-	_ = strings.Builder{}
+	_ = kyse__template.HTMLEscapeString
+	_ = kyse__io.WriteString
+	_ = kyse__view.Text
+	_ = kyse__view.UnsafeText
+	_ = kyse__strings.Builder{}
 )

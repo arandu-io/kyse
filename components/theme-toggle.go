@@ -5,103 +5,156 @@
 package components
 
 import (
-	"html/template"
-	"io"
-	"strings"
+	kyse__fmt "fmt"
+	kyse__template "html/template"
+	kyse__io "io"
+	kyse__strings "strings"
 
-	"github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/framework/view"
 )
 
+//line components/theme-toggle.kyse.go:5
+
+// ThemeAccents are the accent colours the toggle offers, in the order they are
+// read.
+//
+// The list is here because the swatches are markup and the server draws markup:
+// six buttons, each carrying the name it sets. The script that applies a theme
+// keeps a list of its own and checks a name against it before anything reaches
+// the document, so a name that is on one list and not the other sets nothing --
+// it draws a swatch that does not answer, never an unchecked value applied to
+// the page.
+var ThemeAccents = []string{"slate", "blue", "green", "amber", "rose", "violet"}
+
+//line components/theme-toggle.go:30
+
 // ThemeToggle renders the theme-toggle component.
-func ThemeToggle() template.HTML {
-	w := &strings.Builder{}
-	var err error
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+func ThemeToggle() kyse__template.HTML {
+	kyse__w := &kyse__strings.Builder{}
+	var kyse__err error
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "<div class=\"dropdown-menu\" x-data>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t<button type=\"button\" class=\"btn\" data-variant=\"ghost\" data-size=\"icon\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "<div class=\"dropdown-menu\">\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\taria-label=\"Change the theme\" aria-haspopup=\"menu\" aria-expanded=\"false\">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<button type=\"button\" class=\"btn\" data-variant=\"ghost\" data-size=\"icon\"\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t<span aria-hidden=\"true\" x-text=\"$store.theme.dark ? '◑' : '○'\"></span>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-label=\"Change the theme\" aria-haspopup=\"menu\" aria-expanded=\"false\">\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t</button>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<span aria-hidden=\"true\" data-theme-glyph=\"light\">○</span>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<span aria-hidden=\"true\" data-theme-glyph=\"dark\">◑</span>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t<div data-popover aria-hidden=\"true\" class=\"w-44\">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t</button>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t<div role=\"menu\">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\t<button type=\"button\" role=\"menuitem\" @click=\"$store.theme.toggleDark()\">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<div data-popover aria-hidden=\"true\" class=\"w-44\">\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\t\t<span x-text=\"$store.theme.dark ? 'Light' : 'Dark'\"></span>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<div role=\"menu\">\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\t</button>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<button type=\"button\" role=\"menuitem\" data-theme-dark>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<span data-theme-glyph=\"light\">Dark</span>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\t<hr role=\"separator\">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<span data-theme-glyph=\"dark\">Light</span>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t</button>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\t<template x-for=\"a in $store.theme.accents\" :key=\"a\">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\t\t<button type=\"button\" role=\"menuitem\" @click=\"$store.theme.setAccent(a)\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<hr role=\"separator\">\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\t\t\t:aria-current=\"$store.theme.accent === a\">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\t\t\t<span class=\"size-3 rounded-full border\" :style=\"`background: var(--accent-swatch-${a})`\"></span>\n")
+//line components/theme-toggle.kyse.go:52
+	for at := 0; at < len(ThemeAccents); at++ {
+//line components/theme-toggle.go:92
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<button type=\"button\" role=\"menuitem\" data-theme-accent=\"")
+		}
+		if kyse__err == nil {
+//line components/theme-toggle.kyse.go:53
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(ThemeAccents[at]))
+//line components/theme-toggle.go:99
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<span class=\"size-3 rounded-full border\" data-theme-swatch\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tstyle=\"background: var(--accent-swatch-")
+		}
+		if kyse__err == nil {
+			var kyse__v1 string
+//line components/theme-toggle.kyse.go:55
+			kyse__v1, kyse__err = kyse__view.TextCSS(ThemeAccents[at])
+//line components/theme-toggle.go:114
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/theme-toggle.kyse.go:55", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, ")\"></span>\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<span>")
+		}
+		if kyse__err == nil {
+//line components/theme-toggle.kyse.go:56
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(ThemeAccents[at])))
+//line components/theme-toggle.go:130
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t</button>\n")
+		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\t\t\t<span x-text=\"a\"></span>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t</div>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\t\t</button>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t</div>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\t</template>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "</div>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t</div>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t</div>\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "</div>\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
-	}
-	_ = err
-	return template.HTML(w.String())
+	_ = kyse__err
+	return kyse__template.HTML(kyse__w.String())
 }
 
 var (
-	_ = template.HTMLEscapeString
-	_ = io.WriteString
-	_ = view.Text
-	_ = view.UnsafeText
-	_ = strings.Builder{}
+	_ = kyse__template.HTMLEscapeString
+	_ = kyse__io.WriteString
+	_ = kyse__view.Text
+	_ = kyse__view.UnsafeText
+	_ = kyse__strings.Builder{}
 )

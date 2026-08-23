@@ -24,6 +24,11 @@ import (
 // lines all went, and what puts EmptyText on the screen when none are left.
 // Nothing is fetched, so nothing arrives late and nothing arrives out of order.
 //
+// Two attributes carry that, and they are data on both sides: data-search is
+// what a line is matched against, and aria-hidden is what the match writes. The
+// stylesheet reads the second one and does the hiding, the emptying and the
+// message. Nothing on this page is an expression somebody's browser evaluates.
+//
 // # What a line is
 //
 // A link. It is reachable by tab, opens in a new tab on the modifier somebody
@@ -120,28 +125,7 @@ func (p CommandProps) ItemID(group, item int) string {
 	@if(.Label != "")
 		aria-label="{{ .Label }}"
 	@endif
-	x-data="{
-		q: '',
-		active: null,
-		lines() { return Array.from(this.$refs.menu.querySelectorAll('[role=menuitem]')).filter(l =&gt; l.getAttribute('aria-hidden') !== 'true' &amp;&amp; l.getAttribute('aria-disabled') !== 'true') },
-		hidden(line) {
-			const q = this.q.trim().toLowerCase()
-			if (!q) return false
-			return !line.dataset.search.toLowerCase().includes(q)
-		},
-		move(step) {
-			const all = this.lines()
-			if (!all.length) return
-			const at = all.findIndex(l =&gt; l.id === this.active)
-			const to = at &lt; 0 ? (step &gt; 0 ? 0 : all.length - 1) : (at + step + all.length) % all.length
-			this.active = all[to].id
-			all[to].scrollIntoView({ block: 'nearest' })
-		},
-		run() {
-			const line = this.active ? document.getElementById(this.active) : null
-			if (line) line.click()
-		}
-	}"
+	data-command
 >
 	<header>
 		{!! icons.MagnifyingGlass(icons.Props{}) !!}
@@ -155,19 +139,13 @@ func (p CommandProps) ItemID(group, item int) string {
 			aria-autocomplete="list"
 			aria-expanded="true"
 			aria-controls="{{ .MenuID() }}"
-			x-model="q"
-			x-bind:aria-activedescendant="active"
-			x-on:keydown.arrow-down.prevent="move(1)"
-			x-on:keydown.arrow-up.prevent="move(-1)"
-			x-on:keydown.enter.prevent="run()"
-			x-on:keydown.escape="q = ''; active = null"
 			@if(.Placeholder != "")
 				placeholder="{{ .Placeholder }}"
 			@endif
 		>
 	</header>
 
-	<div role="menu" id="{{ .MenuID() }}" aria-orientation="vertical" x-ref="menu"
+	<div role="menu" id="{{ .MenuID() }}" aria-orientation="vertical"
 		@if(.EmptyText != "")
 			data-empty="{{ .EmptyText }}"
 		@endif
@@ -187,8 +165,6 @@ func (p CommandProps) ItemID(group, item int) string {
 						role="menuitem"
 						id="{{ .ItemID(g, i) }}"
 						data-search="{{ .Groups[g].Items[i].Search() }}"
-						x-bind:aria-hidden="hidden($el)"
-						x-bind:class="{ active: active === $el.id }"
 						@if(.Groups[g].Items[i].Available())
 							href="{{ .Groups[g].Items[i].URL }}"
 						@endif

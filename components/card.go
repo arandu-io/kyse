@@ -5,12 +5,12 @@
 package components
 
 import (
-	"fmt"
-	"html/template"
-	"io"
-	"strings"
+	kyse__fmt "fmt"
+	kyse__template "html/template"
+	kyse__io "io"
+	kyse__strings "strings"
 
-	"github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/framework/view"
 )
 
 //line components/card.kyse.go:5
@@ -40,135 +40,137 @@ type CardProps struct {
 //line components/card.go:41
 
 // Card renders the card component.
-func Card(props CardProps) template.HTML {
-	d := props
+func Card(kyse__props CardProps) kyse__template.HTML {
+	kyse__d := kyse__props
+	_ = kyse__d
+	d := kyse__d
 	_ = d
-	w := &strings.Builder{}
-	var err error
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	kyse__w := &kyse__strings.Builder{}
+	var kyse__err error
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "<article class=\"card p-5\">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "<article class=\"card p-5\">\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t<header class=\"flex items-start justify-between gap-3\">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<header class=\"flex items-start justify-between gap-3\">\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t<h3 class=\"font-semibold tracking-tight\">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<h3 class=\"font-semibold tracking-tight\">\n")
 	}
 //line components/card.kyse.go:32
-	if d.Href != "" {
-//line components/card.go:63
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t\t<a class=\"hover:underline\" href=\"")
+	if kyse__d.Href != "" {
+//line components/card.go:65
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<a class=\"hover:underline\" href=\"")
 		}
-		if err == nil {
-			var s string
+		if kyse__err == nil {
+			var kyse__v1 string
 //line components/card.kyse.go:33
-			s, err = view.TextURL(d.Href)
-//line components/card.go:71
-			if err != nil {
-				err = fmt.Errorf("%s: %w", "components/card.kyse.go:33", err)
+			kyse__v1, kyse__err = kyse__view.TextURL(kyse__d.Href)
+//line components/card.go:73
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/card.kyse.go:33", kyse__err)
 			} else {
-				_, err = io.WriteString(w, s)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\">")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\">")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/card.kyse.go:33
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Title)))
-//line components/card.go:84
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Title)))
+//line components/card.go:86
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "</a>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</a>\n")
 		}
 	}
 //line components/card.kyse.go:35
-	if d.Href == "" {
-//line components/card.go:92
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t\t")
+	if kyse__d.Href == "" {
+//line components/card.go:94
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/card.kyse.go:36
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Title)))
-//line components/card.go:99
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Title)))
+//line components/card.go:101
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t</h3>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t</h3>\n")
 	}
 //line components/card.kyse.go:39
-	if d.Badge != "" {
-//line components/card.go:110
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t")
+	if kyse__d.Badge != "" {
+//line components/card.go:112
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/card.kyse.go:40
-			_, err = io.WriteString(w, view.UnsafeText(Badge(BadgeProps{Label: d.Badge, Variant: d.BadgeVariant})))
-//line components/card.go:117
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(Badge(BadgeProps{Label: kyse__d.Badge, Variant: kyse__d.BadgeVariant})))
+//line components/card.go:119
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t</header>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t</header>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
 //line components/card.kyse.go:44
-	if d.Description != "" {
-//line components/card.go:131
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t<p class=\"text-muted-foreground mt-2 text-sm\">")
+	if kyse__d.Description != "" {
+//line components/card.go:133
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<p class=\"text-muted-foreground mt-2 text-sm\">")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/card.kyse.go:45
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Description)))
-//line components/card.go:138
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Description)))
+//line components/card.go:140
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "</p>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
 		}
 	}
 //line components/card.kyse.go:47
-	if d.Meta != "" {
-//line components/card.go:146
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t<p class=\"text-muted-foreground mt-3 text-xs\">")
+	if kyse__d.Meta != "" {
+//line components/card.go:148
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<p class=\"text-muted-foreground mt-3 text-xs\">")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/card.kyse.go:48
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Meta)))
-//line components/card.go:153
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Meta)))
+//line components/card.go:155
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "</p>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "</article>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "</article>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	_ = err
-	return template.HTML(w.String())
+	_ = kyse__err
+	return kyse__template.HTML(kyse__w.String())
 }
 
 var (
-	_ = template.HTMLEscapeString
-	_ = io.WriteString
-	_ = view.Text
-	_ = view.UnsafeText
-	_ = strings.Builder{}
+	_ = kyse__template.HTMLEscapeString
+	_ = kyse__io.WriteString
+	_ = kyse__view.Text
+	_ = kyse__view.UnsafeText
+	_ = kyse__strings.Builder{}
 )

@@ -5,12 +5,13 @@
 package components
 
 import (
-	"fmt"
-	"html/template"
-	"io"
-	"strings"
+	kyse__fmt "fmt"
+	kyse__template "html/template"
+	kyse__io "io"
+	kyse__strings "strings"
 
-	"github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/framework/view"
+	"strings"
 )
 
 //line components/avatar.kyse.go:7
@@ -51,107 +52,109 @@ func (p AvatarProps) Initials() string {
 	return strings.ToUpper(string(out))
 }
 
-//line components/avatar.go:55
+//line components/avatar.go:56
 
 // Avatar renders the avatar component.
-func Avatar(props AvatarProps) template.HTML {
-	d := props
+func Avatar(kyse__props AvatarProps) kyse__template.HTML {
+	kyse__d := kyse__props
+	_ = kyse__d
+	d := kyse__d
 	_ = d
-	w := &strings.Builder{}
-	var err error
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	kyse__w := &kyse__strings.Builder{}
+	var kyse__err error
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "<span class=\"avatar\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "<span class=\"avatar\"\n")
 	}
 //line components/avatar.kyse.go:46
-	if d.Size != "" {
-//line components/avatar.go:71
-		if err == nil {
-			_, err = io.WriteString(w, "\t\tdata-size=\"")
+	if kyse__d.Size != "" {
+//line components/avatar.go:74
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-size=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/avatar.kyse.go:47
-			_, err = io.WriteString(w, view.TextAttr(d.Size))
-//line components/avatar.go:78
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Size))
+//line components/avatar.go:81
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, ">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")
 	}
 //line components/avatar.kyse.go:50
-	if d.ImageURL != "" {
-//line components/avatar.go:89
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t<img src=\"")
+	if kyse__d.ImageURL != "" {
+//line components/avatar.go:92
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<img src=\"")
 		}
-		if err == nil {
-			var s string
+		if kyse__err == nil {
+			var kyse__v1 string
 //line components/avatar.kyse.go:51
-			s, err = view.TextURL(d.ImageURL)
-//line components/avatar.go:97
-			if err != nil {
-				err = fmt.Errorf("%s: %w", "components/avatar.kyse.go:51", err)
+			kyse__v1, kyse__err = kyse__view.TextURL(kyse__d.ImageURL)
+//line components/avatar.go:100
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/avatar.kyse.go:51", kyse__err)
 			} else {
-				_, err = io.WriteString(w, s)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\" alt=\"")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\" alt=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/avatar.kyse.go:51
-			_, err = io.WriteString(w, view.TextAttr(d.Name))
-//line components/avatar.go:110
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
+//line components/avatar.go:113
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\">\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
 		}
 	}
 //line components/avatar.kyse.go:53
-	if d.ImageURL == "" {
-//line components/avatar.go:118
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t<span aria-hidden=\"true\">")
+	if kyse__d.ImageURL == "" {
+//line components/avatar.go:121
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<span aria-hidden=\"true\">")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/avatar.kyse.go:54
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Initials())))
-//line components/avatar.go:125
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Initials())))
+//line components/avatar.go:128
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "</span>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t<span class=\"sr-only\">")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<span class=\"sr-only\">")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/avatar.kyse.go:55
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Name)))
-//line components/avatar.go:136
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Name)))
+//line components/avatar.go:139
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "</span>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "</span>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	_ = err
-	return template.HTML(w.String())
+	_ = kyse__err
+	return kyse__template.HTML(kyse__w.String())
 }
 
 var (
-	_ = template.HTMLEscapeString
-	_ = io.WriteString
-	_ = view.Text
-	_ = view.UnsafeText
-	_ = strings.Builder{}
+	_ = kyse__template.HTMLEscapeString
+	_ = kyse__io.WriteString
+	_ = kyse__view.Text
+	_ = kyse__view.UnsafeText
+	_ = kyse__strings.Builder{}
 )

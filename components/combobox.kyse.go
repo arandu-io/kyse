@@ -105,6 +105,11 @@ func (o ComboboxOption) Text() string {
 // It is numbered rather than named after the value it carries, because
 // aria-activedescendant holds an id and an id with a space in it is read as
 // two. A value is somebody's data and can hold anything; a position cannot.
+//
+// The id is what the Enter key is resolved through, so it has to be unique in
+// the document: two boxes sharing a Name would number their lines the same and
+// the earlier one would answer for both. Name is already required to be unique
+// per page for what is submitted, and this is the second reason.
 func (p ComboboxProps) OptionID(at int) string {
 	return p.Name + "-option-" + strconv.Itoa(at)
 }
@@ -188,30 +193,13 @@ func (p ComboboxProps) DescribedBy() string {
 	<div class="field">
 		<label class="label" for="{{ .Name }}">{{ .Label }}</label>
 
-		<div class="combobox"
-			x-data="{
-				open: false,
-				active: null,
-				options() { return Array.from(this.$refs.list.querySelectorAll('[role=option]:not([aria-disabled=true])')) },
-				move(step) {
-					const all = this.options()
-					if (!all.length) return
-					const at = all.findIndex(o =&gt; o.id === this.active)
-					const to = at &lt; 0 ? (step &gt; 0 ? 0 : all.length - 1) : (at + step + all.length) % all.length
-					this.active = all[to].id
-					all[to].scrollIntoView({ block: 'nearest' })
-				},
-				choose(option) {
-					if (!option) return
-					this.$refs.list.querySelectorAll('[role=option]').forEach(o =&gt; o.setAttribute('aria-selected', o === option))
-					this.$refs.value.value = option.dataset.value
-					this.$refs.input.value = option.dataset.label
-					this.active = option.id
-					this.open = false
-				}
-			}"
-			x-on:click.outside="open = false"
-		>
+		{{-- data-combobox is the scope the client script resolves everything from,
+		     and it is the whole of what the client is told. Open is
+		     aria-expanded on the box and aria-hidden on the popover, the active
+		     line is aria-activedescendant, and the chosen one is aria-selected:
+		     the attributes the markup has to carry anyway are the state, so
+		     there is no second copy of it to fall out of step. --}}
+		<div class="combobox" data-combobox>
 			<input
 				type="text"
 				role="combobox"
@@ -230,15 +218,6 @@ func (p ComboboxProps) DescribedBy() string {
 				hx-select="{{ .ListboxTarget() }}"
 				hx-swap="outerHTML"
 				hx-sync="this:replace"
-				x-ref="input"
-				x-bind:aria-expanded="open"
-				x-bind:aria-activedescendant="active"
-				x-on:click="open = true"
-				x-on:input="open = true; active = null"
-				x-on:keydown.arrow-down.prevent="open = true; move(1)"
-				x-on:keydown.arrow-up.prevent="open = true; move(-1)"
-				x-on:keydown.enter="if (open) { $event.preventDefault(); choose(document.getElementById(active)) }"
-				x-on:keydown.escape="open = false"
 				@if(.Placeholder != "")
 					placeholder="{{ .Placeholder }}"
 				@endif
@@ -261,12 +240,11 @@ func (p ComboboxProps) DescribedBy() string {
 
 			{!! icons.CaretDown(icons.Props{}) !!}
 
-			<div data-popover aria-hidden="true" x-bind:aria-hidden="!open">
+			<div data-popover aria-hidden="true">
 				<div
 					role="listbox"
 					id="{{ .ListboxID() }}"
 					aria-orientation="vertical"
-					x-ref="list"
 					@if(.EmptyText != "")
 						data-empty="{{ .EmptyText }}"
 					@endif
@@ -277,8 +255,6 @@ func (p ComboboxProps) DescribedBy() string {
 							id="{{ .OptionID(at) }}"
 							data-value="{{ .Options[at].Value }}"
 							data-label="{{ .Options[at].Text() }}"
-							x-bind:class="{ active: active === $el.id }"
-							x-on:click="choose($el)"
 							@if(.Options[at].Disabled)
 								aria-disabled="true"
 							@endif
@@ -290,7 +266,7 @@ func (p ComboboxProps) DescribedBy() string {
 				</div>
 			</div>
 
-			<input type="hidden" name="{{ .Name }}" value="{{ .Current() }}" x-ref="value">
+			<input type="hidden" name="{{ .Name }}" value="{{ .Current() }}" data-combobox-value>
 		</div>
 
 		@if(.Message() != "")

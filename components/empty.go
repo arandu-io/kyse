@@ -5,12 +5,12 @@
 package components
 
 import (
-	"fmt"
-	"html/template"
-	"io"
-	"strings"
+	kyse__fmt "fmt"
+	kyse__template "html/template"
+	kyse__io "io"
+	kyse__strings "strings"
 
-	"github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/framework/view"
 )
 
 //line components/empty.kyse.go:5
@@ -34,98 +34,100 @@ type EmptyProps struct {
 //line components/empty.go:35
 
 // Empty renders the empty component.
-func Empty(props EmptyProps) template.HTML {
-	d := props
+func Empty(kyse__props EmptyProps) kyse__template.HTML {
+	kyse__d := kyse__props
+	_ = kyse__d
+	d := kyse__d
 	_ = d
-	w := &strings.Builder{}
-	var err error
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	kyse__w := &kyse__strings.Builder{}
+	var kyse__err error
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "<div class=\"empty\">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "<div class=\"empty\">\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t<header>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<header>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t<h2>")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<h2>")
 	}
-	if err == nil {
+	if kyse__err == nil {
 //line components/empty.kyse.go:25
-		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Title)))
-//line components/empty.go:58
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Title)))
+//line components/empty.go:60
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "</h2>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "</h2>\n")
 	}
 //line components/empty.kyse.go:26
-	if d.Message != "" {
-//line components/empty.go:65
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t<p>")
+	if kyse__d.Message != "" {
+//line components/empty.go:67
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<p>")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/empty.kyse.go:27
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Message)))
-//line components/empty.go:72
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message)))
+//line components/empty.go:74
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "</p>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t</header>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t</header>\n")
 	}
 //line components/empty.kyse.go:30
-	if d.ActionURL != "" {
-//line components/empty.go:83
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t<section>\n")
+	if kyse__d.ActionURL != "" {
+//line components/empty.go:85
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<section>\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t<a class=\"btn\" data-variant=\"outline\" href=\"")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<a class=\"btn\" data-variant=\"outline\" href=\"")
 		}
-		if err == nil {
-			var s string
+		if kyse__err == nil {
+			var kyse__v1 string
 //line components/empty.kyse.go:32
-			s, err = view.TextURL(d.ActionURL)
-//line components/empty.go:94
-			if err != nil {
-				err = fmt.Errorf("%s: %w", "components/empty.kyse.go:32", err)
+			kyse__v1, kyse__err = kyse__view.TextURL(kyse__d.ActionURL)
+//line components/empty.go:96
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/empty.kyse.go:32", kyse__err)
 			} else {
-				_, err = io.WriteString(w, s)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\">")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\">")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/empty.kyse.go:32
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.ActionLabel)))
-//line components/empty.go:107
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.ActionLabel)))
+//line components/empty.go:109
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "</a>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</a>\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t</section>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t</section>\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "</div>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "</div>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	_ = err
-	return template.HTML(w.String())
+	_ = kyse__err
+	return kyse__template.HTML(kyse__w.String())
 }
 
 var (
-	_ = template.HTMLEscapeString
-	_ = io.WriteString
-	_ = view.Text
-	_ = view.UnsafeText
-	_ = strings.Builder{}
+	_ = kyse__template.HTMLEscapeString
+	_ = kyse__io.WriteString
+	_ = kyse__view.Text
+	_ = kyse__view.UnsafeText
+	_ = kyse__strings.Builder{}
 )

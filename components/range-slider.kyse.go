@@ -142,17 +142,11 @@ func (p RangeSliderProps) DescribedBy() string {
 }
 @endgo
 
-<div class="field" data-at="{{ .Current() }}"
-	x-data="{
-		shown: '',
-		paint(track) {
-			const span = (track.max - track.min) || 1
-			track.style.setProperty('--slider-value', ((track.value - track.min) / span * 100) + '%')
-			this.shown = track.value
-		}
-	}"
-	x-init="shown = $el.dataset.at"
->
+{{-- data-slider is how the track finds the number that belongs to it, and it is
+     the whole of what the client is told. There is nothing to seed: the fill and
+     the number below are both written by the server, so the first frame is
+     already right. --}}
+<div class="field" data-slider>
 	<label class="label" for="{{ .Name }}">{{ .Label }}</label>
 
 	<input
@@ -165,8 +159,7 @@ func (p RangeSliderProps) DescribedBy() string {
 		max="{{ .Ceiling() }}"
 		step="{{ .Tick() }}"
 		style="--slider-value: {{ .Fill() }}"
-		x-init="paint($el)"
-		x-on:input="paint($el)"
+		data-slider-track
 		@if(.DescribedBy() != "")
 			aria-describedby="{{ .DescribedBy() }}"
 		@endif
@@ -180,7 +173,7 @@ func (p RangeSliderProps) DescribedBy() string {
 
 	@if(.ShowValue)
 		<p class="text-muted-foreground text-sm">
-			<output for="{{ .Name }}" x-text="shown">{{ .Current() }}</output>
+			<output for="{{ .Name }}" data-slider-output>{{ .Current() }}</output>
 			@if(.Unit != "")
 				{{ .Unit }}
 			@endif

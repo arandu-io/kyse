@@ -5,12 +5,12 @@
 package components
 
 import (
-	"fmt"
-	"html/template"
-	"io"
-	"strings"
+	kyse__fmt "fmt"
+	kyse__template "html/template"
+	kyse__io "io"
+	kyse__strings "strings"
 
-	"github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/framework/view"
 	"github.com/arandu-io/kyse/icons"
 )
 
@@ -74,123 +74,125 @@ func (p BreadcrumbProps) Landmark() string {
 //line components/breadcrumb.go:75
 
 // Breadcrumb renders the breadcrumb component.
-func Breadcrumb(props BreadcrumbProps) template.HTML {
-	d := props
+func Breadcrumb(kyse__props BreadcrumbProps) kyse__template.HTML {
+	kyse__d := kyse__props
+	_ = kyse__d
+	d := kyse__d
 	_ = d
-	w := &strings.Builder{}
-	var err error
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	kyse__w := &kyse__strings.Builder{}
+	var kyse__err error
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "<nav class=\"breadcrumb\" aria-label=\"")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "<nav class=\"breadcrumb\" aria-label=\"")
 	}
-	if err == nil {
+	if kyse__err == nil {
 //line components/breadcrumb.kyse.go:64
-		_, err = io.WriteString(w, view.TextAttr(d.Landmark()))
-//line components/breadcrumb.go:92
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Landmark()))
+//line components/breadcrumb.go:94
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t<ol>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<ol>\n")
 	}
 //line components/breadcrumb.kyse.go:66
-	for _, crumb := range d.Trail() {
+	for _, crumb := range kyse__d.Trail() {
 		_ = crumb
-//line components/breadcrumb.go:103
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t<li>\n")
+//line components/breadcrumb.go:105
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<li>\n")
 		}
 //line components/breadcrumb.kyse.go:68
 		if crumb.URL != "" {
-//line components/breadcrumb.go:109
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t<a href=\"")
+//line components/breadcrumb.go:111
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<a href=\"")
 			}
-			if err == nil {
-				var s string
+			if kyse__err == nil {
+				var kyse__v1 string
 //line components/breadcrumb.kyse.go:69
-				s, err = view.TextURL(crumb.URL)
-//line components/breadcrumb.go:117
-				if err != nil {
-					err = fmt.Errorf("%s: %w", "components/breadcrumb.kyse.go:69", err)
+				kyse__v1, kyse__err = kyse__view.TextURL(crumb.URL)
+//line components/breadcrumb.go:119
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/breadcrumb.kyse.go:69", kyse__err)
 				} else {
-					_, err = io.WriteString(w, s)
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 				}
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\">")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\">")
 			}
-			if err == nil {
+			if kyse__err == nil {
 //line components/breadcrumb.kyse.go:69
-				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(crumb.Label)))
-//line components/breadcrumb.go:130
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(crumb.Label)))
+//line components/breadcrumb.go:132
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "</a>\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</a>\n")
 			}
 		} else {
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t<span>")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<span>")
 			}
-			if err == nil {
+			if kyse__err == nil {
 //line components/breadcrumb.kyse.go:71
-				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(crumb.Label)))
-//line components/breadcrumb.go:142
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(crumb.Label)))
+//line components/breadcrumb.go:144
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "</span>\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t</li>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t</li>\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t<li aria-hidden=\"true\" data-rtl-flip>")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<li aria-hidden=\"true\" data-rtl-flip>")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/breadcrumb.kyse.go:74
-			_, err = io.WriteString(w, view.UnsafeText(icons.CaretRight(icons.Props{})))
-//line components/breadcrumb.go:157
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(icons.CaretRight(icons.Props{})))
+//line components/breadcrumb.go:159
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "</li>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</li>\n")
 		}
 	}
 //line components/breadcrumb.kyse.go:76
-	if len(d.Items) > 0 {
-//line components/breadcrumb.go:165
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t<li><span aria-current=\"page\">")
+	if len(kyse__d.Items) > 0 {
+//line components/breadcrumb.go:167
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<li><span aria-current=\"page\">")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/breadcrumb.kyse.go:77
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Current().Label)))
-//line components/breadcrumb.go:172
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Current().Label)))
+//line components/breadcrumb.go:174
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "</span></li>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</span></li>\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t</ol>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t</ol>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "</nav>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "</nav>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	_ = err
-	return template.HTML(w.String())
+	_ = kyse__err
+	return kyse__template.HTML(kyse__w.String())
 }
 
 var (
-	_ = template.HTMLEscapeString
-	_ = io.WriteString
-	_ = view.Text
-	_ = view.UnsafeText
-	_ = strings.Builder{}
+	_ = kyse__template.HTMLEscapeString
+	_ = kyse__io.WriteString
+	_ = kyse__view.Text
+	_ = kyse__view.UnsafeText
+	_ = kyse__strings.Builder{}
 )

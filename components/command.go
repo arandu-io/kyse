@@ -5,12 +5,12 @@
 package components
 
 import (
-	"fmt"
-	"html/template"
-	"io"
-	"strings"
+	kyse__fmt "fmt"
+	kyse__template "html/template"
+	kyse__io "io"
+	kyse__strings "strings"
 
-	"github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/framework/view"
 	"github.com/arandu-io/kyse/icons"
 	"strconv"
 )
@@ -31,6 +31,11 @@ import (
 // the lines that do not match hidden, which is also what empties a group whose
 // lines all went, and what puts EmptyText on the screen when none are left.
 // Nothing is fetched, so nothing arrives late and nothing arrives out of order.
+//
+// Two attributes carry that, and they are data on both sides: data-search is
+// what a line is matched against, and aria-hidden is what the match writes. The
+// stylesheet reads the second one and does the hiding, the emptying and the
+// message. Nothing on this page is an expression somebody's browser evaluates.
 //
 // # What a line is
 //
@@ -123,412 +128,327 @@ func (p CommandProps) ItemID(group, item int) string {
 	return p.ID + "-item-" + strconv.Itoa(group) + "-" + strconv.Itoa(item)
 }
 
-//line components/command.go:127
+//line components/command.go:132
 
 // Command renders the command component.
-func Command(props CommandProps) template.HTML {
-	d := props
+func Command(kyse__props CommandProps) kyse__template.HTML {
+	kyse__d := kyse__props
+	_ = kyse__d
+	d := kyse__d
 	_ = d
-	w := &strings.Builder{}
-	var err error
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	kyse__w := &kyse__strings.Builder{}
+	var kyse__err error
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "<div class=\"command\" id=\"")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "<div class=\"command\" id=\"")
 	}
-	if err == nil {
-//line components/command.kyse.go:119
-		_, err = io.WriteString(w, view.TextAttr(d.ID))
-//line components/command.go:144
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\"\n")
-	}
-//line components/command.kyse.go:120
-	if d.Label != "" {
+	if kyse__err == nil {
+//line components/command.kyse.go:124
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
 //line components/command.go:151
-		if err == nil {
-			_, err = io.WriteString(w, "\t\taria-label=\"")
-		}
-		if err == nil {
-//line components/command.kyse.go:121
-			_, err = io.WriteString(w, view.TextAttr(d.Label))
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+	}
+//line components/command.kyse.go:125
+	if kyse__d.Label != "" {
 //line components/command.go:158
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-label=\"")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+//line components/command.kyse.go:126
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
+//line components/command.go:165
 		}
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\tx-data=\"{\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\tq: '',\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\tactive: null,\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\tlines() { return Array.from(this.$refs.menu.querySelectorAll('[role=menuitem]')).filter(l =&gt; l.getAttribute('aria-hidden') !== 'true' &amp;&amp; l.getAttribute('aria-disabled') !== 'true') },\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\thidden(line) {\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tconst q = this.q.trim().toLowerCase()\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tif (!q) return false\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\treturn !line.dataset.search.toLowerCase().includes(q)\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t},\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\tmove(step) {\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tconst all = this.lines()\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tif (!all.length) return\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tconst at = all.findIndex(l =&gt; l.id === this.active)\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tconst to = at &lt; 0 ? (step &gt; 0 ? 0 : all.length - 1) : (at + step + all.length) % all.length\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tthis.active = all[to].id\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tall[to].scrollIntoView({ block: 'nearest' })\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t},\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\trun() {\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tconst line = this.active ? document.getElementById(this.active) : null\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tif (line) line.click()\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t}\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t}\"\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, ">\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t<header>\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t")
-	}
-	if err == nil {
-//line components/command.kyse.go:147
-		_, err = io.WriteString(w, view.UnsafeText(icons.MagnifyingGlass(icons.Props{})))
-//line components/command.go:242
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t<input\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\ttype=\"text\"\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\trole=\"combobox\"\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tid=\"")
-	}
-	if err == nil {
-//line components/command.kyse.go:151
-		_, err = io.WriteString(w, view.TextAttr(d.InputID()))
-//line components/command.go:262
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\"\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tautocomplete=\"off\"\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tautocorrect=\"off\"\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tspellcheck=\"false\"\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\taria-autocomplete=\"list\"\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\taria-expanded=\"true\"\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\taria-controls=\"")
-	}
-	if err == nil {
-//line components/command.kyse.go:157
-		_, err = io.WriteString(w, view.TextAttr(d.MenuID()))
-//line components/command.go:288
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\"\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tx-model=\"q\"\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tx-bind:aria-activedescendant=\"active\"\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tx-on:keydown.arrow-down.prevent=\"move(1)\"\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tx-on:keydown.arrow-up.prevent=\"move(-1)\"\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tx-on:keydown.enter.prevent=\"run()\"\n")
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t\tx-on:keydown.escape=\"q = ''; active = null\"\n")
-	}
-//line components/command.kyse.go:164
-	if d.Placeholder != "" {
-//line components/command.go:313
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t\tplaceholder=\"")
-		}
-		if err == nil {
-//line components/command.kyse.go:165
-			_, err = io.WriteString(w, view.TextAttr(d.Placeholder))
-//line components/command.go:320
-		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t\t>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tdata-command\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t</header>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<header>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t<div role=\"menu\" id=\"")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t")
 	}
-	if err == nil {
-//line components/command.kyse.go:170
-		_, err = io.WriteString(w, view.TextAttr(d.MenuID()))
-//line components/command.go:341
+	if kyse__err == nil {
+//line components/command.kyse.go:131
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(icons.MagnifyingGlass(icons.Props{})))
+//line components/command.go:186
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\" aria-orientation=\"vertical\" x-ref=\"menu\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/command.kyse.go:171
-	if d.EmptyText != "" {
-//line components/command.go:348
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\tdata-empty=\"")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<input\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\ttype=\"text\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\trole=\"combobox\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
+	}
+	if kyse__err == nil {
+//line components/command.kyse.go:135
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.InputID()))
+//line components/command.go:206
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tautocomplete=\"off\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tautocorrect=\"off\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tspellcheck=\"false\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-autocomplete=\"list\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-expanded=\"true\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-controls=\"")
+	}
+	if kyse__err == nil {
+//line components/command.kyse.go:141
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.MenuID()))
+//line components/command.go:232
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+	}
+//line components/command.kyse.go:142
+	if kyse__d.Placeholder != "" {
+//line components/command.go:239
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tplaceholder=\"")
 		}
-		if err == nil {
-//line components/command.kyse.go:172
-			_, err = io.WriteString(w, view.TextAttr(d.EmptyText))
+		if kyse__err == nil {
+//line components/command.kyse.go:143
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Placeholder))
+//line components/command.go:246
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t</header>\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<div role=\"menu\" id=\"")
+	}
+	if kyse__err == nil {
+//line components/command.kyse.go:148
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.MenuID()))
+//line components/command.go:267
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\" aria-orientation=\"vertical\"\n")
+	}
+//line components/command.kyse.go:149
+	if kyse__d.EmptyText != "" {
+//line components/command.go:274
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-empty=\"")
+		}
+		if kyse__err == nil {
+//line components/command.kyse.go:150
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.EmptyText))
+//line components/command.go:281
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
+	}
+//line components/command.kyse.go:153
+	for g := 0; g < len(kyse__d.Groups); g++ {
+//line components/command.go:292
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<div role=\"group\"\n")
+		}
+//line components/command.kyse.go:155
+		if kyse__d.Groups[g].Heading != "" {
+//line components/command.go:298
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-labelledby=\"")
+			}
+			if kyse__err == nil {
+//line components/command.kyse.go:156
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HeadingID(g)))
+//line components/command.go:305
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>\n")
+		}
+//line components/command.kyse.go:159
+		if kyse__d.Groups[g].Heading != "" {
+//line components/command.go:316
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<span role=\"heading\" id=\"")
+			}
+			if kyse__err == nil {
+//line components/command.kyse.go:160
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HeadingID(g)))
+//line components/command.go:323
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\">")
+			}
+			if kyse__err == nil {
+//line components/command.kyse.go:160
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Groups[g].Heading)))
+//line components/command.go:331
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+		}
+//line components/command.kyse.go:163
+		for i := 0; i < len(kyse__d.Groups[g].Items); i++ {
+//line components/command.go:342
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<a\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\trole=\"menuitem\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tid=\"")
+			}
+			if kyse__err == nil {
+//line components/command.kyse.go:166
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ItemID(g, i)))
 //line components/command.go:355
-		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
-		}
-	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t>\n")
-	}
-//line components/command.kyse.go:175
-	for g := 0; g < len(d.Groups); g++ {
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-search=\"")
+			}
+			if kyse__err == nil {
+//line components/command.kyse.go:167
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Groups[g].Items[i].Search()))
 //line components/command.go:366
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t<div role=\"group\"\n")
-		}
-//line components/command.kyse.go:177
-		if d.Groups[g].Heading != "" {
-//line components/command.go:372
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\taria-labelledby=\"")
 			}
-			if err == nil {
-//line components/command.kyse.go:178
-				_, err = io.WriteString(w, view.TextAttr(d.HeadingID(g)))
-//line components/command.go:379
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\"\n")
-			}
-		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t>\n")
-		}
-//line components/command.kyse.go:181
-		if d.Groups[g].Heading != "" {
-//line components/command.go:390
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t<span role=\"heading\" id=\"")
-			}
-			if err == nil {
-//line components/command.kyse.go:182
-				_, err = io.WriteString(w, view.TextAttr(d.HeadingID(g)))
-//line components/command.go:397
-			}
-			if err == nil {
-				_, err = io.WriteString(w, "\">")
-			}
-			if err == nil {
-//line components/command.kyse.go:182
-				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Groups[g].Heading)))
-//line components/command.go:405
-			}
-			if err == nil {
-				_, err = io.WriteString(w, "</span>\n")
-			}
-		}
-		if err == nil {
-			_, err = io.WriteString(w, "\n")
-		}
-//line components/command.kyse.go:185
-		for i := 0; i < len(d.Groups[g].Items); i++ {
-//line components/command.go:416
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t<a\n")
-			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t\trole=\"menuitem\"\n")
-			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t\tid=\"")
-			}
-			if err == nil {
-//line components/command.kyse.go:188
-				_, err = io.WriteString(w, view.TextAttr(d.ItemID(g, i)))
-//line components/command.go:429
-			}
-			if err == nil {
-				_, err = io.WriteString(w, "\"\n")
-			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t\tdata-search=\"")
-			}
-			if err == nil {
-//line components/command.kyse.go:189
-				_, err = io.WriteString(w, view.TextAttr(d.Groups[g].Items[i].Search()))
-//line components/command.go:440
-			}
-			if err == nil {
-				_, err = io.WriteString(w, "\"\n")
-			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t\tx-bind:aria-hidden=\"hidden($el)\"\n")
-			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t\tx-bind:class=\"{ active: active === $el.id }\"\n")
-			}
-//line components/command.kyse.go:192
-			if d.Groups[g].Items[i].Available() {
-//line components/command.go:453
-				if err == nil {
-					_, err = io.WriteString(w, "\t\t\t\t\t\t\thref=\"")
+//line components/command.kyse.go:168
+			if kyse__d.Groups[g].Items[i].Available() {
+//line components/command.go:373
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\thref=\"")
 				}
-				if err == nil {
-					var s string
-//line components/command.kyse.go:193
-					s, err = view.TextURL(d.Groups[g].Items[i].URL)
-//line components/command.go:461
-					if err != nil {
-						err = fmt.Errorf("%s: %w", "components/command.kyse.go:193", err)
+				if kyse__err == nil {
+					var kyse__v1 string
+//line components/command.kyse.go:169
+					kyse__v1, kyse__err = kyse__view.TextURL(kyse__d.Groups[g].Items[i].URL)
+//line components/command.go:381
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/command.kyse.go:169", kyse__err)
 					} else {
-						_, err = io.WriteString(w, s)
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 					}
 				}
-				if err == nil {
-					_, err = io.WriteString(w, "\"\n")
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 			}
-//line components/command.kyse.go:195
-			if !d.Groups[g].Items[i].Available() {
-//line components/command.go:474
-				if err == nil {
-					_, err = io.WriteString(w, "\t\t\t\t\t\t\taria-disabled=\"true\"\n")
+//line components/command.kyse.go:171
+			if !kyse__d.Groups[g].Items[i].Available() {
+//line components/command.go:394
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-disabled=\"true\"\n")
 				}
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t>\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>\n")
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t\t<span>")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<span>")
 			}
-			if err == nil {
-//line components/command.kyse.go:199
-				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Groups[g].Items[i].Label)))
-//line components/command.go:488
+			if kyse__err == nil {
+//line components/command.kyse.go:175
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Groups[g].Items[i].Label)))
+//line components/command.go:408
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "</span>\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
 			}
-//line components/command.kyse.go:200
-			if d.Groups[g].Items[i].Shortcut != "" {
-//line components/command.go:495
-				if err == nil {
-					_, err = io.WriteString(w, "\t\t\t\t\t\t\t<span data-shortcut>")
+//line components/command.kyse.go:176
+			if kyse__d.Groups[g].Items[i].Shortcut != "" {
+//line components/command.go:415
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<span data-shortcut>")
 				}
-				if err == nil {
-//line components/command.kyse.go:201
-					_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Groups[g].Items[i].Shortcut)))
-//line components/command.go:502
+				if kyse__err == nil {
+//line components/command.kyse.go:177
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Groups[g].Items[i].Shortcut)))
+//line components/command.go:422
 				}
-				if err == nil {
-					_, err = io.WriteString(w, "</span>\n")
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
 				}
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t</a>\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t</a>\n")
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t</div>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t</div>\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\t</div>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t</div>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "</div>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "</div>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	_ = err
-	return template.HTML(w.String())
+	_ = kyse__err
+	return kyse__template.HTML(kyse__w.String())
 }
 
 var (
-	_ = template.HTMLEscapeString
-	_ = io.WriteString
-	_ = view.Text
-	_ = view.UnsafeText
-	_ = strings.Builder{}
+	_ = kyse__template.HTMLEscapeString
+	_ = kyse__io.WriteString
+	_ = kyse__view.Text
+	_ = kyse__view.UnsafeText
+	_ = kyse__strings.Builder{}
 )

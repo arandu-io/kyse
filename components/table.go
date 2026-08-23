@@ -5,11 +5,12 @@
 package components
 
 import (
-	"html/template"
-	"io"
-	"strings"
+	kyse__template "html/template"
+	kyse__io "io"
+	kyse__strings "strings"
 
-	"github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/framework/view"
+	template "html/template"
 )
 
 //line components/table.kyse.go:5
@@ -100,169 +101,172 @@ func (p TableProps) AlignClass(i int) string {
 	return TableColumn{}.AlignClass()
 }
 
-//line components/table.go:104
+//line components/table.go:105
 
 // Table renders the table component.
-func Table(props TableProps) template.HTML {
-	d := props
+func Table(kyse__props TableProps) kyse__template.HTML {
+	kyse__d := kyse__props
+	_ = kyse__d
+	d := kyse__d
 	_ = d
-	w := &strings.Builder{}
-	var err error
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	kyse__w := &kyse__strings.Builder{}
+	var kyse__err error
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
 //line components/table.kyse.go:93
-	if len(d.Rows) > 0 {
-//line components/table.go:117
-		if err == nil {
-			_, err = io.WriteString(w, "\t<div class=\"table-container\">\n")
+	if len(kyse__d.Rows) > 0 {
+//line components/table.go:120
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t<div class=\"table-container\">\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t<table class=\"table\">\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<table class=\"table\">\n")
 		}
 //line components/table.kyse.go:96
-		if d.Caption != "" {
-//line components/table.go:126
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t<caption>")
+		if kyse__d.Caption != "" {
+//line components/table.go:129
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<caption>")
 			}
-			if err == nil {
+			if kyse__err == nil {
 //line components/table.kyse.go:97
-				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Caption)))
-//line components/table.go:133
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Caption)))
+//line components/table.go:136
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "</caption>\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</caption>\n")
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t<thead>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<thead>\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t\t<tr>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<tr>\n")
 		}
 //line components/table.kyse.go:101
-		for _, column := range d.Columns {
+		for _, column := range kyse__d.Columns {
 			_ = column
-//line components/table.go:148
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t\t<th scope=\"col\" class=\"")
+//line components/table.go:151
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<th scope=\"col\" class=\"")
 			}
-			if err == nil {
+			if kyse__err == nil {
 //line components/table.kyse.go:102
-				_, err = io.WriteString(w, view.TextAttr(column.AlignClass()))
-//line components/table.go:155
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(column.AlignClass()))
+//line components/table.go:158
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\">")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\">")
 			}
-			if err == nil {
+			if kyse__err == nil {
 //line components/table.kyse.go:102
-				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(column.Label)))
-//line components/table.go:163
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(column.Label)))
+//line components/table.go:166
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "</th>\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</th>\n")
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t\t</tr>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t</tr>\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t</thead>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t</thead>\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t<tbody>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<tbody>\n")
 		}
 //line components/table.kyse.go:107
-		for _, row := range d.Rows {
+		for _, row := range kyse__d.Rows {
 			_ = row
-//line components/table.go:181
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t<tr>\n")
+//line components/table.go:184
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<tr>\n")
 			}
 //line components/table.kyse.go:109
 			for i := 0; i < len(row.Cells); i++ {
-//line components/table.go:187
-				if err == nil {
-					_, err = io.WriteString(w, "\t\t\t\t\t\t\t<td class=\"")
+//line components/table.go:190
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<td class=\"")
 				}
-				if err == nil {
+				if kyse__err == nil {
 //line components/table.kyse.go:110
-					_, err = io.WriteString(w, view.TextAttr(d.AlignClass(i)))
-//line components/table.go:194
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.AlignClass(i)))
+//line components/table.go:197
 				}
-				if err == nil {
-					_, err = io.WriteString(w, "\">\n")
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
 				}
 //line components/table.kyse.go:111
 				if row.Cells[i].HTML != "" {
-//line components/table.go:201
-					if err == nil {
-						_, err = io.WriteString(w, "\t\t\t\t\t\t\t\t\t")
+//line components/table.go:204
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t")
 					}
-					if err == nil {
+					if kyse__err == nil {
 //line components/table.kyse.go:112
-						_, err = io.WriteString(w, view.UnsafeText(row.Cells[i].HTML))
-//line components/table.go:208
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(row.Cells[i].HTML))
+//line components/table.go:211
 					}
-					if err == nil {
-						_, err = io.WriteString(w, "\n")
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 					}
 				} else {
-					if err == nil {
-						_, err = io.WriteString(w, "\t\t\t\t\t\t\t\t\t")
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t")
 					}
-					if err == nil {
+					if kyse__err == nil {
 //line components/table.kyse.go:114
-						_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(row.Cells[i].Text)))
-//line components/table.go:220
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(row.Cells[i].Text)))
+//line components/table.go:223
 					}
-					if err == nil {
-						_, err = io.WriteString(w, "\n")
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 					}
 				}
-				if err == nil {
-					_, err = io.WriteString(w, "\t\t\t\t\t\t\t</td>\n")
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t</td>\n")
 				}
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t</tr>\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t</tr>\n")
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t</tbody>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t</tbody>\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t</table>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t</table>\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t</div>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t</div>\n")
 		}
 	} else {
-		if err == nil {
-			_, err = io.WriteString(w, "\t")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/table.kyse.go:124
-			_, err = io.WriteString(w, view.UnsafeText(Empty(d.Empty)))
-//line components/table.go:250
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(Empty(kyse__d.Empty)))
+//line components/table.go:253
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	_ = err
-	return template.HTML(w.String())
+	_ = kyse__err
+	return kyse__template.HTML(kyse__w.String())
 }
 
 var (
+	_ = kyse__template.HTMLEscapeString
+	_ = kyse__io.WriteString
+	_ = kyse__view.Text
+	_ = kyse__view.UnsafeText
+	_ = kyse__strings.Builder{}
 	_ = template.HTMLEscapeString
-	_ = io.WriteString
-	_ = view.Text
-	_ = view.UnsafeText
-	_ = strings.Builder{}
 )

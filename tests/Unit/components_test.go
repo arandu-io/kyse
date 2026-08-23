@@ -3,6 +3,7 @@ package unit
 import (
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -322,6 +323,80 @@ func TestATextareaAsksThePageToo(t *testing.T) {
 	if !strings.Contains(html, "half a paragraph") {
 		t.Errorf("what was typed did not come back:\n%s", html)
 	}
+}
+
+// clientDirective matches the two shapes a client-side expression is written in:
+// a directive named x-something, and the @ shorthand for the event form.
+//
+// The character before the name has to be one that does not continue a name, so
+// hx-get and hx-on:click are not matched -- those are HTMX, they are read by a
+// library that parses attributes rather than evaluating them, and they stay.
+// Requiring an `=` after the @ form is what separates it from the view
+// compiler's own @if, @for and @go, which take parentheses or nothing.
+var clientDirective = regexp.MustCompile(`(?:^|[^\w:@-])(x-[a-z][\w.:-]*|@[\w.:-]+\s*=)`)
+
+// TestNoComponentEvaluatesAnExpression is the guard, and it is the point of the
+// rewrite rather than a tidying rule.
+//
+// A directive's value is a string the client library compiles with the Function
+// constructor. This framework serves script-src 'self' with no unsafe-eval, so
+// that compilation throws at the point of evaluation: a component carrying one
+// is not a noisy component, it is a dead one, and it fails in the browser
+// console rather than in any build.
+//
+// Nothing else in the toolchain would catch it. The markup is valid, the view
+// compiles, every test above still renders a string with a class in it, and the
+// component looks correct in review. So the source is read here.
+//
+// Both the sources and what they compile to are read. The source is where a
+// directive would be written; the compiled file is what a browser is actually
+// sent, and a stale one ships a directive that the source no longer has.
+func TestNoComponentEvaluatesAnExpression(t *testing.T) {
+	for _, pattern := range []string{"*.kyse.go", "*.go"} {
+		files, err := filepath.Glob(filepath.Join("..", "..", "components", pattern))
+		if err != nil {
+			t.Fatalf("reading the component directory: %v", err)
+		}
+		if len(files) == 0 {
+			// A glob that matches nothing would make this test pass by finding
+			// nothing to read, which is the shape of failure it exists to prevent.
+			t.Fatalf("no components/%s found; this test is checking nothing", pattern)
+		}
+
+		for _, file := range files {
+			// *.go matches *.kyse.go too, and a line reported twice reads as two
+			// directives.
+			if pattern == "*.go" && strings.HasSuffix(file, ".kyse.go") {
+				continue
+			}
+			body, err := os.ReadFile(file)
+			if err != nil {
+				t.Fatalf("reading %s: %v", file, err)
+			}
+			for at, line := range strings.Split(string(body), "\n") {
+				found := clientDirective.FindStringSubmatch(asMarkup(line))
+				if found == nil {
+					continue
+				}
+				t.Errorf("%s:%d writes %q, which is an expression the browser is asked to compile:\n\t%s\n"+
+					"\tBehaviour is delegation on data-* attributes. Put the value in a data-* attribute and let the script read it.",
+					filepath.Base(file), at+1, strings.TrimSpace(found[1]), strings.TrimSpace(line))
+			}
+		}
+	}
+}
+
+// asMarkup turns a line of a compiled view back into the markup it writes, far
+// enough for the pattern above to read it.
+//
+// A compiled view holds its markup inside Go string literals, so a tab before an
+// attribute arrives as the two characters `\` and `t`. The pattern asks what
+// comes before a name, and a literal `t` there is a letter -- which is how the
+// first version of this test read a compiled `\t\tx-on:input` as part of a
+// longer word and passed over it. A source line has none of these sequences and
+// goes through unchanged.
+func asMarkup(line string) string {
+	return strings.NewReplacer(`\t`, "\t", `\n`, "\n", `\"`, `"`).Replace(line)
 }
 
 // TestEveryComponentIsInTheTable reads the directory instead of the list.

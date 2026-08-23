@@ -5,11 +5,11 @@
 package components
 
 import (
-	"html/template"
-	"io"
-	"strings"
+	kyse__template "html/template"
+	kyse__io "io"
+	kyse__strings "strings"
 
-	"github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/framework/view"
 )
 
 //line components/kbd.kyse.go:5
@@ -62,78 +62,80 @@ func (p KbdProps) Name(i int) string {
 //line components/kbd.go:63
 
 // Kbd renders the kbd component.
-func Kbd(props KbdProps) template.HTML {
-	d := props
+func Kbd(kyse__props KbdProps) kyse__template.HTML {
+	kyse__d := kyse__props
+	_ = kyse__d
+	d := kyse__d
 	_ = d
-	w := &strings.Builder{}
-	var err error
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	kyse__w := &kyse__strings.Builder{}
+	var kyse__err error
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
 //line components/kbd.kyse.go:52
-	if len(d.Keys) > 0 {
-//line components/kbd.go:76
-		if err == nil {
-			_, err = io.WriteString(w, "\t<span class=\"inline-flex items-center gap-1\">\n")
+	if len(kyse__d.Keys) > 0 {
+//line components/kbd.go:78
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t<span class=\"inline-flex items-center gap-1\">\n")
 		}
 //line components/kbd.kyse.go:54
-		for i := 0; i < len(d.Keys); i++ {
-//line components/kbd.go:82
+		for i := 0; i < len(kyse__d.Keys); i++ {
+//line components/kbd.go:84
 //line components/kbd.kyse.go:55
 			if i > 0 {
-//line components/kbd.go:85
-				if err == nil {
-					_, err = io.WriteString(w, "\t\t\t\t<span>+</span>\n")
+//line components/kbd.go:87
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<span>+</span>\n")
 				}
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t<kbd\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<kbd\n")
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\tclass=\"kbd\"\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"kbd\"\n")
 			}
 //line components/kbd.kyse.go:60
-			if d.Name(i) != "" {
-//line components/kbd.go:98
-				if err == nil {
-					_, err = io.WriteString(w, "\t\t\t\t\taria-label=\"")
+			if kyse__d.Name(i) != "" {
+//line components/kbd.go:100
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-label=\"")
 				}
-				if err == nil {
+				if kyse__err == nil {
 //line components/kbd.kyse.go:61
-					_, err = io.WriteString(w, view.TextAttr(d.Name(i)))
-//line components/kbd.go:105
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name(i)))
+//line components/kbd.go:107
 				}
-				if err == nil {
-					_, err = io.WriteString(w, "\"\n")
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t>")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 			}
-			if err == nil {
+			if kyse__err == nil {
 //line components/kbd.kyse.go:63
-				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Keys[i])))
-//line components/kbd.go:117
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Keys[i])))
+//line components/kbd.go:119
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "</kbd>\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</kbd>\n")
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t</span>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t</span>\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	_ = err
-	return template.HTML(w.String())
+	_ = kyse__err
+	return kyse__template.HTML(kyse__w.String())
 }
 
 var (
-	_ = template.HTMLEscapeString
-	_ = io.WriteString
-	_ = view.Text
-	_ = view.UnsafeText
-	_ = strings.Builder{}
+	_ = kyse__template.HTMLEscapeString
+	_ = kyse__io.WriteString
+	_ = kyse__view.Text
+	_ = kyse__view.UnsafeText
+	_ = kyse__strings.Builder{}
 )

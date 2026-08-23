@@ -5,12 +5,12 @@
 package components
 
 import (
-	"fmt"
-	"html/template"
-	"io"
-	"strings"
+	kyse__fmt "fmt"
+	kyse__template "html/template"
+	kyse__io "io"
+	kyse__strings "strings"
 
-	"github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/framework/view"
 )
 
 //line components/toast.kyse.go:5
@@ -64,155 +64,157 @@ func (p ToastProps) Live() string {
 //line components/toast.go:65
 
 // Toast renders the toast component.
-func Toast(props ToastProps) template.HTML {
-	d := props
+func Toast(kyse__props ToastProps) kyse__template.HTML {
+	kyse__d := kyse__props
+	_ = kyse__d
+	d := kyse__d
 	_ = d
-	w := &strings.Builder{}
-	var err error
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	kyse__w := &kyse__strings.Builder{}
+	var kyse__err error
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
 //line components/toast.kyse.go:53
-	if d.Title != "" {
-//line components/toast.go:78
-		if err == nil {
-			_, err = io.WriteString(w, "\t<div class=\"toast\" role=\"status\" aria-live=\"")
+	if kyse__d.Title != "" {
+//line components/toast.go:80
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t<div class=\"toast\" role=\"status\" aria-live=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/toast.kyse.go:54
-			_, err = io.WriteString(w, view.TextAttr(d.Live()))
-//line components/toast.go:85
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Live()))
+//line components/toast.go:87
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 //line components/toast.kyse.go:55
-		if d.Category != "" {
-//line components/toast.go:92
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\tdata-category=\"")
+		if kyse__d.Category != "" {
+//line components/toast.go:94
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-category=\"")
 			}
-			if err == nil {
+			if kyse__err == nil {
 //line components/toast.kyse.go:56
-				_, err = io.WriteString(w, view.TextAttr(d.Category))
-//line components/toast.go:99
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Category))
+//line components/toast.go:101
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\"\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
 //line components/toast.kyse.go:58
-		if d.Duration != 0 {
-//line components/toast.go:107
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\tdata-duration=\"")
+		if kyse__d.Duration != 0 {
+//line components/toast.go:109
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-duration=\"")
 			}
-			if err == nil {
+			if kyse__err == nil {
 //line components/toast.kyse.go:59
-				_, err = io.WriteString(w, view.TextAttr(d.Duration))
-//line components/toast.go:114
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Duration))
+//line components/toast.go:116
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\"\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t<div class=\"toast-content\">\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<div class=\"toast-content\">\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t<section>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<section>\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t\t<h2>")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<h2>")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/toast.kyse.go:64
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Title)))
-//line components/toast.go:135
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Title)))
+//line components/toast.go:137
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "</h2>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</h2>\n")
 		}
 //line components/toast.kyse.go:65
-		if d.Message != "" {
-//line components/toast.go:142
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t<p>")
+		if kyse__d.Message != "" {
+//line components/toast.go:144
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<p>")
 			}
-			if err == nil {
+			if kyse__err == nil {
 //line components/toast.kyse.go:66
-				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Message)))
-//line components/toast.go:149
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message)))
+//line components/toast.go:151
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "</p>\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t</section>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t</section>\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 		}
 //line components/toast.kyse.go:70
-		if d.ActionURL != "" {
-//line components/toast.go:163
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t<footer>\n")
+		if kyse__d.ActionURL != "" {
+//line components/toast.go:165
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<footer>\n")
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t<button type=\"button\" class=\"btn\" data-size=\"sm\" data-toast-action\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<button type=\"button\" class=\"btn\" data-size=\"sm\" data-toast-action\n")
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\t\thx-post=\"")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thx-post=\"")
 			}
-			if err == nil {
-				var s string
+			if kyse__err == nil {
+				var kyse__v1 string
 //line components/toast.kyse.go:73
-				s, err = view.TextURL(d.ActionURL)
-//line components/toast.go:177
-				if err != nil {
-					err = fmt.Errorf("%s: %w", "components/toast.kyse.go:73", err)
+				kyse__v1, kyse__err = kyse__view.TextURL(kyse__d.ActionURL)
+//line components/toast.go:179
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/toast.kyse.go:73", kyse__err)
 				} else {
-					_, err = io.WriteString(w, s)
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 				}
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\" hx-swap=\"none\">")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\" hx-swap=\"none\">")
 			}
-			if err == nil {
+			if kyse__err == nil {
 //line components/toast.kyse.go:73
-				_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.ActionLabel)))
-//line components/toast.go:190
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.ActionLabel)))
+//line components/toast.go:192
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "</button>\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</button>\n")
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t</footer>\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t</footer>\n")
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t</div>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t</div>\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t</div>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t</div>\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	_ = err
-	return template.HTML(w.String())
+	_ = kyse__err
+	return kyse__template.HTML(kyse__w.String())
 }
 
 var (
-	_ = template.HTMLEscapeString
-	_ = io.WriteString
-	_ = view.Text
-	_ = view.UnsafeText
-	_ = strings.Builder{}
+	_ = kyse__template.HTMLEscapeString
+	_ = kyse__io.WriteString
+	_ = kyse__view.Text
+	_ = kyse__view.UnsafeText
+	_ = kyse__strings.Builder{}
 )

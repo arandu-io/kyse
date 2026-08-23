@@ -5,12 +5,13 @@
 package components
 
 import (
-	"html/template"
-	"io"
-	"strings"
+	kyse__template "html/template"
+	kyse__io "io"
+	kyse__strings "strings"
 
-	"github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/framework/view"
 	"github.com/arandu-io/kyse/icons"
+	"html/template"
 )
 
 //line components/accordion.kyse.go:11
@@ -66,131 +67,133 @@ func (p AccordionProps) Group() string {
 	return p.ID
 }
 
-//line components/accordion.go:70
+//line components/accordion.go:71
 
 // Accordion renders the accordion component.
-func Accordion(props AccordionProps) template.HTML {
-	d := props
+func Accordion(kyse__props AccordionProps) kyse__template.HTML {
+	kyse__d := kyse__props
+	_ = kyse__d
+	d := kyse__d
 	_ = d
-	w := &strings.Builder{}
-	var err error
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	kyse__w := &kyse__strings.Builder{}
+	var kyse__err error
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "<section\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "<section\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\tclass=\"accordion\"\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"accordion\"\n")
 	}
 //line components/accordion.kyse.go:66
-	if d.ID != "" {
-//line components/accordion.go:89
-		if err == nil {
-			_, err = io.WriteString(w, "\t\tid=\"")
+	if kyse__d.ID != "" {
+//line components/accordion.go:92
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tid=\"")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/accordion.kyse.go:67
-			_, err = io.WriteString(w, view.TextAttr(d.ID))
-//line components/accordion.go:96
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
+//line components/accordion.go:99
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\"\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, ">\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")
 	}
 //line components/accordion.kyse.go:70
-	for _, item := range d.Items {
+	for _, item := range kyse__d.Items {
 		_ = item
-//line components/accordion.go:108
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t<details\n")
+//line components/accordion.go:111
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<details\n")
 		}
 //line components/accordion.kyse.go:72
-		if d.Group() != "" {
-//line components/accordion.go:114
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\tname=\"")
+		if kyse__d.Group() != "" {
+//line components/accordion.go:117
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tname=\"")
 			}
-			if err == nil {
+			if kyse__err == nil {
 //line components/accordion.kyse.go:73
-				_, err = io.WriteString(w, view.TextAttr(d.Group()))
-//line components/accordion.go:121
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Group()))
+//line components/accordion.go:124
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\"\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
 //line components/accordion.kyse.go:75
 		if item.Open {
-//line components/accordion.go:129
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\topen\n")
+//line components/accordion.go:132
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\topen\n")
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t<summary\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<summary\n")
 		}
 //line components/accordion.kyse.go:80
 		if item.Disabled {
-//line components/accordion.go:142
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\taria-disabled=\"true\"\n")
+//line components/accordion.go:145
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-disabled=\"true\"\n")
 			}
-			if err == nil {
-				_, err = io.WriteString(w, "\t\t\t\t\ttabindex=\"-1\"\n")
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\ttabindex=\"-1\"\n")
 			}
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t>")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/accordion.kyse.go:84
-			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(item.Label)))
-//line components/accordion.go:156
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(item.Label)))
+//line components/accordion.go:159
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/accordion.kyse.go:84
-			_, err = io.WriteString(w, view.UnsafeText(icons.CaretDown(icons.Props{})))
-//line components/accordion.go:161
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(icons.CaretDown(icons.Props{})))
+//line components/accordion.go:164
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "</summary>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</summary>\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t<section>")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<section>")
 		}
-		if err == nil {
+		if kyse__err == nil {
 //line components/accordion.kyse.go:85
-			_, err = io.WriteString(w, view.UnsafeText(item.Content))
-//line components/accordion.go:172
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(item.Content))
+//line components/accordion.go:175
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "</section>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</section>\n")
 		}
-		if err == nil {
-			_, err = io.WriteString(w, "\t\t</details>\n")
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t</details>\n")
 		}
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "</section>\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "</section>\n")
 	}
-	if err == nil {
-		_, err = io.WriteString(w, "\n")
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	_ = err
-	return template.HTML(w.String())
+	_ = kyse__err
+	return kyse__template.HTML(kyse__w.String())
 }
 
 var (
-	_ = template.HTMLEscapeString
-	_ = io.WriteString
-	_ = view.Text
-	_ = view.UnsafeText
-	_ = strings.Builder{}
+	_ = kyse__template.HTMLEscapeString
+	_ = kyse__io.WriteString
+	_ = kyse__view.Text
+	_ = kyse__view.UnsafeText
+	_ = kyse__strings.Builder{}
 )
