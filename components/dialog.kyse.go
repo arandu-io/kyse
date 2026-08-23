@@ -10,6 +10,12 @@ package components
 // Escape. That is four behaviours nobody has to write, and the four that
 // hand-built modals get wrong.
 //
+// None of the four is true unless it was opened with showModal(). One opened by
+// setting the open attribute is not modal: the page behind it stays reachable,
+// focus walks out of it, and Escape does nothing. And a modal dialog never
+// closes on a click outside itself, which is the behaviour a confirmation
+// wants and is not something this has to arrange.
+//
 // It confirms rather than composes. A dialog that could hold anything would
 // have to take markup as a string, which is where escaping stops being
 // guaranteed -- and "are you sure" is what a dialog is for nine times in ten.
@@ -35,9 +41,40 @@ type DialogProps struct {
 	// CancelLabel is the way out. Empty means "Cancel".
 	CancelLabel string
 
+	// Alert draws this as an alert dialog instead: the message is announced
+	// along with the title the moment it opens, and the cursor starts on the
+	// way out rather than on the way through. Use it for what cannot be undone.
+	//
+	// It is a field rather than a component of its own because the two differ
+	// in the role, in what is announced and in where focus lands, and in
+	// nothing else -- the question, the consequence and the pair of buttons are
+	// the same markup. Two components would be two ways to ask "are you sure",
+	// and within a year they would answer it differently.
+	Alert bool
+
 	// Token is the CSRF token. It is passed in rather than read from the page,
 	// because a component does not receive the page.
 	Token string
+}
+
+// Surface is the stylesheet this is drawn on: the alert one is wider, centres
+// its heading on a narrow screen and has room for a figure above it.
+func (p DialogProps) Surface() string {
+	if p.Alert {
+		return "alert-dialog"
+	}
+	return "dialog"
+}
+
+// DescribedBy names the consequence, and is empty when there is none. An
+// aria-describedby pointing at an element that was never drawn describes
+// nothing, which is worse than describing nothing at all: it reads as a
+// description that failed to arrive.
+func (p DialogProps) DescribedBy() string {
+	if p.Message == "" {
+		return ""
+	}
+	return p.ID + "-description"
 }
 
 // Confirm is the label of the button that goes through with it.
@@ -66,18 +103,35 @@ func (p DialogProps) FormMethod() string {
 }
 @endgo
 
-<dialog id="{{ .ID }}" class="dialog" aria-labelledby="{{ .ID }}-title">
+<dialog
+	id="{{ .ID }}"
+	class="{{ .Surface() }}"
+	aria-labelledby="{{ .ID }}-title"
+	@if(.Alert)
+		role="alertdialog"
+	@endif
+	@if(.DescribedBy() != "")
+		aria-describedby="{{ .DescribedBy() }}"
+	@endif
+>
 	<article>
 		<header>
 			<h2 id="{{ .ID }}-title">{{ .Title }}</h2>
 			@if(.Message != "")
-				<p class="text-muted-foreground text-sm">{{ .Message }}</p>
+				<p id="{{ .ID }}-description" class="text-muted-foreground text-sm">{{ .Message }}</p>
 			@endif
 		</header>
 
 		<footer class="flex justify-end gap-2">
 			<form method="dialog">
-				<button type="submit" class="btn" data-variant="outline">{{ .Cancel() }}</button>
+				<button
+					type="submit"
+					class="btn"
+					data-variant="outline"
+					@if(.Alert)
+						autofocus
+					@endif
+				>{{ .Cancel() }}</button>
 			</form>
 			<form method="{{ .FormMethod() }}" action="{{ .Action }}">
 				<input type="hidden" name="_csrf" value="{{ .Token }}">

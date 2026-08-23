@@ -22,6 +22,12 @@ import (
 // Escape. That is four behaviours nobody has to write, and the four that
 // hand-built modals get wrong.
 //
+// None of the four is true unless it was opened with showModal(). One opened by
+// setting the open attribute is not modal: the page behind it stays reachable,
+// focus walks out of it, and Escape does nothing. And a modal dialog never
+// closes on a click outside itself, which is the behaviour a confirmation
+// wants and is not something this has to arrange.
+//
 // It confirms rather than composes. A dialog that could hold anything would
 // have to take markup as a string, which is where escaping stops being
 // guaranteed -- and "are you sure" is what a dialog is for nine times in ten.
@@ -47,9 +53,40 @@ type DialogProps struct {
 	// CancelLabel is the way out. Empty means "Cancel".
 	CancelLabel string
 
+	// Alert draws this as an alert dialog instead: the message is announced
+	// along with the title the moment it opens, and the cursor starts on the
+	// way out rather than on the way through. Use it for what cannot be undone.
+	//
+	// It is a field rather than a component of its own because the two differ
+	// in the role, in what is announced and in where focus lands, and in
+	// nothing else -- the question, the consequence and the pair of buttons are
+	// the same markup. Two components would be two ways to ask "are you sure",
+	// and within a year they would answer it differently.
+	Alert bool
+
 	// Token is the CSRF token. It is passed in rather than read from the page,
 	// because a component does not receive the page.
 	Token string
+}
+
+// Surface is the stylesheet this is drawn on: the alert one is wider, centres
+// its heading on a narrow screen and has room for a figure above it.
+func (p DialogProps) Surface() string {
+	if p.Alert {
+		return "alert-dialog"
+	}
+	return "dialog"
+}
+
+// DescribedBy names the consequence, and is empty when there is none. An
+// aria-describedby pointing at an element that was never drawn describes
+// nothing, which is worse than describing nothing at all: it reads as a
+// description that failed to arrive.
+func (p DialogProps) DescribedBy() string {
+	if p.Message == "" {
+		return ""
+	}
+	return p.ID + "-description"
 }
 
 // Confirm is the label of the button that goes through with it.
@@ -77,7 +114,7 @@ func (p DialogProps) FormMethod() string {
 	return p.Method
 }
 
-//line components/dialog.go:81
+//line components/dialog.go:118
 
 // Dialog renders the dialog component.
 func Dialog(props DialogProps) template.HTML {
@@ -89,23 +126,65 @@ func Dialog(props DialogProps) template.HTML {
 		_, err = io.WriteString(w, "\n")
 	}
 	if err == nil {
-		_, err = io.WriteString(w, "<dialog id=\"")
+		_, err = io.WriteString(w, "<dialog\n")
 	}
 	if err == nil {
-//line components/dialog.kyse.go:69
+		_, err = io.WriteString(w, "\tid=\"")
+	}
+	if err == nil {
+//line components/dialog.kyse.go:107
 		_, err = io.WriteString(w, view.TextAttr(d.ID))
-//line components/dialog.go:98
+//line components/dialog.go:138
 	}
 	if err == nil {
-		_, err = io.WriteString(w, "\" class=\"dialog\" aria-labelledby=\"")
+		_, err = io.WriteString(w, "\"\n")
 	}
 	if err == nil {
-//line components/dialog.kyse.go:69
+		_, err = io.WriteString(w, "\tclass=\"")
+	}
+	if err == nil {
+//line components/dialog.kyse.go:108
+		_, err = io.WriteString(w, view.TextAttr(d.Surface()))
+//line components/dialog.go:149
+	}
+	if err == nil {
+		_, err = io.WriteString(w, "\"\n")
+	}
+	if err == nil {
+		_, err = io.WriteString(w, "\taria-labelledby=\"")
+	}
+	if err == nil {
+//line components/dialog.kyse.go:109
 		_, err = io.WriteString(w, view.TextAttr(d.ID))
-//line components/dialog.go:106
+//line components/dialog.go:160
 	}
 	if err == nil {
-		_, err = io.WriteString(w, "-title\">\n")
+		_, err = io.WriteString(w, "-title\"\n")
+	}
+//line components/dialog.kyse.go:110
+	if d.Alert {
+//line components/dialog.go:167
+		if err == nil {
+			_, err = io.WriteString(w, "\t\trole=\"alertdialog\"\n")
+		}
+	}
+//line components/dialog.kyse.go:113
+	if d.DescribedBy() != "" {
+//line components/dialog.go:174
+		if err == nil {
+			_, err = io.WriteString(w, "\t\taria-describedby=\"")
+		}
+		if err == nil {
+//line components/dialog.kyse.go:114
+			_, err = io.WriteString(w, view.TextAttr(d.DescribedBy()))
+//line components/dialog.go:181
+		}
+		if err == nil {
+			_, err = io.WriteString(w, "\"\n")
+		}
+	}
+	if err == nil {
+		_, err = io.WriteString(w, ">\n")
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\t<article>\n")
@@ -117,31 +196,39 @@ func Dialog(props DialogProps) template.HTML {
 		_, err = io.WriteString(w, "\t\t\t<h2 id=\"")
 	}
 	if err == nil {
-//line components/dialog.kyse.go:72
+//line components/dialog.kyse.go:119
 		_, err = io.WriteString(w, view.TextAttr(d.ID))
-//line components/dialog.go:123
+//line components/dialog.go:202
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "-title\">")
 	}
 	if err == nil {
-//line components/dialog.kyse.go:72
+//line components/dialog.kyse.go:119
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Title)))
-//line components/dialog.go:131
+//line components/dialog.go:210
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</h2>\n")
 	}
-//line components/dialog.kyse.go:73
+//line components/dialog.kyse.go:120
 	if d.Message != "" {
-//line components/dialog.go:138
+//line components/dialog.go:217
 		if err == nil {
-			_, err = io.WriteString(w, "\t\t\t\t<p class=\"text-muted-foreground text-sm\">")
+			_, err = io.WriteString(w, "\t\t\t\t<p id=\"")
 		}
 		if err == nil {
-//line components/dialog.kyse.go:74
+//line components/dialog.kyse.go:121
+			_, err = io.WriteString(w, view.TextAttr(d.ID))
+//line components/dialog.go:224
+		}
+		if err == nil {
+			_, err = io.WriteString(w, "-description\" class=\"text-muted-foreground text-sm\">")
+		}
+		if err == nil {
+//line components/dialog.kyse.go:121
 			_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Message)))
-//line components/dialog.go:145
+//line components/dialog.go:232
 		}
 		if err == nil {
 			_, err = io.WriteString(w, "</p>\n")
@@ -160,12 +247,31 @@ func Dialog(props DialogProps) template.HTML {
 		_, err = io.WriteString(w, "\t\t\t<form method=\"dialog\">\n")
 	}
 	if err == nil {
-		_, err = io.WriteString(w, "\t\t\t\t<button type=\"submit\" class=\"btn\" data-variant=\"outline\">")
+		_, err = io.WriteString(w, "\t\t\t\t<button\n")
 	}
 	if err == nil {
-//line components/dialog.kyse.go:80
+		_, err = io.WriteString(w, "\t\t\t\t\ttype=\"submit\"\n")
+	}
+	if err == nil {
+		_, err = io.WriteString(w, "\t\t\t\t\tclass=\"btn\"\n")
+	}
+	if err == nil {
+		_, err = io.WriteString(w, "\t\t\t\t\tdata-variant=\"outline\"\n")
+	}
+//line components/dialog.kyse.go:131
+	if d.Alert {
+//line components/dialog.go:264
+		if err == nil {
+			_, err = io.WriteString(w, "\t\t\t\t\t\tautofocus\n")
+		}
+	}
+	if err == nil {
+		_, err = io.WriteString(w, "\t\t\t\t>")
+	}
+	if err == nil {
+//line components/dialog.kyse.go:134
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Cancel())))
-//line components/dialog.go:169
+//line components/dialog.go:275
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</button>\n")
@@ -177,20 +283,20 @@ func Dialog(props DialogProps) template.HTML {
 		_, err = io.WriteString(w, "\t\t\t<form method=\"")
 	}
 	if err == nil {
-//line components/dialog.kyse.go:82
+//line components/dialog.kyse.go:136
 		_, err = io.WriteString(w, view.TextAttr(d.FormMethod()))
-//line components/dialog.go:183
+//line components/dialog.go:289
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\" action=\"")
 	}
 	if err == nil {
 		var s string
-//line components/dialog.kyse.go:82
+//line components/dialog.kyse.go:136
 		s, err = view.TextURL(d.Action)
-//line components/dialog.go:192
+//line components/dialog.go:298
 		if err != nil {
-			err = fmt.Errorf("%s: %w", "components/dialog.kyse.go:82", err)
+			err = fmt.Errorf("%s: %w", "components/dialog.kyse.go:136", err)
 		} else {
 			_, err = io.WriteString(w, s)
 		}
@@ -202,9 +308,9 @@ func Dialog(props DialogProps) template.HTML {
 		_, err = io.WriteString(w, "\t\t\t\t<input type=\"hidden\" name=\"_csrf\" value=\"")
 	}
 	if err == nil {
-//line components/dialog.kyse.go:83
+//line components/dialog.kyse.go:137
 		_, err = io.WriteString(w, view.TextAttr(d.Token))
-//line components/dialog.go:208
+//line components/dialog.go:314
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\">\n")
@@ -213,17 +319,17 @@ func Dialog(props DialogProps) template.HTML {
 		_, err = io.WriteString(w, "\t\t\t\t<button type=\"submit\" class=\"btn\" data-variant=\"")
 	}
 	if err == nil {
-//line components/dialog.kyse.go:84
+//line components/dialog.kyse.go:138
 		_, err = io.WriteString(w, view.TextAttr(d.ConfirmVariant))
-//line components/dialog.go:219
+//line components/dialog.go:325
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "\">")
 	}
 	if err == nil {
-//line components/dialog.kyse.go:84
+//line components/dialog.kyse.go:138
 		_, err = io.WriteString(w, template.HTMLEscapeString(view.Text(d.Confirm())))
-//line components/dialog.go:227
+//line components/dialog.go:333
 	}
 	if err == nil {
 		_, err = io.WriteString(w, "</button>\n")
