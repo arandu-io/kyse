@@ -2,6 +2,8 @@
 
 package components
 
+import "github.com/arandu-io/kyse/icons"
+
 @go
 // ThemeAccents are the accent colours the toggle offers, in the order they are
 // read.
@@ -34,8 +36,14 @@ var ThemeAccents = []string{"slate", "blue", "green", "amber", "rose", "violet"}
 <div class="dropdown-menu">
 	<button type="button" class="btn" data-variant="ghost" data-size="icon"
 		aria-label="Change the theme" aria-haspopup="menu" aria-expanded="false">
-		<span aria-hidden="true" data-theme-glyph="light">○</span>
-		<span aria-hidden="true" data-theme-glyph="dark">◑</span>
+		{{-- The icons are the library's own, not two characters from a font
+		     nobody chose. A glyph borrowed out of the text stream is drawn by
+		     whatever face the page happens to be set in, at whatever weight that
+		     face gives it, and it lines up with nothing else on the page. These
+		     are the same set every other icon here comes from, so they carry the
+		     colour of their text and are sized by the line they sit on. --}}
+		<span aria-hidden="true" class="block size-[18px]" data-theme-glyph="light">{!! icons.Moon(icons.Props{}) !!}</span>
+		<span aria-hidden="true" class="block size-[18px]" data-theme-glyph="dark">{!! icons.Sun(icons.Props{}) !!}</span>
 	</button>
 
 	<div data-popover aria-hidden="true" class="w-44">
