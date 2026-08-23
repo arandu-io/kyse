@@ -1,0 +1,198 @@
+//go:build kyse
+
+package components
+
+import "strconv"
+
+@go
+// RangeSliderProps is a number chosen by dragging: one thumb on one track,
+// between a floor and a ceiling.
+//
+// # Why the input is the slider
+//
+// It is an input of type range, so the thumb, the drag, the arrow keys, Home,
+// End, Page Up and Page Down, the role of slider and the three values a screen
+// reader reads out all come from the browser. None of that is written here and
+// none of it can be got wrong here. What is written here is the label, the
+// bounds, and the coloured part of the track.
+//
+// # What the client is for
+//
+// Two things, and both are what somebody is looking at while they drag: how
+// much of the track is filled, and the number under the thumb. Both are drawn
+// by the server first, so a slider is correct before anything runs and stays
+// correct if nothing does; while a thumb is moving they are kept in step with
+// it, because a number that only catches up on release is a number nobody can
+// aim with.
+//
+// The value that is submitted is the input's own, and the browser sends it
+// whether or not any of that happened.
+type RangeSliderProps struct {
+	// Name is the form field name, the id everything else is hung off, and
+	// what Page is asked about.
+	Name string
+	// Label is the text above the track.
+	Label string
+	// Value is where the thumb starts when nothing was rejected.
+	Value int
+	// Min is the floor. It defaults to zero, which is also what an unset Min
+	// means, so a slider that starts below zero has to say so.
+	Min int
+	// Max is the ceiling. Zero means a hundred, because a slider whose floor
+	// and ceiling are both zero has nowhere to go.
+	Max int
+	// Step is how far one press of an arrow key moves the thumb. Zero means
+	// one.
+	Step int
+	// Unit is what the number is in, drawn after it: per cent, seconds,
+	// pixels. Empty draws the number alone.
+	Unit string
+	// ShowValue draws the current number under the track. Without it the only
+	// way to read a slider is to guess from the thumb, which is fine for
+	// loudness and wrong for anything somebody has to report.
+	ShowValue bool
+	// Hint is the sentence under the track that is always there.
+	Hint string
+	// Page is the screen's own view.Page, which is what this slider asks for
+	// its message and for where the thumb was left. Nil draws no message and
+	// keeps Value.
+	Page Page
+	// Disabled draws the slider as unavailable and stops it answering.
+	Disabled bool
+}
+
+// Floor is the lowest value the thumb reaches.
+func (p RangeSliderProps) Floor() int {
+	return p.Min
+}
+
+// Ceiling is the highest value the thumb reaches.
+func (p RangeSliderProps) Ceiling() int {
+	if p.Max == 0 {
+		return 100
+	}
+	return p.Max
+}
+
+// Tick is how far one press of an arrow key moves the thumb.
+func (p RangeSliderProps) Tick() int {
+	if p.Step == 0 {
+		return 1
+	}
+	return p.Step
+}
+
+// Message is what validation left for this slider, or empty.
+func (p RangeSliderProps) Message() string {
+	if p.Page == nil {
+		return ""
+	}
+	return p.Page.FieldError(p.Name)
+}
+
+// submitted is what the form left for this slider: where the thumb was on the
+// rejected attempt, and Value when there was none. It is text, because that is
+// what a form carries and what Page answers with.
+func (p RangeSliderProps) submitted() string {
+	if p.Page == nil {
+		return strconv.Itoa(p.Value)
+	}
+	return p.Page.OldOr(p.Name, strconv.Itoa(p.Value))
+}
+
+// At is where the thumb is, as a number inside the bounds.
+//
+// Anything that is not a number, and anything outside the bounds, lands on the
+// floor rather than throwing. What comes back from a rejected attempt is
+// whatever was posted, and a slider drawn carrying a word is a slider whose
+// thumb the browser puts in one place and whose track is coloured to another.
+func (p RangeSliderProps) At() int {
+	value, err := strconv.Atoi(p.submitted())
+	if err != nil || value < p.Floor() || value > p.Ceiling() {
+		return p.Floor()
+	}
+	return value
+}
+
+// Current is where the thumb is drawn, which is At written out.
+func (p RangeSliderProps) Current() string {
+	return strconv.Itoa(p.At())
+}
+
+// Fill is how much of the track is coloured, as a percentage, so the slider is
+// painted right on the first frame rather than on the first drag.
+func (p RangeSliderProps) Fill() string {
+	span := p.Ceiling() - p.Floor()
+	if span <= 0 {
+		return "0%"
+	}
+	return strconv.Itoa((p.At() - p.Floor()) * 100 / span) + "%"
+}
+
+// DescribedBy names the element that explains this slider, so the error and
+// the hint are announced rather than only shown.
+func (p RangeSliderProps) DescribedBy() string {
+	if p.Message() != "" {
+		return p.Name + "-error"
+	}
+	if p.Hint != "" {
+		return p.Name + "-hint"
+	}
+	return ""
+}
+@endgo
+
+<div class="field" data-at="{{ .Current() }}"
+	x-data="{
+		shown: '',
+		paint(track) {
+			const span = (track.max - track.min) || 1
+			track.style.setProperty('--slider-value', ((track.value - track.min) / span * 100) + '%')
+			this.shown = track.value
+		}
+	}"
+	x-init="shown = $el.dataset.at"
+>
+	<label class="label" for="{{ .Name }}">{{ .Label }}</label>
+
+	<input
+		class="input"
+		type="range"
+		id="{{ .Name }}"
+		name="{{ .Name }}"
+		value="{{ .Current() }}"
+		min="{{ .Floor() }}"
+		max="{{ .Ceiling() }}"
+		step="{{ .Tick() }}"
+		style="--slider-value: {{ .Fill() }}"
+		x-init="paint($el)"
+		x-on:input="paint($el)"
+		@if(.DescribedBy() != "")
+			aria-describedby="{{ .DescribedBy() }}"
+		@endif
+		@if(.Message() != "")
+			aria-invalid="true"
+		@endif
+		@if(.Disabled)
+			disabled
+		@endif
+	>
+
+	@if(.ShowValue)
+		<p class="text-muted-foreground text-sm">
+			<output for="{{ .Name }}" x-text="shown">{{ .Current() }}</output>
+			@if(.Unit != "")
+				{{ .Unit }}
+			@endif
+		</p>
+	@endif
+
+	@if(.Message() != "")
+		<p id="{{ .Name }}-error" class="text-destructive text-sm">{{ .Message() }}</p>
+	@endif
+	@if(.Message() == "")
+		@if(.Hint != "")
+			<p id="{{ .Name }}-hint" class="text-muted-foreground text-sm">{{ .Hint }}</p>
+		@endif
+	@endif
+</div>
