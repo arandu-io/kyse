@@ -5,7 +5,6 @@
 package components
 
 import (
-	kyse__fmt "fmt"
 	kyse__template "html/template"
 	kyse__io "io"
 	kyse__strings "strings"
@@ -26,7 +25,7 @@ import (
 // the page.
 var ThemeAccents = []string{"slate", "blue", "green", "amber", "rose", "violet"}
 
-//line components/theme-toggle.go:30
+//line components/theme-toggle.go:29
 
 // ThemeToggle renders the theme-toggle component.
 func ThemeToggle() kyse__template.HTML {
@@ -88,45 +87,36 @@ func ThemeToggle() kyse__template.HTML {
 	}
 //line components/theme-toggle.kyse.go:52
 	for at := 0; at < len(ThemeAccents); at++ {
-//line components/theme-toggle.go:92
+//line components/theme-toggle.go:91
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<button type=\"button\" role=\"menuitem\" data-theme-accent=\"")
 		}
 		if kyse__err == nil {
 //line components/theme-toggle.kyse.go:53
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(ThemeAccents[at]))
-//line components/theme-toggle.go:99
+//line components/theme-toggle.go:98
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<span class=\"size-3 rounded-full border\" data-theme-swatch\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<span class=\"size-3 rounded-full border swatch-")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tstyle=\"background: var(--accent-swatch-")
+//line components/theme-toggle.kyse.go:61
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(ThemeAccents[at]))
+//line components/theme-toggle.go:109
 		}
 		if kyse__err == nil {
-			var kyse__v1 string
-//line components/theme-toggle.kyse.go:55
-			kyse__v1, kyse__err = kyse__view.TextCSS(ThemeAccents[at])
-//line components/theme-toggle.go:114
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/theme-toggle.kyse.go:55", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-			}
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, ")\"></span>\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\" data-theme-swatch></span>\n")
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<span>")
 		}
 		if kyse__err == nil {
-//line components/theme-toggle.kyse.go:56
+//line components/theme-toggle.kyse.go:62
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(ThemeAccents[at])))
-//line components/theme-toggle.go:130
+//line components/theme-toggle.go:120
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")

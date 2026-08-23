@@ -51,8 +51,14 @@ var ThemeAccents = []string{"slate", "blue", "green", "amber", "rose", "violet"}
 
 			@for(at := 0; at < len(ThemeAccents); at++)
 				<button type="button" role="menuitem" data-theme-accent="{{ ThemeAccents[at] }}">
-					<span class="size-3 rounded-full border" data-theme-swatch
-						style="background: var(--accent-swatch-{{ ThemeAccents[at] }})"></span>
+					{{-- The colour is a class and not a style attribute. The policy an
+					     Arandu application serves its pages under is style-src 'self',
+					     which refuses a style attribute as surely as it refuses an
+					     inline script -- the swatch would be a colourless dot, and the
+					     console would say so in a sentence about inline styles that
+					     reads like a different problem. The class is defined once
+					     beside the rest of the theme rules. --}}
+					<span class="size-3 rounded-full border swatch-{{ ThemeAccents[at] }}" data-theme-swatch></span>
 					<span>{{ ThemeAccents[at] }}</span>
 				</button>
 			@endfor
