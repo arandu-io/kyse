@@ -41,16 +41,21 @@ import "github.com/arandu-io/kyse/icons"
 	</button>
 
 	<div data-popover aria-hidden="true" class="w-40">
-		<div role="radiogroup" aria-label="Theme">
-			<button type="button" role="radio" aria-checked="true" data-theme-mode="auto">
+		{{-- role="menu" with menuitemradio, and not a radiogroup. The two say the
+		     same thing about mutual exclusion, and only one of them is what a
+		     menu is: the script that opens this popover looks for a menu inside
+		     it, and a radiogroup leaves it reporting a missing element and the
+		     arrow keys doing nothing. --}}
+		<div role="menu" aria-label="Theme">
+			<button type="button" role="menuitemradio" aria-checked="true" data-theme-mode="auto">
 				<span aria-hidden="true" class="block size-4">{!! icons.Desktop(icons.Props{}) !!}</span>
 				<span>Auto</span>
 			</button>
-			<button type="button" role="radio" aria-checked="false" data-theme-mode="light">
+			<button type="button" role="menuitemradio" aria-checked="false" data-theme-mode="light">
 				<span aria-hidden="true" class="block size-4">{!! icons.Sun(icons.Props{}) !!}</span>
 				<span>Light</span>
 			</button>
-			<button type="button" role="radio" aria-checked="false" data-theme-mode="dark">
+			<button type="button" role="menuitemradio" aria-checked="false" data-theme-mode="dark">
 				<span aria-hidden="true" class="block size-4">{!! icons.Moon(icons.Props{}) !!}</span>
 				<span>Dark</span>
 			</button>
