@@ -72,6 +72,21 @@ func TestPreloadsCarryCrossoriginAndTheRightType(t *testing.T) {
 	}
 }
 
+// TestAFontNameCannotAddAPreloadAttribute covers the application-controlled
+// part of the preload URL. A quote is a valid file-name byte, but it must stay
+// inside href rather than becoming an event-handler attribute.
+func TestAFontNameCannotAddAPreloadAttribute(t *testing.T) {
+	fonts.Register(`hostile" onload="alert(1).woff2`, body)
+
+	markup := string(fonts.Preloads())
+	if strings.Contains(markup, `" onload="`) {
+		t.Fatalf("a font name added an event-handler attribute:\n%s", markup)
+	}
+	if !strings.Contains(markup, `hostile&#34; onload=&#34;alert(1).woff2`) {
+		t.Errorf("the hostile name was not kept as escaped href data:\n%s", markup)
+	}
+}
+
 // TestTheOrderIsStable: a map has no order, and markup that differs by line
 // order between two runs of one binary is markup no diff and no cache can
 // compare.

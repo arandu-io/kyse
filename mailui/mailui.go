@@ -47,6 +47,8 @@ import (
 	"fmt"
 	"html/template"
 	"strings"
+
+	"github.com/arandu-io/framework/view"
 )
 
 // The palette, and it is inline everywhere because it has to be.
@@ -156,8 +158,11 @@ func Paragraph(text string) template.HTML {
 
 // ButtonProps is the one thing the message wants the reader to do.
 type ButtonProps struct {
+	// Label is the action the reader sees.
 	Label string
-	Href  string
+	// Href is where the action leads. It may be relative, or use http, https,
+	// mailto or tel; any other scheme draws no button.
+	Href string
 }
 
 // Button is the call to action.
@@ -168,13 +173,21 @@ type ButtonProps struct {
 //
 // It is an <a> styled as a block and not a <button>: a button element does
 // nothing in an inbox, and a form does not submit from one.
+//
+// A destination with a refused scheme draws nothing. HTML escaping prevents a
+// value from ending the attribute; the scheme check prevents a syntactically
+// valid javascript or data URL from executing when the reader follows it.
 func Button(p ButtonProps) template.HTML {
 	if p.Href == "" || p.Label == "" {
 		return ""
 	}
+	href, err := view.TextURL(p.Href)
+	if err != nil {
+		return ""
+	}
 	return template.HTML(fmt.Sprintf(
 		`<p style="margin:0 0 24px"><a href="%s" style="display:inline-block;background:%s;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;font-size:15px;font-weight:500;line-height:1">%s</a></p>`,
-		escape(p.Href), ink, escape(p.Label)))
+		href, ink, escape(p.Label)))
 }
 
 // Fallback is the address under a button, written out.

@@ -93,8 +93,12 @@ func Preloads() template.HTML {
 		if _, ok := formats[extension(a.Name)]; !ok {
 			continue
 		}
+		href, err := view.TextURL(a.URL)
+		if err != nil {
+			panic("fonts: a registered face produced an unsafe preload URL: " + err.Error())
+		}
 		fmt.Fprintf(&b, `<link rel="preload" href="%s" as="font" type="%s" crossorigin>`,
-			a.URL, a.ContentType)
+			href, view.TextAttr(a.ContentType))
 	}
 	return template.HTML(b.String())
 }

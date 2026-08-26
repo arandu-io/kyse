@@ -54,6 +54,36 @@ func TestEverythingIsEscaped(t *testing.T) {
 	}
 }
 
+// TestAButtonRefusesADangerousDestination covers the part HTML escaping cannot
+// answer: a javascript URL contains no syntax that needs escaping, but the
+// browser executes it when the reader follows the link.
+func TestAButtonRefusesADangerousDestination(t *testing.T) {
+	for _, href := range []string{
+		"javascript:alert(1)",
+		"JaVaScRiPt:alert(1)",
+		"java\tscript:alert(1)",
+		"data:text/html,<script>alert(1)</script>",
+		"//evil.example/steal",
+	} {
+		if got := mailui.Button(mailui.ButtonProps{Label: "Open", Href: href}); got != "" {
+			t.Errorf("a button rendered the refused destination %q:\n%s", href, got)
+		}
+	}
+}
+
+// TestAButtonKeepsAnAllowedDestination is the other half of the refusal. A
+// guard that removes every link is safe from scripts and useless as mail UI.
+func TestAButtonKeepsAnAllowedDestination(t *testing.T) {
+	got := string(mailui.Button(mailui.ButtonProps{
+		Label: "Open",
+		Href:  "/account?tab=security&from=mail",
+	}))
+
+	if !strings.Contains(got, `href="/account?tab=security&amp;from=mail"`) {
+		t.Errorf("an allowed destination was refused or changed incorrectly:\n%s", got)
+	}
+}
+
 // TestAButtonWithNoDestinationDrawsNothing: a call to action that goes nowhere
 // is worse than none, because the reader clicks it.
 func TestAButtonWithNoDestinationDrawsNothing(t *testing.T) {
