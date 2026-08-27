@@ -73,6 +73,13 @@ type MenuItem struct {
 
 	// The HTMX attributes, written only when they carry something. An empty
 	// hx-post is an attribute HTMX acts on: it would post to the current URL.
+	//
+	// HxTarget asks for a piece of the page back rather than a document, so what
+	// answers the request has to be a view that draws that piece and nothing
+	// around it -- one that extends no layout. Aimed at a view that extends one,
+	// the reply is a whole document: the swap drops its head, puts the body's
+	// children inside the target, and the page ends up holding a second copy of
+	// its own header and navigation.
 	HxPost    string
 	HxGet     string
 	HxTarget  string

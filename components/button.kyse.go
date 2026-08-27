@@ -28,6 +28,19 @@ type ButtonProps struct {
 
 	// The HTMX attributes, written only when they carry something. An empty
 	// hx-post is an attribute HTMX acts on: it would post to the current URL.
+	//
+	// HxTarget and HxSwap ask for a piece of the page back rather than a
+	// document, so what answers the request has to be a view that draws that
+	// piece and nothing around it -- one that extends no layout. Aimed at a
+	// view that extends one, the reply is a whole document: the swap drops its
+	// head, puts the body's children inside the target, and the page ends up
+	// holding a second copy of its own header and navigation.
+	//
+	// The status the answer carries decides whether the swap happens at all.
+	// A rejected form is answered 422, and 422 is not swapped unless the
+	// document says it is, so a button that narrows a swap and never seems to
+	// receive one is asking a question the page has not been configured to
+	// accept.
 	HxPost    string
 	HxGet     string
 	HxTarget  string

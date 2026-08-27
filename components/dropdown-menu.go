@@ -84,6 +84,13 @@ type MenuItem struct {
 
 	// The HTMX attributes, written only when they carry something. An empty
 	// hx-post is an attribute HTMX acts on: it would post to the current URL.
+	//
+	// HxTarget asks for a piece of the page back rather than a document, so what
+	// answers the request has to be a view that draws that piece and nothing
+	// around it -- one that extends no layout. Aimed at a view that extends one,
+	// the reply is a whole document: the swap drops its head, puts the body's
+	// children inside the target, and the page ends up holding a second copy of
+	// its own header and navigation.
 	HxPost    string
 	HxGet     string
 	HxTarget  string
@@ -107,7 +114,7 @@ func (p DropdownMenuProps) MenuID() string { return p.ID + "-menu" }
 // and an id repeated is an announcement naming the wrong line.
 func (p DropdownMenuProps) ItemID(at int) string { return p.ID + "-item-" + strconv.Itoa(at) }
 
-//line components/dropdown-menu.go:111
+//line components/dropdown-menu.go:118
 
 // DropdownMenu renders the dropdown-menu component.
 func DropdownMenu(kyse__props DropdownMenuProps) kyse__template.HTML {
@@ -124,9 +131,9 @@ func DropdownMenu(kyse__props DropdownMenuProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "<div class=\"dropdown-menu\" id=\"")
 	}
 	if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:100
+//line components/dropdown-menu.kyse.go:107
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/dropdown-menu.go:130
+//line components/dropdown-menu.go:137
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
@@ -144,9 +151,9 @@ func DropdownMenu(kyse__props DropdownMenuProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:104
+//line components/dropdown-menu.kyse.go:111
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.TriggerID()))
-//line components/dropdown-menu.go:150
+//line components/dropdown-menu.go:157
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -158,9 +165,9 @@ func DropdownMenu(kyse__props DropdownMenuProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-controls=\"")
 	}
 	if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:106
+//line components/dropdown-menu.kyse.go:113
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.MenuID()))
-//line components/dropdown-menu.go:164
+//line components/dropdown-menu.go:171
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -168,31 +175,31 @@ func DropdownMenu(kyse__props DropdownMenuProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-expanded=\"false\"\n")
 	}
-//line components/dropdown-menu.kyse.go:108
+//line components/dropdown-menu.kyse.go:115
 	if kyse__d.Variant != "" {
-//line components/dropdown-menu.go:174
+//line components/dropdown-menu.go:181
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-variant=\"")
 		}
 		if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:109
+//line components/dropdown-menu.kyse.go:116
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Variant))
-//line components/dropdown-menu.go:181
+//line components/dropdown-menu.go:188
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/dropdown-menu.kyse.go:111
+//line components/dropdown-menu.kyse.go:118
 	if kyse__d.Size != "" {
-//line components/dropdown-menu.go:189
+//line components/dropdown-menu.go:196
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-size=\"")
 		}
 		if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:112
+//line components/dropdown-menu.kyse.go:119
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Size))
-//line components/dropdown-menu.go:196
+//line components/dropdown-menu.go:203
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -202,9 +209,9 @@ func DropdownMenu(kyse__props DropdownMenuProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>")
 	}
 	if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:114
+//line components/dropdown-menu.kyse.go:121
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
-//line components/dropdown-menu.go:208
+//line components/dropdown-menu.go:215
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</button>\n")
@@ -219,9 +226,9 @@ func DropdownMenu(kyse__props DropdownMenuProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:117
+//line components/dropdown-menu.kyse.go:124
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PanelID()))
-//line components/dropdown-menu.go:225
+//line components/dropdown-menu.go:232
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -232,31 +239,31 @@ func DropdownMenu(kyse__props DropdownMenuProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-hidden=\"true\"\n")
 	}
-//line components/dropdown-menu.kyse.go:120
+//line components/dropdown-menu.kyse.go:127
 	if kyse__d.Side != "" {
-//line components/dropdown-menu.go:238
+//line components/dropdown-menu.go:245
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-side=\"")
 		}
 		if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:121
+//line components/dropdown-menu.kyse.go:128
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Side))
-//line components/dropdown-menu.go:245
+//line components/dropdown-menu.go:252
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/dropdown-menu.kyse.go:123
+//line components/dropdown-menu.kyse.go:130
 	if kyse__d.Align != "" {
-//line components/dropdown-menu.go:253
+//line components/dropdown-menu.go:260
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-align=\"")
 		}
 		if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:124
+//line components/dropdown-menu.kyse.go:131
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Align))
-//line components/dropdown-menu.go:260
+//line components/dropdown-menu.go:267
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -269,55 +276,55 @@ func DropdownMenu(kyse__props DropdownMenuProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<div role=\"menu\" id=\"")
 	}
 	if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:127
+//line components/dropdown-menu.kyse.go:134
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.MenuID()))
-//line components/dropdown-menu.go:275
+//line components/dropdown-menu.go:282
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\" aria-labelledby=\"")
 	}
 	if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:127
+//line components/dropdown-menu.kyse.go:134
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.TriggerID()))
-//line components/dropdown-menu.go:283
+//line components/dropdown-menu.go:290
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
 	}
-//line components/dropdown-menu.kyse.go:128
+//line components/dropdown-menu.kyse.go:135
 	for at := 0; at < len(kyse__d.Items); at++ {
-//line components/dropdown-menu.go:290
-//line components/dropdown-menu.kyse.go:129
+//line components/dropdown-menu.go:297
+//line components/dropdown-menu.kyse.go:136
 		if kyse__d.Items[at].Separator {
-//line components/dropdown-menu.go:293
+//line components/dropdown-menu.go:300
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<hr role=\"separator\">\n")
 			}
-//line components/dropdown-menu.kyse.go:131
+//line components/dropdown-menu.kyse.go:138
 		} else if kyse__d.Items[at].Heading {
-//line components/dropdown-menu.go:299
+//line components/dropdown-menu.go:306
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<div role=\"heading\" id=\"")
 			}
 			if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:132
+//line components/dropdown-menu.kyse.go:139
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ItemID(at)))
-//line components/dropdown-menu.go:306
+//line components/dropdown-menu.go:313
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\">")
 			}
 			if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:132
+//line components/dropdown-menu.kyse.go:139
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Items[at].Label)))
-//line components/dropdown-menu.go:314
+//line components/dropdown-menu.go:321
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</div>\n")
 			}
-//line components/dropdown-menu.kyse.go:133
+//line components/dropdown-menu.kyse.go:140
 		} else if kyse__d.Items[at].URL != "" {
-//line components/dropdown-menu.go:321
+//line components/dropdown-menu.go:328
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<a\n")
 			}
@@ -328,9 +335,9 @@ func DropdownMenu(kyse__props DropdownMenuProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tid=\"")
 			}
 			if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:136
+//line components/dropdown-menu.kyse.go:143
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ItemID(at)))
-//line components/dropdown-menu.go:334
+//line components/dropdown-menu.go:341
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -340,11 +347,11 @@ func DropdownMenu(kyse__props DropdownMenuProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v1 string
-//line components/dropdown-menu.kyse.go:137
+//line components/dropdown-menu.kyse.go:144
 				kyse__v1, kyse__err = kyse__view.TextURL(kyse__d.Items[at].URL)
-//line components/dropdown-menu.go:346
+//line components/dropdown-menu.go:353
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/dropdown-menu.kyse.go:137", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/dropdown-menu.kyse.go:144", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 				}
@@ -352,24 +359,24 @@ func DropdownMenu(kyse__props DropdownMenuProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
-//line components/dropdown-menu.kyse.go:138
+//line components/dropdown-menu.kyse.go:145
 			if kyse__d.Items[at].Variant != "" {
-//line components/dropdown-menu.go:358
+//line components/dropdown-menu.go:365
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-variant=\"")
 				}
 				if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:139
+//line components/dropdown-menu.kyse.go:146
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Items[at].Variant))
-//line components/dropdown-menu.go:365
+//line components/dropdown-menu.go:372
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 			}
-//line components/dropdown-menu.kyse.go:141
+//line components/dropdown-menu.kyse.go:148
 			if kyse__d.Items[at].Disabled {
-//line components/dropdown-menu.go:373
+//line components/dropdown-menu.go:380
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-disabled=\"true\"\n")
 				}
@@ -381,23 +388,23 @@ func DropdownMenu(kyse__props DropdownMenuProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t")
 			}
 			if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:145
+//line components/dropdown-menu.kyse.go:152
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Items[at].Label)))
-//line components/dropdown-menu.go:387
+//line components/dropdown-menu.go:394
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 			}
-//line components/dropdown-menu.kyse.go:146
+//line components/dropdown-menu.kyse.go:153
 			if kyse__d.Items[at].Shortcut != "" {
-//line components/dropdown-menu.go:394
+//line components/dropdown-menu.go:401
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<kbd>")
 				}
 				if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:147
+//line components/dropdown-menu.kyse.go:154
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Items[at].Shortcut)))
-//line components/dropdown-menu.go:401
+//line components/dropdown-menu.go:408
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "</kbd>\n")
@@ -420,48 +427,48 @@ func DropdownMenu(kyse__props DropdownMenuProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tid=\"")
 			}
 			if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:154
+//line components/dropdown-menu.kyse.go:161
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ItemID(at)))
-//line components/dropdown-menu.go:426
+//line components/dropdown-menu.go:433
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
-//line components/dropdown-menu.kyse.go:155
+//line components/dropdown-menu.kyse.go:162
 			if kyse__d.Items[at].Variant != "" {
-//line components/dropdown-menu.go:433
+//line components/dropdown-menu.go:440
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-variant=\"")
 				}
 				if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:156
+//line components/dropdown-menu.kyse.go:163
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Items[at].Variant))
-//line components/dropdown-menu.go:440
+//line components/dropdown-menu.go:447
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 			}
-//line components/dropdown-menu.kyse.go:158
+//line components/dropdown-menu.kyse.go:165
 			if kyse__d.Items[at].Disabled {
-//line components/dropdown-menu.go:448
+//line components/dropdown-menu.go:455
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-disabled=\"true\"\n")
 				}
 			}
-//line components/dropdown-menu.kyse.go:161
+//line components/dropdown-menu.kyse.go:168
 			if kyse__d.Items[at].HxPost != "" {
-//line components/dropdown-menu.go:455
+//line components/dropdown-menu.go:462
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\thx-post=\"")
 				}
 				if kyse__err == nil {
 					var kyse__v2 string
-//line components/dropdown-menu.kyse.go:162
+//line components/dropdown-menu.kyse.go:169
 					kyse__v2, kyse__err = kyse__view.TextURL(kyse__d.Items[at].HxPost)
-//line components/dropdown-menu.go:463
+//line components/dropdown-menu.go:470
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/dropdown-menu.kyse.go:162", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/dropdown-menu.kyse.go:169", kyse__err)
 					} else {
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 					}
@@ -470,19 +477,19 @@ func DropdownMenu(kyse__props DropdownMenuProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 			}
-//line components/dropdown-menu.kyse.go:164
+//line components/dropdown-menu.kyse.go:171
 			if kyse__d.Items[at].HxGet != "" {
-//line components/dropdown-menu.go:476
+//line components/dropdown-menu.go:483
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\thx-get=\"")
 				}
 				if kyse__err == nil {
 					var kyse__v3 string
-//line components/dropdown-menu.kyse.go:165
+//line components/dropdown-menu.kyse.go:172
 					kyse__v3, kyse__err = kyse__view.TextURL(kyse__d.Items[at].HxGet)
-//line components/dropdown-menu.go:484
+//line components/dropdown-menu.go:491
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/dropdown-menu.kyse.go:165", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/dropdown-menu.kyse.go:172", kyse__err)
 					} else {
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 					}
@@ -491,31 +498,31 @@ func DropdownMenu(kyse__props DropdownMenuProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 			}
-//line components/dropdown-menu.kyse.go:167
+//line components/dropdown-menu.kyse.go:174
 			if kyse__d.Items[at].HxTarget != "" {
-//line components/dropdown-menu.go:497
+//line components/dropdown-menu.go:504
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\thx-target=\"")
 				}
 				if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:168
+//line components/dropdown-menu.kyse.go:175
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Items[at].HxTarget))
-//line components/dropdown-menu.go:504
+//line components/dropdown-menu.go:511
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 			}
-//line components/dropdown-menu.kyse.go:170
+//line components/dropdown-menu.kyse.go:177
 			if kyse__d.Items[at].HxConfirm != "" {
-//line components/dropdown-menu.go:512
+//line components/dropdown-menu.go:519
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\thx-confirm=\"")
 				}
 				if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:171
+//line components/dropdown-menu.kyse.go:178
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Items[at].HxConfirm))
-//line components/dropdown-menu.go:519
+//line components/dropdown-menu.go:526
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -528,23 +535,23 @@ func DropdownMenu(kyse__props DropdownMenuProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t")
 			}
 			if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:174
+//line components/dropdown-menu.kyse.go:181
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Items[at].Label)))
-//line components/dropdown-menu.go:534
+//line components/dropdown-menu.go:541
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 			}
-//line components/dropdown-menu.kyse.go:175
+//line components/dropdown-menu.kyse.go:182
 			if kyse__d.Items[at].Shortcut != "" {
-//line components/dropdown-menu.go:541
+//line components/dropdown-menu.go:548
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<kbd>")
 				}
 				if kyse__err == nil {
-//line components/dropdown-menu.kyse.go:176
+//line components/dropdown-menu.kyse.go:183
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Items[at].Shortcut)))
-//line components/dropdown-menu.go:548
+//line components/dropdown-menu.go:555
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "</kbd>\n")
