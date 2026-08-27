@@ -21,6 +21,34 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## Unreleased — the range slider paints with a class
+
+```
+- ./components: RangeSliderProps.Fill: removed
+```
+
+`Fill()` returned how much of the track is coloured as a percentage string, meant
+for an inline `style`. It is gone, and `FillClass()` returns the class that
+paints the same thing:
+
+```go
+// before
+<div style="width: {{ .Fill }}">
+
+// after
+<div class="{{ .FillClass }}">
+```
+
+The reason is the content security policy this stack serves under. An inline
+`style` needs `style-src` to allow unsafe inline, and it does not -- so the
+percentage was being computed, written into the markup, and refused by the
+browser.
+
+The class comes out of twenty-one fixed positions, so the painted half moves in
+steps of five percent until the pointer takes over. What is announced to a screen
+reader, and what is submitted with the form, is the exact value and not the
+rounded one.
+
 ## v0.6.0 — an input asks the page instead of being handed the message
 
 One change, and it is the only incompatible one this module has shipped. It cost
