@@ -70,45 +70,93 @@ func attr(e xml.StartElement, name string) (string, bool) {
 // whatever tag was left open. The browser recovers silently and the layout is
 // wrong somewhere else.
 func TestEveryIconIsOneWellFormedSVG(t *testing.T) {
+	shaded, plain := 0, 0
+
 	for name, icon := range all {
 		markup := string(icon(icons.Props{}))
 		els := elements(t, name, markup)
 
-		if len(els) != 2 {
-			t.Errorf("%s drew %d elements, want an svg and a path:\n%s", name, len(els), markup)
+		// An svg and one or two paths. Two is the duotone weight drawn whole --
+		// the shade at a fifth of the colour, then the line over it -- and one
+		// is an icon upstream draws nothing to shade: cell-signal-none is an
+		// empty signal, and a fifth of a colour over nothing is nothing.
+		//
+		// Three is what this refused before the weight changed, and it still
+		// refuses four: whatever the weight, an icon is paths and no other
+		// element.
+		if len(els) < 2 || len(els) > 3 {
+			t.Errorf("%s drew %d elements, want an svg and one or two paths:\n%s", name, len(els), markup)
 			continue
 		}
-		if els[0].Name.Local != "svg" || els[1].Name.Local != "path" {
-			t.Errorf("%s drew <%s><%s>, want <svg><path>", name, els[0].Name.Local, els[1].Name.Local)
+		if els[0].Name.Local != "svg" {
+			t.Errorf("%s opens with <%s>, want <svg>", name, els[0].Name.Local)
 			continue
+		}
+		for _, el := range els[1:] {
+			if el.Name.Local != "path" {
+				t.Errorf("%s draws a <%s> inside the svg, and an icon is paths only", name, el.Name.Local)
+			}
 		}
 		if box, _ := attr(els[0], "viewBox"); box != "0 0 256 256" {
 			t.Errorf("%s has viewBox %q, so it is not on the Phosphor grid", name, box)
 		}
-		if d, ok := attr(els[1], "d"); !ok || d == "" {
-			t.Errorf("%s has no path data", name)
+
+		if len(els) == 3 {
+			shaded++
+			// The shade comes first and carries the opacity. Drawn the other way
+			// round the line would be underneath a wash of itself, which is the
+			// same two paths and not the same icon.
+			if o, ok := attr(els[1], "opacity"); !ok || o != ".2" {
+				t.Errorf("%s draws its first path at opacity %q, and the shade of this weight is .2", name, o)
+			}
+			if _, ok := attr(els[2], "opacity"); ok {
+				t.Errorf("%s draws its line path with an opacity, and only the shade carries one", name)
+			}
+		} else {
+			plain++
+			if _, ok := attr(els[1], "opacity"); ok {
+				t.Errorf("%s has one path and draws it at reduced opacity, so it is a shade with nothing over it", name)
+			}
 		}
+
+		for _, el := range els[1:] {
+			if d, ok := attr(el, "d"); !ok || d == "" {
+				t.Errorf("%s has a path with no data", name)
+			}
+		}
+	}
+
+	// The set is overwhelmingly two paths, and a run that came back all-plain
+	// would mean the generator had quietly stopped reading shades -- every icon
+	// still well-formed, and the weight gone.
+	if shaded == 0 {
+		t.Fatal("no icon draws a shade, so this library is not the weight it says it is")
+	}
+	if plain > shaded {
+		t.Errorf("%d icons draw a shade and %d do not; the second number is meant to be the handful upstream leaves unshaded", shaded, plain)
 	}
 }
 
 // TestNoIconCarriesMarkup.
 //
-// The generator writes the value of one d attribute and nothing else, so this
-// should be true by construction. It is checked anyway because the property is
-// the whole reason vendoring somebody else's artwork into this binary is safe:
-// the day a Phosphor SVG arrives with a <script>, an onload= or an
-// xlink:href=, this is what says so.
+// The generator writes the values of one or two d attributes and nothing else,
+// so this should be true by construction. It is checked anyway because the
+// property is the whole reason vendoring somebody else's artwork into this
+// binary is safe: the day a Phosphor SVG arrives with a <script>, an onload= or
+// an xlink:href=, this is what says so.
 func TestNoIconCarriesMarkup(t *testing.T) {
 	for name, icon := range all {
 		els := elements(t, name, string(icon(icons.Props{})))
 		if len(els) < 2 {
 			continue // already reported by the well-formed test
 		}
-		d, _ := attr(els[1], "d")
 
-		for _, forbidden := range []string{"<", ">", "&", "\"", "'", "script", "javascript:", "url("} {
-			if strings.Contains(strings.ToLower(d), forbidden) {
-				t.Errorf("%s has %q in its path data:\n%s", name, forbidden, d)
+		for _, e := range els[1:] {
+			d, _ := attr(e, "d")
+			for _, forbidden := range []string{"<", ">", "&", "\"", "'", "script", "javascript:", "url("} {
+				if strings.Contains(strings.ToLower(d), forbidden) {
+					t.Errorf("%s has %q in its path data:\n%s", name, forbidden, d)
+				}
 			}
 		}
 		for _, e := range els {

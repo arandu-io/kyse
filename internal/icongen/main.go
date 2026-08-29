@@ -1,18 +1,20 @@
 // Command icongen vendors the Phosphor icon set into Go source.
 //
 // It fetches one pinned commit of github.com/phosphor-icons/core, reads the
-// regular weight, and writes one exported function per icon into ../icons,
+// duotone weight, and writes one exported function per icon into ../icons,
 // along with the registry of them all as a test file under ../tests/Unit.
 // Run it with `go generate ./...` from anywhere in this module.
 //
 // Two properties are worth the program existing rather than a shell script.
 //
 // The first is that nothing but path geometry crosses the boundary. Every
-// Phosphor SVG is one <path> with one attribute inside a wrapper this program
-// knows by heart, and it refuses anything else -- another element, another
-// attribute, a different wrapper. A vendoring step that copied whole SVG files
-// would happily copy a <script> or an onload= along with them one day; this one
-// cannot, because the only thing it carries out is the value of d.
+// duotone Phosphor SVG is one or two <path> elements inside a wrapper this
+// program knows by heart. The shade may carry the exact opacity this weight
+// declares; every other value is a d attribute. It refuses anything else --
+// another element, another attribute, a different wrapper. A vendoring step
+// that copied whole SVG files would happily copy a <script> or an onload= along
+// with them one day; this one cannot, because the only values it carries out
+// are path data.
 //
 // The second is that the pin is in the source. The commit below is what
 // regenerates, so two runs a year apart produce the same bytes, and moving to a
@@ -43,15 +45,31 @@ const (
 // weight is the one weight this library ships. Six weights would be six names
 // for the same idea, and the icon set is a design decision the library makes
 // once, like the stylesheet.
-const weight = "regular"
+//
+// Duotone, because that is the weight the identity draws in. It is still one
+// weight and still one name per icon: Heart is duotone, and there is no
+// HeartDuotone beside it.
+const weight = "duotone"
 
-// wrapper is every regular Phosphor SVG, exactly. The generator asserts it
+// suffix is what upstream appends to a file name of this weight: the regular
+// assets are heart.svg and these are heart-duotone.svg. It is trimmed before
+// the name is looked up in the catalogue, which lists the icon and not the
+// file.
+const suffix = "-" + weight
+
+// wrapper is every duotone Phosphor SVG, exactly. The generator asserts it
 // rather than parsing: an upstream file that no longer looks like this is a
 // change worth stopping for, not one worth accommodating.
+//
+// Two paths, and always in this order: the shade at one fifth opacity, then the
+// line over it. That is what makes the weight duotone -- one colour, two
+// strengths of it -- and it is why an icon of this weight carries two strings
+// rather than one.
 const (
 	wrapperOpen  = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor">`
 	wrapperClose = `</svg>`
 	pathOpen     = `<path d="`
+	shadeClose   = `" opacity="0.2"/>`
 	pathClose    = `"/>`
 )
 
@@ -66,7 +84,11 @@ type icon struct {
 	Name string
 	// GoName is the exported Go identifier: "ArrowRight".
 	GoName string
-	// Data is the value of the path's d attribute, and nothing else.
+	// Shade is the d attribute of the first path, the one drawn at a fifth of
+	// the colour. Data is the second, the line over it. Two fields and not one
+	// string of markup, for the reason pathsOf gives.
+	Shade string
+	// Data is the d attribute of the line path, and nothing else.
 	Data string
 	// Tags are the upstream synonyms, which end up in the doc comment so that
 	// searching pkg.go.dev for "delete" finds Trash.
@@ -137,7 +159,7 @@ func moduleRoot() (string, error) {
 // fetch checks out the pinned commit into dir.
 //
 // Blobless and sparse: the repository is eighty megabytes and all of it but the
-// regular weight, the catalogue and the licence is waste. This way it is nine
+// selected weight, the catalogue and the licence is waste. This way it is nine
 // megabytes and about two seconds, which is what makes the CI step that
 // regenerates and compares affordable on every push.
 func fetch(dir string) error {
@@ -178,12 +200,17 @@ func read(src string) ([]icon, error) {
 			continue
 		}
 		name := strings.TrimSuffix(e.Name(), ".svg")
+		trimmed, ok := strings.CutSuffix(name, suffix)
+		if !ok {
+			return nil, fmt.Errorf("%s: a file of the %s weight is expected to end in %s", e.Name(), weight, suffix)
+		}
+		name = trimmed
 
 		body, err := os.ReadFile(filepath.Join(dir, e.Name()))
 		if err != nil {
 			return nil, err
 		}
-		data, err := pathOf(strings.TrimSpace(string(body)))
+		shade, data, err := pathsOf(strings.TrimSpace(string(body)))
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", e.Name(), err)
 		}
@@ -210,7 +237,7 @@ func read(src string) ([]icon, error) {
 		}
 		delete(catalog, name)
 
-		icons = append(icons, icon{Name: name, GoName: goName, Data: data, Tags: entry.tags})
+		icons = append(icons, icon{Name: name, GoName: goName, Shade: shade, Data: data, Tags: entry.tags})
 	}
 
 	for name := range catalog {
@@ -224,34 +251,56 @@ func read(src string) ([]icon, error) {
 	return icons, nil
 }
 
-// pathOf pulls the d attribute out of a Phosphor SVG, and refuses everything
-// that is not one.
+// pathsOf pulls the two d attributes out of a duotone Phosphor SVG, and refuses
+// everything that is not them.
 //
 // This is the whole security argument of the package. What is written into Go
-// source is a string that has been proved to hold nothing but path commands, so
-// no icon can carry a <script>, an onclick, an xlink:href or a second element,
-// whatever arrives upstream.
-func pathOf(svg string) (string, error) {
+// source is two strings that have been proved to hold nothing but path
+// commands, so no icon can carry a <script>, an onclick, an xlink:href or a
+// third element, whatever arrives upstream.
+//
+// The opacity is asserted rather than read. It is the same value on all of
+// them, it is what the weight means, and reading it would make it a number this
+// package carries fifteen hundred copies of.
+func pathsOf(svg string) (shade, line string, err error) {
 	body, ok := strings.CutPrefix(svg, wrapperOpen)
 	if !ok {
-		return "", fmt.Errorf("does not open with the wrapper this generator knows")
+		return "", "", fmt.Errorf("does not open with the wrapper this generator knows")
 	}
 	body, ok = strings.CutSuffix(body, wrapperClose)
 	if !ok {
-		return "", fmt.Errorf("does not close with %s", wrapperClose)
+		return "", "", fmt.Errorf("does not close with %s", wrapperClose)
 	}
-	data, ok := strings.CutPrefix(body, pathOpen)
+
+	rest, ok := strings.CutPrefix(body, pathOpen)
 	if !ok {
-		return "", fmt.Errorf("holds something that is not a single path: %.60q", body)
+		return "", "", fmt.Errorf("does not open with a path: %.60q", body)
 	}
-	data, ok = strings.CutSuffix(data, pathClose)
+
+	// A shade is usual and not universal. Upstream draws none where there is
+	// nothing to fill -- cell-signal-none is an empty signal, and a fifth of a
+	// colour over nothing is nothing. Those files carry the line alone, and an
+	// icon whose shade is empty is a shape of this weight rather than a file
+	// that stopped being one.
+	if before, after, found := strings.Cut(rest, shadeClose); found {
+		shade, rest = before, after
+		if rest, ok = strings.CutPrefix(rest, pathOpen); !ok {
+			return "", "", fmt.Errorf("holds a shade and no line after it: %.60q", body)
+		}
+	}
+
+	line, ok = strings.CutSuffix(rest, pathClose)
 	if !ok {
-		return "", fmt.Errorf("holds more than one element: %.60q", body)
+		return "", "", fmt.Errorf("holds more than the paths of this weight: %.60q", rest)
 	}
-	if !pathData.MatchString(data) {
-		return "", fmt.Errorf("path data holds something that is not path data: %.60q", data)
+
+	if shade != "" && !pathData.MatchString(shade) {
+		return "", "", fmt.Errorf("the shade path holds something that is not path data: %.60q", shade)
 	}
-	return data, nil
+	if !pathData.MatchString(line) {
+		return "", "", fmt.Errorf("the line path holds something that is not path data: %.60q", line)
+	}
+	return shade, line, nil
 }
 
 // identifier is the Phosphor name as an exported Go one: arrow-right becomes
@@ -445,7 +494,7 @@ func source(group []icon) string {
 	for _, i := range group {
 		b.WriteString("\n")
 		b.WriteString(comment(i))
-		fmt.Fprintf(&b, "func %s(p Props) template.HTML {\n\treturn draw(p, `%s`)\n}\n", i.GoName, i.Data)
+		fmt.Fprintf(&b, "func %s(p Props) template.HTML {\n\treturn draw(p, `%s`, `%s`)\n}\n", i.GoName, i.Shade, i.Data)
 	}
 	return b.String()
 }
