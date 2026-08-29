@@ -61,24 +61,15 @@ jobs:
       # somebody's project. A change to them has to show up as a diff in review
       # rather than as a surprise in a checkout, so a run that rewrites them and
       # leaves the tree dirty is a failure.
-      # One dependency, and it is the framework.
+      # Two first-party dependencies, and they have distinct ownership.
       #
-      # A component compiles to a function that calls view.Text and returns
-      # template.HTML, so the framework is not optional here -- it is what the
-      # output is made of. Anything else is: this module is imported by every
-      # project that draws a button, and a second require is a download for all
-      # of them.
-      - name: one dependency
-        run: |
-          # Direct requires only. What the framework pulls in is the
-          # framework's to answer for, and listing it here would make this step
-          # fail every time it takes a dependency of its own.
-          extra=$(grep -E '^\s+[a-z].*/' go.mod | grep -v '// indirect' | grep -v 'arandu-io/framework' || true)
-          if [ -n "$extra" ]; then
-            echo "this module took a dependency beyond the framework:"
-            echo "$extra"
-            exit 1
-          fi
+      # Generated components call the native hesape/view contract. Framework
+      # remains direct only for its application adapter and asset registry.
+      # The Go test parses `go mod edit -json`, so a third direct dependency or
+      # an accidental return to the old single-owner boundary fails without a
+      # shell grep guessing at go.mod formatting.
+      - name: native view dependency budget
+        run: go test -race -count=1 ./tests/Unit -run '^TestTheNativeViewDependencyBudget$'
 
       # The generated views are committed, and a stale one ships.
       #
