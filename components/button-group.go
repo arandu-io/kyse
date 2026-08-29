@@ -9,7 +9,7 @@ import (
 	kyse__io "io"
 	kyse__strings "strings"
 
-	kyse__view "github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/hesape/view"
 )
 
 //line components/button-group.kyse.go:5
@@ -122,7 +122,7 @@ func ButtonGroup(kyse__props ButtonGroupProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 //line components/button-group.kyse.go:63
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(Button(kyse__d.Buttons[at])))
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(Button(kyse__d.Buttons[at])))
 //line components/button-group.go:127
 		}
 		if kyse__err == nil {
@@ -143,6 +143,5 @@ var (
 	_ = kyse__template.HTMLEscapeString
 	_ = kyse__io.WriteString
 	_ = kyse__view.Text
-	_ = kyse__view.UnsafeText
 	_ = kyse__strings.Builder{}
 )

@@ -9,7 +9,7 @@ import (
 	kyse__io "io"
 	kyse__strings "strings"
 
-	kyse__view "github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/hesape/view"
 	"html/template"
 )
 
@@ -322,7 +322,7 @@ func Tabs(kyse__props TabsProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 //line components/tabs.kyse.go:148
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(tab.Panel))
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(tab.Panel))
 //line components/tabs.go:327
 		}
 		if kyse__err == nil {
@@ -343,6 +343,5 @@ var (
 	_ = kyse__template.HTMLEscapeString
 	_ = kyse__io.WriteString
 	_ = kyse__view.Text
-	_ = kyse__view.UnsafeText
 	_ = kyse__strings.Builder{}
 )

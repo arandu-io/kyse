@@ -10,7 +10,7 @@ import (
 	kyse__io "io"
 	kyse__strings "strings"
 
-	kyse__view "github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/hesape/view"
 	"github.com/arandu-io/kyse/icons"
 	"strconv"
 )
@@ -433,7 +433,7 @@ func Combobox(kyse__props ComboboxProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 //line components/combobox.kyse.go:241
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(icons.CaretDown(icons.Props{})))
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(icons.CaretDown(icons.Props{})))
 //line components/combobox.go:438
 		}
 		if kyse__err == nil {
@@ -650,6 +650,5 @@ var (
 	_ = kyse__template.HTMLEscapeString
 	_ = kyse__io.WriteString
 	_ = kyse__view.Text
-	_ = kyse__view.UnsafeText
 	_ = kyse__strings.Builder{}
 )

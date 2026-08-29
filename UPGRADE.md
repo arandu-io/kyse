@@ -21,7 +21,7 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
-## Unreleased — the range slider paints with a class
+## v0.13.0 — the range slider paints with a class
 
 ```
 - ./components: RangeSliderProps.Fill: removed

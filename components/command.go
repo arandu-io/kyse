@@ -10,7 +10,7 @@ import (
 	kyse__io "io"
 	kyse__strings "strings"
 
-	kyse__view "github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/hesape/view"
 	"github.com/arandu-io/kyse/icons"
 	"strconv"
 )
@@ -181,7 +181,7 @@ func Command(kyse__props CommandProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 //line components/command.kyse.go:131
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(icons.MagnifyingGlass(icons.Props{})))
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(icons.MagnifyingGlass(icons.Props{})))
 //line components/command.go:186
 	}
 	if kyse__err == nil {
@@ -449,6 +449,5 @@ var (
 	_ = kyse__template.HTMLEscapeString
 	_ = kyse__io.WriteString
 	_ = kyse__view.Text
-	_ = kyse__view.UnsafeText
 	_ = kyse__strings.Builder{}
 )

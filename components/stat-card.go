@@ -9,7 +9,7 @@ import (
 	kyse__io "io"
 	kyse__strings "strings"
 
-	kyse__view "github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/hesape/view"
 )
 
 //line components/stat-card.kyse.go:5
@@ -201,7 +201,7 @@ func StatCard(kyse__props StatCardProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 //line components/stat-card.kyse.go:83
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(Empty(kyse__d.Empty)))
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(Empty(kyse__d.Empty)))
 //line components/stat-card.go:206
 		}
 		if kyse__err == nil {
@@ -222,6 +222,5 @@ var (
 	_ = kyse__template.HTMLEscapeString
 	_ = kyse__io.WriteString
 	_ = kyse__view.Text
-	_ = kyse__view.UnsafeText
 	_ = kyse__strings.Builder{}
 )

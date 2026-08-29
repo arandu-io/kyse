@@ -9,7 +9,7 @@ import (
 	kyse__io "io"
 	kyse__strings "strings"
 
-	kyse__view "github.com/arandu-io/framework/view"
+	kyse__view "github.com/arandu-io/hesape/view"
 	template "html/template"
 )
 
@@ -206,7 +206,7 @@ func Table(kyse__props TableProps) kyse__template.HTML {
 					}
 					if kyse__err == nil {
 //line components/table.kyse.go:112
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(row.Cells[i].HTML))
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(row.Cells[i].HTML))
 //line components/table.go:211
 					}
 					if kyse__err == nil {
@@ -248,7 +248,7 @@ func Table(kyse__props TableProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 //line components/table.kyse.go:124
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.UnsafeText(Empty(kyse__d.Empty)))
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(Empty(kyse__d.Empty)))
 //line components/table.go:253
 		}
 		if kyse__err == nil {
@@ -266,7 +266,6 @@ var (
 	_ = kyse__template.HTMLEscapeString
 	_ = kyse__io.WriteString
 	_ = kyse__view.Text
-	_ = kyse__view.UnsafeText
 	_ = kyse__strings.Builder{}
 	_ = template.HTMLEscapeString
 )
