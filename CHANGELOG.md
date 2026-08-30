@@ -1,5 +1,9 @@
 # Release Notes
 
+## [v0.14.0](https://github.com/arandu-io/kyse/compare/v0.13.0...v0.14.0) - 2026-08-30
+
+**Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.13.0...v0.14.0
+
 ## [v0.14.0](https://github.com/arandu-io/kyse/compare/v0.13.0...v0.14.0) - 2026-08-29
 
 The icon set is drawn in the duotone weight, which is the one the identity uses.
