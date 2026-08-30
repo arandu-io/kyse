@@ -1,5 +1,15 @@
 # Release Notes
 
+## [v0.14.0](https://github.com/arandu-io/kyse/compare/v0.13.0...v0.14.0) - 2026-08-29
+
+The icon set is drawn in the duotone weight, which is the one the identity uses.
+Still one weight and one name per icon: `Heart` is duotone, and there is no
+`HeartDuotone` beside it. An icon is two paths of one colour -- the shade at a
+fifth of `currentColor`, then the line over it -- so it still takes the colour
+of the text around it and still needs no palette.
+
+**Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.13.0...v0.14.0
+
 ## [v0.13.0](https://github.com/arandu-io/kyse/compare/v0.12.0...v0.13.0) - 2026-08-29
 
 **Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.12.0...v0.13.0
