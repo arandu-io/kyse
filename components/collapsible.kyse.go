@@ -28,6 +28,8 @@ import "github.com/arandu-io/kyse/icons"
 // these side by side would be several one-item lists, each with no rule between
 // it and the next.
 type CollapsibleProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Label is the heading: what opening it will show.
 	Label string
 	// Content is the text under it.
@@ -36,15 +38,38 @@ type CollapsibleProps struct {
 	// a screen where everything starts open is a screen with no summary.
 	Open bool
 }
+// PartNames are the parts this component publishes.
+func (p CollapsibleProps) PartNames() []string { return []string{"root", "item", "trigger", "panel"} }
 @endgo
 
-<section class="accordion">
+<section
+	data-part="root"
+	class="{{ .RootClass("accordion") }}"
+	@attributes(.RootAttrs())
+>
 	<details
+		data-part="item"
+		@if(.PartClass("item") != "")
+			class="{{ .PartClass("item") }}"
+		@endif
+		@attributes(.PartAttrs("item"))
 		@if(.Open)
 			open
 		@endif
 	>
-		<summary>{{ .Label }}{!! icons.CaretDown(icons.Props{}) !!}</summary>
-		<section>{{ .Content }}</section>
+		<summary
+			data-part="trigger"
+			@if(.PartClass("trigger") != "")
+				class="{{ .PartClass("trigger") }}"
+			@endif
+			@attributes(.PartAttrs("trigger"))
+		>{{ .Label }}{!! icons.CaretDown(icons.Props{}) !!}</summary>
+		<section
+			data-part="panel"
+			@if(.PartClass("panel") != "")
+				class="{{ .PartClass("panel") }}"
+			@endif
+			@attributes(.PartAttrs("panel"))
+		>{{ .Content }}</section>
 	</details>
 </section>

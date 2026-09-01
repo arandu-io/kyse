@@ -5,6 +5,7 @@
 package components
 
 import (
+	kyse__fmt "fmt"
 	kyse__template "html/template"
 	kyse__io "io"
 	kyse__strings "strings"
@@ -38,6 +39,8 @@ import (
 // these side by side would be several one-item lists, each with no rule between
 // it and the next.
 type CollapsibleProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Label is the heading: what opening it will show.
 	Label string
 	// Content is the text under it.
@@ -47,7 +50,10 @@ type CollapsibleProps struct {
 	Open bool
 }
 
-//line components/collapsible.go:51
+// PartNames are the parts this component publishes.
+func (p CollapsibleProps) PartNames() []string { return []string{"root", "item", "trigger", "panel"} }
+
+//line components/collapsible.go:57
 
 // Collapsible renders the collapsible component.
 func Collapsible(kyse__props CollapsibleProps) kyse__template.HTML {
@@ -61,14 +67,71 @@ func Collapsible(kyse__props CollapsibleProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "<section class=\"accordion\">\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "<section\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tdata-part=\"root\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
+	}
+	if kyse__err == nil {
+//line components/collapsible.kyse.go:47
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("accordion")))
+//line components/collapsible.go:82
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+	}
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/collapsible.kyse.go:48
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/collapsible.go:91
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/collapsible.kyse.go:48", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
+		}
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<details\n")
 	}
-//line components/collapsible.kyse.go:43
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-part=\"item\"\n")
+	}
+//line components/collapsible.kyse.go:52
+	if kyse__d.PartClass("item") != "" {
+//line components/collapsible.go:109
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/collapsible.kyse.go:53
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("item")))
+//line components/collapsible.go:116
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v2 string
+//line components/collapsible.kyse.go:55
+		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("item"))
+//line components/collapsible.go:126
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/collapsible.kyse.go:55", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
+		}
+	}
+//line components/collapsible.kyse.go:56
 	if kyse__d.Open {
-//line components/collapsible.go:72
+//line components/collapsible.go:135
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\topen\n")
 		}
@@ -77,28 +140,92 @@ func Collapsible(kyse__props CollapsibleProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<summary>")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<summary\n")
 	}
 	if kyse__err == nil {
-//line components/collapsible.kyse.go:47
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"trigger\"\n")
+	}
+//line components/collapsible.kyse.go:62
+	if kyse__d.PartClass("trigger") != "" {
+//line components/collapsible.go:151
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/collapsible.kyse.go:63
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("trigger")))
+//line components/collapsible.go:158
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v3 string
+//line components/collapsible.kyse.go:65
+		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("trigger"))
+//line components/collapsible.go:168
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/collapsible.kyse.go:65", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
+		}
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
+	}
+	if kyse__err == nil {
+//line components/collapsible.kyse.go:66
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
-//line components/collapsible.go:86
+//line components/collapsible.go:181
 	}
 	if kyse__err == nil {
-//line components/collapsible.kyse.go:47
+//line components/collapsible.kyse.go:66
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(icons.CaretDown(icons.Props{})))
-//line components/collapsible.go:91
+//line components/collapsible.go:186
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</summary>\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<section>")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<section\n")
 	}
 	if kyse__err == nil {
-//line components/collapsible.kyse.go:48
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"panel\"\n")
+	}
+//line components/collapsible.kyse.go:69
+	if kyse__d.PartClass("panel") != "" {
+//line components/collapsible.go:199
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/collapsible.kyse.go:70
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("panel")))
+//line components/collapsible.go:206
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v4 string
+//line components/collapsible.kyse.go:72
+		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("panel"))
+//line components/collapsible.go:216
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/collapsible.kyse.go:72", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
+		}
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
+	}
+	if kyse__err == nil {
+//line components/collapsible.kyse.go:73
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Content)))
-//line components/collapsible.go:102
+//line components/collapsible.go:229
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</section>\n")

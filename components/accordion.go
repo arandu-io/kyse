@@ -5,6 +5,7 @@
 package components
 
 import (
+	kyse__fmt "fmt"
 	kyse__template "html/template"
 	kyse__io "io"
 	kyse__strings "strings"
@@ -30,6 +31,8 @@ import (
 // elements that share a name are exclusive to each other, and the browser
 // closes the one that was open when the next is unfolded.
 type AccordionProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// ID is the name the sections share, which is what makes opening one close
 	// the last. Two accordions on a page need two, and an empty ID leaves every
 	// section independent whatever Multiple says.
@@ -67,7 +70,10 @@ func (p AccordionProps) Group() string {
 	return p.ID
 }
 
-//line components/accordion.go:71
+// PartNames are the parts this component publishes.
+func (p AccordionProps) PartNames() []string { return []string{"root", "item", "trigger", "panel"} }
+
+//line components/accordion.go:77
 
 // Accordion renders the accordion component.
 func Accordion(kyse__props AccordionProps) kyse__template.HTML {
@@ -84,18 +90,40 @@ func Accordion(kyse__props AccordionProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "<section\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"accordion\"\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tdata-part=\"root\"\n")
 	}
-//line components/accordion.kyse.go:66
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
+	}
+	if kyse__err == nil {
+//line components/accordion.kyse.go:70
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("accordion")))
+//line components/accordion.go:102
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+	}
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/accordion.kyse.go:71
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/accordion.go:111
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/accordion.kyse.go:71", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
+		}
+	}
+//line components/accordion.kyse.go:72
 	if kyse__d.ID != "" {
-//line components/accordion.go:92
+//line components/accordion.go:120
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tid=\"")
 		}
 		if kyse__err == nil {
-//line components/accordion.kyse.go:67
+//line components/accordion.kyse.go:73
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/accordion.go:99
+//line components/accordion.go:127
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -104,31 +132,60 @@ func Accordion(kyse__props AccordionProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")
 	}
-//line components/accordion.kyse.go:70
+//line components/accordion.kyse.go:76
 	for _, item := range kyse__d.Items {
 		_ = item
-//line components/accordion.go:111
+//line components/accordion.go:139
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<details\n")
 		}
-//line components/accordion.kyse.go:72
-		if kyse__d.Group() != "" {
-//line components/accordion.go:117
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"item\"\n")
+		}
+//line components/accordion.kyse.go:79
+		if kyse__d.PartClass("item") != "" {
+//line components/accordion.go:148
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tname=\"")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/accordion.kyse.go:73
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Group()))
-//line components/accordion.go:124
+//line components/accordion.kyse.go:80
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("item")))
+//line components/accordion.go:155
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/accordion.kyse.go:75
+		if kyse__err == nil {
+			var kyse__v2 string
+//line components/accordion.kyse.go:82
+			kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("item"))
+//line components/accordion.go:165
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/accordion.kyse.go:82", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
+			}
+		}
+//line components/accordion.kyse.go:83
+		if kyse__d.Group() != "" {
+//line components/accordion.go:174
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tname=\"")
+			}
+			if kyse__err == nil {
+//line components/accordion.kyse.go:84
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Group()))
+//line components/accordion.go:181
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+		}
+//line components/accordion.kyse.go:86
 		if item.Open {
-//line components/accordion.go:132
+//line components/accordion.go:189
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\topen\n")
 			}
@@ -139,9 +196,38 @@ func Accordion(kyse__props AccordionProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<summary\n")
 		}
-//line components/accordion.kyse.go:80
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"trigger\"\n")
+		}
+//line components/accordion.kyse.go:92
+		if kyse__d.PartClass("trigger") != "" {
+//line components/accordion.go:205
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/accordion.kyse.go:93
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("trigger")))
+//line components/accordion.go:212
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v3 string
+//line components/accordion.kyse.go:95
+			kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("trigger"))
+//line components/accordion.go:222
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/accordion.kyse.go:95", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
+			}
+		}
+//line components/accordion.kyse.go:96
 		if item.Disabled {
-//line components/accordion.go:145
+//line components/accordion.go:231
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-disabled=\"true\"\n")
 			}
@@ -153,25 +239,57 @@ func Accordion(kyse__props AccordionProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 		}
 		if kyse__err == nil {
-//line components/accordion.kyse.go:84
+//line components/accordion.kyse.go:100
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(item.Label)))
-//line components/accordion.go:159
+//line components/accordion.go:245
 		}
 		if kyse__err == nil {
-//line components/accordion.kyse.go:84
+//line components/accordion.kyse.go:100
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(icons.CaretDown(icons.Props{})))
-//line components/accordion.go:164
+//line components/accordion.go:250
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</summary>\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<section>")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<section\n")
 		}
 		if kyse__err == nil {
-//line components/accordion.kyse.go:85
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"panel\"\n")
+		}
+//line components/accordion.kyse.go:103
+		if kyse__d.PartClass("panel") != "" {
+//line components/accordion.go:263
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/accordion.kyse.go:104
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("panel")))
+//line components/accordion.go:270
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v4 string
+//line components/accordion.kyse.go:106
+			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("panel"))
+//line components/accordion.go:280
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/accordion.kyse.go:106", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
+		}
+		if kyse__err == nil {
+//line components/accordion.kyse.go:107
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(item.Content))
-//line components/accordion.go:175
+//line components/accordion.go:293
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</section>\n")

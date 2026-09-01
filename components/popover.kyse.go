@@ -21,6 +21,8 @@ import "html/template"
 // and focus is free to leave -- which is what separates a panel with a filter
 // in it from something that has to be answered before the page continues.
 type PopoverProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// ID is what the trigger and the panel hang their ids off. Two popovers on
 	// a page need two.
 	ID string
@@ -50,15 +52,26 @@ func (p PopoverProps) TriggerID() string { return p.ID + "-trigger" }
 
 // PanelID is the id of the panel it opens.
 func (p PopoverProps) PanelID() string { return p.ID + "-popover" }
+// PartNames are the parts this component publishes.
+func (p PopoverProps) PartNames() []string {
+	return []string{"root", "trigger", "panel", "header", "title", "description"}
+}
 @endgo
 
-<div class="popover" id="{{ .ID }}">
+<div
+	data-part="root"
+	class="{{ .RootClass("popover") }}"
+	id="{{ .ID }}"
+	@attributes(.RootAttrs())
+>
 	<button
+		data-part="trigger"
 		type="button"
-		class="btn"
+		class="{{ .PartClass("trigger", "btn") }}"
 		id="{{ .TriggerID() }}"
 		aria-controls="{{ .PanelID() }}"
 		aria-expanded="false"
+		@attributes(.PartAttrs("trigger"))
 		@if(.Variant != "")
 			data-variant="{{ .Variant }}"
 		@endif
@@ -68,9 +81,14 @@ func (p PopoverProps) PanelID() string { return p.ID + "-popover" }
 	>{{ .Label }}</button>
 
 	<div
+		data-part="panel"
+		@if(.PartClass("panel") != "")
+			class="{{ .PartClass("panel") }}"
+		@endif
 		id="{{ .PanelID() }}"
 		data-popover
 		aria-hidden="true"
+		@attributes(.PartAttrs("panel"))
 		@if(.Side != "")
 			data-side="{{ .Side }}"
 		@endif
@@ -79,10 +97,28 @@ func (p PopoverProps) PanelID() string { return p.ID + "-popover" }
 		@endif
 	>
 		@if(.Title != "")
-			<header>
-				<h3>{{ .Title }}</h3>
+			<header
+				data-part="header"
+				@if(.PartClass("header") != "")
+					class="{{ .PartClass("header") }}"
+				@endif
+				@attributes(.PartAttrs("header"))
+			>
+				<h3
+					data-part="title"
+					@if(.PartClass("title") != "")
+						class="{{ .PartClass("title") }}"
+					@endif
+					@attributes(.PartAttrs("title"))
+				>{{ .Title }}</h3>
 				@if(.Description != "")
-					<p>{{ .Description }}</p>
+					<p
+						data-part="description"
+						@if(.PartClass("description") != "")
+							class="{{ .PartClass("description") }}"
+						@endif
+						@attributes(.PartAttrs("description"))
+					>{{ .Description }}</p>
 				@endif
 			</header>
 		@endif

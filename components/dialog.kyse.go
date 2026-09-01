@@ -20,6 +20,8 @@ package components
 // have to take markup as a string, which is where escaping stops being
 // guaranteed -- and "are you sure" is what a dialog is for nine times in ten.
 type DialogProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// ID is what a button targets to open this: `onclick="ID.showModal()"`.
 	ID string
 	// Title is the question.
@@ -101,12 +103,18 @@ func (p DialogProps) FormMethod() string {
 	}
 	return p.Method
 }
+// PartNames are the parts this component publishes.
+func (p DialogProps) PartNames() []string {
+	return []string{"root", "content", "header", "title", "message", "footer", "cancel", "confirm"}
+}
 @endgo
 
 <dialog
+	data-part="root"
 	id="{{ .ID }}"
-	class="{{ .Surface() }}"
+	class="{{ .RootClass(.Surface()) }}"
 	aria-labelledby="{{ .ID }}-title"
+	@attributes(.RootAttrs())
 	@if(.Alert)
 		role="alertdialog"
 	@endif
@@ -114,20 +122,50 @@ func (p DialogProps) FormMethod() string {
 		aria-describedby="{{ .DescribedBy() }}"
 	@endif
 >
-	<article>
-		<header>
-			<h2 id="{{ .ID }}-title">{{ .Title }}</h2>
+	<article
+		data-part="content"
+		@if(.PartClass("content") != "")
+			class="{{ .PartClass("content") }}"
+		@endif
+		@attributes(.PartAttrs("content"))
+	>
+		<header
+			data-part="header"
+			@if(.PartClass("header") != "")
+				class="{{ .PartClass("header") }}"
+			@endif
+			@attributes(.PartAttrs("header"))
+		>
+			<h2
+				data-part="title"
+				@if(.PartClass("title") != "")
+					class="{{ .PartClass("title") }}"
+				@endif
+				id="{{ .ID }}-title"
+				@attributes(.PartAttrs("title"))
+			>{{ .Title }}</h2>
 			@if(.Message != "")
-				<p id="{{ .ID }}-description" class="text-muted-foreground text-sm">{{ .Message }}</p>
+				<p
+					data-part="message"
+					id="{{ .ID }}-description"
+					class="{{ .PartClass("message", "text-muted-foreground text-sm") }}"
+					@attributes(.PartAttrs("message"))
+				>{{ .Message }}</p>
 			@endif
 		</header>
 
-		<footer class="flex justify-end gap-2">
+		<footer
+			data-part="footer"
+			class="{{ .PartClass("footer", "flex justify-end gap-2") }}"
+			@attributes(.PartAttrs("footer"))
+		>
 			<form method="dialog">
 				<button
+					data-part="cancel"
 					type="submit"
-					class="btn"
+					class="{{ .PartClass("cancel", "btn") }}"
 					data-variant="outline"
+					@attributes(.PartAttrs("cancel"))
 					@if(.Alert)
 						autofocus
 					@endif
@@ -135,7 +173,13 @@ func (p DialogProps) FormMethod() string {
 			</form>
 			<form method="{{ .FormMethod() }}" action="{{ .Action }}">
 				<input type="hidden" name="_csrf" value="{{ .Token }}">
-				<button type="submit" class="btn" data-variant="{{ .ConfirmVariant }}">{{ .Confirm() }}</button>
+				<button
+					data-part="confirm"
+					type="submit"
+					class="{{ .PartClass("confirm", "btn") }}"
+					data-variant="{{ .ConfirmVariant }}"
+					@attributes(.PartAttrs("confirm"))
+				>{{ .Confirm() }}</button>
 			</form>
 		</footer>
 	</article>

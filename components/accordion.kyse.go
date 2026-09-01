@@ -23,6 +23,8 @@ import (
 // elements that share a name are exclusive to each other, and the browser
 // closes the one that was open when the next is unfolded.
 type AccordionProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// ID is the name the sections share, which is what makes opening one close
 	// the last. Two accordions on a page need two, and an empty ID leaves every
 	// section independent whatever Multiple says.
@@ -59,16 +61,25 @@ func (p AccordionProps) Group() string {
 	}
 	return p.ID
 }
+// PartNames are the parts this component publishes.
+func (p AccordionProps) PartNames() []string { return []string{"root", "item", "trigger", "panel"} }
 @endgo
 
 <section
-	class="accordion"
+	data-part="root"
+	class="{{ .RootClass("accordion") }}"
+	@attributes(.RootAttrs())
 	@if(.ID != "")
 		id="{{ .ID }}"
 	@endif
 >
 	@foreach(.Items as item)
 		<details
+			data-part="item"
+			@if(.PartClass("item") != "")
+				class="{{ .PartClass("item") }}"
+			@endif
+			@attributes(.PartAttrs("item"))
 			@if(.Group() != "")
 				name="{{ .Group() }}"
 			@endif
@@ -77,12 +88,23 @@ func (p AccordionProps) Group() string {
 			@endif
 		>
 			<summary
+				data-part="trigger"
+				@if(.PartClass("trigger") != "")
+					class="{{ .PartClass("trigger") }}"
+				@endif
+				@attributes(.PartAttrs("trigger"))
 				@if(item.Disabled)
 					aria-disabled="true"
 					tabindex="-1"
 				@endif
 			>{{ item.Label }}{!! icons.CaretDown(icons.Props{}) !!}</summary>
-			<section>{!! item.Content !!}</section>
+			<section
+				data-part="panel"
+				@if(.PartClass("panel") != "")
+					class="{{ .PartClass("panel") }}"
+				@endif
+				@attributes(.PartAttrs("panel"))
+			>{!! item.Content !!}</section>
 		</details>
 	@endforeach
 </section>

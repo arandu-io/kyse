@@ -124,6 +124,68 @@ var extensible = []struct {
 		components.ToastProps{}.PartNames,
 	},
 	{
+		"Accordion",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Accordion(components.AccordionProps{
+				ComponentProps: c,
+				Items: []components.AccordionItem{
+					{Label: "What is it", Content: template.HTML("<p>A framework.</p>")},
+				},
+			}))}
+		},
+		components.AccordionProps{}.PartNames,
+	},
+	{
+		"Collapsible",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Collapsible(components.CollapsibleProps{
+				ComponentProps: c, Label: "Details", Content: "More.",
+			}))}
+		},
+		components.CollapsibleProps{}.PartNames,
+	},
+	{
+		"Dialog",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Dialog(components.DialogProps{
+				ComponentProps: c,
+				ID:             "confirm",
+				Title:          "Delete the post?",
+				Message:        "This cannot be undone.",
+				Action:         "/posts/1",
+				Token:          "t",
+			}))}
+		},
+		components.DialogProps{}.PartNames,
+	},
+	{
+		"Drawer",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Drawer(components.DrawerProps{
+				ComponentProps: c,
+				ID:             "menu",
+				Title:          "Menu",
+				Description:    "Where to go.",
+				Links:          []components.DrawerLink{{Label: "Home", Href: "/"}},
+			}))}
+		},
+		components.DrawerProps{}.PartNames,
+	},
+	{
+		"Popover",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Popover(components.PopoverProps{
+				ComponentProps: c,
+				ID:             "help",
+				Label:          "Help",
+				Title:          "About this",
+				Description:    "What it does.",
+				Content:        template.HTML("<p>x</p>"),
+			}))}
+		},
+		components.PopoverProps{}.PartNames,
+	},
+	{
 		"Card",
 		func(c components.ComponentProps) []string {
 			return []string{string(components.Card(components.CardProps{

@@ -33,6 +33,8 @@ package components
 // is where escaping stops being guaranteed by construction. A panel that has to
 // hold a form is written as <dialog class="drawer"> directly.
 type DrawerProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// ID is what a trigger targets to open this: `onclick="ID.showModal()"`.
 	ID string
 	// Side is the edge it comes in from: "left", "right", "top" or "bottom".
@@ -79,12 +81,18 @@ func (p DrawerProps) DescribedBy() string {
 	}
 	return p.ID + "-description"
 }
+// PartNames are the parts this component publishes.
+func (p DrawerProps) PartNames() []string {
+	return []string{"root", "content", "header", "title", "description", "nav", "link", "footer", "close"}
+}
 @endgo
 
 <dialog
+	data-part="root"
 	id="{{ .ID }}"
-	class="drawer"
+	class="{{ .RootClass("drawer") }}"
 	aria-labelledby="{{ .ID }}-title"
+	@attributes(.RootAttrs())
 	@if(.Side != "")
 		data-side="{{ .Side }}"
 	@endif
@@ -92,22 +100,54 @@ func (p DrawerProps) DescribedBy() string {
 		aria-describedby="{{ .DescribedBy() }}"
 	@endif
 >
-	<article>
-		<header>
-			<h2 id="{{ .ID }}-title">{{ .Title }}</h2>
+	<article
+		data-part="content"
+		@if(.PartClass("content") != "")
+			class="{{ .PartClass("content") }}"
+		@endif
+		@attributes(.PartAttrs("content"))
+	>
+		<header
+			data-part="header"
+			@if(.PartClass("header") != "")
+				class="{{ .PartClass("header") }}"
+			@endif
+			@attributes(.PartAttrs("header"))
+		>
+			<h2
+				data-part="title"
+				@if(.PartClass("title") != "")
+					class="{{ .PartClass("title") }}"
+				@endif
+				id="{{ .ID }}-title"
+				@attributes(.PartAttrs("title"))
+			>{{ .Title }}</h2>
 			@if(.Description != "")
-				<p id="{{ .ID }}-description">{{ .Description }}</p>
+				<p
+					data-part="description"
+					@if(.PartClass("description") != "")
+						class="{{ .PartClass("description") }}"
+					@endif
+					id="{{ .ID }}-description"
+					@attributes(.PartAttrs("description"))
+				>{{ .Description }}</p>
 			@endif
 		</header>
 
 		@if(len(.Links) > 0)
 			<section class="p-4">
-				<nav class="grid gap-1">
+				<nav
+					data-part="nav"
+					class="{{ .PartClass("nav", "grid gap-1") }}"
+					@attributes(.PartAttrs("nav"))
+				>
 					@foreach(.Links as link)
 						<a
-							class="btn justify-start"
+							data-part="link"
+							class="{{ .PartClass("link", "btn justify-start") }}"
 							data-variant="ghost"
 							href="{{ link.Href }}"
+							@attributes(.PartAttrs("link"))
 							@if(link.Current)
 								aria-current="page"
 							@endif
@@ -117,9 +157,21 @@ func (p DrawerProps) DescribedBy() string {
 			</section>
 		@endif
 
-		<footer>
+		<footer
+			data-part="footer"
+			@if(.PartClass("footer") != "")
+				class="{{ .PartClass("footer") }}"
+			@endif
+			@attributes(.PartAttrs("footer"))
+		>
 			<form method="dialog">
-				<button type="submit" class="btn" data-variant="outline">{{ .Close() }}</button>
+				<button
+					data-part="close"
+					type="submit"
+					class="{{ .PartClass("close", "btn") }}"
+					data-variant="outline"
+					@attributes(.PartAttrs("close"))
+				>{{ .Close() }}</button>
 			</form>
 		</footer>
 	</article>
