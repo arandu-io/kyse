@@ -13,7 +13,11 @@ package components
 //
 // An empty Variant or Size means the default, and the stylesheet says so: the
 // rules are written for `.btn:not([data-variant])` as well as for the named one.
+//
+// It publishes one part, root, which is the button itself.
 type ButtonProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Label is the text on the button.
 	Label string
 	// Variant and Size select the look. Empty is the default of each.
@@ -56,11 +60,16 @@ func (p ButtonProps) ButtonType() string {
 	}
 	return p.Type
 }
+
+// PartNames are the parts this component publishes.
+func (p ButtonProps) PartNames() []string { return []string{"root"} }
 @endgo
 
 <button
+	data-part="root"
 	type="{{ .ButtonType() }}"
-	class="btn"
+	class="{{ .RootClass("btn") }}"
+	@attributes(.RootAttrs())
 	@if(.Variant != "")
 		data-variant="{{ .Variant }}"
 	@endif

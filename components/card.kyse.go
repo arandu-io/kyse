@@ -10,7 +10,11 @@ package components
 // this view layer refuses to accept -- it is exactly where escaping stops being
 // guaranteed by construction. So a card takes the fields it draws, and markup
 // that needs a frame around it uses `class="card"` directly.
+//
+// It publishes root, header, title, description and meta.
 type CardProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Title is the heading, and the link text when Href is set.
 	Title string
 	// Description is the sentence under it.
@@ -24,11 +28,28 @@ type CardProps struct {
 	// BadgeVariant styles it. See BadgeProps.
 	BadgeVariant string
 }
+
+// PartNames are the parts this component publishes.
+func (p CardProps) PartNames() []string {
+	return []string{"root", "header", "title", "description", "meta"}
+}
 @endgo
 
-<article class="card p-5">
-	<header class="flex items-start justify-between gap-3">
-		<h3 class="font-semibold tracking-tight">
+<article
+	data-part="root"
+	class="{{ .RootClass("card p-5") }}"
+	@attributes(.RootAttrs())
+>
+	<header
+		data-part="header"
+		class="{{ .PartClass("header", "flex items-start justify-between gap-3") }}"
+		@attributes(.PartAttrs("header"))
+	>
+		<h3
+			data-part="title"
+			class="{{ .PartClass("title", "font-semibold tracking-tight") }}"
+			@attributes(.PartAttrs("title"))
+		>
 			@if(.Href != "")
 				<a class="hover:underline" href="{{ .Href }}">{{ .Title }}</a>
 			@endif
@@ -42,9 +63,17 @@ type CardProps struct {
 	</header>
 
 	@if(.Description != "")
-		<p class="text-muted-foreground mt-2 text-sm">{{ .Description }}</p>
+		<p
+			data-part="description"
+			class="{{ .PartClass("description", "text-muted-foreground mt-2 text-sm") }}"
+			@attributes(.PartAttrs("description"))
+		>{{ .Description }}</p>
 	@endif
 	@if(.Meta != "")
-		<p class="text-muted-foreground mt-3 text-xs">{{ .Meta }}</p>
+		<p
+			data-part="meta"
+			class="{{ .PartClass("meta", "text-muted-foreground mt-3 text-xs") }}"
+			@attributes(.PartAttrs("meta"))
+		>{{ .Meta }}</p>
 	@endif
 </article>
