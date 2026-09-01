@@ -5,6 +5,7 @@
 package components
 
 import (
+	kyse__fmt "fmt"
 	kyse__template "html/template"
 	kyse__io "io"
 	kyse__strings "strings"
@@ -35,7 +36,10 @@ import (
 // or an input group the stylesheet sizes the rule itself, off the role, and
 // these classes would win over it: a separator in one of those is written as
 // <hr role="separator"> directly, with no classes at all.
+// It publishes one part, root, which is the rule itself.
 type SeparatorProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Orientation is "horizontal" or "vertical". Empty is horizontal.
 	//
 	// A vertical one takes its height from the row it sits in, so it needs a
@@ -56,7 +60,10 @@ func (p SeparatorProps) Direction() string {
 	return "horizontal"
 }
 
-//line components/separator.go:60
+// PartNames are the parts this component publishes.
+func (p SeparatorProps) PartNames() []string { return []string{"root"} }
+
+//line components/separator.go:67
 
 // Separator renders the separator component.
 func Separator(kyse__props SeparatorProps) kyse__template.HTML {
@@ -72,9 +79,12 @@ func Separator(kyse__props SeparatorProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "<hr\n")
 	}
-//line components/separator.kyse.go:50
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tdata-part=\"root\"\n")
+	}
+//line components/separator.kyse.go:57
 	if kyse__d.Decorative {
-//line components/separator.go:78
+//line components/separator.go:88
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\trole=\"none\" aria-hidden=\"true\"\n")
 		}
@@ -83,23 +93,50 @@ func Separator(kyse__props SeparatorProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\trole=\"separator\" aria-orientation=\"")
 		}
 		if kyse__err == nil {
-//line components/separator.kyse.go:53
+//line components/separator.kyse.go:60
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Direction()))
-//line components/separator.go:89
+//line components/separator.go:99
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/separator.kyse.go:55
+//line components/separator.kyse.go:62
 	if kyse__d.Direction() == "vertical" {
-//line components/separator.go:97
+//line components/separator.go:107
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"bg-border w-px shrink-0 self-stretch border-0\"\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/separator.kyse.go:63
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("bg-border w-px shrink-0 self-stretch border-0")))
+//line components/separator.go:114
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	} else {
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"bg-border h-px w-full shrink-0 border-0\"\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/separator.kyse.go:65
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("bg-border h-px w-full shrink-0 border-0")))
+//line components/separator.go:126
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/separator.kyse.go:67
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/separator.go:136
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/separator.kyse.go:67", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
 	}
 	if kyse__err == nil {

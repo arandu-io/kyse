@@ -14,7 +14,10 @@ package components
 // It has no colour and no animation of its own: both come from the stylesheet,
 // which is what keeps every rectangle on a page pulsing together rather than
 // each on its own clock.
+// It publishes one part, root, which is the rectangle itself.
 type SkeletonProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Shape is what is being waited for: "line" for a line of text, "block" for
 	// a picture or a chart, "circle" for an avatar. Empty means "line".
 	Shape string
@@ -66,10 +69,15 @@ func (p SkeletonProps) Geometry() string {
 		return shape + " w-full"
 	}
 }
+
+// PartNames are the parts this component publishes.
+func (p SkeletonProps) PartNames() []string { return []string{"root"} }
 @endgo
 
 <div
-	class="skeleton {{ .Geometry() }}"
+	data-part="root"
+	class="{{ .RootClass("skeleton", .Geometry()) }}"
+	@attributes(.RootAttrs())
 	@if(.Label != "")
 		role="status"
 		aria-busy="true"

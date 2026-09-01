@@ -21,7 +21,10 @@ package components
 // component that chose between an anchor and an article would have to write out
 // everything inside it twice, once under each element, and two copies of the
 // same four parts is the drift this exists to prevent.
+// It publishes root, icon, content, title, description and action.
 type ItemProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Title is the line, and what the row is about.
 	Title string
 	// Description is the sentence under it. Empty draws none, which is the
@@ -48,10 +51,17 @@ type ItemProps struct {
 	// Size is "default", "sm" or "xs". Empty is the default.
 	Size string
 }
+
+// PartNames are the parts this component publishes.
+func (p ItemProps) PartNames() []string {
+	return []string{"root", "icon", "content", "title", "description", "action"}
+}
 @endgo
 
 <article
-	class="item"
+	data-part="root"
+	class="{{ .RootClass("item") }}"
+	@attributes(.RootAttrs())
 	@if(.Variant != "")
 		data-variant="{{ .Variant }}"
 	@endif
@@ -60,15 +70,45 @@ type ItemProps struct {
 	@endif
 >
 	@if(.Icon != "")
-		<figure>{!! .Icon !!}</figure>
+		<figure
+			data-part="icon"
+			@if(.PartClass("icon") != "")
+				class="{{ .PartClass("icon") }}"
+			@endif
+			@attributes(.PartAttrs("icon"))
+		>{!! .Icon !!}</figure>
 	@endif
-	<section>
-		<h3>{{ .Title }}</h3>
+	<section
+		data-part="content"
+		@if(.PartClass("content") != "")
+			class="{{ .PartClass("content") }}"
+		@endif
+		@attributes(.PartAttrs("content"))
+	>
+		<h3
+			data-part="title"
+			@if(.PartClass("title") != "")
+				class="{{ .PartClass("title") }}"
+			@endif
+			@attributes(.PartAttrs("title"))
+		>{{ .Title }}</h3>
 		@if(.Description != "")
-			<p>{{ .Description }}</p>
+			<p
+				data-part="description"
+				@if(.PartClass("description") != "")
+					class="{{ .PartClass("description") }}"
+				@endif
+				@attributes(.PartAttrs("description"))
+			>{{ .Description }}</p>
 		@endif
 	</section>
 	@if(.Action != "")
-		<aside>{!! .Action !!}</aside>
+		<aside
+			data-part="action"
+			@if(.PartClass("action") != "")
+				class="{{ .PartClass("action") }}"
+			@endif
+			@attributes(.PartAttrs("action"))
+		>{!! .Action !!}</aside>
 	@endif
 </article>

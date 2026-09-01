@@ -24,7 +24,10 @@ package components
 // or an input group the stylesheet sizes the rule itself, off the role, and
 // these classes would win over it: a separator in one of those is written as
 // <hr role="separator"> directly, with no classes at all.
+// It publishes one part, root, which is the rule itself.
 type SeparatorProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Orientation is "horizontal" or "vertical". Empty is horizontal.
 	//
 	// A vertical one takes its height from the row it sits in, so it needs a
@@ -44,17 +47,22 @@ func (p SeparatorProps) Direction() string {
 	}
 	return "horizontal"
 }
+
+// PartNames are the parts this component publishes.
+func (p SeparatorProps) PartNames() []string { return []string{"root"} }
 @endgo
 
 <hr
+	data-part="root"
 	@if(.Decorative)
 		role="none" aria-hidden="true"
 	@else
 		role="separator" aria-orientation="{{ .Direction() }}"
 	@endif
 	@if(.Direction() == "vertical")
-		class="bg-border w-px shrink-0 self-stretch border-0"
+		class="{{ .RootClass("bg-border w-px shrink-0 self-stretch border-0") }}"
 	@else
-		class="bg-border h-px w-full shrink-0 border-0"
+		class="{{ .RootClass("bg-border h-px w-full shrink-0 border-0") }}"
 	@endif
+	@attributes(.RootAttrs())
 >

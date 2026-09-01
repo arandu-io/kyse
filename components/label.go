@@ -5,6 +5,7 @@
 package components
 
 import (
+	kyse__fmt "fmt"
 	kyse__template "html/template"
 	kyse__io "io"
 	kyse__strings "strings"
@@ -24,7 +25,10 @@ import (
 // because it is decoration and has to be kept out of the accessible name: read
 // aloud it turns "Email" into "Email star", and it is not what announces the
 // constraint either -- the required attribute on the control is.
+// It publishes root and marker, marker being the asterisk beside the text.
 type LabelProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// For is the id of the control this names, which is the control's id and not
 	// its name. The two are the same only where nothing set them apart.
 	For string
@@ -35,7 +39,10 @@ type LabelProps struct {
 	Required bool
 }
 
-//line components/label.go:39
+// PartNames are the parts this component publishes.
+func (p LabelProps) PartNames() []string { return []string{"root", "marker"} }
+
+//line components/label.go:46
 
 // Label renders the label component.
 func Label(kyse__props LabelProps) kyse__template.HTML {
@@ -49,32 +56,94 @@ func Label(kyse__props LabelProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "<label class=\"label\" for=\"")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "<label\n")
 	}
 	if kyse__err == nil {
-//line components/label.kyse.go:28
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tdata-part=\"root\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
+	}
+	if kyse__err == nil {
+//line components/label.kyse.go:36
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("label")))
+//line components/label.go:71
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tfor=\"")
+	}
+	if kyse__err == nil {
+//line components/label.kyse.go:37
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.For))
-//line components/label.go:58
+//line components/label.go:82
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+	}
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/label.kyse.go:38
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/label.go:91
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/label.kyse.go:38", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
+		}
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t")
 	}
 	if kyse__err == nil {
-//line components/label.kyse.go:29
+//line components/label.kyse.go:40
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Text)))
-//line components/label.go:69
+//line components/label.go:107
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/label.kyse.go:30
+//line components/label.kyse.go:41
 	if kyse__d.Required {
-//line components/label.go:76
+//line components/label.go:114
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<span class=\"text-destructive\" aria-hidden=\"true\">*</span>\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<span\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"marker\"\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/label.kyse.go:44
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("marker", "text-destructive")))
+//line components/label.go:127
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-hidden=\"true\"\n")
+		}
+		if kyse__err == nil {
+			var kyse__v2 string
+//line components/label.kyse.go:46
+			kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("marker"))
+//line components/label.go:139
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/label.kyse.go:46", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>*</span>\n")
 		}
 	}
 	if kyse__err == nil {

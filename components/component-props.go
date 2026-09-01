@@ -132,8 +132,12 @@ type PartProps struct {
 //
 // Empty pieces and repeats are dropped, so a caller who writes a class the
 // component already draws with does not double it.
-func (c ComponentProps) PartClass(part, own string) string {
-	return joinClasses(own, c.partProps(part).Class)
+// own is variadic because a component's own classes are not always one string:
+// a skeleton's shape and its width are decided separately, and a component that
+// had to concatenate them first would be building a class list with a + before
+// handing it to the thing whose job is building class lists.
+func (c ComponentProps) PartClass(part string, own ...string) string {
+	return joinClasses(append(own, c.partProps(part).Class)...)
 }
 
 // PartAttrs is the attributes to write on one part.
@@ -200,8 +204,8 @@ func (c ComponentProps) StyleClass() string { return c.Style.Class() }
 // It is a separate method rather than PartClass("root", own) because the root
 // is the one element the scoped block attaches to, and a component should not
 // have to remember to append it.
-func (c ComponentProps) RootClass(own string) string {
-	return joinClasses(own, c.partProps("root").Class, c.Style.Class())
+func (c ComponentProps) RootClass(own ...string) string {
+	return joinClasses(append(own, c.partProps("root").Class, c.Style.Class())...)
 }
 
 // partProps is what the caller wrote for one part, with root reading the

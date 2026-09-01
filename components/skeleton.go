@@ -5,6 +5,7 @@
 package components
 
 import (
+	kyse__fmt "fmt"
 	kyse__template "html/template"
 	kyse__io "io"
 	kyse__strings "strings"
@@ -25,7 +26,10 @@ import (
 // It has no colour and no animation of its own: both come from the stylesheet,
 // which is what keeps every rectangle on a page pulsing together rather than
 // each on its own clock.
+// It publishes one part, root, which is the rectangle itself.
 type SkeletonProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Shape is what is being waited for: "line" for a line of text, "block" for
 	// a picture or a chart, "circle" for an avatar. Empty means "line".
 	Shape string
@@ -78,7 +82,10 @@ func (p SkeletonProps) Geometry() string {
 	}
 }
 
-//line components/skeleton.go:82
+// PartNames are the parts this component publishes.
+func (p SkeletonProps) PartNames() []string { return []string{"root"} }
+
+//line components/skeleton.go:89
 
 // Skeleton renders the skeleton component.
 func Skeleton(kyse__props SkeletonProps) kyse__template.HTML {
@@ -95,19 +102,33 @@ func Skeleton(kyse__props SkeletonProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "<div\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"skeleton ")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tdata-part=\"root\"\n")
 	}
 	if kyse__err == nil {
-//line components/skeleton.kyse.go:72
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Geometry()))
-//line components/skeleton.go:104
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
+	}
+	if kyse__err == nil {
+//line components/skeleton.kyse.go:79
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("skeleton", kyse__d.Geometry())))
+//line components/skeleton.go:114
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-//line components/skeleton.kyse.go:73
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/skeleton.kyse.go:80
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/skeleton.go:123
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/skeleton.kyse.go:80", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
+		}
+	}
+//line components/skeleton.kyse.go:81
 	if kyse__d.Label != "" {
-//line components/skeleton.go:111
+//line components/skeleton.go:132
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\trole=\"status\"\n")
 		}
@@ -118,17 +139,17 @@ func Skeleton(kyse__props SkeletonProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-label=\"")
 		}
 		if kyse__err == nil {
-//line components/skeleton.kyse.go:76
+//line components/skeleton.kyse.go:84
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
-//line components/skeleton.go:124
+//line components/skeleton.go:145
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/skeleton.kyse.go:78
+//line components/skeleton.kyse.go:86
 	if kyse__d.Label == "" {
-//line components/skeleton.go:132
+//line components/skeleton.go:153
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-hidden=\"true\"\n")
 		}

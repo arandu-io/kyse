@@ -5,6 +5,7 @@
 package components
 
 import (
+	kyse__fmt "fmt"
 	kyse__template "html/template"
 	kyse__io "io"
 	kyse__strings "strings"
@@ -24,7 +25,10 @@ import (
 // bar to it and says so with aria-valuenow. A value that is not known fills the
 // bar and pulses, and writes no aria-valuenow at all -- which is precisely how
 // an unknown share is spelled, and not an omission.
+// It publishes root and fill, fill being the part of the bar that is filled.
 type ProgressProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Label is what is progressing: "Upload", "Import", "Restore". It becomes
 	// the accessible name, and a bar without one is announced as a percentage
 	// of nothing in particular.
@@ -88,7 +92,10 @@ func (p ProgressProps) WidthClass() string {
 	return progressWidths[(p.Percent()+2)/5]
 }
 
-//line components/progress.go:92
+// PartNames are the parts this component publishes.
+func (p ProgressProps) PartNames() []string { return []string{"root", "fill"} }
+
+//line components/progress.go:99
 
 // Progress renders the progress component.
 func Progress(kyse__props ProgressProps) kyse__template.HTML {
@@ -105,21 +112,43 @@ func Progress(kyse__props ProgressProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "<div\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"progress\"\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tdata-part=\"root\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
+	}
+	if kyse__err == nil {
+//line components/progress.kyse.go:89
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("progress")))
+//line components/progress.go:124
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\trole=\"progressbar\"\n")
 	}
-//line components/progress.kyse.go:84
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/progress.kyse.go:91
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/progress.go:136
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/progress.kyse.go:91", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
+		}
+	}
+//line components/progress.kyse.go:92
 	if kyse__d.Label != "" {
-//line components/progress.go:116
+//line components/progress.go:145
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-label=\"")
 		}
 		if kyse__err == nil {
-//line components/progress.kyse.go:85
+//line components/progress.kyse.go:93
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
-//line components/progress.go:123
+//line components/progress.go:152
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -132,23 +161,23 @@ func Progress(kyse__props ProgressProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\taria-valuemax=\"")
 	}
 	if kyse__err == nil {
-//line components/progress.kyse.go:88
+//line components/progress.kyse.go:96
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Ceiling()))
-//line components/progress.go:138
+//line components/progress.go:167
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-//line components/progress.kyse.go:89
+//line components/progress.kyse.go:97
 	if !kyse__d.Indeterminate {
-//line components/progress.go:145
+//line components/progress.go:174
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-valuenow=\"")
 		}
 		if kyse__err == nil {
-//line components/progress.kyse.go:90
+//line components/progress.kyse.go:98
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Now()))
-//line components/progress.go:152
+//line components/progress.go:181
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -157,23 +186,71 @@ func Progress(kyse__props ProgressProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")
 	}
-//line components/progress.kyse.go:93
+//line components/progress.kyse.go:101
 	if kyse__d.Indeterminate {
-//line components/progress.go:163
+//line components/progress.go:192
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<span class=\"w-full animate-pulse\"></span>\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<span\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"fill\"\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/progress.kyse.go:104
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("fill", "w-full animate-pulse")))
+//line components/progress.go:205
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+		if kyse__err == nil {
+			var kyse__v2 string
+//line components/progress.kyse.go:105
+			kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("fill"))
+//line components/progress.go:214
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/progress.kyse.go:105", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t></span>\n")
 		}
 	} else {
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<span class=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<span\n")
 		}
 		if kyse__err == nil {
-//line components/progress.kyse.go:96
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.WidthClass()))
-//line components/progress.go:174
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"fill\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\"></span>\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/progress.kyse.go:110
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("fill", kyse__d.WidthClass())))
+//line components/progress.go:237
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+		if kyse__err == nil {
+			var kyse__v3 string
+//line components/progress.kyse.go:111
+			kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("fill"))
+//line components/progress.go:246
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/progress.kyse.go:111", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t></span>\n")
 		}
 	}
 	if kyse__err == nil {

@@ -5,6 +5,7 @@
 package components
 
 import (
+	kyse__fmt "fmt"
 	kyse__template "html/template"
 	kyse__io "io"
 	kyse__strings "strings"
@@ -20,7 +21,10 @@ import (
 // whole component: a caller that supplied the separators would be a caller
 // writing markup, and the separator is the part that drifts -- a plus here, a
 // space there, a hyphen on the page somebody wrote last.
+// It publishes root and item, item being each key cap.
 type KbdProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Keys are the keys, in the order they are held down: {"Ctrl", "Shift",
 	// "P"}, or {"⌘", "K"}. One key draws no separator, and none draws nothing
 	// at all, so a screen can include the shortcut it may not have.
@@ -59,7 +63,10 @@ func (p KbdProps) Name(i int) string {
 	return keyNames[p.Keys[i]]
 }
 
-//line components/kbd.go:63
+// PartNames are the parts this component publishes.
+func (p KbdProps) PartNames() []string { return []string{"root", "item"} }
+
+//line components/kbd.go:70
 
 // Kbd renders the kbd component.
 func Kbd(kyse__props KbdProps) kyse__template.HTML {
@@ -72,18 +79,46 @@ func Kbd(kyse__props KbdProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/kbd.kyse.go:52
+//line components/kbd.kyse.go:58
 	if len(kyse__d.Keys) > 0 {
-//line components/kbd.go:78
+//line components/kbd.go:85
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t<span class=\"inline-flex items-center gap-1\">\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t<span\n")
 		}
-//line components/kbd.kyse.go:54
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-part=\"root\"\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/kbd.kyse.go:61
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("inline-flex items-center gap-1")))
+//line components/kbd.go:98
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+		if kyse__err == nil {
+			var kyse__v1 string
+//line components/kbd.kyse.go:62
+			kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/kbd.go:107
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/kbd.kyse.go:62", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
+		}
+//line components/kbd.kyse.go:64
 		for i := 0; i < len(kyse__d.Keys); i++ {
-//line components/kbd.go:84
-//line components/kbd.kyse.go:55
+//line components/kbd.go:119
+//line components/kbd.kyse.go:65
 			if i > 0 {
-//line components/kbd.go:87
+//line components/kbd.go:122
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<span>+</span>\n")
 				}
@@ -92,18 +127,40 @@ func Kbd(kyse__props KbdProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<kbd\n")
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"kbd\"\n")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"item\"\n")
 			}
-//line components/kbd.kyse.go:60
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/kbd.kyse.go:70
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("item", "kbd")))
+//line components/kbd.go:139
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				var kyse__v2 string
+//line components/kbd.kyse.go:71
+				kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("item"))
+//line components/kbd.go:148
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/kbd.kyse.go:71", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
+				}
+			}
+//line components/kbd.kyse.go:72
 			if kyse__d.Name(i) != "" {
-//line components/kbd.go:100
+//line components/kbd.go:157
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-label=\"")
 				}
 				if kyse__err == nil {
-//line components/kbd.kyse.go:61
+//line components/kbd.kyse.go:73
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name(i)))
-//line components/kbd.go:107
+//line components/kbd.go:164
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -113,9 +170,9 @@ func Kbd(kyse__props KbdProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/kbd.kyse.go:63
+//line components/kbd.kyse.go:75
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Keys[i])))
-//line components/kbd.go:119
+//line components/kbd.go:176
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</kbd>\n")

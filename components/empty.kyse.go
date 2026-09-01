@@ -9,7 +9,10 @@ package components
 // failed rather than a page with nothing to show, and the difference costs a
 // heading and a sentence. The action is what turns it from an apology into the
 // obvious next step.
+// It publishes root, header, title, message and action.
 type EmptyProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Title is the heading: what is not here.
 	Title string
 	// Message is the sentence under it.
@@ -18,18 +21,51 @@ type EmptyProps struct {
 	ActionLabel string
 	ActionURL   string
 }
+
+// PartNames are the parts this component publishes.
+func (p EmptyProps) PartNames() []string {
+	return []string{"root", "header", "title", "message", "action"}
+}
 @endgo
 
-<div class="empty">
-	<header>
-		<h2>{{ .Title }}</h2>
+<div
+	data-part="root"
+	class="{{ .RootClass("empty") }}"
+	@attributes(.RootAttrs())
+>
+	<header
+		data-part="header"
+		@if(.PartClass("header") != "")
+			class="{{ .PartClass("header") }}"
+		@endif
+		@attributes(.PartAttrs("header"))
+	>
+		<h2
+			data-part="title"
+			@if(.PartClass("title") != "")
+				class="{{ .PartClass("title") }}"
+			@endif
+			@attributes(.PartAttrs("title"))
+		>{{ .Title }}</h2>
 		@if(.Message != "")
-			<p>{{ .Message }}</p>
+			<p
+				data-part="message"
+				@if(.PartClass("message") != "")
+					class="{{ .PartClass("message") }}"
+				@endif
+				@attributes(.PartAttrs("message"))
+			>{{ .Message }}</p>
 		@endif
 	</header>
 	@if(.ActionURL != "")
 		<section>
-			<a class="btn" data-variant="outline" href="{{ .ActionURL }}">{{ .ActionLabel }}</a>
+			<a
+				data-part="action"
+				class="{{ .PartClass("action", "btn") }}"
+				data-variant="outline"
+				href="{{ .ActionURL }}"
+				@attributes(.PartAttrs("action"))
+			>{{ .ActionLabel }}</a>
 		</section>
 	@endif
 </div>

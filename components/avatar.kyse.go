@@ -10,7 +10,10 @@ import "strings"
 // With no image it draws initials, which is the case that actually happens: an
 // application where everybody uploaded a photograph does not exist, and a broken
 // image icon beside every comment is worse than two letters.
+// It publishes one part, root, which is the circle itself.
 type AvatarProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Name is the person. It is the alt text, and the initials come from it.
 	Name string
 	// ImageURL is their picture. Empty draws the initials.
@@ -40,9 +43,15 @@ func (p AvatarProps) Initials() string {
 	}
 	return strings.ToUpper(string(out))
 }
+
+// PartNames are the parts this component publishes.
+func (p AvatarProps) PartNames() []string { return []string{"root"} }
 @endgo
 
-<span class="avatar"
+<span
+	data-part="root"
+	class="{{ .RootClass("avatar") }}"
+	@attributes(.RootAttrs())
 	@if(.Size != "")
 		data-size="{{ .Size }}"
 	@endif

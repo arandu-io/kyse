@@ -13,7 +13,10 @@ package components
 // because it is decoration and has to be kept out of the accessible name: read
 // aloud it turns "Email" into "Email star", and it is not what announces the
 // constraint either -- the required attribute on the control is.
+// It publishes root and marker, marker being the asterisk beside the text.
 type LabelProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// For is the id of the control this names, which is the control's id and not
 	// its name. The two are the same only where nothing set them apart.
 	For string
@@ -23,11 +26,24 @@ type LabelProps struct {
 	// nothing more: the control carries the required attribute.
 	Required bool
 }
+
+// PartNames are the parts this component publishes.
+func (p LabelProps) PartNames() []string { return []string{"root", "marker"} }
 @endgo
 
-<label class="label" for="{{ .For }}">
+<label
+	data-part="root"
+	class="{{ .RootClass("label") }}"
+	for="{{ .For }}"
+	@attributes(.RootAttrs())
+>
 	{{ .Text }}
 	@if(.Required)
-		<span class="text-destructive" aria-hidden="true">*</span>
+		<span
+			data-part="marker"
+			class="{{ .PartClass("marker", "text-destructive") }}"
+			aria-hidden="true"
+			@attributes(.PartAttrs("marker"))
+		>*</span>
 	@endif
 </label>

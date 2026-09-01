@@ -5,6 +5,7 @@
 package components
 
 import (
+	kyse__fmt "fmt"
 	kyse__template "html/template"
 	kyse__io "io"
 	kyse__strings "strings"
@@ -30,7 +31,14 @@ import (
 // row are announced one after another with nothing saying what they belong to,
 // and "Archive, Report, Snooze" is a list of three unrelated commands until
 // something says they are what can be done with this message.
+// # What it publishes
+//
+// One part, root, which is the group itself. The buttons are not a part:
+// each one is a ButtonProps and carries its own class, attributes and parts,
+// so a part here would be a second way to reach the same element.
 type ButtonGroupProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Label is what assistive technology calls the group. Empty leaves the
 	// group unnamed, which is right only when the buttons are words that
 	// already say what they are together.
@@ -58,7 +66,10 @@ func (p ButtonGroupProps) Orientation() string {
 	return ""
 }
 
-//line components/button-group.go:62
+// PartNames are the parts this component publishes.
+func (p ButtonGroupProps) PartNames() []string { return []string{"root"} }
+
+//line components/button-group.go:73
 
 // ButtonGroup renders the button-group component.
 func ButtonGroup(kyse__props ButtonGroupProps) kyse__template.HTML {
@@ -72,33 +83,61 @@ func ButtonGroup(kyse__props ButtonGroupProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "<div class=\"button-group\" role=\"group\"\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "<div\n")
 	}
-//line components/button-group.kyse.go:52
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tdata-part=\"root\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
+	}
+	if kyse__err == nil {
+//line components/button-group.kyse.go:63
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("button-group")))
+//line components/button-group.go:98
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\trole=\"group\"\n")
+	}
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/button-group.kyse.go:65
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/button-group.go:110
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/button-group.kyse.go:65", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
+		}
+	}
+//line components/button-group.kyse.go:66
 	if kyse__d.Label != "" {
-//line components/button-group.go:80
+//line components/button-group.go:119
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-label=\"")
 		}
 		if kyse__err == nil {
-//line components/button-group.kyse.go:53
+//line components/button-group.kyse.go:67
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
-//line components/button-group.go:87
+//line components/button-group.go:126
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/button-group.kyse.go:55
+//line components/button-group.kyse.go:69
 	if kyse__d.Orientation() != "" {
-//line components/button-group.go:95
+//line components/button-group.go:134
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-orientation=\"")
 		}
 		if kyse__err == nil {
-//line components/button-group.kyse.go:56
+//line components/button-group.kyse.go:70
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Orientation()))
-//line components/button-group.go:102
+//line components/button-group.go:141
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -107,12 +146,12 @@ func ButtonGroup(kyse__props ButtonGroupProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")
 	}
-//line components/button-group.kyse.go:59
+//line components/button-group.kyse.go:73
 	for at := 0; at < len(kyse__d.Buttons); at++ {
-//line components/button-group.go:113
-//line components/button-group.kyse.go:60
+//line components/button-group.go:152
+//line components/button-group.kyse.go:74
 		if kyse__d.Separated && at > 0 {
-//line components/button-group.go:116
+//line components/button-group.go:155
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<hr role=\"separator\">\n")
 			}
@@ -121,9 +160,9 @@ func ButtonGroup(kyse__props ButtonGroupProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t")
 		}
 		if kyse__err == nil {
-//line components/button-group.kyse.go:63
+//line components/button-group.kyse.go:77
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(Button(kyse__d.Buttons[at])))
-//line components/button-group.go:127
+//line components/button-group.go:166
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")

@@ -19,7 +19,14 @@ package components
 // row are announced one after another with nothing saying what they belong to,
 // and "Archive, Report, Snooze" is a list of three unrelated commands until
 // something says they are what can be done with this message.
+// # What it publishes
+//
+// One part, root, which is the group itself. The buttons are not a part:
+// each one is a ButtonProps and carries its own class, attributes and parts,
+// so a part here would be a second way to reach the same element.
 type ButtonGroupProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Label is what assistive technology calls the group. Empty leaves the
 	// group unnamed, which is right only when the buttons are words that
 	// already say what they are together.
@@ -46,9 +53,16 @@ func (p ButtonGroupProps) Orientation() string {
 	}
 	return ""
 }
+
+// PartNames are the parts this component publishes.
+func (p ButtonGroupProps) PartNames() []string { return []string{"root"} }
 @endgo
 
-<div class="button-group" role="group"
+<div
+	data-part="root"
+	class="{{ .RootClass("button-group") }}"
+	role="group"
+	@attributes(.RootAttrs())
 	@if(.Label != "")
 		aria-label="{{ .Label }}"
 	@endif

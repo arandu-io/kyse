@@ -1,6 +1,7 @@
 package unit
 
 import (
+	"html/template"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -24,6 +25,22 @@ var extensible = []struct {
 	render    func(components.ComponentProps) string
 	partNames func() []string
 }{
+	{
+		"Alert",
+		func(c components.ComponentProps) string {
+			return string(components.Alert(components.AlertProps{
+				ComponentProps: c, Title: "Saved", Message: "The post is live.",
+			}))
+		},
+		components.AlertProps{}.PartNames,
+	},
+	{
+		"Avatar",
+		func(c components.ComponentProps) string {
+			return string(components.Avatar(components.AvatarProps{ComponentProps: c, Name: "Ada Lovelace"}))
+		},
+		components.AvatarProps{}.PartNames,
+	},
 	{
 		"Badge",
 		func(c components.ComponentProps) string {
@@ -49,6 +66,82 @@ var extensible = []struct {
 			}))
 		},
 		components.CardProps{}.PartNames,
+	},
+	{
+		"ButtonGroup",
+		func(c components.ComponentProps) string {
+			return string(components.ButtonGroup(components.ButtonGroupProps{
+				ComponentProps: c,
+				Label:          "Message actions",
+				Buttons:        []components.ButtonProps{{Label: "Archive"}, {Label: "Report"}},
+			}))
+		},
+		components.ButtonGroupProps{}.PartNames,
+	},
+	{
+		"Empty",
+		func(c components.ComponentProps) string {
+			return string(components.Empty(components.EmptyProps{
+				ComponentProps: c,
+				Title:          "No posts",
+				Message:        "Nothing has been published.",
+				ActionLabel:    "Write one",
+				ActionURL:      "/posts/new",
+			}))
+		},
+		components.EmptyProps{}.PartNames,
+	},
+	{
+		"Item",
+		func(c components.ComponentProps) string {
+			return string(components.Item(components.ItemProps{
+				ComponentProps: c,
+				Title:          "Billing",
+				Description:    "Cards and invoices.",
+				Icon:           template.HTML(`<svg></svg>`),
+				Action:         template.HTML(`<button></button>`),
+			}))
+		},
+		components.ItemProps{}.PartNames,
+	},
+	{
+		"Kbd",
+		func(c components.ComponentProps) string {
+			return string(components.Kbd(components.KbdProps{ComponentProps: c, Keys: []string{"⌘", "K"}}))
+		},
+		components.KbdProps{}.PartNames,
+	},
+	{
+		"Label",
+		func(c components.ComponentProps) string {
+			return string(components.Label(components.LabelProps{
+				ComponentProps: c, For: "email", Text: "Email", Required: true,
+			}))
+		},
+		components.LabelProps{}.PartNames,
+	},
+	{
+		"Progress",
+		func(c components.ComponentProps) string {
+			return string(components.Progress(components.ProgressProps{
+				ComponentProps: c, Label: "Upload", Value: 40,
+			}))
+		},
+		components.ProgressProps{}.PartNames,
+	},
+	{
+		"Separator",
+		func(c components.ComponentProps) string {
+			return string(components.Separator(components.SeparatorProps{ComponentProps: c}))
+		},
+		components.SeparatorProps{}.PartNames,
+	},
+	{
+		"Skeleton",
+		func(c components.ComponentProps) string {
+			return string(components.Skeleton(components.SkeletonProps{ComponentProps: c}))
+		},
+		components.SkeletonProps{}.PartNames,
 	},
 }
 

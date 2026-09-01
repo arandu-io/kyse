@@ -9,7 +9,10 @@ package components
 // assertive live region and everything else is polite, and getting that pair
 // wrong is the difference between a screen reader interrupting somebody and
 // never mentioning the error at all.
+// It publishes root, title and message.
 type AlertProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Variant is "default" or "destructive". Empty is the default.
 	Variant string
 	// Title is the line in bold. It can stand alone.
@@ -25,17 +28,34 @@ func (p AlertProps) Role() string {
 	}
 	return "status"
 }
+
+// PartNames are the parts this component publishes.
+func (p AlertProps) PartNames() []string { return []string{"root", "title", "message"} }
 @endgo
 
 <div
-	class="alert"
+	data-part="root"
+	class="{{ .RootClass("alert") }}"
 	role="{{ .Role() }}"
+	@attributes(.RootAttrs())
 	@if(.Variant != "")
 		data-variant="{{ .Variant }}"
 	@endif
 >
-	<h2>{{ .Title }}</h2>
+	<h2
+		data-part="title"
+		@if(.PartClass("title") != "")
+			class="{{ .PartClass("title") }}"
+		@endif
+		@attributes(.PartAttrs("title"))
+	>{{ .Title }}</h2>
 	@if(.Message != "")
-		<section>{{ .Message }}</section>
+		<section
+			data-part="message"
+			@if(.PartClass("message") != "")
+				class="{{ .PartClass("message") }}"
+			@endif
+			@attributes(.PartAttrs("message"))
+		>{{ .Message }}</section>
 	@endif
 </div>

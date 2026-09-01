@@ -13,7 +13,10 @@ package components
 // bar to it and says so with aria-valuenow. A value that is not known fills the
 // bar and pulses, and writes no aria-valuenow at all -- which is precisely how
 // an unknown share is spelled, and not an omission.
+// It publishes root and fill, fill being the part of the bar that is filled.
 type ProgressProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Label is what is progressing: "Upload", "Import", "Restore". It becomes
 	// the accessible name, and a bar without one is announced as a percentage
 	// of nothing in particular.
@@ -76,11 +79,16 @@ var progressWidths = [21]string{
 func (p ProgressProps) WidthClass() string {
 	return progressWidths[(p.Percent()+2)/5]
 }
+
+// PartNames are the parts this component publishes.
+func (p ProgressProps) PartNames() []string { return []string{"root", "fill"} }
 @endgo
 
 <div
-	class="progress"
+	data-part="root"
+	class="{{ .RootClass("progress") }}"
 	role="progressbar"
+	@attributes(.RootAttrs())
 	@if(.Label != "")
 		aria-label="{{ .Label }}"
 	@endif
@@ -91,8 +99,16 @@ func (p ProgressProps) WidthClass() string {
 	@endif
 >
 	@if(.Indeterminate)
-		<span class="w-full animate-pulse"></span>
+		<span
+			data-part="fill"
+			class="{{ .PartClass("fill", "w-full animate-pulse") }}"
+			@attributes(.PartAttrs("fill"))
+		></span>
 	@else
-		<span class="{{ .WidthClass() }}"></span>
+		<span
+			data-part="fill"
+			class="{{ .PartClass("fill", .WidthClass()) }}"
+			@attributes(.PartAttrs("fill"))
+		></span>
 	@endif
 </div>
