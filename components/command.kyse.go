@@ -37,6 +37,8 @@ import (
 // anchor the browser will not focus or follow, and is marked disabled so it is
 // announced the way it looks.
 type CommandProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// ID is the id everything inside is hung off. Two palettes on one page
 	// need two of them.
 	ID string
@@ -119,20 +121,39 @@ func (p CommandProps) HeadingID(group int) string {
 func (p CommandProps) ItemID(group, item int) string {
 	return p.ID + "-item-" + strconv.Itoa(group) + "-" + strconv.Itoa(item)
 }
+// PartNames are the parts this component publishes.
+func (p CommandProps) PartNames() []string {
+	return []string{"root", "header", "input", "menu", "group", "group-heading", "item"}
+}
 @endgo
 
-<div class="command" id="{{ .ID }}"
+<div
+	data-part="root"
+	class="{{ .RootClass("command") }}"
+	id="{{ .ID }}"
+	data-command
+	@attributes(.RootAttrs())
 	@if(.Label != "")
 		aria-label="{{ .Label }}"
 	@endif
-	data-command
 >
-	<header>
+	<header
+		data-part="header"
+		@if(.PartClass("header") != "")
+			class="{{ .PartClass("header") }}"
+		@endif
+		@attributes(.PartAttrs("header"))
+	>
 		{!! icons.MagnifyingGlass(icons.Props{}) !!}
 		<input
+			data-part="input"
+			@if(.PartClass("input") != "")
+				class="{{ .PartClass("input") }}"
+			@endif
 			type="text"
 			role="combobox"
 			id="{{ .InputID() }}"
+			@attributes(.PartAttrs("input"))
 			autocomplete="off"
 			autocorrect="off"
 			spellcheck="false"
@@ -145,26 +166,53 @@ func (p CommandProps) ItemID(group, item int) string {
 		>
 	</header>
 
-	<div role="menu" id="{{ .MenuID() }}" aria-orientation="vertical"
+	<div
+		data-part="menu"
+		@if(.PartClass("menu") != "")
+			class="{{ .PartClass("menu") }}"
+		@endif
+		role="menu"
+		id="{{ .MenuID() }}"
+		aria-orientation="vertical"
+		@attributes(.PartAttrs("menu"))
 		@if(.EmptyText != "")
 			data-empty="{{ .EmptyText }}"
 		@endif
 	>
 		@for(g := 0; g < len(.Groups); g++)
-			<div role="group"
+			<div
+				data-part="group"
+				@if(.PartClass("group") != "")
+					class="{{ .PartClass("group") }}"
+				@endif
+				role="group"
+				@attributes(.PartAttrs("group"))
 				@if(.Groups[g].Heading != "")
 					aria-labelledby="{{ .HeadingID(g) }}"
 				@endif
 			>
 				@if(.Groups[g].Heading != "")
-					<span role="heading" id="{{ .HeadingID(g) }}">{{ .Groups[g].Heading }}</span>
+					<span
+						data-part="group-heading"
+						@if(.PartClass("group-heading") != "")
+							class="{{ .PartClass("group-heading") }}"
+						@endif
+						role="heading"
+						id="{{ .HeadingID(g) }}"
+						@attributes(.PartAttrs("group-heading"))
+					>{{ .Groups[g].Heading }}</span>
 				@endif
 
 				@for(i := 0; i < len(.Groups[g].Items); i++)
 					<a
+						data-part="item"
+						@if(.PartClass("item") != "")
+							class="{{ .PartClass("item") }}"
+						@endif
 						role="menuitem"
 						id="{{ .ItemID(g, i) }}"
 						data-search="{{ .Groups[g].Items[i].Search() }}"
+						@attributes(.PartAttrs("item"))
 						@if(.Groups[g].Items[i].Available())
 							href="{{ .Groups[g].Items[i].URL }}"
 						@endif

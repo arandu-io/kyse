@@ -35,6 +35,8 @@ import (
 // browser sends the box it fired the request from and a box with no name sends
 // nothing. A handler that only wants the first ignores the second.
 type ComboboxProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Name is the form field name, the id everything else is hung off, and
 	// what Page is asked about.
 	Name string
@@ -187,11 +189,24 @@ func (p ComboboxProps) DescribedBy() string {
 	}
 	return ""
 }
+// PartNames are the parts this component publishes.
+func (p ComboboxProps) PartNames() []string {
+	return []string{"root", "label", "group", "input", "panel", "listbox", "option", "message", "hint"}
+}
 @endgo
 
 @if(.SearchURL != "")
-	<div class="field">
-		<label class="label" for="{{ .Name }}">{{ .Label }}</label>
+	<div
+		data-part="root"
+		class="{{ .RootClass("field") }}"
+		@attributes(.RootAttrs())
+	>
+		<label
+			data-part="label"
+			class="{{ .PartClass("label", "label") }}"
+			for="{{ .Name }}"
+			@attributes(.PartAttrs("label"))
+		>{{ .Label }}</label>
 
 		{{-- data-combobox is the scope the client script resolves everything from,
 		     and it is the whole of what the client is told. Open is
@@ -199,11 +214,21 @@ func (p ComboboxProps) DescribedBy() string {
 		     line is aria-activedescendant, and the chosen one is aria-selected:
 		     the attributes the markup has to carry anyway are the state, so
 		     there is no second copy of it to fall out of step. --}}
-		<div class="combobox" data-combobox>
+		<div
+			data-part="group"
+			class="{{ .PartClass("group", "combobox") }}"
+			data-combobox
+			@attributes(.PartAttrs("group"))
+		>
 			<input
+				data-part="input"
+				@if(.PartClass("input") != "")
+					class="{{ .PartClass("input") }}"
+				@endif
 				type="text"
 				role="combobox"
 				id="{{ .Name }}"
+				@attributes(.PartAttrs("input"))
 				name="{{ .Query() }}"
 				value="{{ .CurrentLabel() }}"
 				autocomplete="off"
@@ -240,21 +265,39 @@ func (p ComboboxProps) DescribedBy() string {
 
 			{!! icons.CaretDown(icons.Props{}) !!}
 
-			<div data-popover aria-hidden="true">
+			<div
+				data-part="panel"
+				@if(.PartClass("panel") != "")
+					class="{{ .PartClass("panel") }}"
+				@endif
+				data-popover
+				aria-hidden="true"
+				@attributes(.PartAttrs("panel"))
+			>
 				<div
+					data-part="listbox"
+					@if(.PartClass("listbox") != "")
+						class="{{ .PartClass("listbox") }}"
+					@endif
 					role="listbox"
 					id="{{ .ListboxID() }}"
 					aria-orientation="vertical"
+					@attributes(.PartAttrs("listbox"))
 					@if(.EmptyText != "")
 						data-empty="{{ .EmptyText }}"
 					@endif
 				>
 					@for(at := 0; at < len(.Options); at++)
 						<div
+							data-part="option"
+							@if(.PartClass("option") != "")
+								class="{{ .PartClass("option") }}"
+							@endif
 							role="option"
 							id="{{ .OptionID(at) }}"
 							data-value="{{ .Options[at].Value }}"
 							data-label="{{ .Options[at].Text() }}"
+							@attributes(.PartAttrs("option"))
 							@if(.Options[at].Disabled)
 								aria-disabled="true"
 							@endif
@@ -270,11 +313,21 @@ func (p ComboboxProps) DescribedBy() string {
 		</div>
 
 		@if(.Message() != "")
-			<p id="{{ .Name }}-error" class="text-destructive text-sm">{{ .Message() }}</p>
+			<p
+				data-part="message"
+				id="{{ .Name }}-error"
+				class="{{ .PartClass("message", "text-destructive text-sm") }}"
+				@attributes(.PartAttrs("message"))
+			>{{ .Message() }}</p>
 		@endif
 		@if(.Message() == "")
 			@if(.Hint != "")
-				<p id="{{ .Name }}-hint" class="text-muted-foreground text-sm">{{ .Hint }}</p>
+				<p
+					data-part="hint"
+					id="{{ .Name }}-hint"
+					class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
+					@attributes(.PartAttrs("hint"))
+				>{{ .Hint }}</p>
 			@endif
 		@endif
 	</div>

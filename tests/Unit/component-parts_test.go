@@ -245,6 +245,62 @@ var extensible = []struct {
 		components.ThemeToggleProps{}.PartNames,
 	},
 	{
+		"Combobox",
+		func(c components.ComponentProps) []string {
+			props := components.ComboboxProps{
+				ComponentProps: c, Name: "city", Label: "City", SearchURL: "/cities",
+				Hint: "Start typing.", Options: []components.ComboboxOption{{Label: "Lisbon", Value: "lis"}},
+			}
+			withHint := string(components.Combobox(props))
+			props.Page = page{errs: map[string]string{"city": "Required."}}
+			return []string{withHint, string(components.Combobox(props))}
+		},
+		components.ComboboxProps{}.PartNames,
+	},
+	{
+		"Command",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Command(components.CommandProps{
+				ComponentProps: c,
+				ID:             "palette",
+				Label:          "Commands",
+				Groups: []components.CommandGroup{{
+					Heading: "Posts",
+					Items:   []components.CommandItem{{Label: "New post", URL: "/posts/new"}},
+				}},
+			}))}
+		},
+		components.CommandProps{}.PartNames,
+	},
+	{
+		"DropdownMenu",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.DropdownMenu(components.DropdownMenuProps{
+				ComponentProps: c,
+				ID:             "actions",
+				Label:          "Actions",
+				Items:          []components.MenuItem{{Label: "Edit", URL: "/edit"}},
+			}))}
+		},
+		components.DropdownMenuProps{}.PartNames,
+	},
+	{
+		"Sidebar",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Sidebar(components.SidebarProps{
+				ComponentProps: c,
+				ID:             "main",
+				Header:         template.HTML("<b>Acme</b>"),
+				Footer:         template.HTML("<b>v1</b>"),
+				Groups: []components.SidebarGroup{{
+					Label: "Manage",
+					Items: []components.SidebarItem{{Label: "Posts", URL: "/posts"}},
+				}},
+			}))}
+		},
+		components.SidebarProps{}.PartNames,
+	},
+	{
 		"Card",
 		func(c components.ComponentProps) []string {
 			return []string{string(components.Card(components.CardProps{

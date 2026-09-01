@@ -28,6 +28,8 @@ import "strconv"
 // that could hold anything would have to take a string of HTML -- which is
 // where escaping stops being guaranteed by construction.
 type DropdownMenuProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// ID is what the trigger, the panel, the menu and every entry hang their
 	// ids off. Two menus on one page need two.
 	ID string
@@ -102,16 +104,27 @@ func (p DropdownMenuProps) MenuID() string { return p.ID + "-menu" }
 // nothing unique on it: two menus commonly hold two entries reading "Delete",
 // and an id repeated is an announcement naming the wrong line.
 func (p DropdownMenuProps) ItemID(at int) string { return p.ID + "-item-" + strconv.Itoa(at) }
+// PartNames are the parts this component publishes.
+func (p DropdownMenuProps) PartNames() []string {
+	return []string{"root", "trigger", "panel", "menu", "item"}
+}
 @endgo
 
-<div class="dropdown-menu" id="{{ .ID }}">
+<div
+	data-part="root"
+	class="{{ .RootClass("dropdown-menu") }}"
+	id="{{ .ID }}"
+	@attributes(.RootAttrs())
+>
 	<button
+		data-part="trigger"
 		type="button"
-		class="btn"
+		class="{{ .PartClass("trigger", "btn") }}"
 		id="{{ .TriggerID() }}"
 		aria-haspopup="menu"
 		aria-controls="{{ .MenuID() }}"
 		aria-expanded="false"
+		@attributes(.PartAttrs("trigger"))
 		@if(.Variant != "")
 			data-variant="{{ .Variant }}"
 		@endif
@@ -121,9 +134,14 @@ func (p DropdownMenuProps) ItemID(at int) string { return p.ID + "-item-" + strc
 	>{{ .Label }}</button>
 
 	<div
+		data-part="panel"
+		@if(.PartClass("panel") != "")
+			class="{{ .PartClass("panel") }}"
+		@endif
 		id="{{ .PanelID() }}"
 		data-popover
 		aria-hidden="true"
+		@attributes(.PartAttrs("panel"))
 		@if(.Side != "")
 			data-side="{{ .Side }}"
 		@endif
@@ -131,7 +149,16 @@ func (p DropdownMenuProps) ItemID(at int) string { return p.ID + "-item-" + strc
 			data-align="{{ .Align }}"
 		@endif
 	>
-		<div role="menu" id="{{ .MenuID() }}" aria-labelledby="{{ .TriggerID() }}">
+		<div
+			data-part="menu"
+			@if(.PartClass("menu") != "")
+				class="{{ .PartClass("menu") }}"
+			@endif
+			role="menu"
+			id="{{ .MenuID() }}"
+			aria-labelledby="{{ .TriggerID() }}"
+			@attributes(.PartAttrs("menu"))
+		>
 			@for(at := 0; at < len(.Items); at++)
 				@if(.Items[at].Separator)
 					<hr role="separator">
@@ -139,9 +166,14 @@ func (p DropdownMenuProps) ItemID(at int) string { return p.ID + "-item-" + strc
 					<div role="heading" id="{{ .ItemID(at) }}">{{ .Items[at].Label }}</div>
 				@elseif(.Items[at].URL != "")
 					<a
+						data-part="item"
+						@if(.PartClass("item") != "")
+							class="{{ .PartClass("item") }}"
+						@endif
 						role="menuitem"
 						id="{{ .ItemID(at) }}"
 						href="{{ .Items[at].URL }}"
+						@attributes(.PartAttrs("item"))
 						@if(.Items[at].Variant != "")
 							data-variant="{{ .Items[at].Variant }}"
 						@endif
@@ -156,9 +188,14 @@ func (p DropdownMenuProps) ItemID(at int) string { return p.ID + "-item-" + strc
 					</a>
 				@else
 					<button
+						data-part="item"
+						@if(.PartClass("item") != "")
+							class="{{ .PartClass("item") }}"
+						@endif
 						type="button"
 						role="menuitem"
 						id="{{ .ItemID(at) }}"
+						@attributes(.PartAttrs("item"))
 						@if(.Items[at].Variant != "")
 							data-variant="{{ .Items[at].Variant }}"
 						@endif

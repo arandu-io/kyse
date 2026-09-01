@@ -28,6 +28,8 @@ import "html/template"
 // link inside it is followed or the shade beside it is clicked -- so a page
 // that never draws a button of its own is still usable there.
 type SidebarProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// ID is the handle the control that opens and closes the sidebar reaches it
 	// by.
 	ID string
@@ -93,12 +95,18 @@ func (p SidebarProps) Edge() string {
 	}
 	return p.Side
 }
+// PartNames are the parts this component publishes.
+func (p SidebarProps) PartNames() []string {
+	return []string{"root", "nav", "header", "group", "group-label", "list", "item", "link", "footer"}
+}
 @endgo
 
 <aside
-	class="sidebar"
+	data-part="root"
+	class="{{ .RootClass("sidebar") }}"
 	id="{{ .ID }}"
 	data-side="{{ .Edge() }}"
+	@attributes(.RootAttrs())
 	@if(.Collapsed)
 		data-initial-open="false"
 	@endif
@@ -106,27 +114,68 @@ func (p SidebarProps) Edge() string {
 		data-initial-mobile-open="true"
 	@endif
 >
-	<nav aria-label="{{ .Landmark() }}">
+	<nav
+		data-part="nav"
+		@if(.PartClass("nav") != "")
+			class="{{ .PartClass("nav") }}"
+		@endif
+		aria-label="{{ .Landmark() }}"
+		@attributes(.PartAttrs("nav"))
+	>
 		@if(.Header != "")
-			<header>{!! .Header !!}</header>
+			<header
+				data-part="header"
+				@if(.PartClass("header") != "")
+					class="{{ .PartClass("header") }}"
+				@endif
+				@attributes(.PartAttrs("header"))
+			>{!! .Header !!}</header>
 		@endif
 
 		<section>
 			@foreach(.Groups as group)
 				<div
+					data-part="group"
+					@if(.PartClass("group") != "")
+						class="{{ .PartClass("group") }}"
+					@endif
 					role="group"
+					@attributes(.PartAttrs("group"))
 					@if(group.Label != "")
 						aria-label="{{ group.Label }}"
 					@endif
 				>
 					@if(group.Label != "")
-						<h3>{{ group.Label }}</h3>
+						<h3
+							data-part="group-label"
+							@if(.PartClass("group-label") != "")
+								class="{{ .PartClass("group-label") }}"
+							@endif
+							@attributes(.PartAttrs("group-label"))
+						>{{ group.Label }}</h3>
 					@endif
-					<ul>
+					<ul
+						data-part="list"
+						@if(.PartClass("list") != "")
+							class="{{ .PartClass("list") }}"
+						@endif
+						@attributes(.PartAttrs("list"))
+					>
 						@foreach(group.Items as item)
-							<li>
+							<li
+								data-part="item"
+								@if(.PartClass("item") != "")
+									class="{{ .PartClass("item") }}"
+								@endif
+								@attributes(.PartAttrs("item"))
+							>
 								<a
+									data-part="link"
+									@if(.PartClass("link") != "")
+										class="{{ .PartClass("link") }}"
+									@endif
 									href="{{ item.URL }}"
+									@attributes(.PartAttrs("link"))
 									@if(item.Current)
 										aria-current="page"
 									@endif
@@ -142,7 +191,13 @@ func (p SidebarProps) Edge() string {
 		</section>
 
 		@if(.Footer != "")
-			<footer>{!! .Footer !!}</footer>
+			<footer
+				data-part="footer"
+				@if(.PartClass("footer") != "")
+					class="{{ .PartClass("footer") }}"
+				@endif
+				@attributes(.PartAttrs("footer"))
+			>{!! .Footer !!}</footer>
 		@endif
 	</nav>
 </aside>
