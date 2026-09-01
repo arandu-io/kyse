@@ -30,6 +30,8 @@ import (
 // "Home, greater than, Posts, greater than", which is four words of punctuation
 // for three of content.
 type BreadcrumbProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Items are the crumbs, from the outermost down to the page itself. Empty
 	// draws an empty trail rather than a stray separator.
 	Items []Crumb
@@ -71,7 +73,12 @@ func (p BreadcrumbProps) Landmark() string {
 	return p.Label
 }
 
-//line components/breadcrumb.go:75
+// PartNames are the parts this component publishes.
+func (p BreadcrumbProps) PartNames() []string {
+	return []string{"root", "list", "item", "link", "current"}
+}
+
+//line components/breadcrumb.go:82
 
 // Breadcrumb renders the breadcrumb component.
 func Breadcrumb(kyse__props BreadcrumbProps) kyse__template.HTML {
@@ -85,50 +92,180 @@ func Breadcrumb(kyse__props BreadcrumbProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "<nav class=\"breadcrumb\" aria-label=\"")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "<nav\n")
 	}
 	if kyse__err == nil {
-//line components/breadcrumb.kyse.go:64
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tdata-part=\"root\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
+	}
+	if kyse__err == nil {
+//line components/breadcrumb.kyse.go:70
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("breadcrumb")))
+//line components/breadcrumb.go:107
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\taria-label=\"")
+	}
+	if kyse__err == nil {
+//line components/breadcrumb.kyse.go:71
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Landmark()))
-//line components/breadcrumb.go:94
+//line components/breadcrumb.go:118
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<ol>\n")
+		var kyse__v1 string
+//line components/breadcrumb.kyse.go:72
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/breadcrumb.go:127
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/breadcrumb.kyse.go:72", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
+		}
 	}
-//line components/breadcrumb.kyse.go:66
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<ol\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-part=\"list\"\n")
+	}
+//line components/breadcrumb.kyse.go:76
+	if kyse__d.PartClass("list") != "" {
+//line components/breadcrumb.go:145
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/breadcrumb.kyse.go:77
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("list")))
+//line components/breadcrumb.go:152
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v2 string
+//line components/breadcrumb.kyse.go:79
+		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("list"))
+//line components/breadcrumb.go:162
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/breadcrumb.kyse.go:79", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
+		}
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
+	}
+//line components/breadcrumb.kyse.go:81
 	for _, crumb := range kyse__d.Trail() {
 		_ = crumb
-//line components/breadcrumb.go:105
+//line components/breadcrumb.go:175
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<li>\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<li\n")
 		}
-//line components/breadcrumb.kyse.go:68
-		if crumb.URL != "" {
-//line components/breadcrumb.go:111
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"item\"\n")
+		}
+//line components/breadcrumb.kyse.go:84
+		if kyse__d.PartClass("item") != "" {
+//line components/breadcrumb.go:184
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<a href=\"")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-				var kyse__v1 string
-//line components/breadcrumb.kyse.go:69
-				kyse__v1, kyse__err = kyse__view.TextURL(crumb.URL)
-//line components/breadcrumb.go:119
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/breadcrumb.kyse.go:69", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
+//line components/breadcrumb.kyse.go:85
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("item")))
+//line components/breadcrumb.go:191
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v3 string
+//line components/breadcrumb.kyse.go:87
+			kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("item"))
+//line components/breadcrumb.go:201
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/breadcrumb.kyse.go:87", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>\n")
+		}
+//line components/breadcrumb.kyse.go:89
+		if crumb.URL != "" {
+//line components/breadcrumb.go:213
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<a\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-part=\"link\"\n")
+			}
+//line components/breadcrumb.kyse.go:92
+			if kyse__d.PartClass("link") != "" {
+//line components/breadcrumb.go:222
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/breadcrumb.kyse.go:93
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("link")))
+//line components/breadcrumb.go:229
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\">")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thref=\"")
 			}
 			if kyse__err == nil {
-//line components/breadcrumb.kyse.go:69
+				var kyse__v4 string
+//line components/breadcrumb.kyse.go:95
+				kyse__v4, kyse__err = kyse__view.TextURL(crumb.URL)
+//line components/breadcrumb.go:242
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/breadcrumb.kyse.go:95", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				var kyse__v5 string
+//line components/breadcrumb.kyse.go:96
+				kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("link"))
+//line components/breadcrumb.go:256
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/breadcrumb.kyse.go:96", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>")
+			}
+			if kyse__err == nil {
+//line components/breadcrumb.kyse.go:97
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(crumb.Label)))
-//line components/breadcrumb.go:132
+//line components/breadcrumb.go:269
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</a>\n")
@@ -138,9 +275,9 @@ func Breadcrumb(kyse__props BreadcrumbProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<span>")
 			}
 			if kyse__err == nil {
-//line components/breadcrumb.kyse.go:71
+//line components/breadcrumb.kyse.go:99
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(crumb.Label)))
-//line components/breadcrumb.go:144
+//line components/breadcrumb.go:281
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
@@ -153,27 +290,68 @@ func Breadcrumb(kyse__props BreadcrumbProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<li aria-hidden=\"true\" data-rtl-flip>")
 		}
 		if kyse__err == nil {
-//line components/breadcrumb.kyse.go:74
+//line components/breadcrumb.kyse.go:102
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(icons.CaretRight(icons.Props{})))
-//line components/breadcrumb.go:159
+//line components/breadcrumb.go:296
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</li>\n")
 		}
 	}
-//line components/breadcrumb.kyse.go:76
+//line components/breadcrumb.kyse.go:104
 	if len(kyse__d.Items) > 0 {
-//line components/breadcrumb.go:167
+//line components/breadcrumb.go:304
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<li><span aria-current=\"page\">")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<li>\n")
 		}
 		if kyse__err == nil {
-//line components/breadcrumb.kyse.go:77
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<span\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-part=\"current\"\n")
+		}
+//line components/breadcrumb.kyse.go:108
+		if kyse__d.PartClass("current") != "" {
+//line components/breadcrumb.go:316
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/breadcrumb.kyse.go:109
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("current")))
+//line components/breadcrumb.go:323
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-current=\"page\"\n")
+		}
+		if kyse__err == nil {
+			var kyse__v6 string
+//line components/breadcrumb.kyse.go:112
+			kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("current"))
+//line components/breadcrumb.go:336
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/breadcrumb.kyse.go:112", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>")
+		}
+		if kyse__err == nil {
+//line components/breadcrumb.kyse.go:113
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Current().Label)))
-//line components/breadcrumb.go:174
+//line components/breadcrumb.go:349
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "</span></li>\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t</li>\n")
 		}
 	}
 	if kyse__err == nil {

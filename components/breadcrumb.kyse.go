@@ -19,6 +19,8 @@ import "github.com/arandu-io/kyse/icons"
 // "Home, greater than, Posts, greater than", which is four words of punctuation
 // for three of content.
 type BreadcrumbProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Items are the crumbs, from the outermost down to the page itself. Empty
 	// draws an empty trail rather than a stray separator.
 	Items []Crumb
@@ -59,14 +61,40 @@ func (p BreadcrumbProps) Landmark() string {
 	}
 	return p.Label
 }
+// PartNames are the parts this component publishes.
+func (p BreadcrumbProps) PartNames() []string { return []string{"root", "list", "item", "link", "current"} }
 @endgo
 
-<nav class="breadcrumb" aria-label="{{ .Landmark() }}">
-	<ol>
+<nav
+	data-part="root"
+	class="{{ .RootClass("breadcrumb") }}"
+	aria-label="{{ .Landmark() }}"
+	@attributes(.RootAttrs())
+>
+	<ol
+		data-part="list"
+		@if(.PartClass("list") != "")
+			class="{{ .PartClass("list") }}"
+		@endif
+		@attributes(.PartAttrs("list"))
+	>
 		@foreach(.Trail() as crumb)
-			<li>
+			<li
+				data-part="item"
+				@if(.PartClass("item") != "")
+					class="{{ .PartClass("item") }}"
+				@endif
+				@attributes(.PartAttrs("item"))
+			>
 				@if(crumb.URL != "")
-					<a href="{{ crumb.URL }}">{{ crumb.Label }}</a>
+					<a
+						data-part="link"
+						@if(.PartClass("link") != "")
+							class="{{ .PartClass("link") }}"
+						@endif
+						href="{{ crumb.URL }}"
+						@attributes(.PartAttrs("link"))
+					>{{ crumb.Label }}</a>
 				@else
 					<span>{{ crumb.Label }}</span>
 				@endif
@@ -74,7 +102,16 @@ func (p BreadcrumbProps) Landmark() string {
 			<li aria-hidden="true" data-rtl-flip>{!! icons.CaretRight(icons.Props{}) !!}</li>
 		@endforeach
 		@if(len(.Items) > 0)
-			<li><span aria-current="page">{{ .Current().Label }}</span></li>
+			<li>
+				<span
+					data-part="current"
+					@if(.PartClass("current") != "")
+						class="{{ .PartClass("current") }}"
+					@endif
+					aria-current="page"
+					@attributes(.PartAttrs("current"))
+				>{{ .Current().Label }}</span>
+			</li>
 		@endif
 	</ol>
 </nav>

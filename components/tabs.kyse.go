@@ -20,6 +20,8 @@ import "html/template"
 // run, and it is why a panel is a value rather than an address: switching tabs
 // is not a request.
 type TabsProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// ID is what every tab and panel hangs its id off. Two tab sets on one page
 	// need two, or the second set's panels answer to the first set's tabs.
 	ID string
@@ -108,12 +110,24 @@ func (p TabsProps) Orientation() string {
 	}
 	return "horizontal"
 }
+// PartNames are the parts this component publishes.
+func (p TabsProps) PartNames() []string { return []string{"root", "list", "trigger", "panel"} }
 @endgo
 
-<div class="tabs" id="{{ .ID }}">
+<div
+	data-part="root"
+	class="{{ .RootClass("tabs") }}"
+	id="{{ .ID }}"
+	@attributes(.RootAttrs())
+>
 	<div
+		data-part="list"
+		@if(.PartClass("list") != "")
+			class="{{ .PartClass("list") }}"
+		@endif
 		role="tablist"
 		aria-orientation="{{ .Orientation() }}"
+		@attributes(.PartAttrs("list"))
 		@if(.Label != "")
 			aria-label="{{ .Label }}"
 		@endif
@@ -123,8 +137,13 @@ func (p TabsProps) Orientation() string {
 	>
 		@foreach(.Tabs as tab)
 			<button
+				data-part="trigger"
+				@if(.PartClass("trigger") != "")
+					class="{{ .PartClass("trigger") }}"
+				@endif
 				type="button"
 				role="tab"
+				@attributes(.PartAttrs("trigger"))
 				id="{{ .TabID(tab) }}"
 				aria-controls="{{ .PanelID(tab) }}"
 				aria-selected="{{ .Selected(tab) }}"
@@ -138,10 +157,15 @@ func (p TabsProps) Orientation() string {
 
 	@foreach(.Tabs as tab)
 		<div
+			data-part="panel"
+			@if(.PartClass("panel") != "")
+				class="{{ .PartClass("panel") }}"
+			@endif
 			role="tabpanel"
 			id="{{ .PanelID(tab) }}"
 			aria-labelledby="{{ .TabID(tab) }}"
 			tabindex="0"
+			@attributes(.PartAttrs("panel"))
 			@if(.Folded(tab))
 				hidden
 			@endif

@@ -19,6 +19,8 @@ package components
 // while the pointer is over the tray and removes the node when the transition
 // ends. A toast written by hand gets one of those four right.
 type ToastProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Title is the line. Empty draws nothing at all, so a page can include it
 	// unconditionally.
 	Title string
@@ -48,10 +50,19 @@ func (p ToastProps) Live() string {
 	}
 	return "polite"
 }
+// PartNames are the parts this component publishes.
+func (p ToastProps) PartNames() []string {
+	return []string{"root", "content", "title", "message", "action"}
+}
 @endgo
 
 @if(.Title != "")
-	<div class="toast" role="status" aria-live="{{ .Live() }}"
+	<div
+		data-part="root"
+		class="{{ .RootClass("toast") }}"
+		role="status"
+		aria-live="{{ .Live() }}"
+		@attributes(.RootAttrs())
 		@if(.Category != "")
 			data-category="{{ .Category }}"
 		@endif
@@ -59,18 +70,42 @@ func (p ToastProps) Live() string {
 			data-duration="{{ .Duration }}"
 		@endif
 	>
-		<div class="toast-content">
+		<div
+			data-part="content"
+			class="{{ .PartClass("content", "toast-content") }}"
+			@attributes(.PartAttrs("content"))
+		>
 			<section>
-				<h2>{{ .Title }}</h2>
+				<h2
+					data-part="title"
+					@if(.PartClass("title") != "")
+						class="{{ .PartClass("title") }}"
+					@endif
+					@attributes(.PartAttrs("title"))
+				>{{ .Title }}</h2>
 				@if(.Message != "")
-					<p>{{ .Message }}</p>
+					<p
+						data-part="message"
+						@if(.PartClass("message") != "")
+							class="{{ .PartClass("message") }}"
+						@endif
+						@attributes(.PartAttrs("message"))
+					>{{ .Message }}</p>
 				@endif
 			</section>
 
 			@if(.ActionURL != "")
 				<footer>
-					<button type="button" class="btn" data-size="sm" data-toast-action
-						hx-post="{{ .ActionURL }}" hx-swap="none">{{ .ActionLabel }}</button>
+					<button
+						data-part="action"
+						class="{{ .PartClass("action", "btn") }}"
+						type="button"
+						data-size="sm"
+						data-toast-action
+						hx-post="{{ .ActionURL }}"
+						hx-swap="none"
+						@attributes(.PartAttrs("action"))
+					>{{ .ActionLabel }}</button>
 				</footer>
 			@endif
 		</div>

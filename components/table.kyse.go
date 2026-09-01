@@ -21,6 +21,8 @@ package components
 // a thousands separator and a currency are decided where the locale is known,
 // and a component that chose would choose wrong in half the places it is drawn.
 type TableProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Caption is the sentence saying what the table lists. It is drawn under
 	// the table and is the table's name to assistive technology, which is what
 	// makes a page of three tables navigable. Empty draws none.
@@ -88,26 +90,65 @@ func (p TableProps) AlignClass(i int) string {
 	}
 	return TableColumn{}.AlignClass()
 }
+// PartNames are the parts this component publishes.
+func (p TableProps) PartNames() []string {
+	return []string{"root", "table", "caption", "head", "header-cell", "row", "cell"}
+}
 @endgo
 
 @if(len(.Rows) > 0)
-	<div class="table-container">
-		<table class="table">
+	<div
+		data-part="root"
+		class="{{ .RootClass("table-container") }}"
+		@attributes(.RootAttrs())
+	>
+		<table
+			data-part="table"
+			class="{{ .PartClass("table", "table") }}"
+			@attributes(.PartAttrs("table"))
+		>
 			@if(.Caption != "")
-				<caption>{{ .Caption }}</caption>
+				<caption
+					data-part="caption"
+					@if(.PartClass("caption") != "")
+						class="{{ .PartClass("caption") }}"
+					@endif
+					@attributes(.PartAttrs("caption"))
+				>{{ .Caption }}</caption>
 			@endif
-			<thead>
+			<thead
+				data-part="head"
+				@if(.PartClass("head") != "")
+					class="{{ .PartClass("head") }}"
+				@endif
+				@attributes(.PartAttrs("head"))
+			>
 				<tr>
 					@foreach(.Columns as column)
-						<th scope="col" class="{{ column.AlignClass() }}">{{ column.Label }}</th>
+						<th
+							data-part="header-cell"
+							scope="col"
+							class="{{ .PartClass("header-cell", column.AlignClass()) }}"
+							@attributes(.PartAttrs("header-cell"))
+						>{{ column.Label }}</th>
 					@endforeach
 				</tr>
 			</thead>
 			<tbody>
 				@foreach(.Rows as row)
-					<tr>
+					<tr
+						data-part="row"
+						@if(.PartClass("row") != "")
+							class="{{ .PartClass("row") }}"
+						@endif
+						@attributes(.PartAttrs("row"))
+					>
 						@for(i := 0; i < len(row.Cells); i++)
-							<td class="{{ .AlignClass(i) }}">
+							<td
+								data-part="cell"
+								class="{{ .PartClass("cell", .AlignClass(i)) }}"
+								@attributes(.PartAttrs("cell"))
+							>
 								@if(row.Cells[i].HTML != "")
 									{!! row.Cells[i].HTML !!}
 								@else

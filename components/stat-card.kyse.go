@@ -24,6 +24,8 @@ package components
 // should read as, because a thousands separator is a local decision and a
 // component that made it would make it wrong in half the places it is used.
 type StatCardProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Title is the heading: what is being counted.
 	Title string
 	// Meta is the small line under it -- when the numbers were read, what
@@ -48,18 +50,42 @@ type StatRow struct {
 	// formatted.
 	Values []string
 }
+// PartNames are the parts this component publishes.
+func (p StatCardProps) PartNames() []string { return []string{"root", "header", "title", "meta", "table"} }
 @endgo
 
-<article class="card p-5">
-	<header>
-		<h3 class="font-semibold tracking-tight">{{ .Title }}</h3>
+<article
+	data-part="root"
+	class="{{ .RootClass("card p-5") }}"
+	@attributes(.RootAttrs())
+>
+	<header
+		data-part="header"
+		@if(.PartClass("header") != "")
+			class="{{ .PartClass("header") }}"
+		@endif
+		@attributes(.PartAttrs("header"))
+	>
+		<h3
+			data-part="title"
+			class="{{ .PartClass("title", "font-semibold tracking-tight") }}"
+			@attributes(.PartAttrs("title"))
+		>{{ .Title }}</h3>
 		@if(.Meta != "")
-			<p class="text-muted-foreground mt-1 text-xs">{{ .Meta }}</p>
+			<p
+				data-part="meta"
+				class="{{ .PartClass("meta", "text-muted-foreground mt-1 text-xs") }}"
+				@attributes(.PartAttrs("meta"))
+			>{{ .Meta }}</p>
 		@endif
 	</header>
 
 	@if(len(.Rows) > 0)
-		<table class="mt-4 w-full text-sm">
+		<table
+			data-part="table"
+			class="{{ .PartClass("table", "mt-4 w-full text-sm") }}"
+			@attributes(.PartAttrs("table"))
+		>
 			<thead>
 				<tr class="text-muted-foreground text-left text-xs">
 					<th class="font-medium">Name</th>

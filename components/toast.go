@@ -31,6 +31,8 @@ import (
 // while the pointer is over the tray and removes the node when the transition
 // ends. A toast written by hand gets one of those four right.
 type ToastProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Title is the line. Empty draws nothing at all, so a page can include it
 	// unconditionally.
 	Title string
@@ -61,7 +63,12 @@ func (p ToastProps) Live() string {
 	return "polite"
 }
 
-//line components/toast.go:65
+// PartNames are the parts this component publishes.
+func (p ToastProps) PartNames() []string {
+	return []string{"root", "content", "title", "message", "action"}
+}
+
+//line components/toast.go:72
 
 // Toast renders the toast component.
 func Toast(kyse__props ToastProps) kyse__template.HTML {
@@ -74,45 +81,76 @@ func Toast(kyse__props ToastProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/toast.kyse.go:53
+//line components/toast.kyse.go:59
 	if kyse__d.Title != "" {
-//line components/toast.go:80
+//line components/toast.go:87
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t<div class=\"toast\" role=\"status\" aria-live=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t<div\n")
 		}
 		if kyse__err == nil {
-//line components/toast.kyse.go:54
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Live()))
-//line components/toast.go:87
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-part=\"root\"\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/toast.kyse.go:62
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("toast")))
+//line components/toast.go:100
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-//line components/toast.kyse.go:55
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\trole=\"status\"\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-live=\"")
+		}
+		if kyse__err == nil {
+//line components/toast.kyse.go:64
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Live()))
+//line components/toast.go:114
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+		if kyse__err == nil {
+			var kyse__v1 string
+//line components/toast.kyse.go:65
+			kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/toast.go:123
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/toast.kyse.go:65", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
+			}
+		}
+//line components/toast.kyse.go:66
 		if kyse__d.Category != "" {
-//line components/toast.go:94
+//line components/toast.go:132
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-category=\"")
 			}
 			if kyse__err == nil {
-//line components/toast.kyse.go:56
+//line components/toast.kyse.go:67
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Category))
-//line components/toast.go:101
+//line components/toast.go:139
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/toast.kyse.go:58
+//line components/toast.kyse.go:69
 		if kyse__d.Duration != 0 {
-//line components/toast.go:109
+//line components/toast.go:147
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-duration=\"")
 			}
 			if kyse__err == nil {
-//line components/toast.kyse.go:59
+//line components/toast.kyse.go:70
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Duration))
-//line components/toast.go:116
+//line components/toast.go:154
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -122,32 +160,124 @@ func Toast(kyse__props ToastProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<div class=\"toast-content\">\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<div\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"content\"\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/toast.kyse.go:75
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("content", "toast-content")))
+//line components/toast.go:175
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+		if kyse__err == nil {
+			var kyse__v2 string
+//line components/toast.kyse.go:76
+			kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("content"))
+//line components/toast.go:184
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/toast.kyse.go:76", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>\n")
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<section>\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<h2>")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<h2\n")
 		}
 		if kyse__err == nil {
-//line components/toast.kyse.go:64
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-part=\"title\"\n")
+		}
+//line components/toast.kyse.go:81
+		if kyse__d.PartClass("title") != "" {
+//line components/toast.go:205
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/toast.kyse.go:82
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("title")))
+//line components/toast.go:212
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v3 string
+//line components/toast.kyse.go:84
+			kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("title"))
+//line components/toast.go:222
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/toast.kyse.go:84", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>")
+		}
+		if kyse__err == nil {
+//line components/toast.kyse.go:85
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Title)))
-//line components/toast.go:137
+//line components/toast.go:235
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</h2>\n")
 		}
-//line components/toast.kyse.go:65
+//line components/toast.kyse.go:86
 		if kyse__d.Message != "" {
-//line components/toast.go:144
+//line components/toast.go:242
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<p>")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<p\n")
 			}
 			if kyse__err == nil {
-//line components/toast.kyse.go:66
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-part=\"message\"\n")
+			}
+//line components/toast.kyse.go:89
+			if kyse__d.PartClass("message") != "" {
+//line components/toast.go:251
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/toast.kyse.go:90
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("message")))
+//line components/toast.go:258
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+			}
+			if kyse__err == nil {
+				var kyse__v4 string
+//line components/toast.kyse.go:92
+				kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("message"))
+//line components/toast.go:268
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/toast.kyse.go:92", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>")
+			}
+			if kyse__err == nil {
+//line components/toast.kyse.go:93
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message)))
-//line components/toast.go:151
+//line components/toast.go:281
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
@@ -159,36 +289,76 @@ func Toast(kyse__props ToastProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 		}
-//line components/toast.kyse.go:70
+//line components/toast.kyse.go:97
 		if kyse__d.ActionURL != "" {
-//line components/toast.go:165
+//line components/toast.go:295
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<footer>\n")
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<button type=\"button\" class=\"btn\" data-size=\"sm\" data-toast-action\n")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<button\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-part=\"action\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/toast.kyse.go:101
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("action", "btn")))
+//line components/toast.go:311
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\ttype=\"button\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-size=\"sm\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-toast-action\n")
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thx-post=\"")
 			}
 			if kyse__err == nil {
-				var kyse__v1 string
-//line components/toast.kyse.go:73
-				kyse__v1, kyse__err = kyse__view.TextURL(kyse__d.ActionURL)
-//line components/toast.go:179
+				var kyse__v5 string
+//line components/toast.kyse.go:105
+				kyse__v5, kyse__err = kyse__view.TextURL(kyse__d.ActionURL)
+//line components/toast.go:332
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/toast.kyse.go:73", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/toast.kyse.go:105", kyse__err)
 				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 				}
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\" hx-swap=\"none\">")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 			if kyse__err == nil {
-//line components/toast.kyse.go:73
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thx-swap=\"none\"\n")
+			}
+			if kyse__err == nil {
+				var kyse__v6 string
+//line components/toast.kyse.go:107
+				kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("action"))
+//line components/toast.go:349
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/toast.kyse.go:107", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>")
+			}
+			if kyse__err == nil {
+//line components/toast.kyse.go:108
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.ActionLabel)))
-//line components/toast.go:192
+//line components/toast.go:362
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</button>\n")

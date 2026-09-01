@@ -61,6 +61,69 @@ var extensible = []struct {
 		components.ButtonProps{}.PartNames,
 	},
 	{
+		"Breadcrumb",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Breadcrumb(components.BreadcrumbProps{
+				ComponentProps: c,
+				Items: []components.Crumb{
+					{Label: "Home", URL: "/"},
+					{Label: "Posts", URL: "/posts"},
+					{Label: "A post"},
+				},
+			}))}
+		},
+		components.BreadcrumbProps{}.PartNames,
+	},
+	{
+		"StatCard",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.StatCard(components.StatCardProps{
+				ComponentProps: c,
+				Title:          "Connections",
+				Meta:           "read at 21:44",
+				Columns:        []string{"Open"},
+				Rows:           []components.StatRow{{Label: "acme", Values: []string{"12"}}},
+			}))}
+		},
+		components.StatCardProps{}.PartNames,
+	},
+	{
+		"Table",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Table(components.TableProps{
+				ComponentProps: c,
+				Caption:        "Invoices",
+				Columns:        []components.TableColumn{{Label: "Number"}},
+				Rows:           []components.TableRow{{Cells: []components.TableCell{{Text: "0001"}}}},
+			}))}
+		},
+		components.TableProps{}.PartNames,
+	},
+	{
+		"Tabs",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Tabs(components.TabsProps{
+				ComponentProps: c,
+				ID:             "settings",
+				Tabs:           []components.Tab{{Label: "General", Panel: template.HTML("<p>x</p>")}},
+			}))}
+		},
+		components.TabsProps{}.PartNames,
+	},
+	{
+		"Toast",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Toast(components.ToastProps{
+				ComponentProps: c,
+				Title:          "Saved",
+				Message:        "The post is live.",
+				ActionLabel:    "Undo",
+				ActionURL:      "/undo",
+			}))}
+		},
+		components.ToastProps{}.PartNames,
+	},
+	{
 		"Card",
 		func(c components.ComponentProps) []string {
 			return []string{string(components.Card(components.CardProps{
