@@ -36,8 +36,8 @@
 // Above that are Theme, which writes data-theme and takes its default from
 // [Configure]; Style, a block of CSS compiled into the project's stylesheet and
 // reached by a class; and Behavior and Events, which name a client behaviour
-// and an action that ui.js dispatches. None of the five is a script: every one
-// of them is data in an attribute, which is what lets the policy stay
+// and an action that ui.js dispatches. None of those four is a script: every
+// one of them is data in an attribute, which is what lets the policy stay
 // script-src 'self' with no unsafe-eval.
 //
 // The icons package is deliberately outside this. An icon has one field, its
