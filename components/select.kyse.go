@@ -19,6 +19,8 @@ package components
 // row for a list. RadioGroup is the same choice with every option on the screen
 // at once, which is worth its space up to about five.
 type SelectProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Name is the form field name, and what Page is asked about.
 	Name string
 	// ID is the id the markup carries, and the id the label points at. Empty
@@ -96,10 +98,16 @@ func (p SelectProps) DescribedBy() string {
 	}
 	return ""
 }
+// PartNames are the parts this component publishes.
+func (p SelectProps) PartNames() []string {
+	return []string{"root", "label", "input", "option", "message", "hint"}
+}
 @endgo
 
 <div
-	class="field"
+	data-part="root"
+	class="{{ .RootClass("field") }}"
+	@attributes(.RootAttrs())
 	@if(.Message() != "")
 		data-invalid="true"
 	@endif
@@ -107,11 +115,18 @@ func (p SelectProps) DescribedBy() string {
 		data-disabled="true"
 	@endif
 >
-	<label class="label" for="{{ .ElementID() }}">{{ .Label }}</label>
+	<label
+		data-part="label"
+		class="{{ .PartClass("label", "label") }}"
+		for="{{ .ElementID() }}"
+		@attributes(.PartAttrs("label"))
+	>{{ .Label }}</label>
 	<select
-		class="select"
+		data-part="input"
+		class="{{ .PartClass("input", "select") }}"
 		id="{{ .ElementID() }}"
 		name="{{ .Name }}"
+		@attributes(.PartAttrs("input"))
 		@if(.DescribedBy() != "")
 			aria-describedby="{{ .DescribedBy() }}"
 		@endif
@@ -127,7 +142,12 @@ func (p SelectProps) DescribedBy() string {
 	>
 		@if(.Placeholder != "")
 			<option
+				data-part="option"
+				@if(.PartClass("option") != "")
+					class="{{ .PartClass("option") }}"
+				@endif
 				value=""
+				@attributes(.PartAttrs("option"))
 				@if(.Current() == "")
 					selected
 				@endif
@@ -135,7 +155,12 @@ func (p SelectProps) DescribedBy() string {
 		@endif
 		@foreach(.Options as option)
 			<option
+				data-part="option"
+				@if(.PartClass("option") != "")
+					class="{{ .PartClass("option") }}"
+				@endif
 				value="{{ option.Value }}"
+				@attributes(.PartAttrs("option"))
 				@if(option.Value == .Current())
 					selected
 				@endif
@@ -146,11 +171,21 @@ func (p SelectProps) DescribedBy() string {
 		@endforeach
 	</select>
 	@if(.Message() != "")
-		<p id="{{ .ElementID() }}-error" class="text-destructive text-sm">{{ .Message() }}</p>
+		<p
+			data-part="message"
+			id="{{ .ElementID() }}-error"
+			class="{{ .PartClass("message", "text-destructive text-sm") }}"
+			@attributes(.PartAttrs("message"))
+		>{{ .Message() }}</p>
 	@endif
 	@if(.Message() == "")
 		@if(.Hint != "")
-			<p id="{{ .ElementID() }}-hint" class="text-muted-foreground text-sm">{{ .Hint }}</p>
+			<p
+				data-part="hint"
+				id="{{ .ElementID() }}-hint"
+				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
+				@attributes(.PartAttrs("hint"))
+			>{{ .Hint }}</p>
 		@endif
 	@endif
 </div>

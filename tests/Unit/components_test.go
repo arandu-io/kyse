@@ -102,7 +102,7 @@ func TestEveryComponentRenders(t *testing.T) {
 			Tabs: []components.Tab{{ID: "one", Label: "One", Panel: "First."}},
 		}))},
 		{"Textarea", string(components.Textarea(components.TextareaProps{Name: "body", Label: "Body"}))},
-		{"ThemeToggle", string(components.ThemeToggle())},
+		{"ThemeToggle", string(components.ThemeToggle(components.ThemeToggleProps{}))},
 		{"Toast", string(components.Toast(components.ToastProps{Title: "Saved"}))},
 	} {
 		t.Run(c.name, func(t *testing.T) {

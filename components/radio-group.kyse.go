@@ -18,6 +18,8 @@ import "strings"
 // the same choice for a longer list: a group is worth its space up to about five
 // options, and past that it is a wall.
 type RadioGroupProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Name is the form field name shared by every radio, which is what makes
 	// the choice exclusive, and what Page is asked about.
 	Name string
@@ -105,18 +107,34 @@ func (p RadioGroupProps) DescribedBy() string {
 	}
 	return ""
 }
+// PartNames are the parts this component publishes.
+func (p RadioGroupProps) PartNames() []string {
+	return []string{"root", "label", "group", "option", "input", "option-label", "message", "hint"}
+}
 @endgo
 
 <div
-	class="field"
+	data-part="root"
+	class="{{ .RootClass("field") }}"
+	@attributes(.RootAttrs())
 	@if(.Message() != "")
 		data-invalid="true"
 	@endif
 >
-	<span class="label" id="{{ .Name }}-label">{{ .Label }}</span>
+	<span
+		data-part="label"
+		class="{{ .PartClass("label", "label") }}"
+		id="{{ .Name }}-label"
+		@attributes(.PartAttrs("label"))
+	>{{ .Label }}</span>
 	<div
+		data-part="group"
+		@if(.PartClass("group") != "")
+			class="{{ .PartClass("group") }}"
+		@endif
 		role="radiogroup"
 		aria-labelledby="{{ .Name }}-label"
+		@attributes(.PartAttrs("group"))
 		@if(.DescribedBy() != "")
 			aria-describedby="{{ .DescribedBy() }}"
 		@endif
@@ -129,18 +147,22 @@ func (p RadioGroupProps) DescribedBy() string {
 	>
 		@foreach(.Options as option)
 			<div
-				class="field"
+				data-part="option"
+				class="{{ .PartClass("option", "field") }}"
 				data-orientation="horizontal"
+				@attributes(.PartAttrs("option"))
 				@if(option.Disabled)
 					data-disabled="true"
 				@endif
 			>
 				<input
-					class="input"
+					data-part="input"
+					class="{{ .PartClass("input", "input") }}"
 					type="radio"
 					id="{{ .OptionID(option.Value) }}"
 					name="{{ .Name }}"
 					value="{{ option.Value }}"
+					@attributes(.PartAttrs("input"))
 					@if(option.Value == .Current())
 						checked
 					@endif
@@ -155,7 +177,12 @@ func (p RadioGroupProps) DescribedBy() string {
 					@endif
 				>
 				<section>
-					<label class="label" for="{{ .OptionID(option.Value) }}">{{ option.Label }}</label>
+					<label
+						data-part="option-label"
+						class="{{ .PartClass("option-label", "label") }}"
+						for="{{ .OptionID(option.Value) }}"
+						@attributes(.PartAttrs("option-label"))
+					>{{ option.Label }}</label>
 					@if(option.Hint != "")
 						<p id="{{ .OptionID(option.Value) }}-hint" class="text-muted-foreground text-sm">{{ option.Hint }}</p>
 					@endif
@@ -164,11 +191,21 @@ func (p RadioGroupProps) DescribedBy() string {
 		@endforeach
 	</div>
 	@if(.Message() != "")
-		<p id="{{ .Name }}-error" class="text-destructive text-sm">{{ .Message() }}</p>
+		<p
+			data-part="message"
+			id="{{ .Name }}-error"
+			class="{{ .PartClass("message", "text-destructive text-sm") }}"
+			@attributes(.PartAttrs("message"))
+		>{{ .Message() }}</p>
 	@endif
 	@if(.Message() == "")
 		@if(.Hint != "")
-			<p id="{{ .Name }}-hint" class="text-muted-foreground text-sm">{{ .Hint }}</p>
+			<p
+				data-part="hint"
+				id="{{ .Name }}-hint"
+				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
+				@attributes(.PartAttrs("hint"))
+			>{{ .Hint }}</p>
 		@endif
 	@endif
 </div>

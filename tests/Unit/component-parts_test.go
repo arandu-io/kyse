@@ -186,6 +186,65 @@ var extensible = []struct {
 		components.PopoverProps{}.PartNames,
 	},
 	{
+		"InputGroup",
+		func(c components.ComponentProps) []string {
+			props := components.InputGroupProps{
+				ComponentProps: c, Name: "search", Label: "Search",
+				Start: "/", End: "go", Hint: "Press enter.",
+			}
+			withHint := string(components.InputGroup(props))
+			props.Page = page{errs: map[string]string{"search": "Required."}}
+			return []string{withHint, string(components.InputGroup(props))}
+		},
+		components.InputGroupProps{}.PartNames,
+	},
+	{
+		"RadioGroup",
+		func(c components.ComponentProps) []string {
+			props := components.RadioGroupProps{
+				ComponentProps: c, Name: "plan", Label: "Plan", Hint: "Change any time.",
+				Options: []components.RadioOption{{Label: "Free", Value: "free"}},
+			}
+			withHint := string(components.RadioGroup(props))
+			props.Page = page{errs: map[string]string{"plan": "Required."}}
+			return []string{withHint, string(components.RadioGroup(props))}
+		},
+		components.RadioGroupProps{}.PartNames,
+	},
+	{
+		"RangeSlider",
+		func(c components.ComponentProps) []string {
+			props := components.RangeSliderProps{
+				ComponentProps: c, Name: "volume", Label: "Volume",
+				ShowValue: true, Hint: "Louder to the right.",
+			}
+			withHint := string(components.RangeSlider(props))
+			props.Page = page{errs: map[string]string{"volume": "Required."}}
+			return []string{withHint, string(components.RangeSlider(props))}
+		},
+		components.RangeSliderProps{}.PartNames,
+	},
+	{
+		"Select",
+		func(c components.ComponentProps) []string {
+			props := components.SelectProps{
+				ComponentProps: c, Name: "plan", Label: "Plan", Hint: "Change any time.",
+				Options: []components.SelectOption{{Label: "Free", Value: "free"}},
+			}
+			withHint := string(components.Select(props))
+			props.Page = page{errs: map[string]string{"plan": "Required."}}
+			return []string{withHint, string(components.Select(props))}
+		},
+		components.SelectProps{}.PartNames,
+	},
+	{
+		"ThemeToggle",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.ThemeToggle(components.ThemeToggleProps{ComponentProps: c}))}
+		},
+		components.ThemeToggleProps{}.PartNames,
+	},
+	{
 		"Card",
 		func(c components.ComponentProps) []string {
 			return []string{string(components.Card(components.CardProps{

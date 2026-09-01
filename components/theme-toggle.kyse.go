@@ -29,9 +29,41 @@ import "github.com/arandu-io/kyse/icons"
      compared against the html element by the client script, which validates a
      name against its own list before anything reaches the document. --}}
 
-<div class="dropdown-menu">
-	<button type="button" class="btn" data-variant="ghost" data-size="icon"
-		aria-label="Change the theme" aria-haspopup="menu" aria-expanded="false">
+@go
+// ThemeToggleProps is what a caller adds to the theme control.
+//
+// It carries no data of its own, and it exists anyway: without it this was the
+// one component in the library that could not take a class, an attribute or a
+// part, and "every component except that one" is a rule nobody remembers.
+//
+// It publishes root, trigger, menu and option.
+type ThemeToggleProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
+}
+
+// PartNames are the parts this component publishes.
+func (p ThemeToggleProps) PartNames() []string {
+	return []string{"root", "trigger", "menu", "option"}
+}
+@endgo
+
+<div
+	data-part="root"
+	class="{{ .RootClass("dropdown-menu") }}"
+	@attributes(.RootAttrs())
+>
+	<button
+		data-part="trigger"
+		type="button"
+		class="{{ .PartClass("trigger", "btn") }}"
+		data-variant="ghost"
+		data-size="icon"
+		aria-label="Change the theme"
+		aria-haspopup="menu"
+		aria-expanded="false"
+		@attributes(.PartAttrs("trigger"))
+	>
 		{{-- The trigger shows what is in force rather than what was chosen. In
 		     auto those are different things, and the sun and the moon are what
 		     the page actually looks like; a third glyph here would name the
@@ -46,16 +78,54 @@ import "github.com/arandu-io/kyse/icons"
 		     menu is: the script that opens this popover looks for a menu inside
 		     it, and a radiogroup leaves it reporting a missing element and the
 		     arrow keys doing nothing. --}}
-		<div role="menu" aria-label="Theme">
-			<button type="button" role="menuitemradio" aria-checked="true" data-theme-mode="auto">
+		<div
+			data-part="menu"
+			@if(.PartClass("menu") != "")
+				class="{{ .PartClass("menu") }}"
+			@endif
+			role="menu"
+			aria-label="Theme"
+			@attributes(.PartAttrs("menu"))
+		>
+			<button
+				data-part="option"
+				@if(.PartClass("option") != "")
+					class="{{ .PartClass("option") }}"
+				@endif
+				type="button"
+				role="menuitemradio"
+				aria-checked="true"
+				data-theme-mode="auto"
+				@attributes(.PartAttrs("option"))
+			>
 				<span aria-hidden="true" class="block size-4">{!! icons.Desktop(icons.Props{}) !!}</span>
 				<span>Auto</span>
 			</button>
-			<button type="button" role="menuitemradio" aria-checked="false" data-theme-mode="light">
+			<button
+				data-part="option"
+				@if(.PartClass("option") != "")
+					class="{{ .PartClass("option") }}"
+				@endif
+				type="button"
+				role="menuitemradio"
+				aria-checked="false"
+				data-theme-mode="light"
+				@attributes(.PartAttrs("option"))
+			>
 				<span aria-hidden="true" class="block size-4">{!! icons.Sun(icons.Props{}) !!}</span>
 				<span>Light</span>
 			</button>
-			<button type="button" role="menuitemradio" aria-checked="false" data-theme-mode="dark">
+			<button
+				data-part="option"
+				@if(.PartClass("option") != "")
+					class="{{ .PartClass("option") }}"
+				@endif
+				type="button"
+				role="menuitemradio"
+				aria-checked="false"
+				data-theme-mode="dark"
+				@attributes(.PartAttrs("option"))
+			>
 				<span aria-hidden="true" class="block size-4">{!! icons.Moon(icons.Props{}) !!}</span>
 				<span>Dark</span>
 			</button>

@@ -26,6 +26,8 @@ import "strings"
 //
 // From Page, by Name, in the same way a field asks. See the Page interface.
 type InputGroupProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Name is the form field name, the id everything else is hung off, and
 	// what Page is asked about.
 	Name string
@@ -125,17 +127,39 @@ func (p InputGroupProps) DescribedBy() string {
 	}
 	return strings.Join(ids, " ")
 }
+// PartNames are the parts this component publishes.
+func (p InputGroupProps) PartNames() []string {
+	return []string{"root", "label", "group", "input", "addon", "message", "hint"}
+}
 @endgo
 
-<div class="field">
-	<label class="label" for="{{ .Name }}">{{ .Label }}</label>
+<div
+	data-part="root"
+	class="{{ .RootClass("field") }}"
+	@attributes(.RootAttrs())
+>
+	<label
+		data-part="label"
+		class="{{ .PartClass("label", "label") }}"
+		for="{{ .Name }}"
+		@attributes(.PartAttrs("label"))
+	>{{ .Label }}</label>
 
-	<div class="input-group">
+	<div
+		data-part="group"
+		class="{{ .PartClass("group", "input-group") }}"
+		@attributes(.PartAttrs("group"))
+	>
 		<input
+			data-part="input"
+			@if(.PartClass("input") != "")
+				class="{{ .PartClass("input") }}"
+			@endif
 			type="{{ .InputType() }}"
 			id="{{ .Name }}"
 			name="{{ .Name }}"
 			value="{{ .Current() }}"
+			@attributes(.PartAttrs("input"))
 			@if(.Placeholder != "")
 				placeholder="{{ .Placeholder }}"
 			@endif
@@ -160,22 +184,55 @@ func (p InputGroupProps) DescribedBy() string {
 		>
 
 		@if(.Start != "")
-			<span id="{{ .StartID() }}" data-align="start">{{ .Start }}</span>
+			<span
+				data-part="addon"
+				@if(.PartClass("addon") != "")
+					class="{{ .PartClass("addon") }}"
+				@endif
+				id="{{ .StartID() }}"
+				data-align="start"
+				@attributes(.PartAttrs("addon"))
+			>{{ .Start }}</span>
 		@endif
 		@if(.End != "")
-			<span id="{{ .EndID() }}" data-align="end">{{ .End }}</span>
+			<span
+				data-part="addon"
+				@if(.PartClass("addon") != "")
+					class="{{ .PartClass("addon") }}"
+				@endif
+				id="{{ .EndID() }}"
+				data-align="end"
+				@attributes(.PartAttrs("addon"))
+			>{{ .End }}</span>
 		@endif
 		@if(.Shortcut != "")
-			<span data-align="end"><kbd>{{ .Shortcut }}</kbd></span>
+			<span
+				data-part="addon"
+				@if(.PartClass("addon") != "")
+					class="{{ .PartClass("addon") }}"
+				@endif
+				data-align="end"
+				@attributes(.PartAttrs("addon"))
+			><kbd>{{ .Shortcut }}</kbd></span>
 		@endif
 	</div>
 
 	@if(.Message() != "")
-		<p id="{{ .Name }}-error" class="text-destructive text-sm">{{ .Message() }}</p>
+		<p
+			data-part="message"
+			id="{{ .Name }}-error"
+			class="{{ .PartClass("message", "text-destructive text-sm") }}"
+			@attributes(.PartAttrs("message"))
+		>{{ .Message() }}</p>
 	@endif
 	@if(.Message() == "")
 		@if(.Hint != "")
-			<p id="{{ .Name }}-hint" class="text-muted-foreground text-sm">{{ .Hint }}</p>
+			<p
+				data-part="hint"
+				id="{{ .Name }}-hint"
+				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
+				@attributes(.PartAttrs("hint"))
+			>{{ .Hint }}</p>
 		@endif
 	@endif
 </div>

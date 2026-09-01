@@ -28,6 +28,8 @@ import "strconv"
 // The value that is submitted is the input's own, and the browser sends it
 // whether or not any of that happened.
 type RangeSliderProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Name is the form field name, the id everything else is hung off, and
 	// what Page is asked about.
 	Name string
@@ -161,17 +163,36 @@ func (p RangeSliderProps) DescribedBy() string {
 	}
 	return ""
 }
+// PartNames are the parts this component publishes.
+func (p RangeSliderProps) PartNames() []string {
+	return []string{"root", "label", "input", "value", "message", "hint"}
+}
 @endgo
 
 {{-- data-slider is how the track finds the number that belongs to it, and it is
      the whole of what the client is told. There is nothing to seed: the fill and
      the number below are both written by the server, so the first frame is
      already right. --}}
-<div class="field" data-slider>
-	<label class="label" for="{{ .Name }}">{{ .Label }}</label>
+<div
+	data-part="root"
+	class="{{ .RootClass("field") }}"
+	data-slider
+	@attributes(.RootAttrs())
+>
+	<label
+		data-part="label"
+		class="{{ .PartClass("label", "label") }}"
+		for="{{ .Name }}"
+		@attributes(.PartAttrs("label"))
+	>{{ .Label }}</label>
 
+	{{-- One class attribute, not two. It carried "input" and the fill class in
+	     separate attributes, and HTML keeps the first occurrence of a repeated
+	     attribute and drops the rest -- so the fill was written into the markup
+	     and never reached the page. --}}
 	<input
-		class="input"
+		data-part="input"
+		class="{{ .PartClass("input", "input", .FillClass()) }}"
 		type="range"
 		id="{{ .Name }}"
 		name="{{ .Name }}"
@@ -179,8 +200,8 @@ func (p RangeSliderProps) DescribedBy() string {
 		min="{{ .Floor() }}"
 		max="{{ .Ceiling() }}"
 		step="{{ .Tick() }}"
-		class="{{ .FillClass() }}"
 		data-slider-track
+		@attributes(.PartAttrs("input"))
 		@if(.DescribedBy() != "")
 			aria-describedby="{{ .DescribedBy() }}"
 		@endif
@@ -193,7 +214,11 @@ func (p RangeSliderProps) DescribedBy() string {
 	>
 
 	@if(.ShowValue)
-		<p class="text-muted-foreground text-sm">
+		<p
+			data-part="value"
+			class="{{ .PartClass("value", "text-muted-foreground text-sm") }}"
+			@attributes(.PartAttrs("value"))
+		>
 			<output for="{{ .Name }}" data-slider-output>{{ .Current() }}</output>
 			@if(.Unit != "")
 				{{ .Unit }}
@@ -202,11 +227,21 @@ func (p RangeSliderProps) DescribedBy() string {
 	@endif
 
 	@if(.Message() != "")
-		<p id="{{ .Name }}-error" class="text-destructive text-sm">{{ .Message() }}</p>
+		<p
+			data-part="message"
+			id="{{ .Name }}-error"
+			class="{{ .PartClass("message", "text-destructive text-sm") }}"
+			@attributes(.PartAttrs("message"))
+		>{{ .Message() }}</p>
 	@endif
 	@if(.Message() == "")
 		@if(.Hint != "")
-			<p id="{{ .Name }}-hint" class="text-muted-foreground text-sm">{{ .Hint }}</p>
+			<p
+				data-part="hint"
+				id="{{ .Name }}-hint"
+				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
+				@attributes(.PartAttrs("hint"))
+			>{{ .Hint }}</p>
 		@endif
 	@endif
 </div>
