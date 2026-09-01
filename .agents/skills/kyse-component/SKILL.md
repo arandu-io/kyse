@@ -138,6 +138,20 @@ component library is the whole point.
 - **Derived values are methods on the props struct**, in the `@go` block:
   `InputType()`, `DescribedBy()`, `AlignClass()`. The markup stays readable and
   the logic is testable without rendering.
+- **`ComponentProps` is the first field, and `PartNames()` is a method beside
+  the others.** They are what lets a caller add a class, an attribute or a part
+  without forking the component. The doc comment on the struct lists the parts
+  it publishes, because that list is the component's public promise and
+  pkg.go.dev is where somebody reads it.
+- **A row in `tests/Unit/component-parts_test.go`.** Not optional:
+  `TestEveryExtensibleComponentIsInThisTable` reads the directory and fails on a
+  component that embeds the type and has no row. If the component draws a part
+  only in some states — a message or a hint, never both — the row answers one
+  rendering per state.
+- **Nothing is a part unless a caller would reach for it.** A group whose
+  members are themselves components does not publish them: the button inside a
+  `ButtonGroup` is a `ButtonProps` and carries its own class, so a part here
+  would be a second way to the same element.
 
 ## Removing or renaming a prop
 

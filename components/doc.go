@@ -16,6 +16,34 @@
 // `aru view:build`, run from the root of this module, and are committed --
 // a module whose generated files are missing is a module `go get` cannot use.
 //
+// # What a caller can change without forking a component
+//
+// Every props type embeds [ComponentProps]: a class added to the outermost
+// element, attributes written on it, and the same two for each inner element
+// the component names. The names are published by PartNames on each props type
+// and rendered as data-part, so a caller reaches the label of a field by asking
+// for "label" rather than by a selector counting the divs above it.
+//
+//	components.Field(components.FieldProps{
+//		Name:  "email",
+//		Label: "Email",
+//		ComponentProps: components.ComponentProps{
+//			Class: "max-w-sm",
+//			Parts: components.Parts{"label": {Class: "text-xs"}},
+//		},
+//	})
+//
+// Above that are Theme, which writes data-theme and takes its default from
+// [Configure]; Style, a block of CSS compiled into the project's stylesheet and
+// reached by a class; and Behavior and Events, which name a client behaviour
+// and an action that ui.js dispatches. None of the five is a script: every one
+// of them is data in an attribute, which is what lets the policy stay
+// script-src 'self' with no unsafe-eval.
+//
+// The icons package is deliberately outside this. An icon has one field, its
+// markup is assembled in Go rather than compiled from a view, and its size
+// comes from the class on the element that contains it.
+//
 // The class names are semantic -- btn, field, card -- and the rules behind them
 // ship with the skeleton under resources/css/basecoat/. The same button written
 // with utility classes is 443 characters of markup; this way it is thirty.

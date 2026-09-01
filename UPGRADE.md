@@ -21,6 +21,108 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## v0.15.0 — every component takes a class, attributes and parts
+
+### `ThemeToggle` takes props
+
+```
+- ./components.ThemeToggle: changed from func() html/template.HTML to func(ThemeToggleProps) html/template.HTML
+```
+
+```go
+{!! components.ThemeToggle() !!}                              // before
+{!! components.ThemeToggle(components.ThemeToggleProps{}) !!} // now
+```
+
+It was the one component that could not take a class, an attribute or a part,
+and "every component except that one" is a rule nobody remembers. It carries no
+data of its own and still needs somewhere for a caller to write.
+
+### Twenty-two props types are no longer comparable
+
+```
+- ./components.AlertProps: old is comparable, new is not
+- ./components.AvatarProps: old is comparable, new is not
+- ./components.BadgeProps: old is comparable, new is not
+- ./components.ButtonProps: old is comparable, new is not
+- ./components.CardProps: old is comparable, new is not
+- ./components.CheckboxProps: old is comparable, new is not
+- ./components.CollapsibleProps: old is comparable, new is not
+- ./components.DialogProps: old is comparable, new is not
+- ./components.EmptyProps: old is comparable, new is not
+- ./components.FieldProps: old is comparable, new is not
+- ./components.InputGroupProps: old is comparable, new is not
+- ./components.InputProps: old is comparable, new is not
+- ./components.ItemProps: old is comparable, new is not
+- ./components.LabelProps: old is comparable, new is not
+- ./components.PopoverProps: old is comparable, new is not
+- ./components.ProgressProps: old is comparable, new is not
+- ./components.RangeSliderProps: old is comparable, new is not
+- ./components.SeparatorProps: old is comparable, new is not
+- ./components.SkeletonProps: old is comparable, new is not
+- ./components.SwitchProps: old is comparable, new is not
+- ./components.TextareaProps: old is comparable, new is not
+- ./components.ToastProps: old is comparable, new is not
+```
+
+Every props type now embeds `ComponentProps`, which holds two maps, and a struct
+containing a map cannot be compared with `==` or used as a map key.
+
+Nothing in this repository or in the Arandu tree did either, so in practice this
+breaks a call nobody makes. If you compared two props values, compare the fields
+you meant instead.
+
+### What you get for it
+
+Every component takes `ComponentProps` as an embedded field:
+
+```go
+{!! components.ButtonGroup(components.ButtonGroupProps{
+    Label: "Message actions",
+    ComponentProps: components.ComponentProps{
+        Class: "w-full",
+        Parts: components.Parts{
+            "root":   {Class: "gap-2"},
+            "button": {Class: "rounded-xl"},
+        },
+        Attrs: components.Attrs{"data-testid": "message-actions"},
+    },
+    Buttons: []components.ButtonProps{{Label: "Archive"}},
+}) !!}
+```
+
+Each component publishes the parts it draws — `PartNames()` on its props, and
+the same names as `data-part` on the elements — so a caller addresses an inner
+element by name rather than by a selector written against the structure.
+
+Classes are **added** to the component's own, not substituted. Order inside the
+attribute decides nothing; what settles a collision is the layer, and a Tailwind
+utility beats a component class there. Utility against utility is the one case
+that needs the importance marker: `p-8!`.
+
+Attributes go through a check that refuses every name whose value a browser or a
+library would act on — `on*`, `hx-on*`, `x-*`, `style`, `href` and the other
+address attributes, and the `class`, `role` and `aria-*` the component owns. A
+refused name is an error at render, naming the attribute and the view's line.
+
+### A class written outside a view is not compiled into the stylesheet
+
+Tailwind reads the source, so a class only exists if its name appears in a file
+the stylesheet is compiled from. Those are the project's `resources/views/**`,
+its compiled output, and this module.
+
+A class written in a `.kyse.go` is therefore found. A class written in ordinary
+application Go — a catalogue, a helper that returns props — **is not**, and the
+element renders unstyled. So is anything assembled at run time, `"text-"+variant`
+included. It is the same limit the progress bar's width table is written around.
+
+### Fixed on the way past
+
+The range slider wrote `class` twice on its `<input>` — `class="input"` and,
+lower down, `class="{{ .FillClass() }}"`. HTML keeps the first occurrence of a
+repeated attribute and drops the rest, so the fill class was in the markup and
+never on the page. Both now go through one call.
+
 ## v0.13.0 — the range slider paints with a class
 
 ```

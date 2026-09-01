@@ -161,10 +161,11 @@ the markup.
 The set is closed: `@extends` · `@section` / `@endsection` · `@yield` ·
 `@include` · `@if` / `@elseif` / `@else` / `@endif` · `@foreach` /
 `@endforeach` · `@forelse` / `@empty` / `@endforelse` · `@for` / `@endfor` ·
-`@while` / `@endwhile` · `@continue` · `@break` · `@go` / `@endgo` · `@csrf`.
+`@while` / `@endwhile` · `@continue` · `@break` · `@go` / `@endgo` · `@csrf` ·
+`@attributes`.
 
-A component uses `@if`, `@foreach`, `@for` and `@go`, and nothing else — this
-returns nothing across all 37 of them:
+A component uses `@if`, `@foreach`, `@for`, `@go` and `@attributes`, and nothing
+else — this returns nothing across all 37 of them:
 
 ```sh
 grep -ohE '@(extends|section|yield|include|csrf|while|forelse)' components/*.kyse.go
@@ -194,6 +195,42 @@ decorative.
 ## A note on inline styles
 
 `style-src 'self'` is served with no `unsafe-inline`, so a `style` attribute is
-dropped the same way an inline script is. Use a class. `range-slider.kyse.go`
-currently writes one to seed a custom property, and nothing in the build catches
-it — that is a known inconsistency, not a precedent to copy.
+dropped the same way an inline script is. Use a class. No component writes one
+any more — `grep -n 'style=' components/*.kyse.go` returns nothing — and
+`view.Attributes` refuses `style` from a caller for the same reason.
+
+## Every element a caller can reach carries `data-part`
+
+A component's own markup is written the same way it always was. What is added is
+one line per named element:
+
+```
+<div
+	data-part="root"
+	class="{{ .RootClass("card p-5") }}"
+	@attributes(.RootAttrs())
+>
+	<h3
+		data-part="title"
+		class="{{ .PartClass("title", "font-semibold") }}"
+		@attributes(.PartAttrs("title"))
+	>{{ .Title }}</h3>
+```
+
+Four rules:
+
+- the outermost element uses `RootClass` and `RootAttrs`; every other named one
+  uses `PartClass` and `PartAttrs` with its own name;
+- a part with no classes of its own writes the attribute under an `@if`, because
+  `class=""` is markup nobody meant to write;
+- `@attributes` goes **inside a tag, on a line of its own**, like the `@if` that
+  writes a conditional attribute. Anywhere else the compiler refuses it;
+- the names a component publishes go in `PartNames()` on its props, and a test
+  compares that list against the `data-part` attributes rendered, in both
+  directions. Publishing a name the markup does not draw fails, and drawing one
+  the list does not publish fails too.
+
+Never build a class name from data. `PartClass` takes the component's own
+classes variadically, so a class chosen between alternatives is written out in
+full in each branch — a name assembled at run time never appears in the source
+the stylesheet is compiled from, and no rule is emitted for it.
