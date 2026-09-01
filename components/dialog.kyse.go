@@ -172,7 +172,7 @@ func (p DialogProps) PartNames() []string {
 				>{{ .Cancel() }}</button>
 			</form>
 			<form method="{{ .FormMethod() }}" action="{{ .Action }}">
-				<input type="hidden" name="_csrf" value="{{ .Token }}">
+				<input type="hidden" name="_token" value="{{ .Token }}">
 				<button
 					data-part="confirm"
 					type="submit"
