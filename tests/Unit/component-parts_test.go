@@ -20,128 +20,180 @@ import (
 // without this file failing to compile. What is hand-kept is only the
 // membership of the list, and TestEveryExtensibleComponentIsInThisTable reads
 // the directory to hold that.
+//
+// render answers one string per state, because some parts cannot coexist. A
+// field draws a message or a hint and never both, so no single rendering shows
+// everything it publishes, and a test that demanded one would be asking the
+// component to do something it must not do.
 var extensible = []struct {
 	name      string
-	render    func(components.ComponentProps) string
+	render    func(components.ComponentProps) []string
 	partNames func() []string
 }{
 	{
 		"Alert",
-		func(c components.ComponentProps) string {
-			return string(components.Alert(components.AlertProps{
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Alert(components.AlertProps{
 				ComponentProps: c, Title: "Saved", Message: "The post is live.",
-			}))
+			}))}
 		},
 		components.AlertProps{}.PartNames,
 	},
 	{
 		"Avatar",
-		func(c components.ComponentProps) string {
-			return string(components.Avatar(components.AvatarProps{ComponentProps: c, Name: "Ada Lovelace"}))
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Avatar(components.AvatarProps{ComponentProps: c, Name: "Ada Lovelace"}))}
 		},
 		components.AvatarProps{}.PartNames,
 	},
 	{
 		"Badge",
-		func(c components.ComponentProps) string {
-			return string(components.Badge(components.BadgeProps{ComponentProps: c, Label: "draft"}))
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Badge(components.BadgeProps{ComponentProps: c, Label: "draft"}))}
 		},
 		components.BadgeProps{}.PartNames,
 	},
 	{
 		"Button",
-		func(c components.ComponentProps) string {
-			return string(components.Button(components.ButtonProps{ComponentProps: c, Label: "Save"}))
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Button(components.ButtonProps{ComponentProps: c, Label: "Save"}))}
 		},
 		components.ButtonProps{}.PartNames,
 	},
 	{
 		"Card",
-		func(c components.ComponentProps) string {
-			return string(components.Card(components.CardProps{
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Card(components.CardProps{
 				ComponentProps: c,
 				Title:          "A title",
 				Description:    "A sentence.",
 				Meta:           "yesterday",
-			}))
+			}))}
 		},
 		components.CardProps{}.PartNames,
 	},
 	{
 		"ButtonGroup",
-		func(c components.ComponentProps) string {
-			return string(components.ButtonGroup(components.ButtonGroupProps{
+		func(c components.ComponentProps) []string {
+			return []string{string(components.ButtonGroup(components.ButtonGroupProps{
 				ComponentProps: c,
 				Label:          "Message actions",
 				Buttons:        []components.ButtonProps{{Label: "Archive"}, {Label: "Report"}},
-			}))
+			}))}
 		},
 		components.ButtonGroupProps{}.PartNames,
 	},
 	{
 		"Empty",
-		func(c components.ComponentProps) string {
-			return string(components.Empty(components.EmptyProps{
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Empty(components.EmptyProps{
 				ComponentProps: c,
 				Title:          "No posts",
 				Message:        "Nothing has been published.",
 				ActionLabel:    "Write one",
 				ActionURL:      "/posts/new",
-			}))
+			}))}
 		},
 		components.EmptyProps{}.PartNames,
 	},
 	{
+		"Checkbox",
+		func(c components.ComponentProps) []string {
+			props := components.CheckboxProps{ComponentProps: c, Name: "terms", Label: "I agree", Hint: "You can change this later."}
+			withHint := string(components.Checkbox(props))
+			props.Page = page{errs: map[string]string{"terms": "Required."}}
+			return []string{withHint, string(components.Checkbox(props))}
+		},
+		components.CheckboxProps{}.PartNames,
+	},
+	{
+		"Field",
+		func(c components.ComponentProps) []string {
+			props := components.FieldProps{ComponentProps: c, Name: "email", Label: "Email", Hint: "We never share it."}
+			withHint := string(components.Field(props))
+			props.Page = page{errs: map[string]string{"email": "Required."}}
+			return []string{withHint, string(components.Field(props))}
+		},
+		components.FieldProps{}.PartNames,
+	},
+	{
+		"Input",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Input(components.InputProps{ComponentProps: c, Name: "email"}))}
+		},
+		components.InputProps{}.PartNames,
+	},
+	{
 		"Item",
-		func(c components.ComponentProps) string {
-			return string(components.Item(components.ItemProps{
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Item(components.ItemProps{
 				ComponentProps: c,
 				Title:          "Billing",
 				Description:    "Cards and invoices.",
 				Icon:           template.HTML(`<svg></svg>`),
 				Action:         template.HTML(`<button></button>`),
-			}))
+			}))}
 		},
 		components.ItemProps{}.PartNames,
 	},
 	{
 		"Kbd",
-		func(c components.ComponentProps) string {
-			return string(components.Kbd(components.KbdProps{ComponentProps: c, Keys: []string{"⌘", "K"}}))
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Kbd(components.KbdProps{ComponentProps: c, Keys: []string{"⌘", "K"}}))}
 		},
 		components.KbdProps{}.PartNames,
 	},
 	{
 		"Label",
-		func(c components.ComponentProps) string {
-			return string(components.Label(components.LabelProps{
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Label(components.LabelProps{
 				ComponentProps: c, For: "email", Text: "Email", Required: true,
-			}))
+			}))}
 		},
 		components.LabelProps{}.PartNames,
 	},
 	{
 		"Progress",
-		func(c components.ComponentProps) string {
-			return string(components.Progress(components.ProgressProps{
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Progress(components.ProgressProps{
 				ComponentProps: c, Label: "Upload", Value: 40,
-			}))
+			}))}
 		},
 		components.ProgressProps{}.PartNames,
 	},
 	{
 		"Separator",
-		func(c components.ComponentProps) string {
-			return string(components.Separator(components.SeparatorProps{ComponentProps: c}))
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Separator(components.SeparatorProps{ComponentProps: c}))}
 		},
 		components.SeparatorProps{}.PartNames,
 	},
 	{
 		"Skeleton",
-		func(c components.ComponentProps) string {
-			return string(components.Skeleton(components.SkeletonProps{ComponentProps: c}))
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Skeleton(components.SkeletonProps{ComponentProps: c}))}
 		},
 		components.SkeletonProps{}.PartNames,
+	},
+	{
+		"Switch",
+		func(c components.ComponentProps) []string {
+			props := components.SwitchProps{ComponentProps: c, Name: "alerts", Label: "Email alerts", Hint: "Sent once a day."}
+			withHint := string(components.Switch(props))
+			props.Page = page{errs: map[string]string{"alerts": "Required."}}
+			return []string{withHint, string(components.Switch(props))}
+		},
+		components.SwitchProps{}.PartNames,
+	},
+	{
+		"Textarea",
+		func(c components.ComponentProps) []string {
+			props := components.TextareaProps{ComponentProps: c, Name: "body", Label: "Body", Hint: "Markdown is allowed."}
+			withHint := string(components.Textarea(props))
+			props.Page = page{errs: map[string]string{"body": "Required."}}
+			return []string{withHint, string(components.Textarea(props))}
+		},
+		components.TextareaProps{}.PartNames,
 	},
 }
 
@@ -154,9 +206,10 @@ var extensible = []struct {
 func TestEveryComponentTakesAClass(t *testing.T) {
 	for _, c := range extensible {
 		t.Run(c.name, func(t *testing.T) {
-			got := c.render(components.ComponentProps{Class: "kyse-probe-root"})
-			if !strings.Contains(got, "kyse-probe-root") {
-				t.Fatalf("the class a caller added is not in the output:\n%s", got)
+			for _, got := range c.render(components.ComponentProps{Class: "kyse-probe-root"}) {
+				if !strings.Contains(got, "kyse-probe-root") {
+					t.Fatalf("the class a caller added is not in the output:\n%s", got)
+				}
 			}
 		})
 	}
@@ -183,17 +236,24 @@ func TestEveryPublishedPartIsReachable(t *testing.T) {
 
 			for _, part := range published {
 				probe := "kyse-probe-" + part
-				got := c.render(components.ComponentProps{
+				states := c.render(components.ComponentProps{
 					Parts: components.Parts{part: {Class: probe}},
 				})
-				if !strings.Contains(got, probe) {
-					t.Errorf("the part %q is published and a class written for it does not appear:\n%s", part, got)
+				reached := false
+				for _, got := range states {
+					reached = reached || strings.Contains(got, probe)
+				}
+				if !reached {
+					t.Errorf("the part %q is published and a class written for it appears in none of its %d states:\n%s",
+						part, len(states), strings.Join(states, "\n---\n"))
 				}
 			}
 
 			var found []string
-			for _, m := range drawn.FindAllStringSubmatch(c.render(components.ComponentProps{}), -1) {
-				found = append(found, m[1])
+			for _, got := range c.render(components.ComponentProps{}) {
+				for _, m := range drawn.FindAllStringSubmatch(got, -1) {
+					found = append(found, m[1])
+				}
 			}
 			if diff := missing(found, published); len(diff) > 0 {
 				t.Errorf("these parts are drawn and not published: %v", diff)
@@ -222,10 +282,11 @@ func TestAnAttrCannotCarryAScript(t *testing.T) {
 				{"href": "javascript:alert(1)"},
 				{`x" onerror="alert(1)`: "1"},
 			} {
-				got := c.render(components.ComponentProps{Attrs: attrs})
-				for name := range attrs {
-					if strings.Contains(got, name) {
-						t.Errorf("the attribute %q was written:\n%s", name, got)
+				for _, got := range c.render(components.ComponentProps{Attrs: attrs}) {
+					for name := range attrs {
+						if strings.Contains(got, name) {
+							t.Errorf("the attribute %q was written:\n%s", name, got)
+						}
 					}
 				}
 			}
@@ -239,11 +300,12 @@ func TestAnAttrCannotCarryAScript(t *testing.T) {
 func TestAnInertAttrIsWritten(t *testing.T) {
 	for _, c := range extensible {
 		t.Run(c.name, func(t *testing.T) {
-			got := c.render(components.ComponentProps{
+			for _, got := range c.render(components.ComponentProps{
 				Attrs: components.Attrs{"data-testid": "probe"},
-			})
-			if !strings.Contains(got, `data-testid="probe"`) {
-				t.Fatalf("an inert attribute did not reach the element:\n%s", got)
+			}) {
+				if !strings.Contains(got, `data-testid="probe"`) {
+					t.Fatalf("an inert attribute did not reach the element:\n%s", got)
+				}
 			}
 		})
 	}

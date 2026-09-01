@@ -19,6 +19,8 @@ package components
 // given up is the value and the invalid state: both still come from Page, by
 // Name, exactly as they do for Field.
 type InputProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Name is the form field name, and what Page is asked about.
 	Name string
 	// ID is the id the markup carries, so a Label can point at it. Empty uses
@@ -99,14 +101,18 @@ func (p InputProps) Current() string {
 	}
 	return p.Page.OldOr(p.Name, p.Value)
 }
+// PartNames are the parts this component publishes.
+func (p InputProps) PartNames() []string { return []string{"root"} }
 @endgo
 
 <input
-	class="input"
+	data-part="root"
+	class="{{ .RootClass("input") }}"
 	type="{{ .InputType() }}"
 	id="{{ .ElementID() }}"
 	name="{{ .Name }}"
 	value="{{ .Current() }}"
+	@attributes(.RootAttrs())
 	@if(.Placeholder != "")
 		placeholder="{{ .Placeholder }}"
 	@endif

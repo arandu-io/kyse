@@ -5,6 +5,7 @@
 package components
 
 import (
+	kyse__fmt "fmt"
 	kyse__template "html/template"
 	kyse__io "io"
 	kyse__strings "strings"
@@ -25,6 +26,8 @@ import (
 // Use it for consent and for one answer of many on a form somebody submits. Use
 // Switch for a setting that takes effect when it is thrown.
 type CheckboxProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Name is the form field name, and what Page is asked about.
 	Name string
 	// ID is the id the markup carries, and the id the label points at. Empty
@@ -111,7 +114,12 @@ func (p CheckboxProps) DescribedBy() string {
 	return ""
 }
 
-//line components/checkbox.go:115
+// PartNames are the parts this component publishes.
+func (p CheckboxProps) PartNames() []string {
+	return []string{"root", "input", "content", "label", "message", "hint"}
+}
+
+//line components/checkbox.go:123
 
 // Checkbox renders the checkbox component.
 func Checkbox(kyse__props CheckboxProps) kyse__template.HTML {
@@ -128,21 +136,43 @@ func Checkbox(kyse__props CheckboxProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "<div\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"field\"\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tdata-part=\"root\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
+	}
+	if kyse__err == nil {
+//line components/checkbox.kyse.go:110
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("field")))
+//line components/checkbox.go:148
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tdata-orientation=\"horizontal\"\n")
 	}
-//line components/checkbox.kyse.go:107
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/checkbox.kyse.go:112
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/checkbox.go:160
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/checkbox.kyse.go:112", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
+		}
+	}
+//line components/checkbox.kyse.go:113
 	if kyse__d.Message() != "" {
-//line components/checkbox.go:139
+//line components/checkbox.go:169
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-invalid=\"true\"\n")
 		}
 	}
-//line components/checkbox.kyse.go:110
+//line components/checkbox.kyse.go:116
 	if kyse__d.Disabled {
-//line components/checkbox.go:146
+//line components/checkbox.go:176
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-disabled=\"true\"\n")
 		}
@@ -154,7 +184,18 @@ func Checkbox(kyse__props CheckboxProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<input\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"input\"\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-part=\"input\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
+	}
+	if kyse__err == nil {
+//line components/checkbox.kyse.go:122
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("input", "input")))
+//line components/checkbox.go:196
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\ttype=\"checkbox\"\n")
@@ -163,9 +204,9 @@ func Checkbox(kyse__props CheckboxProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/checkbox.kyse.go:117
+//line components/checkbox.kyse.go:124
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/checkbox.go:169
+//line components/checkbox.go:210
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -174,67 +215,78 @@ func Checkbox(kyse__props CheckboxProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tname=\"")
 	}
 	if kyse__err == nil {
-//line components/checkbox.kyse.go:118
+//line components/checkbox.kyse.go:125
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/checkbox.go:180
+//line components/checkbox.go:221
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-//line components/checkbox.kyse.go:119
+	if kyse__err == nil {
+		var kyse__v2 string
+//line components/checkbox.kyse.go:126
+		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
+//line components/checkbox.go:230
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/checkbox.kyse.go:126", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
+		}
+	}
+//line components/checkbox.kyse.go:127
 	if kyse__d.Value != "" {
-//line components/checkbox.go:187
+//line components/checkbox.go:239
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tvalue=\"")
 		}
 		if kyse__err == nil {
-//line components/checkbox.kyse.go:120
+//line components/checkbox.kyse.go:128
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Value))
-//line components/checkbox.go:194
+//line components/checkbox.go:246
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/checkbox.kyse.go:122
+//line components/checkbox.kyse.go:130
 	if kyse__d.Current() {
-//line components/checkbox.go:202
+//line components/checkbox.go:254
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tchecked\n")
 		}
 	}
-//line components/checkbox.kyse.go:125
+//line components/checkbox.kyse.go:133
 	if kyse__d.DescribedBy() != "" {
-//line components/checkbox.go:209
+//line components/checkbox.go:261
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/checkbox.kyse.go:126
+//line components/checkbox.kyse.go:134
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/checkbox.go:216
+//line components/checkbox.go:268
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/checkbox.kyse.go:128
+//line components/checkbox.kyse.go:136
 	if kyse__d.Message() != "" {
-//line components/checkbox.go:224
+//line components/checkbox.go:276
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/checkbox.kyse.go:131
+//line components/checkbox.kyse.go:139
 	if kyse__d.Required {
-//line components/checkbox.go:231
+//line components/checkbox.go:283
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\trequired\n")
 		}
 	}
-//line components/checkbox.kyse.go:134
+//line components/checkbox.kyse.go:142
 	if kyse__d.Disabled {
-//line components/checkbox.go:238
+//line components/checkbox.go:290
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdisabled\n")
 		}
@@ -243,71 +295,196 @@ func Checkbox(kyse__props CheckboxProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<section>\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<section\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<label class=\"label\" for=\"")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-part=\"content\"\n")
+	}
+//line components/checkbox.kyse.go:148
+	if kyse__d.PartClass("content") != "" {
+//line components/checkbox.go:306
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/checkbox.kyse.go:149
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("content")))
+//line components/checkbox.go:313
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
 	}
 	if kyse__err == nil {
-//line components/checkbox.kyse.go:139
+		var kyse__v3 string
+//line components/checkbox.kyse.go:151
+		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("content"))
+//line components/checkbox.go:323
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/checkbox.kyse.go:151", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
+		}
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<label\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"label\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
+	}
+	if kyse__err == nil {
+//line components/checkbox.kyse.go:155
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("label", "label")))
+//line components/checkbox.go:345
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tfor=\"")
+	}
+	if kyse__err == nil {
+//line components/checkbox.kyse.go:156
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/checkbox.go:255
+//line components/checkbox.go:356
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\">")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
-//line components/checkbox.kyse.go:139
+		var kyse__v4 string
+//line components/checkbox.kyse.go:157
+		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("label"))
+//line components/checkbox.go:365
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/checkbox.kyse.go:157", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
+		}
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
+	}
+	if kyse__err == nil {
+//line components/checkbox.kyse.go:158
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
-//line components/checkbox.go:263
+//line components/checkbox.go:378
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</label>\n")
 	}
-//line components/checkbox.kyse.go:140
+//line components/checkbox.kyse.go:159
 	if kyse__d.Message() != "" {
-//line components/checkbox.go:270
+//line components/checkbox.go:385
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<p id=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<p\n")
 		}
 		if kyse__err == nil {
-//line components/checkbox.kyse.go:141
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"message\"\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tid=\"")
+		}
+		if kyse__err == nil {
+//line components/checkbox.kyse.go:162
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/checkbox.go:277
+//line components/checkbox.go:398
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "-error\" class=\"text-destructive text-sm\">")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "-error\"\n")
 		}
 		if kyse__err == nil {
-//line components/checkbox.kyse.go:141
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/checkbox.kyse.go:163
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("message", "text-destructive text-sm")))
+//line components/checkbox.go:409
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+		if kyse__err == nil {
+			var kyse__v5 string
+//line components/checkbox.kyse.go:164
+			kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("message"))
+//line components/checkbox.go:418
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/checkbox.kyse.go:164", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
+		}
+		if kyse__err == nil {
+//line components/checkbox.kyse.go:165
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message())))
-//line components/checkbox.go:285
+//line components/checkbox.go:431
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
 		}
 	}
-//line components/checkbox.kyse.go:143
+//line components/checkbox.kyse.go:167
 	if kyse__d.Message() == "" {
-//line components/checkbox.go:293
-//line components/checkbox.kyse.go:144
+//line components/checkbox.go:439
+//line components/checkbox.kyse.go:168
 		if kyse__d.Hint != "" {
-//line components/checkbox.go:296
+//line components/checkbox.go:442
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<p id=\"")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<p\n")
 			}
 			if kyse__err == nil {
-//line components/checkbox.kyse.go:145
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-part=\"hint\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tid=\"")
+			}
+			if kyse__err == nil {
+//line components/checkbox.kyse.go:171
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/checkbox.go:303
+//line components/checkbox.go:455
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "-hint\" class=\"text-muted-foreground text-sm\">")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "-hint\"\n")
 			}
 			if kyse__err == nil {
-//line components/checkbox.kyse.go:145
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/checkbox.kyse.go:172
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("hint", "text-muted-foreground text-sm")))
+//line components/checkbox.go:466
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				var kyse__v6 string
+//line components/checkbox.kyse.go:173
+				kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("hint"))
+//line components/checkbox.go:475
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/checkbox.kyse.go:173", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>")
+			}
+			if kyse__err == nil {
+//line components/checkbox.kyse.go:174
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Hint)))
-//line components/checkbox.go:311
+//line components/checkbox.go:488
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")

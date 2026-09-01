@@ -22,6 +22,8 @@ package components
 // one call is a name two of the three can disagree with, silently, on the screen
 // where a missing message is the complaint.
 type FieldProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Name is the form field name, the id everything else is hung off, and what
 	// Page is asked about.
 	Name string
@@ -92,16 +94,29 @@ func (p FieldProps) DescribedBy() string {
 	}
 	return ""
 }
+// PartNames are the parts this component publishes.
+func (p FieldProps) PartNames() []string { return []string{"root", "label", "input", "message", "hint"} }
 @endgo
 
-<div class="field">
-	<label class="label" for="{{ .Name }}">{{ .Label }}</label>
+<div
+	data-part="root"
+	class="{{ .RootClass("field") }}"
+	@attributes(.RootAttrs())
+>
+	<label
+		data-part="label"
+		class="{{ .PartClass("label", "label") }}"
+		for="{{ .Name }}"
+		@attributes(.PartAttrs("label"))
+	>{{ .Label }}</label>
 	<input
-		class="input"
+		data-part="input"
+		class="{{ .PartClass("input", "input") }}"
 		type="{{ .InputType() }}"
 		id="{{ .Name }}"
 		name="{{ .Name }}"
 		value="{{ .Current() }}"
+		@attributes(.PartAttrs("input"))
 		@if(.Placeholder != "")
 			placeholder="{{ .Placeholder }}"
 		@endif
@@ -122,11 +137,21 @@ func (p FieldProps) DescribedBy() string {
 		@endif
 	>
 	@if(.Message() != "")
-		<p id="{{ .Name }}-error" class="text-destructive text-sm">{{ .Message() }}</p>
+		<p
+			data-part="message"
+			id="{{ .Name }}-error"
+			class="{{ .PartClass("message", "text-destructive text-sm") }}"
+			@attributes(.PartAttrs("message"))
+		>{{ .Message() }}</p>
 	@endif
 	@if(.Message() == "")
 		@if(.Hint != "")
-			<p id="{{ .Name }}-hint" class="text-muted-foreground text-sm">{{ .Hint }}</p>
+			<p
+				data-part="hint"
+				id="{{ .Name }}-hint"
+				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
+				@attributes(.PartAttrs("hint"))
+			>{{ .Hint }}</p>
 		@endif
 	@endif
 </div>

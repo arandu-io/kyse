@@ -21,6 +21,8 @@ package components
 // still say "off" after somebody turned the switch on, which is worse than
 // having said nothing.
 type SwitchProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Name is the form field name, and what Page is asked about.
 	Name string
 	// ID is the id the markup carries, and the id the label points at. Empty
@@ -103,11 +105,15 @@ func (p SwitchProps) DescribedBy() string {
 	}
 	return ""
 }
+// PartNames are the parts this component publishes.
+func (p SwitchProps) PartNames() []string { return []string{"root", "content", "label", "input", "message", "hint"} }
 @endgo
 
 <div
-	class="field"
+	data-part="root"
+	class="{{ .RootClass("field") }}"
 	data-orientation="horizontal"
+	@attributes(.RootAttrs())
 	@if(.Message() != "")
 		data-invalid="true"
 	@endif
@@ -115,23 +121,46 @@ func (p SwitchProps) DescribedBy() string {
 		data-disabled="true"
 	@endif
 >
-	<section>
-		<label class="label" for="{{ .ElementID() }}">{{ .Label }}</label>
+	<section
+		data-part="content"
+		@if(.PartClass("content") != "")
+			class="{{ .PartClass("content") }}"
+		@endif
+		@attributes(.PartAttrs("content"))
+	>
+		<label
+			data-part="label"
+			class="{{ .PartClass("label", "label") }}"
+			for="{{ .ElementID() }}"
+			@attributes(.PartAttrs("label"))
+		>{{ .Label }}</label>
 		@if(.Message() != "")
-			<p id="{{ .ElementID() }}-error" class="text-destructive text-sm">{{ .Message() }}</p>
+			<p
+				data-part="message"
+				id="{{ .ElementID() }}-error"
+				class="{{ .PartClass("message", "text-destructive text-sm") }}"
+				@attributes(.PartAttrs("message"))
+			>{{ .Message() }}</p>
 		@endif
 		@if(.Message() == "")
 			@if(.Hint != "")
-				<p id="{{ .ElementID() }}-hint" class="text-muted-foreground text-sm">{{ .Hint }}</p>
+				<p
+					data-part="hint"
+					id="{{ .ElementID() }}-hint"
+					class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
+					@attributes(.PartAttrs("hint"))
+				>{{ .Hint }}</p>
 			@endif
 		@endif
 	</section>
 	<input
-		class="input"
+		data-part="input"
+		class="{{ .PartClass("input", "input") }}"
 		type="checkbox"
 		role="switch"
 		id="{{ .ElementID() }}"
 		name="{{ .Name }}"
+		@attributes(.PartAttrs("input"))
 		@if(.Value != "")
 			value="{{ .Value }}"
 		@endif

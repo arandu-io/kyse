@@ -14,6 +14,8 @@ package components
 // Use it for consent and for one answer of many on a form somebody submits. Use
 // Switch for a setting that takes effect when it is thrown.
 type CheckboxProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Name is the form field name, and what Page is asked about.
 	Name string
 	// ID is the id the markup carries, and the id the label points at. Empty
@@ -99,11 +101,15 @@ func (p CheckboxProps) DescribedBy() string {
 	}
 	return ""
 }
+// PartNames are the parts this component publishes.
+func (p CheckboxProps) PartNames() []string { return []string{"root", "input", "content", "label", "message", "hint"} }
 @endgo
 
 <div
-	class="field"
+	data-part="root"
+	class="{{ .RootClass("field") }}"
 	data-orientation="horizontal"
+	@attributes(.RootAttrs())
 	@if(.Message() != "")
 		data-invalid="true"
 	@endif
@@ -112,10 +118,12 @@ func (p CheckboxProps) DescribedBy() string {
 	@endif
 >
 	<input
-		class="input"
+		data-part="input"
+		class="{{ .PartClass("input", "input") }}"
 		type="checkbox"
 		id="{{ .ElementID() }}"
 		name="{{ .Name }}"
+		@attributes(.PartAttrs("input"))
 		@if(.Value != "")
 			value="{{ .Value }}"
 		@endif
@@ -135,14 +143,35 @@ func (p CheckboxProps) DescribedBy() string {
 			disabled
 		@endif
 	>
-	<section>
-		<label class="label" for="{{ .ElementID() }}">{{ .Label }}</label>
+	<section
+		data-part="content"
+		@if(.PartClass("content") != "")
+			class="{{ .PartClass("content") }}"
+		@endif
+		@attributes(.PartAttrs("content"))
+	>
+		<label
+			data-part="label"
+			class="{{ .PartClass("label", "label") }}"
+			for="{{ .ElementID() }}"
+			@attributes(.PartAttrs("label"))
+		>{{ .Label }}</label>
 		@if(.Message() != "")
-			<p id="{{ .ElementID() }}-error" class="text-destructive text-sm">{{ .Message() }}</p>
+			<p
+				data-part="message"
+				id="{{ .ElementID() }}-error"
+				class="{{ .PartClass("message", "text-destructive text-sm") }}"
+				@attributes(.PartAttrs("message"))
+			>{{ .Message() }}</p>
 		@endif
 		@if(.Message() == "")
 			@if(.Hint != "")
-				<p id="{{ .ElementID() }}-hint" class="text-muted-foreground text-sm">{{ .Hint }}</p>
+				<p
+					data-part="hint"
+					id="{{ .ElementID() }}-hint"
+					class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
+					@attributes(.PartAttrs("hint"))
+				>{{ .Hint }}</p>
 			@endif
 		@endif
 	</section>

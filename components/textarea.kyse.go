@@ -10,6 +10,8 @@ package components
 // between the tags rather than in an attribute -- and one component branching on
 // which element to draw would be two components sharing a name.
 type TextareaProps struct {
+	// ComponentProps is the class, attributes and parts the caller adds.
+	ComponentProps
 	// Name is the form field name, and the id the label points at.
 	Name string
 	// Label is the text above the box.
@@ -57,14 +59,27 @@ func (p TextareaProps) DescribedBy() string {
 	}
 	return ""
 }
+// PartNames are the parts this component publishes.
+func (p TextareaProps) PartNames() []string { return []string{"root", "label", "input", "message", "hint"} }
 @endgo
 
-<div class="field">
-	<label class="label" for="{{ .Name }}">{{ .Label }}</label>
+<div
+	data-part="root"
+	class="{{ .RootClass("field") }}"
+	@attributes(.RootAttrs())
+>
+	<label
+		data-part="label"
+		class="{{ .PartClass("label", "label") }}"
+		for="{{ .Name }}"
+		@attributes(.PartAttrs("label"))
+	>{{ .Label }}</label>
 	<textarea
-		class="textarea"
+		data-part="input"
+		class="{{ .PartClass("input", "textarea") }}"
 		id="{{ .Name }}"
 		name="{{ .Name }}"
+		@attributes(.PartAttrs("input"))
 		@if(.Rows > 0)
 			rows="{{ .Rows }}"
 		@endif
@@ -82,11 +97,21 @@ func (p TextareaProps) DescribedBy() string {
 		@endif
 	>{{ .Current() }}</textarea>
 	@if(.Message() != "")
-		<p id="{{ .Name }}-error" class="text-destructive text-sm">{{ .Message() }}</p>
+		<p
+			data-part="message"
+			id="{{ .Name }}-error"
+			class="{{ .PartClass("message", "text-destructive text-sm") }}"
+			@attributes(.PartAttrs("message"))
+		>{{ .Message() }}</p>
 	@endif
 	@if(.Message() == "")
 		@if(.Hint != "")
-			<p id="{{ .Name }}-hint" class="text-muted-foreground text-sm">{{ .Hint }}</p>
+			<p
+				data-part="hint"
+				id="{{ .Name }}-hint"
+				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
+				@attributes(.PartAttrs("hint"))
+			>{{ .Hint }}</p>
 		@endif
 	@endif
 </div>
