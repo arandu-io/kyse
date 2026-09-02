@@ -30,7 +30,7 @@ intended method in a hidden `_method` field. Applications must register
 before routing; the Arandu skeleton does this in its default pipeline.
 
 The dialog's CSRF field is `_token`, and this module now requires Framework
-v0.42.0, the release whose `CSRFProtect` reads that spelling. A public test
+v0.42.1, whose `CSRFProtect` reads that spelling. A public test
 renders the component, simulates the browser submission, and crosses
 `CSRFProtect → OverrideMethod → Router` for all three spoofed methods.
 
