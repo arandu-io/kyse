@@ -21,7 +21,7 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
-## Unreleased — Dialog submissions use the browser's native transport
+## v0.15.2 — Dialog submissions use the browser's native transport
 
 `DialogProps.Method` may still be PUT, PATCH or DELETE, but an HTML form cannot
 send any of those methods. The rendered form now sends POST and carries the
@@ -43,8 +43,8 @@ pair disagrees about the form field: Framework reads `_csrf`, while Hesape's
 refused with 419. In both releases, a Dialog configured for PUT, PATCH or DELETE
 also wrote that method directly on the form, which browsers do not submit.
 
-Use the next Kyse release rather than either retracted version. Retraction is
-metadata published by that next release; it cannot remove an immutable tag, but
+Use v0.15.2 or newer rather than either retracted version. Retraction is
+metadata published by v0.15.2; it cannot remove an immutable tag, but
 the Go command will warn before selecting one of them.
 
 ## v0.15.0 — every component takes a class, attributes and parts
