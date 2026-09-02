@@ -2,6 +2,8 @@
 
 package components
 
+import "strings"
+
 @go
 // DialogProps is a confirmation: the thing about to happen, and the two ways
 // out of it.
@@ -35,8 +37,10 @@ type DialogProps struct {
 	ConfirmLabel string
 	// ConfirmVariant styles it. Use "destructive" for anything that deletes.
 	ConfirmVariant string
-	// Action and Method are the form the confirm button submits. A dialog that
-	// deletes over GET is a dialog a crawler can fire.
+	// Action and Method are the form the confirm button submits. PUT, PATCH and
+	// DELETE are carried by a POST with a hidden _method field, because browsers
+	// cannot submit those methods directly. A dialog that deletes over GET is a
+	// dialog a crawler can fire.
 	Action string
 	Method string
 
@@ -95,13 +99,29 @@ func (p DialogProps) Cancel() string {
 	return p.CancelLabel
 }
 
-// FormMethod defaults to post, because everything a dialog confirms changes
-// something.
+// FormMethod is the method a browser submits. It defaults to post because
+// everything a dialog confirms changes something, and uses post as the carrier
+// for PUT, PATCH and DELETE.
 func (p DialogProps) FormMethod() string {
 	if p.Method == "" {
 		return "post"
 	}
-	return p.Method
+	if p.MethodOverride() != "" {
+		return "post"
+	}
+	return strings.ToLower(p.Method)
+}
+
+// MethodOverride is the method carried in the hidden _method field, or empty
+// when the browser can submit the requested method directly.
+func (p DialogProps) MethodOverride() string {
+	method := strings.ToUpper(p.Method)
+	switch method {
+	case "PUT", "PATCH", "DELETE":
+		return method
+	default:
+		return ""
+	}
 }
 // PartNames are the parts this component publishes.
 func (p DialogProps) PartNames() []string {
@@ -172,6 +192,9 @@ func (p DialogProps) PartNames() []string {
 				>{{ .Cancel() }}</button>
 			</form>
 			<form method="{{ .FormMethod() }}" action="{{ .Action }}">
+				@if(.MethodOverride() != "")
+					<input type="hidden" name="_method" value="{{ .MethodOverride() }}">
+				@endif
 				<input type="hidden" name="_token" value="{{ .Token }}">
 				<button
 					data-part="confirm"
