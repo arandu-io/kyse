@@ -21,6 +21,32 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## Unreleased — Dialog submissions use the browser's native transport
+
+`DialogProps.Method` may still be PUT, PATCH or DELETE, but an HTML form cannot
+send any of those methods. The rendered form now sends POST and carries the
+intended method in a hidden `_method` field. Applications must register
+`hesape/http/middleware.OverrideMethod` **after** Framework's `CSRFProtect` and
+before routing; the Arandu skeleton does this in its default pipeline.
+
+The dialog's CSRF field is `_token`, and this module now requires Framework
+v0.42.0, the release whose `CSRFProtect` reads that spelling. A public test
+renders the component, simulates the browser submission, and crosses
+`CSRFProtect → OverrideMethod → Router` for all three spoofed methods.
+
+### v0.15.0 and v0.15.1 are retracted
+
+Both releases selected Framework v0.41.0 together with Hesape v0.21.0. That
+pair disagrees about the form field: Framework reads `_csrf`, while Hesape's
+`@csrf` directive writes `_token`. v0.15.1 also changed Dialog itself to
+`_token` without raising the Framework floor, so its own confirmation form was
+refused with 419. In both releases, a Dialog configured for PUT, PATCH or DELETE
+also wrote that method directly on the form, which browsers do not submit.
+
+Use the next Kyse release rather than either retracted version. Retraction is
+metadata published by that next release; it cannot remove an immutable tag, but
+the Go command will warn before selecting one of them.
+
 ## v0.15.0 — every component takes a class, attributes and parts
 
 ### `ThemeToggle` takes props
