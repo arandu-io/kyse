@@ -623,6 +623,36 @@ func TestEveryComponentCarriesTheClientBridge(t *testing.T) {
 	}
 }
 
+// TestEveryComponentCarriesTheTheme is the other field on ComponentProps that a
+// component can accept and ignore.
+//
+// A theme is a variation the stylesheet defines, selected by data-theme on the
+// element. So a component that takes the field and writes nothing is a component
+// the theme does not reach -- and it fails as a colour that did not change,
+// which reads as a stylesheet that is missing a rule rather than as markup that
+// is missing an attribute.
+//
+// The empty case is asserted too, and it is the sharper half. The rules a theme
+// varies are written for `:not([data-theme])` as well as for the named one, so
+// data-theme="" is not the absence of a theme: it turns the default rules off
+// and matches no named theme, leaving the element styled by neither.
+func TestEveryComponentCarriesTheTheme(t *testing.T) {
+	for _, c := range extensible {
+		t.Run(c.name, func(t *testing.T) {
+			for _, got := range c.render(components.ComponentProps{Theme: "kyse-probe-theme"}) {
+				if root := rootTag(t, got); !strings.Contains(root, `data-theme="kyse-probe-theme"`) {
+					t.Errorf("the outermost element does not carry the theme:\n%s", root)
+				}
+			}
+			for _, got := range c.render(components.ComponentProps{}) {
+				if root := rootTag(t, got); strings.Contains(root, `data-theme=`) {
+					t.Errorf("a component nobody gave a theme writes one anyway:\n%s", root)
+				}
+			}
+		})
+	}
+}
+
 // TestTheBridgeIsWrittenInOnePlace holds the emission down to ComponentProps.
 //
 // The attributes are one bag, RootAttrs, and every component writes that bag.
