@@ -551,6 +551,133 @@ func TestAnInertAttrIsWritten(t *testing.T) {
 	}
 }
 
+// bridgeEvents are the events the client script listens for on the document,
+// which is the whole set an action can answer.
+//
+// They are listed rather than sampled because the attribute name is assembled
+// from the event -- data-kyse-on-<event> -- and a component that wrote one of
+// them and dropped the rest would pass a test that only asked about click.
+var bridgeEvents = map[string]string{
+	"change":  "kyse-probe-change",
+	"click":   "kyse-probe-click",
+	"input":   "kyse-probe-input",
+	"keydown": "kyse-probe-keydown",
+	"submit":  "kyse-probe-submit",
+}
+
+// TestEveryComponentCarriesTheClientBridge is what a behaviour needs to be
+// reachable at all: the name, the props and the events have to arrive on the
+// element, or an application registers a behaviour that nothing ever mounts.
+//
+// It asserts on the outermost tag rather than on the whole rendering, because
+// where the attributes land decides what happens. A behaviour is mounted on the
+// element carrying data-kyse-behavior and torn down with it, so the same
+// attribute on an inner element gives the behaviour a shorter life than the
+// component it was written for.
+//
+// The props are checked in their escaped spelling, which is the one the browser
+// is sent. The value is JSON inside an HTML attribute, so the quotes travel as
+// &#34; and are decoded by the parser before any script reads them; a component
+// that wrote the raw text would end the attribute at the first quote and hand
+// the behaviour a fragment.
+//
+// Every component takes these fields because every component embeds
+// ComponentProps. So a component that takes them and writes nothing compiles,
+// renders, and is silent -- which is what this exists to make loud, and why it
+// runs over the whole table rather than over a component somebody remembered.
+func TestEveryComponentCarriesTheClientBridge(t *testing.T) {
+	props := components.ComponentProps{
+		Behavior: components.Behavior{
+			Name:  "kyse-probe-behaviour",
+			Props: map[string]any{"confirm": true},
+		},
+		Events: components.Events{},
+	}
+	for event, action := range bridgeEvents {
+		props.Events[event] = action
+	}
+
+	want := []string{
+		`data-kyse-behavior="kyse-probe-behaviour"`,
+		`data-kyse-props="{&#34;confirm&#34;:true}"`,
+	}
+	for event, action := range bridgeEvents {
+		want = append(want, `data-kyse-on-`+event+`="`+action+`"`)
+	}
+	sort.Strings(want)
+
+	for _, c := range extensible {
+		t.Run(c.name, func(t *testing.T) {
+			for _, got := range c.render(props) {
+				root := rootTag(t, got)
+				for _, attribute := range want {
+					if !strings.Contains(root, attribute) {
+						t.Errorf("the outermost element does not carry %s:\n%s", attribute, root)
+					}
+				}
+			}
+		})
+	}
+}
+
+// TestTheBridgeIsWrittenInOnePlace holds the emission down to ComponentProps.
+//
+// The attributes are one bag, RootAttrs, and every component writes that bag.
+// A component that spelled an attribute into its markup instead would work,
+// which is the problem: it would work for that component, at that name, and
+// leave the next one to be remembered rather than compiled. Thirty-seven copies
+// of one emission is thirty-seven places for the thirty-eighth to be forgotten.
+//
+// Both the sources and what they compile to are read, for the reason
+// TestNoComponentEvaluatesAnExpression reads both: the source is where the line
+// would be written, and the compiled file is what a browser is actually sent.
+func TestTheBridgeIsWrittenInOnePlace(t *testing.T) {
+	for _, pattern := range []string{"*.kyse.go", "*.go"} {
+		files, err := filepath.Glob(filepath.Join("..", "..", "components", pattern))
+		if err != nil {
+			t.Fatalf("reading the component directory: %v", err)
+		}
+		if len(files) == 0 {
+			t.Fatalf("no components/%s found; this test is checking nothing", pattern)
+		}
+
+		for _, file := range files {
+			base := filepath.Base(file)
+			// *.go matches *.kyse.go too, and component-props.go is where the
+			// attribute names are supposed to be written.
+			if (pattern == "*.go" && strings.HasSuffix(file, ".kyse.go")) || base == "component-props.go" {
+				continue
+			}
+			body, err := os.ReadFile(file)
+			if err != nil {
+				t.Fatalf("reading %s: %v", file, err)
+			}
+			for at, line := range strings.Split(string(body), "\n") {
+				if !strings.Contains(line, "data-kyse-") {
+					continue
+				}
+				t.Errorf("%s:%d writes a bridge attribute of its own:\n\t%s\n"+
+					"\tThe behaviour, the props and the events are the ComponentProps fields, and RootAttrs is what writes them.",
+					base, at+1, strings.TrimSpace(line))
+			}
+		}
+	}
+}
+
+// rootTag is the outermost tag of a rendering, which is the element every
+// component publishes as its root.
+func rootTag(t *testing.T, markup string) string {
+	t.Helper()
+
+	tag := firstTag.FindString(markup)
+	if tag == "" {
+		t.Fatalf("the rendering opens no tag:\n%s", markup)
+	}
+	return tag
+}
+
+var firstTag = regexp.MustCompile(`(?s)<[a-zA-Z][^>]*>`)
+
 // TestEveryExtensibleComponentIsInThisTable reads the component directory, the
 // way TestEveryComponentIsInTheTable does, so that migrating a component and
 // forgetting this file fails here rather than leaving the component untested.
