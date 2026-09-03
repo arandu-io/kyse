@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/arandu-io/kyse"
 	"github.com/arandu-io/kyse/components"
 )
 
@@ -42,7 +43,10 @@ var extensible = []struct {
 	{
 		"Avatar",
 		func(c components.ComponentProps) []string {
-			return []string{string(components.Avatar(components.AvatarProps{ComponentProps: c, Name: "Ada Lovelace"}))}
+			props := components.AvatarProps{ComponentProps: c, Name: "Ada Lovelace"}
+			withInitials := string(components.Avatar(props))
+			props.ImageURL = "/ada.png"
+			return []string{withInitials, string(components.Avatar(props))}
 		},
 		components.AvatarProps{}.PartNames,
 	},
@@ -550,6 +554,206 @@ func TestAnInertAttrIsWritten(t *testing.T) {
 		})
 	}
 }
+
+// bridgeEvents are the events the client script listens for on the document,
+// which is the whole set an action can answer.
+//
+// They are listed rather than sampled because the attribute name is assembled
+// from the event -- data-kyse-on-<event> -- and a component that wrote one of
+// them and dropped the rest would pass a test that only asked about click.
+var bridgeEvents = map[string]string{
+	"change":  "kyse-probe-change",
+	"click":   "kyse-probe-click",
+	"input":   "kyse-probe-input",
+	"keydown": "kyse-probe-keydown",
+	"submit":  "kyse-probe-submit",
+}
+
+// TestEveryComponentCarriesTheClientBridge is what a behaviour needs to be
+// reachable at all: the name, the props and the events have to arrive on the
+// element, or an application registers a behaviour that nothing ever mounts.
+//
+// It asserts on the outermost tag rather than on the whole rendering, because
+// where the attributes land decides what happens. A behaviour is mounted on the
+// element carrying data-kyse-behavior and torn down with it, so the same
+// attribute on an inner element gives the behaviour a shorter life than the
+// component it was written for.
+//
+// The props are checked in their escaped spelling, which is the one the browser
+// is sent. The value is JSON inside an HTML attribute, so the quotes travel as
+// &#34; and are decoded by the parser before any script reads them; a component
+// that wrote the raw text would end the attribute at the first quote and hand
+// the behaviour a fragment.
+//
+// Every component takes these fields because every component embeds
+// ComponentProps. So a component that takes them and writes nothing compiles,
+// renders, and is silent -- which is what this exists to make loud, and why it
+// runs over the whole table rather than over a component somebody remembered.
+func TestEveryComponentCarriesTheClientBridge(t *testing.T) {
+	props := components.ComponentProps{
+		Behavior: components.Behavior{
+			Name:  "kyse-probe-behaviour",
+			Props: map[string]any{"confirm": true},
+		},
+		Events: components.Events{},
+	}
+	for event, action := range bridgeEvents {
+		props.Events[event] = action
+	}
+
+	want := []string{
+		`data-kyse-behavior="kyse-probe-behaviour"`,
+		`data-kyse-props="{&#34;confirm&#34;:true}"`,
+	}
+	for event, action := range bridgeEvents {
+		want = append(want, `data-kyse-on-`+event+`="`+action+`"`)
+	}
+	sort.Strings(want)
+
+	for _, c := range extensible {
+		t.Run(c.name, func(t *testing.T) {
+			for _, got := range c.render(props) {
+				root := rootTag(t, got)
+				for _, attribute := range want {
+					if !strings.Contains(root, attribute) {
+						t.Errorf("the outermost element does not carry %s:\n%s", attribute, root)
+					}
+				}
+			}
+		})
+	}
+}
+
+// TestEveryComponentCarriesTheTheme is the other field on ComponentProps that a
+// component can accept and ignore.
+//
+// A theme is a variation the stylesheet defines, selected by data-theme on the
+// element. So a component that takes the field and writes nothing is a component
+// the theme does not reach -- and it fails as a colour that did not change,
+// which reads as a stylesheet that is missing a rule rather than as markup that
+// is missing an attribute.
+//
+// The empty case is asserted too, and it is the sharper half. The rules a theme
+// varies are written for `:not([data-theme])` as well as for the named one, so
+// data-theme="" is not the absence of a theme: it turns the default rules off
+// and matches no named theme, leaving the element styled by neither.
+func TestEveryComponentCarriesTheTheme(t *testing.T) {
+	for _, c := range extensible {
+		t.Run(c.name, func(t *testing.T) {
+			for _, got := range c.render(components.ComponentProps{Theme: "kyse-probe-theme"}) {
+				if root := rootTag(t, got); !strings.Contains(root, `data-theme="kyse-probe-theme"`) {
+					t.Errorf("the outermost element does not carry the theme:\n%s", root)
+				}
+			}
+			for _, got := range c.render(components.ComponentProps{}) {
+				if root := rootTag(t, got); strings.Contains(root, `data-theme=`) {
+					t.Errorf("a component nobody gave a theme writes one anyway:\n%s", root)
+				}
+			}
+		})
+	}
+}
+
+// TestEveryComponentCarriesItsScopedStyleClass is the render half of a
+// two-module agreement, and the half nothing else here holds.
+//
+// A scoped block does not travel in the page: the policy is style-src 'self'
+// with no unsafe-inline, so what the element carries is a class, and the rules
+// are written into the project's stylesheet at build time under the hash of the
+// block's own text. The two sides never speak -- they agree because both hash
+// the same bytes -- so the element is where the agreement is kept or lost.
+//
+// A component that lost the class renders, passes every other test in this
+// package, and is simply unstyled. The rules would be in the stylesheet and
+// nothing on the page would match them, which is the shape of failure the whole
+// design of the block is built to avoid, and it is invisible from this side
+// without an assertion.
+//
+// The class comes from the type rather than from a literal here: a literal
+// would be a third place the hash is written down, and the point of the design
+// is that there is no table between the sides.
+func TestEveryComponentCarriesItsScopedStyleClass(t *testing.T) {
+	block := kyse.CSS("& { gap: 6px; }")
+	want := `class="`
+
+	for _, c := range extensible {
+		t.Run(c.name, func(t *testing.T) {
+			if block.Class() == "" {
+				t.Fatal("the block has no class, and this test is checking nothing")
+			}
+			for _, got := range c.render(components.ComponentProps{Style: block}) {
+				root := rootTag(t, got)
+				if !strings.Contains(root, want+block.Class()) && !strings.Contains(root, " "+block.Class()) {
+					t.Errorf("the outermost element does not carry the scoped block's class %q:\n%s",
+						block.Class(), root)
+				}
+			}
+			for _, got := range c.render(components.ComponentProps{}) {
+				if root := rootTag(t, got); strings.Contains(root, block.Class()) {
+					t.Errorf("a component with no scoped block carries its class anyway:\n%s", root)
+				}
+			}
+		})
+	}
+}
+
+// TestTheBridgeIsWrittenInOnePlace holds the emission down to ComponentProps.
+//
+// The attributes are one bag, RootAttrs, and every component writes that bag.
+// A component that spelled an attribute into its markup instead would work,
+// which is the problem: it would work for that component, at that name, and
+// leave the next one to be remembered rather than compiled. Thirty-seven copies
+// of one emission is thirty-seven places for the thirty-eighth to be forgotten.
+//
+// Both the sources and what they compile to are read, for the reason
+// TestNoComponentEvaluatesAnExpression reads both: the source is where the line
+// would be written, and the compiled file is what a browser is actually sent.
+func TestTheBridgeIsWrittenInOnePlace(t *testing.T) {
+	for _, pattern := range []string{"*.kyse.go", "*.go"} {
+		files, err := filepath.Glob(filepath.Join("..", "..", "components", pattern))
+		if err != nil {
+			t.Fatalf("reading the component directory: %v", err)
+		}
+		if len(files) == 0 {
+			t.Fatalf("no components/%s found; this test is checking nothing", pattern)
+		}
+
+		for _, file := range files {
+			base := filepath.Base(file)
+			// *.go matches *.kyse.go too, and component-props.go is where the
+			// attribute names are supposed to be written.
+			if (pattern == "*.go" && strings.HasSuffix(file, ".kyse.go")) || base == "component-props.go" {
+				continue
+			}
+			body, err := os.ReadFile(file)
+			if err != nil {
+				t.Fatalf("reading %s: %v", file, err)
+			}
+			for at, line := range strings.Split(string(body), "\n") {
+				if !strings.Contains(line, "data-kyse-") {
+					continue
+				}
+				t.Errorf("%s:%d writes a bridge attribute of its own:\n\t%s\n"+
+					"\tThe behaviour, the props and the events are the ComponentProps fields, and RootAttrs is what writes them.",
+					base, at+1, strings.TrimSpace(line))
+			}
+		}
+	}
+}
+
+// rootTag is the outermost tag of a rendering, which is the element every
+// component publishes as its root.
+func rootTag(t *testing.T, markup string) string {
+	t.Helper()
+
+	tag := firstTag.FindString(markup)
+	if tag == "" {
+		t.Fatalf("the rendering opens no tag:\n%s", markup)
+	}
+	return tag
+}
+
+var firstTag = regexp.MustCompile(`(?s)<[a-zA-Z][^>]*>`)
 
 // TestEveryExtensibleComponentIsInThisTable reads the component directory, the
 // way TestEveryComponentIsInTheTable does, so that migrating a component and
