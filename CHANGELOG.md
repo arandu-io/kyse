@@ -4,6 +4,10 @@
 
 **Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.15.2...v0.16.0
 
+## [v0.16.0](https://github.com/arandu-io/kyse/compare/v0.15.2...v0.16.0) - 2026-09-03
+
+**Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.15.2...v0.16.0
+
 ## [v0.15.2](https://github.com/arandu-io/kyse/compare/v0.15.1...v0.15.2) - 2026-09-02
 
 **Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.15.1...v0.15.2
