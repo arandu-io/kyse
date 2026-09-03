@@ -10,7 +10,19 @@ import "strings"
 // With no image it draws initials, which is the case that actually happens: an
 // application where everybody uploaded a photograph does not exist, and a broken
 // image icon beside every comment is worse than two letters.
-// It publishes one part, root, which is the circle itself.
+//
+// # What it publishes
+//
+// Three parts: root, the circle itself; image, the picture; and initials, the
+// two letters that stand in for one. The two inner ones never appear together --
+// which one is drawn is what ImageURL decides -- and they are published because
+// they are what a caller reaches for: how the picture is cropped and how heavy
+// the letters read are both decisions about this avatar rather than about every
+// avatar.
+//
+// The name beside the initials is not a part. It is the sentence a screen reader
+// is given in place of the letters, and its class is what keeps it out of the
+// circle; a handle for it would be a handle for breaking that.
 type AvatarProps struct {
 	// ComponentProps is the class, attributes and parts the caller adds.
 	ComponentProps
@@ -45,7 +57,7 @@ func (p AvatarProps) Initials() string {
 }
 
 // PartNames are the parts this component publishes.
-func (p AvatarProps) PartNames() []string { return []string{"root"} }
+func (p AvatarProps) PartNames() []string { return []string{"root", "image", "initials"} }
 @endgo
 
 <span
@@ -57,10 +69,25 @@ func (p AvatarProps) PartNames() []string { return []string{"root"} }
 	@endif
 >
 	@if(.ImageURL != "")
-		<img src="{{ .ImageURL }}" alt="{{ .Name }}">
+		<img
+			data-part="image"
+			@if(.PartClass("image") != "")
+				class="{{ .PartClass("image") }}"
+			@endif
+			src="{{ .ImageURL }}"
+			alt="{{ .Name }}"
+			@attributes(.PartAttrs("image"))
+		>
 	@endif
 	@if(.ImageURL == "")
-		<span aria-hidden="true">{{ .Initials() }}</span>
+		<span
+			data-part="initials"
+			@if(.PartClass("initials") != "")
+				class="{{ .PartClass("initials") }}"
+			@endif
+			aria-hidden="true"
+			@attributes(.PartAttrs("initials"))
+		>{{ .Initials() }}</span>
 		<span class="sr-only">{{ .Name }}</span>
 	@endif
 </span>

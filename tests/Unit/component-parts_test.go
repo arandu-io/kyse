@@ -42,7 +42,10 @@ var extensible = []struct {
 	{
 		"Avatar",
 		func(c components.ComponentProps) []string {
-			return []string{string(components.Avatar(components.AvatarProps{ComponentProps: c, Name: "Ada Lovelace"}))}
+			props := components.AvatarProps{ComponentProps: c, Name: "Ada Lovelace"}
+			withInitials := string(components.Avatar(props))
+			props.ImageURL = "/ada.png"
+			return []string{withInitials, string(components.Avatar(props))}
 		},
 		components.AvatarProps{}.PartNames,
 	},
