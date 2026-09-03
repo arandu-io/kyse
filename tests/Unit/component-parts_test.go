@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/arandu-io/kyse"
 	"github.com/arandu-io/kyse/components"
 )
 
@@ -647,6 +648,49 @@ func TestEveryComponentCarriesTheTheme(t *testing.T) {
 			for _, got := range c.render(components.ComponentProps{}) {
 				if root := rootTag(t, got); strings.Contains(root, `data-theme=`) {
 					t.Errorf("a component nobody gave a theme writes one anyway:\n%s", root)
+				}
+			}
+		})
+	}
+}
+
+// TestEveryComponentCarriesItsScopedStyleClass is the render half of a
+// two-module agreement, and the half nothing else here holds.
+//
+// A scoped block does not travel in the page: the policy is style-src 'self'
+// with no unsafe-inline, so what the element carries is a class, and the rules
+// are written into the project's stylesheet at build time under the hash of the
+// block's own text. The two sides never speak -- they agree because both hash
+// the same bytes -- so the element is where the agreement is kept or lost.
+//
+// A component that lost the class renders, passes every other test in this
+// package, and is simply unstyled. The rules would be in the stylesheet and
+// nothing on the page would match them, which is the shape of failure the whole
+// design of the block is built to avoid, and it is invisible from this side
+// without an assertion.
+//
+// The class comes from the type rather than from a literal here: a literal
+// would be a third place the hash is written down, and the point of the design
+// is that there is no table between the sides.
+func TestEveryComponentCarriesItsScopedStyleClass(t *testing.T) {
+	block := kyse.CSS("& { gap: 6px; }")
+	want := `class="`
+
+	for _, c := range extensible {
+		t.Run(c.name, func(t *testing.T) {
+			if block.Class() == "" {
+				t.Fatal("the block has no class, and this test is checking nothing")
+			}
+			for _, got := range c.render(components.ComponentProps{Style: block}) {
+				root := rootTag(t, got)
+				if !strings.Contains(root, want+block.Class()) && !strings.Contains(root, " "+block.Class()) {
+					t.Errorf("the outermost element does not carry the scoped block's class %q:\n%s",
+						block.Class(), root)
+				}
+			}
+			for _, got := range c.render(components.ComponentProps{}) {
+				if root := rootTag(t, got); strings.Contains(root, block.Class()) {
+					t.Errorf("a component with no scoped block carries its class anyway:\n%s", root)
 				}
 			}
 		})
