@@ -176,6 +176,19 @@ var extensible = []struct {
 		components.DrawerProps{}.PartNames,
 	},
 	{
+		"Password",
+		func(c components.ComponentProps) []string {
+			props := components.PasswordProps{
+				ComponentProps: c, Name: "password", Label: "Password",
+				Hint: "Pick something long.",
+			}
+			withHint := string(components.Password(props))
+			props.Page = page{errs: map[string]string{"password": "Required."}}
+			return []string{withHint, string(components.Password(props))}
+		},
+		components.PasswordProps{}.PartNames,
+	},
+	{
 		"Popover",
 		func(c components.ComponentProps) []string {
 			return []string{string(components.Popover(components.PopoverProps{

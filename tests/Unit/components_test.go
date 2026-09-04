@@ -74,6 +74,9 @@ func TestEveryComponentRenders(t *testing.T) {
 		{"Item", string(components.Item(components.ItemProps{Title: "A row", Description: "with a line under it"}))},
 		{"Kbd", string(components.Kbd(components.KbdProps{Keys: []string{"Ctrl", "K"}}))},
 		{"Label", string(components.Label(components.LabelProps{For: "email", Text: "Email"}))},
+		{"Password", string(components.Password(components.PasswordProps{
+			Name: "password", Label: "Password",
+		}))},
 		{"Popover", string(components.Popover(components.PopoverProps{
 			ID: "p", Label: "More", Content: "Something else.",
 		}))},
