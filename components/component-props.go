@@ -57,6 +57,10 @@ type ComponentProps struct {
 	// Class is added to the outermost element, after the component's own.
 	// Shorthand for Parts["root"].Class.
 	Class string
+	// Replace writes Class instead of adding to it, so the outermost element
+	// carries only what this call wrote. Shorthand for Parts["root"].Replace,
+	// and documented there.
+	Replace bool
 	// Attrs are written on the outermost element. Shorthand for
 	// Parts["root"].Attrs.
 	Attrs Attrs
@@ -100,6 +104,30 @@ type Parts map[string]PartProps
 type PartProps struct {
 	// Class is added to that element's own classes, after them.
 	Class string
+	// Replace writes Class instead of adding to it, so the element carries
+	// only what the caller wrote.
+	//
+	// # Why adding is not enough on its own
+	//
+	// Adding covers the common case and cannot cover all of it. A caller who
+	// wants one more unit of padding adds a class and wins on the cascade; a
+	// caller who wants the border gone, or the background gone, or the whole
+	// look of a control replaced, cannot -- there is no utility that unsets
+	// what another rule set, and a component class that draws a border will
+	// keep drawing it however many classes are written after it. The answer
+	// used to be to fight the specificity, which works until the stylesheet
+	// changes.
+	//
+	// So the caller says which they meant. Adding stays the default, because
+	// it is what almost every call wants and it costs the caller nothing.
+	//
+	// # What it does not take away
+	//
+	// The element, its data-part, its role and its ARIA. Those are what the
+	// component is; the class is what it looks like. A part that stopped being
+	// reachable, or a control that stopped announcing itself, would be a
+	// different component rather than the same one restyled.
+	Replace bool
 	// Attrs are written on that element.
 	Attrs Attrs
 }
@@ -137,7 +165,11 @@ type PartProps struct {
 // had to concatenate them first would be building a class list with a + before
 // handing it to the thing whose job is building class lists.
 func (c ComponentProps) PartClass(part string, own ...string) string {
-	return joinClasses(append(own, c.partProps(part).Class)...)
+	props := c.partProps(part)
+	if props.Replace {
+		return joinClasses(props.Class)
+	}
+	return joinClasses(append(own, props.Class)...)
 }
 
 // PartAttrs is the attributes to write on one part.
@@ -205,7 +237,14 @@ func (c ComponentProps) StyleClass() string { return c.Style.Class() }
 // is the one element the scoped block attaches to, and a component should not
 // have to remember to append it.
 func (c ComponentProps) RootClass(own ...string) string {
-	return joinClasses(append(own, c.partProps("root").Class, c.Style.Class())...)
+	props := c.partProps("root")
+	if props.Replace {
+		// The scoped block's class stays: it names CSS this call itself asked
+		// to be compiled, so dropping it would silently discard the Style the
+		// same caller wrote.
+		return joinClasses(props.Class, c.Style.Class())
+	}
+	return joinClasses(append(own, props.Class, c.Style.Class())...)
 }
 
 // partProps is what the caller wrote for one part, with root reading the
@@ -216,6 +255,9 @@ func (c ComponentProps) RootClass(own ...string) string {
 // answer is obviously right, so the one that reads as more deliberate wins.
 func (c ComponentProps) partProps(part string) PartProps {
 	p := c.Parts[part]
+	if part == "root" && c.Replace {
+		p.Replace = true
+	}
 	if part != "root" {
 		return p
 	}
