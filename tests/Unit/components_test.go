@@ -27,6 +27,52 @@ import (
 // exactly like a component that does not exist. Twenty-one were added at once
 // and it stayed green. TestEveryComponentIsInTheTable below is what makes the
 // claim true -- it reads the directory rather than this list.
+// TestEveryAddressIsAnAddress is the gate that was missing on the day every
+// sort link and every page link of the server path pointed at the same dead
+// URL.
+//
+// url.Values.Encode percent-encodes a templated value, so "{sort}" came out
+// "%7Bsort%7D" and the caller looking for "{sort}" found nothing. Nothing
+// noticed: the markup was well formed, the parts were reachable, and the only
+// symptom was that clicking a header did not reorder anything.
+func TestEveryAddressIsAnAddress(t *testing.T) {
+	table := components.DataTableProps{
+		ID: "invoices", URL: "/invoices?status=paid&scope=mine",
+		SearchName: "q", Query: "ada", SortKey: "total", SortDir: "desc",
+		Page: 3, Pages: 9, Total: 137, PageSize: 20,
+		Columns: []components.TableColumn{
+			{Label: "Number", Key: "number", Sortable: true},
+			{Label: "Total", Key: "total", Sortable: true, Align: "end"},
+		},
+		Rows: []components.TableRow{{Cells: []components.TableCell{{Text: "2026-114"}, {Text: "1.240,00"}}}},
+	}
+	html := string(components.DataTable(table))
+
+	if strings.Contains(html, "%7B") {
+		t.Error("a templated placeholder was percent-encoded, so nothing can substitute it")
+	}
+
+	found := regexp.MustCompile(`href="([^"]+)"`).FindAllStringSubmatch(html, -1)
+	if len(found) == 0 {
+		t.Fatal("no address was drawn at all")
+	}
+	for _, one := range found {
+		address := strings.ReplaceAll(one[1], "&amp;", "&")
+		if strings.Count(address, "?") != 1 {
+			t.Errorf("the address carries %d question marks, and a parser reads all but the first as value: %s",
+				strings.Count(address, "?"), address)
+		}
+		// The caller's own parameters are the only place a facet, a date range
+		// or a tenant scope can live, and a link that drops them drops the
+		// filter on the first click.
+		for _, kept := range []string{"status=paid", "scope=mine"} {
+			if !strings.Contains(address, kept) {
+				t.Errorf("the address dropped %q, which the caller put on URL: %s", kept, address)
+			}
+		}
+	}
+}
+
 func TestEveryComponentRenders(t *testing.T) {
 	for _, c := range []struct {
 		name string

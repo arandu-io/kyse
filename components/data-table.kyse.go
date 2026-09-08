@@ -4,7 +4,9 @@ package components
 
 import (
 	"net/url"
+	"sort"
 	"strconv"
+	"strings"
 )
 
 @go
@@ -89,6 +91,15 @@ type DataTableProps struct {
 	// It means nothing when the server is paging, because then the page it
 	// sent is the page.
 	PageSize int
+	// PageSizes are the counts the reader can switch between. Empty draws no
+	// chooser, which is right for a list whose length nobody argues with.
+	//
+	// It is a list and not a range because the numbers are a judgement about
+	// the rows: ten of something wide, a hundred of something narrow.
+	PageSizes []int
+	// Lines are the sentences this draws, so none of them is written in a
+	// script and all of them come from the application's own catalogue.
+	Lines DataTableLines
 	// Empty is what stands in when the list has nothing -- which on a searched
 	// list means "nothing matched" and not "nothing exists", so the message is
 	// the caller's to write.
@@ -103,6 +114,15 @@ type DataTableProps struct {
 	// SearchLabel is the box's name. Empty uses Label with "Search" before it.
 	SearchLabel string
 
+	// Navigable turns the table into a grid: one tab stop, and the arrow keys
+	// moving from cell to cell. See TableProps.Navigable.
+	Navigable bool
+	// BulkMethod is how the bulk bar submits. See TableProps.BulkMethod.
+	BulkMethod string
+	// Filters are the per-column facets, drawn beside the search. Their chosen
+	// values ride on every sort and page link, which is what keeps a facet
+	// from being thrown away by the next click.
+	Filters []DataTableFilter
 	// SortKey and SortDir are the ordering in force, and travel as "sort" and
 	// "dir".
 	SortKey string
@@ -112,6 +132,14 @@ type DataTableProps struct {
 	// there are. It travels as "page". Pages of zero or one draws no pager.
 	Page  int
 	Pages int
+	// Total is how many rows the whole list has, which on a windowed list only
+	// the server knows -- it is the count it already ran to work out Pages.
+	//
+	// Without it the range under the table cannot be true, so it is not drawn:
+	// Rows is one page, and saying "1 to 20 of 20" under page three of a
+	// hundred and thirty-seven is worse than saying nothing. A complete list
+	// needs none of this, because there the rows are the list.
+	Total int
 
 	// SelectName turns on per-row selection and is the field the checkboxes
 	// submit under. BulkActions are the controls revealed once something is
@@ -124,12 +152,77 @@ type DataTableProps struct {
 	// Token is the CSRF token for that form.
 	Token string
 
-	// ColumnsLabel, SelectedLabel and the pager's two ends are the sentences
-	// this draws. Each is documented on the component it belongs to.
+	// ColumnsLabel and SelectedLabel are the two sentences that belong to the
+	// table rather than to the list. Everything else this says is in Lines --
+	// two fields for one control is exactly the defect that puts a table into
+	// two languages.
 	ColumnsLabel  string
 	SelectedLabel string
-	PreviousLabel string
-	NextLabel     string
+}
+
+// DataTableLines are the sentences a data table says.
+//
+// They are a struct and not a scatter of Label fields because they belong
+// together: a table says all of them or none, and a project that translated
+// four of the seven has a table that speaks two languages. Every one carries
+// its placeholders, so a language that puts the number last can.
+//
+// Empty says the English underneath. That is a floor and not a default worth
+// shipping -- a table drawn from a catalogue says these in the language the
+// page is served in, which is the only place that knows it.
+type DataTableLines struct {
+	// Showing is the range under the table: "{from} to {to} of {total}".
+	Showing string
+	// PerPage labels the chooser beside it: "per page".
+	PerPage string
+	// NoResult is what the body says when the search matched nothing. It is
+	// not the same sentence as an empty list: the table has rows, and none of
+	// them is the answer.
+	NoResult string
+	// Previous and Next name the two ends of the pager for a screen reader.
+	// They are names and not text, because the controls are arrows.
+	Previous string
+	Next     string
+	// Page names one numbered control: "Page {n}". The digit alone is read as
+	// a digit, which in a row of them says nothing about what it does.
+	Page string
+	// SelectAll names the header checkbox, and Bulk the bar of actions.
+	SelectAll string
+	Bulk      string
+	// Ascending, Descending and Unsorted are what a sortable header is called
+	// in each of its three states: "{column}, sorted ascending". A header that
+	// only draws an arrow is a header a screen reader reads as a link.
+	Ascending  string
+	Descending string
+	Unsorted   string
+}
+
+// Sentences are the lines with the English floor filled in under whatever the
+// caller left empty.
+//
+// Filling them here rather than in the script is the whole point: the script
+// composes no sentence, so there is one place a translation lands and it is a
+// file the application already has.
+func (l DataTableLines) Sentences() map[string]any {
+	fallback := func(given, floor string) string {
+		if given != "" {
+			return given
+		}
+		return floor
+	}
+	return map[string]any{
+		"showing":    fallback(l.Showing, "{from} to {to} of {total}"),
+		"perPage":    fallback(l.PerPage, "per page"),
+		"noResult":   fallback(l.NoResult, "Nothing matched"),
+		"previous":   fallback(l.Previous, "Previous page"),
+		"next":       fallback(l.Next, "Next page"),
+		"page":       fallback(l.Page, "Page {n}"),
+		"ascending":  fallback(l.Ascending, "{column}, sorted ascending"),
+		"descending": fallback(l.Descending, "{column}, sorted descending"),
+		"unsorted":   fallback(l.Unsorted, "{column}, not sorted"),
+		"selectAll":  fallback(l.SelectAll, "Select all rows"),
+		"bulk":       fallback(l.Bulk, "Bulk actions"),
+	}
 }
 
 // Address is URL with a query string built from everything except what the
@@ -139,31 +232,82 @@ type DataTableProps struct {
 // each other away: a sort link carries the search, a page link carries both,
 // and a new search drops the page rather than keeping a number that no longer
 // points anywhere.
+//
+// # Two things it has to do that are easy to miss
+//
+// It seeds from whatever URL already carries. That is the only place a caller
+// can put a parameter this component does not model -- a status facet, a date
+// range, a tenant scope -- and rebuilding the query from four known keys would
+// drop it on the first click. Parsing also means one "?" rather than a second
+// one appended to a URL that had one, which every parser reads as one
+// parameter whose value is the rest of the query.
+//
+// And it writes the templated pairs by hand, after the encoding. A value of
+// "{sort}" through url.Values.Encode comes out "%7Bsort%7D", and the caller
+// looking for "{sort}" then finds nothing -- every header and every page
+// pointing at one dead address. That was the bug this comment exists to keep
+// from coming back.
 func (p DataTableProps) Address(changes map[string]string) string {
-	values := url.Values{}
-	if p.SearchName != "" && p.Query != "" {
-		values.Set(p.SearchName, p.Query)
+	base, err := url.Parse(p.URL)
+	if err != nil {
+		base = &url.URL{Path: p.URL}
 	}
-	if p.SortKey != "" {
-		values.Set("sort", p.SortKey)
-		if p.SortDir != "" {
-			values.Set("dir", p.SortDir)
+	values := base.Query()
+
+	set := func(key, value string) {
+		if value == "" {
+			values.Del(key)
+			return
 		}
+		values.Set(key, value)
+	}
+	if p.SearchName != "" {
+		set(p.SearchName, p.Query)
+	}
+	set("sort", p.SortKey)
+	if p.SortKey != "" {
+		set("dir", p.SortDir)
 	}
 	if p.Page > 1 {
-		values.Set("page", strconv.Itoa(p.Page))
+		set("page", strconv.Itoa(p.Page))
 	}
+	for _, filter := range p.Filters {
+		values.Del(filter.Key)
+		for _, chosen := range filter.Selected {
+			values.Add(filter.Key, chosen)
+		}
+	}
+
+	// A templated value is held out of the encoder and appended verbatim.
+	templated := make([][2]string, 0, len(changes))
 	for key, value := range changes {
 		if value == "" {
 			values.Del(key)
 			continue
 		}
+		if strings.HasPrefix(value, "{") && strings.HasSuffix(value, "}") {
+			values.Del(key)
+			templated = append(templated, [2]string{key, value})
+			continue
+		}
 		values.Set(key, value)
 	}
-	if len(values) == 0 {
-		return p.URL
+	sort.Slice(templated, func(a, b int) bool { return templated[a][0] < templated[b][0] })
+
+	query := values.Encode()
+	for _, pair := range templated {
+		if query != "" {
+			query += "&"
+		}
+		query += pair[0] + "=" + pair[1]
 	}
-	return p.URL + "?" + values.Encode()
+
+	base.RawQuery = ""
+	address := base.String()
+	if query == "" {
+		return address
+	}
+	return address + "?" + query
 }
 
 // SortURL is the template the table builds its header links from. The page is
@@ -174,10 +318,41 @@ func (p DataTableProps) SortURL() string {
 	return p.Address(map[string]string{"sort": "{sort}", "dir": "{dir}", "page": ""})
 }
 
-// PageURL is the template the pager builds from. It keeps the search and the
-// order, because a page of a filtered, sorted list is a page of that list.
+// PageURL is the template the pager builds from. It keeps the search, the
+// order and every facet, because a page of a filtered, sorted list is a page
+// of that list.
 func (p DataTableProps) PageURL() string {
 	return p.Address(map[string]string{"page": "{page}"})
+}
+
+// DataTableFilter is one per-column facet, drawn beside the search.
+//
+// It is typed rather than a slot of markup, because a slot would be a place to
+// put anything, and this component's whole claim is that every control's state
+// survives every other control -- which it can only promise about state it
+// knows the shape of.
+type DataTableFilter struct {
+	// Key is the parameter the chosen values travel under.
+	Key string
+	// Label names the control.
+	Label string
+	// Options are what can be chosen.
+	Options []SelectOption
+	// Selected are the values in force, which every link then carries.
+	Selected []string
+}
+
+// Filtered is whether any facet is drawn.
+func (p DataTableProps) Filtered() bool { return len(p.Filters) > 0 }
+
+// Chosen is whether one option of a facet is in force.
+func (p DataTableProps) Chosen(filter DataTableFilter, option SelectOption) bool {
+	for _, value := range filter.Selected {
+		if value == option.Value {
+			return true
+		}
+	}
+	return false
 }
 
 // Target is what every control swaps: this region, by id.
@@ -243,12 +418,32 @@ func (p DataTableProps) Grid() TableProps {
 		column.Hideable = false
 		columns = append(columns, column)
 	}
+	rows := p.Rows
+	if p.Complete && p.PageSize > 0 {
+		// The window is marked here so the first paint is already the page.
+		from, to, _ := p.window()
+		rows = make([]TableRow, 0, len(p.Rows))
+		for at, row := range p.Rows {
+			row.Hidden = at+1 < from || at+1 > to
+			rows = append(rows, row)
+		}
+	}
+
 	return TableProps{
-		ComponentProps: ComponentProps{Parts: p.Parts},
-		Caption:        p.Caption,
-		Columns:        columns,
-		Rows:           p.Rows,
-		Empty:          p.Empty,
+		ComponentProps:  ComponentProps{Parts: p.Parts},
+		Composed:        true,
+		ID:              p.ID,
+		Navigable:       p.Navigable,
+		BulkMethod:      p.BulkMethod,
+		SelectAllLabel:  p.Lines.SelectAll,
+		BulkLabel:       p.Lines.Bulk,
+		AscendingLabel:  p.Lines.Ascending,
+		DescendingLabel: p.Lines.Descending,
+		UnsortedLabel:   p.Lines.Unsorted,
+		Caption:         p.Caption,
+		Columns:         columns,
+		Rows:            rows,
+		Empty:           p.Empty,
 		SortKey:        p.SortKey,
 		SortDir:        p.SortDir,
 		SortURL:        p.SortURL(),
@@ -257,9 +452,34 @@ func (p DataTableProps) Grid() TableProps {
 		BulkActions:    p.BulkActions,
 		BulkAction:     p.BulkAction,
 		Token:          p.Token,
-		HxTarget:       p.Target(),
-		HxSwap:         "outerHTML",
+		HxTarget:       p.swapTarget(),
+		HxSwap:         p.swapKind(),
 	}
+}
+
+// swapTarget and swapKind are empty on a complete list, and that is the whole
+// of what keeps one gesture from running two engines.
+//
+// preventDefault does not cancel HTMX: its listener sits on the link itself,
+// so a header that carries hx-get fires a request the browser was told not to
+// follow, and the outerHTML swap then hands back the server's region -- wiping
+// the page, the size, the filter, the hidden columns and the selection the
+// browser had just worked out. href, action and method stay either way, so the
+// path with no script is unchanged.
+func (p DataTableProps) swapTarget() string {
+	if p.Complete {
+		return ""
+	}
+	return p.Target()
+}
+
+// swapKind is how the region is replaced, and nothing when the browser is the
+// one working the rows.
+func (p DataTableProps) swapKind() string {
+	if p.Complete {
+		return ""
+	}
+	return "outerHTML"
 }
 
 // Pager is the pagination this draws, or the zero value when there is one page.
@@ -270,10 +490,11 @@ func (p DataTableProps) Pager() PaginationProps {
 		Pages:          p.Sheets(),
 		URL:            p.PageURL(),
 		Label:          p.Label,
-		PreviousLabel:  p.PreviousLabel,
-		NextLabel:      p.NextLabel,
-		HxTarget:       p.Target(),
-		HxSwap:         "outerHTML",
+		PreviousLabel:  p.Lines.Previous,
+		NextLabel:      p.Lines.Next,
+		PageLabel:      p.Lines.Page,
+		HxTarget:       p.swapTarget(),
+		HxSwap:         p.swapKind(),
 	}
 }
 
@@ -305,25 +526,106 @@ func (p DataTableProps) SearchAddress() string {
 // searching, the ordering or the paging needs a script -- they are addresses.
 func (p DataTableProps) RootAttrs() map[string]string {
 	if p.Behavior.Name == "" {
-		p.Behavior = Behavior{Name: TableBehavior, Props: map[string]any{
-			"selected": p.SelectedLabel,
-			"complete": p.Complete,
-			"pageSize": p.PageSize,
-			"search":   p.SearchName,
-			"empty":    p.Empty.Title,
-		}}
+		props := p.Lines.Sentences()
+		props["selected"] = p.SelectedLabel
+		props["complete"] = p.Complete
+		props["pageSize"] = p.PageSize
+		p.Behavior = Behavior{Name: TableBehavior, Props: props}
 	}
 	return p.ComponentProps.RootAttrs()
 }
+
+// Sizes are the counts the chooser offers.
+func (p DataTableProps) Sizes() []int { return p.PageSizes }
+
+// Chooses is whether the chooser is drawn: only on a complete list, because
+// only there can the count change without asking the server. A windowed list
+// is paged by the endpoint, and the size is the endpoint's to decide.
+func (p DataTableProps) Chooses() bool { return p.Complete && len(p.PageSizes) > 0 }
+
+// PerPageText is the label beside the chooser.
+func (p DataTableProps) PerPageText() string {
+	if p.Lines.PerPage != "" {
+		return p.Lines.PerPage
+	}
+	return "per page"
+}
+
+// Showing is the range under the table, drawn by the server for the first
+// page and rewritten by the behaviour after that -- from the same sentence,
+// so the two cannot say it differently.
+func (p DataTableProps) Showing() string {
+	sentence := p.Lines.Showing
+	if sentence == "" {
+		sentence = "{from} to {to} of {total}"
+	}
+	from, to, total := p.window()
+	sentence = strings.ReplaceAll(sentence, "{from}", strconv.Itoa(from))
+	sentence = strings.ReplaceAll(sentence, "{to}", strconv.Itoa(to))
+	return strings.ReplaceAll(sentence, "{total}", strconv.Itoa(total))
+}
+
+// window is the range the table is showing and the size of the list it is a
+// window onto.
+func (p DataTableProps) window() (int, int, int) {
+	total := p.Total
+	if p.Complete {
+		total = len(p.Rows)
+	}
+	if total == 0 {
+		return 0, 0, 0
+	}
+	at := p.Page
+	if at < 1 {
+		at = 1
+	}
+	if p.PageSize > 0 {
+		from := (at-1)*p.PageSize + 1
+		to := from + p.PageSize - 1
+		if to > total {
+			to = total
+		}
+		return from, to, total
+	}
+	if p.Complete {
+		return 1, total, total
+	}
+	// A windowed list with no page size still knows where it is from the rows
+	// it was handed.
+	from := (at-1)*len(p.Rows) + 1
+	return from, from + len(p.Rows) - 1, total
+}
+
+// Ranged is whether the range can be stated truthfully. A windowed list that
+// was not told the total cannot, and draws nothing rather than a number that
+// is silently the page size.
+func (p DataTableProps) Ranged() bool { return p.Complete || p.Total > 0 }
 
 // PartNames are the parts this component publishes.
 func (p DataTableProps) PartNames() []string {
 	// The table's names and the pager's are published here as well, because
 	// this draws both and the parts a caller can reach are the parts on the
 	// page -- not the parts this file happens to write itself.
-	names := []string{"root", "toolbar", "search", "indicator", "columns", "toggle", "pagination"}
+	names := []string{
+		"root", "toolbar", "search", "indicator", "columns", "toggle",
+		"pagination", "sizes", "showing", "footer", "filter",
+	}
 	names = append(names, TableProps{}.PartNames()[1:]...)
-	return append(names, PaginationProps{}.PartNames()[1:]...)
+	names = append(names, PaginationProps{}.PartNames()[1:]...)
+
+	// Deduplicated, because this composes two components that publish some of
+	// the same names and a list that repeats one is a list nobody can trust to
+	// be the set.
+	seen := map[string]bool{}
+	unique := names[:0]
+	for _, name := range names {
+		if seen[name] {
+			continue
+		}
+		seen[name] = true
+		unique = append(unique, name)
+	}
+	return unique
 }
 @endgo
 
@@ -343,7 +645,7 @@ func (p DataTableProps) PartNames() []string {
 	@endif
 	@attributes(.RootAttrs())
 >
-	@if(.Searchable() || .Hideable())
+	@if(.Searchable() || .Hideable() || .Chooses())
 		<div
 			data-part="toolbar"
 			class="{{ .PartClass("toolbar", "data-table-toolbar") }}"
@@ -354,7 +656,7 @@ func (p DataTableProps) PartNames() []string {
 				     comes back with the results in it. HTMX takes the typing
 				     before that ever happens. --}}
 				<form
-					class="data-table-search"
+					class="data-table-controls"
 					action="{{ .SearchAddress() }}"
 					method="get"
 					role="search"
@@ -368,12 +670,14 @@ func (p DataTableProps) PartNames() []string {
 						name="{{ .SearchName }}"
 						value="{{ .Query }}"
 						autocomplete="off"
-						hx-get="{{ .SearchAddress() }}"
-						hx-trigger="{{ .SearchTrigger() }}"
-						hx-target="{{ .Target() }}"
-						hx-swap="outerHTML"
-						hx-sync="this:replace"
-						hx-indicator="#{{ .ID }}-indicator"
+						@if(!.Complete)
+							hx-get="{{ .SearchAddress() }}"
+							hx-trigger="{{ .SearchTrigger() }}"
+							hx-target="{{ .Target() }}"
+							hx-swap="outerHTML"
+							hx-sync="this:replace"
+							hx-indicator="#{{ .ID }}-indicator"
+						@endif
 						@attributes(.PartAttrs("search"))
 						@if(.SearchPlaceholder != "")
 							placeholder="{{ .SearchPlaceholder }}"
@@ -387,6 +691,60 @@ func (p DataTableProps) PartNames() []string {
 						@attributes(.PartAttrs("indicator"))
 					></span>
 				</form>
+			@endif
+
+			@if(.Filtered())
+				{{-- A facet is a native multiple select inside the same GET form
+				     as the search, so choosing narrows the list with no script
+				     and the chosen values ride on every sort and page link --
+				     which is what stops the next click from throwing the facet
+				     away. --}}
+				@foreach(.Filters as filter)
+					<label class="data-table-facet">
+						<span class="sr-only">{{ filter.Label }}</span>
+						<select
+							data-part="filter"
+							class="{{ .PartClass("filter", "select") }}"
+							name="{{ filter.Key }}"
+							multiple
+							size="1"
+							@attributes(.PartAttrs("filter"))
+						>
+							@foreach(filter.Options as option)
+								<option
+									value="{{ option.Value }}"
+									@if(.Chosen(filter, option))
+										selected
+									@endif
+								>{{ option.Label }}</option>
+							@endforeach
+						</select>
+					</label>
+				@endforeach
+			@endif
+
+			@if(.Chooses())
+				{{-- A native select: the browser draws the list, the keyboard
+				     opens it, and typing jumps within it. A menu of numbers
+				     would be all three written again. --}}
+				<label class="data-table-sizes">
+					<select
+						data-part="sizes"
+						class="{{ .PartClass("sizes", "select") }}"
+						data-page-size
+						@attributes(.PartAttrs("sizes"))
+					>
+						@foreach(.Sizes() as size)
+							<option
+								value="{{ size }}"
+								@if(size == .PageSize)
+									selected
+								@endif
+							>{{ size }}</option>
+						@endforeach
+					</select>
+					<span>{{ .PerPageText() }}</span>
+				</label>
 			@endif
 
 			@if(.Hideable())
@@ -428,11 +786,33 @@ func (p DataTableProps) PartNames() []string {
 
 	{!! Table(.Grid()) !!}
 
-	@if(.Paged())
+	{{-- The range and the pager sit together, because between them they say
+	     one thing: where in the list the reader is. The range is a live region
+	     so a page change is announced -- rows changing under somebody is
+	     otherwise silent. --}}
+	@if(.Paged() || .Complete || .Searchable() || .Chooses())
 		<div
-			data-part="pagination"
-			class="{{ .PartClass("pagination", "data-table-pagination") }}"
-			@attributes(.PartAttrs("pagination"))
-		>{!! Pagination(.Pager()) !!}</div>
+			data-part="footer"
+			class="{{ .PartClass("footer", "data-table-footer") }}"
+			@attributes(.PartAttrs("footer"))
+		>
+			@if(.Ranged())
+			<p
+				data-part="showing"
+				class="{{ .PartClass("showing", "data-table-showing") }}"
+				role="status"
+				aria-live="polite"
+				@attributes(.PartAttrs("showing"))
+			>{{ .Showing() }}</p>
+			@endif
+
+			@if(.Paged())
+				<div
+					data-part="pagination"
+					class="{{ .PartClass("pagination", "data-table-pagination") }}"
+					@attributes(.PartAttrs("pagination"))
+				>{!! Pagination(.Pager()) !!}</div>
+			@endif
+		</div>
 	@endif
 </div>

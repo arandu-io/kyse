@@ -101,6 +101,24 @@ type TableProps struct {
 	HxTarget string
 	HxSwap   string
 
+	// Composed says this table is drawn inside another component, which has
+	// already mounted the behaviour and owns the region.
+	//
+	// Without it the bridge is written twice -- once on the wrapper and once
+	// here -- so the count runs twice per click and the live region is
+	// rewritten twice, which a screen reader reads out twice.
+	Composed bool
+	// ID is what the bulk form and its checkboxes hang their ids off. Empty
+	// falls back to SelectName, which two tables on one page share -- and then
+	// each checkbox points at whichever form the browser found first.
+	ID string
+	// AscendingLabel, DescendingLabel and UnsortedLabel are what a sortable
+	// header is called in each of its three states: "{column}, sorted
+	// ascending". A header that only draws an arrow is a header a screen
+	// reader reads as a link.
+	AscendingLabel  string
+	DescendingLabel string
+	UnsortedLabel   string
 	// Token is the CSRF token for the bulk form. A form that changes something
 	// and carries none is refused by the framework, which is the intended
 	// outcome and a confusing one to debug -- so it is a field here rather
@@ -167,6 +185,14 @@ type TableRow struct {
 	// Expanded is whether a branch row is open, and means nothing on a row
 	// with no children.
 	Expanded bool
+	// Hidden keeps the row out of the page without taking it off it, for a
+	// list the browser pages: the server draws every row and marks the ones
+	// outside the window, so the first paint is already right.
+	//
+	// Drawing them all visible and letting a script hide them afterwards is a
+	// first frame that lies, and a page with no script that contradicts its
+	// own footer.
+	Hidden bool
 	// Branch is whether the row has children under it. It is separate from
 	// Expanded because a leaf has no expanded state at all -- which is what
 	// the attribute being absent means, and is different from it being false.
@@ -270,14 +296,6 @@ func (p TableProps) Role() string {
 	return "grid"
 }
 
-// FirstRow is the index of the row holding the tab stop on a navigable table.
-func (p TableProps) FirstRow() int {
-	if len(p.Rows) == 0 {
-		return -1
-	}
-	return 0
-}
-
 // Sortable is whether any column offers to order the table, which is what
 // decides whether the header cells are controls at all.
 func (p TableProps) Sortable() bool {
@@ -304,7 +322,7 @@ func (p TableProps) SortedBy(column TableColumn) bool {
 // claim that the column could be sorted and is not, which on a column of
 // avatars is a promise nobody can keep.
 func (p TableProps) Order(column TableColumn) string {
-	if !column.Sortable || column.Key == "" {
+	if !column.Sortable || column.Key == "" || !p.Sortable() {
 		return ""
 	}
 	if !p.SortedBy(column) {
@@ -401,12 +419,40 @@ const TableBehavior = "table"
 // browser can -- keep the count in step as boxes are ticked, switch a column
 // off, and move a cell at a time on a navigable table.
 func (p TableProps) RootAttrs() map[string]string {
-	if p.Behavior.Name == "" && (p.Selectable() || p.Hideable() || p.Navigable) {
+	if p.Behavior.Name == "" && !p.Composed && (p.Selectable() || p.Hideable() || p.Navigable) {
 		p.Behavior = Behavior{Name: TableBehavior, Props: map[string]any{
 			"selected": p.SelectedLabel,
 		}}
 	}
 	return p.ComponentProps.RootAttrs()
+}
+
+// FormID is the id of the bulk form, and what a checkbox points at.
+func (p TableProps) FormID() string {
+	if p.ID != "" {
+		return p.ID + "-bulk"
+	}
+	return p.SelectName + "-bulk"
+}
+
+// Submits is whether a checkbox names a form at all. Without bulk actions
+// there is no form, and an attribute naming an element that does not exist
+// takes the checkbox out of every form instead of putting it in one.
+func (p TableProps) Submits() bool { return p.Selectable() && len(p.BulkActions) > 0 }
+
+// SortName is what a sortable header is called, in the state it is in.
+func (p TableProps) SortName(column TableColumn) string {
+	sentence := p.UnsortedLabel
+	switch p.Order(column) {
+	case "ascending":
+		sentence = p.AscendingLabel
+	case "descending":
+		sentence = p.DescendingLabel
+	}
+	if sentence == "" {
+		return ""
+	}
+	return strings.ReplaceAll(sentence, "{column}", column.Label)
 }
 
 // PartNames are the parts this component publishes.
@@ -422,8 +468,13 @@ func (p TableProps) PartNames() []string {
 	{{-- A form only when there is something to submit. Wrapping every table in
 	     one would nest a form inside whatever form the page already has, which
 	     no browser accepts and which silently drops the inner one. --}}
+	{{-- A composed table writes no root part: the component that draws it owns
+	     the region, and two elements answering to the same name is a name that
+	     reaches whichever the caller did not mean. --}}
 	<div
-		data-part="root"
+		@if(!.Composed)
+			data-part="root"
+		@endif
 		class="{{ .RootClass("table-container") }}"
 		@attributes(.RootAttrs())
 		@if(.Selectable())
@@ -486,7 +537,7 @@ func (p TableProps) PartNames() []string {
 			<form
 				data-part="bulk"
 				class="{{ .PartClass("bulk", "table-bulk") }}"
-				id="{{ .SelectName }}-bulk"
+				id="{{ .FormID() }}"
 				method="{{ .PostMethod() }}"
 				aria-label="{{ .BulkName() }}"
 				@attributes(.PartAttrs("bulk"))
@@ -569,6 +620,9 @@ func (p TableProps) PartNames() []string {
 									class="{{ .PartClass("sort", "table-sort") }}"
 									href="{{ .SortHref(column) }}"
 									@attributes(.PartAttrs("sort"))
+									@if(.SortName(column) != "")
+										aria-label="{{ .SortName(column) }}"
+									@endif
 									@if(.HxTarget != "")
 										hx-get="{{ .SortHref(column) }}"
 										hx-target="{{ .HxTarget }}"
@@ -593,6 +647,9 @@ func (p TableProps) PartNames() []string {
 							class="{{ .PartClass("row") }}"
 						@endif
 						@attributes(.PartAttrs("row"))
+						@if(row.Hidden)
+							hidden
+						@endif
 						@if(row.Level > 0)
 							aria-level="{{ row.Level }}"
 							data-level="{{ row.Level }}"
@@ -621,7 +678,12 @@ func (p TableProps) PartNames() []string {
 									type="checkbox"
 									name="{{ .SelectName }}"
 									value="{{ row.Key }}"
-									form="{{ .SelectName }}-bulk"
+									@if(.Submits())
+										form="{{ .FormID() }}"
+									@endif
+									@if(row.Hidden)
+										disabled
+									@endif
 									aria-label="{{ .RowName(row) }}"
 									@attributes(.PartAttrs("select"))
 									@if(row.Selected)

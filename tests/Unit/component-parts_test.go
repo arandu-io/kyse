@@ -727,21 +727,46 @@ var extensible = []struct {
 	{
 		"DataTable",
 		func(c components.ComponentProps) []string {
-			return []string{string(components.DataTable(components.DataTableProps{
+			props := components.DataTableProps{
 				ComponentProps: c, ID: "invoices", Label: "Invoices", URL: "/invoices",
-				Caption:    "Invoices, most recent first",
+				Caption:  "Invoices, most recent first",
+				Complete: true, PageSize: 1, PageSizes: []int{1, 2},
+				Lines: components.DataTableLines{
+					Showing: "{from} to {to} of {total}", PerPage: "per page",
+				},
 				SearchName: "q", Query: "ada", SortKey: "total", SortDir: "desc",
-				Page: 2, Pages: 9, SelectName: "ids", Token: "csrf",
+				Filters: []components.DataTableFilter{{
+					Key: "status", Label: "Status", Selected: []string{"paid"},
+					Options: []components.SelectOption{{Label: "Paid", Value: "paid"}, {Label: "Open", Value: "open"}},
+				}},
+				Page: 1, SelectName: "ids", Token: "csrf",
 				BulkActions: []components.ButtonProps{{Label: "Archive"}},
 				Columns: []components.TableColumn{
 					{Label: "Number", Key: "number", Sortable: true, Hideable: true},
 					{Label: "Total", Key: "total", Align: "end", Sortable: true},
 				},
-				Rows: []components.TableRow{{
-					Key: "114", Label: "Select 2026-114",
-					Cells: []components.TableCell{{Text: "2026-114"}, {Text: "1.240,00"}},
-				}},
-			}))}
+				Rows: []components.TableRow{
+					{Key: "114", Label: "Select 2026-114", Cells: []components.TableCell{
+						{Text: "2026-114"}, {Text: "1.240,00", SortValue: "1240.00"}}},
+					{Key: "115", Label: "Select 2026-115", Cells: []components.TableCell{
+						{Text: "2026-115"}, {Text: "860,00", SortValue: "860.00"}}},
+					{Key: "116", Label: "Select 2026-116", Cells: []components.TableCell{
+						{Text: "2026-116"}, {Text: "2.410,00", SortValue: "2410.00"}}},
+				},
+			}
+			// The first page draws next and the last draws previous, so no
+			// single rendering shows both ends of the pager. The third is a
+			// long list, where the pager collapses its middle into an
+			// ellipsis -- which a three-page list never has.
+			first := string(components.DataTable(props))
+			props.Page = 3
+			last := string(components.DataTable(props))
+
+			long := props
+			long.Complete = false
+			long.Page = 12
+			long.Pages = 40
+			return []string{first, last, string(components.DataTable(long))}
 		},
 		components.DataTableProps{}.PartNames,
 	},
