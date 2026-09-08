@@ -189,6 +189,18 @@ var extensible = []struct {
 		components.PasswordProps{}.PartNames,
 	},
 	{
+		"OneTimeCode",
+		func(c components.ComponentProps) []string {
+			props := components.OneTimeCodeProps{
+				ComponentProps: c, Name: "email_code", Label: "Email code",
+			}
+			plain := string(components.OneTimeCode(props))
+			props.Page = page{errs: map[string]string{"email_code": "Required."}}
+			return []string{plain, string(components.OneTimeCode(props))}
+		},
+		components.OneTimeCodeProps{}.PartNames,
+	},
+	{
 		"Masked",
 		func(c components.ComponentProps) []string {
 			props := components.MaskedProps{
