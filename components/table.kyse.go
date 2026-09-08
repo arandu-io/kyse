@@ -178,6 +178,20 @@ type TableCell struct {
 	// Text is what the cell says. It is escaped on the way out, and it is what
 	// almost every cell is.
 	Text string
+	// SortValue is what a browser compares this cell by, when the browser is
+	// the one doing the ordering.
+	//
+	// It exists because what a cell reads as and what it sorts as are not the
+	// same string, and this component refuses to format: "1.240,00" sorts
+	// before "860,00" as text and after it as money, and "8 de setembro"
+	// sorts nowhere at all. So the server hands over the comparable form --
+	// "1240.00", "2026-09-08" -- and keeps the readable one in Text.
+	//
+	// A value that parses as a number is compared as one; everything else is
+	// compared as text, which for an ISO date is the same order. Empty falls
+	// back to the cell's own text, which is right for a name and wrong for
+	// everything with a unit in it.
+	SortValue string
 	// HTML is markup, drawn in place of Text whenever it is set.
 	//
 	// Nothing here escapes it, so what goes in is what the page gets, and the
@@ -626,6 +640,9 @@ func (p TableProps) PartNames() []string {
 								@endif
 								@if(.ColumnHidden(i))
 									hidden
+								@endif
+								@if(row.Cells[i].SortValue != "")
+									data-sort-value="{{ row.Cells[i].SortValue }}"
 								@endif
 							>
 								@if(row.Cells[i].HTML != "")
