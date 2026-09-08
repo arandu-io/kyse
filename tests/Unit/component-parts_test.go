@@ -189,6 +189,19 @@ var extensible = []struct {
 		components.PasswordProps{}.PartNames,
 	},
 	{
+		"Masked",
+		func(c components.ComponentProps) []string {
+			props := components.MaskedProps{
+				ComponentProps: c, Name: "postcode", Pattern: "00000-000",
+				Value: "01310100",
+			}
+			plain := string(components.Masked(props))
+			props.Page = page{errs: map[string]string{"postcode": "Required."}}
+			return []string{plain, string(components.Masked(props))}
+		},
+		components.MaskedProps{}.PartNames,
+	},
+	{
 		"Popover",
 		func(c components.ComponentProps) []string {
 			return []string{string(components.Popover(components.PopoverProps{
