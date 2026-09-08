@@ -28,6 +28,63 @@ func TestTheCallersClassIsAddedAndNotSubstituted(t *testing.T) {
 // TestAClassIsNotWrittenTwice covers the caller who repeats what the component
 // already draws with. Two rules under one name is the same page and an
 // unreadable attribute.
+// TestReplaceLeavesOnlyTheCallersClass is the other half of the bargain
+// TestTheCallersClassIsAddedAndNotSubstituted describes.
+//
+// Adding covers almost every call and cannot cover all of it: there is no
+// utility that unsets a border another rule set, so a caller who wants the
+// component's look gone had no way to say so except to out-specify the
+// stylesheet -- which works until the stylesheet changes. Replace says it
+// instead.
+func TestReplaceLeavesOnlyTheCallersClass(t *testing.T) {
+	own := string(components.Button(components.ButtonProps{Label: "Save"}))
+	if !strings.Contains(own, `class="btn"`) {
+		t.Fatalf("the component stopped drawing its own class:\n%s", own)
+	}
+
+	added := string(components.Button(components.ButtonProps{
+		Label:          "Save",
+		ComponentProps: components.ComponentProps{Class: "w-full"},
+	}))
+	if !strings.Contains(added, "btn") || !strings.Contains(added, "w-full") {
+		t.Errorf("adding lost one of the two:\n%s", added)
+	}
+
+	replaced := string(components.Button(components.ButtonProps{
+		Label:          "Save",
+		ComponentProps: components.ComponentProps{Class: "mine", Replace: true},
+	}))
+	if strings.Contains(replaced, "btn") {
+		t.Errorf("Replace kept the component's own class:\n%s", replaced)
+	}
+	if !strings.Contains(replaced, `class="mine"`) {
+		t.Errorf("Replace lost the caller's class:\n%s", replaced)
+	}
+
+	// A part is replaceable on its own, without taking the rest with it.
+	part := string(components.Password(components.PasswordProps{
+		Name: "password", Label: "Password",
+		ComponentProps: components.ComponentProps{
+			Parts: components.Parts{"reveal": {Class: "bare", Replace: true}},
+		},
+	}))
+	if !strings.Contains(part, `class="bare"`) {
+		t.Errorf("the part kept nothing the caller wrote:\n%s", part)
+	}
+	if !strings.Contains(part, `class="field password"`) {
+		t.Error("replacing one part took the root's own class with it")
+	}
+
+	// What Replace must never take away: the element is still reachable and
+	// still says what it is.
+	if !strings.Contains(part, `data-part="reveal"`) {
+		t.Error("Replace removed the part name, so nothing can reach the element at all")
+	}
+	if !strings.Contains(part, "aria-pressed") {
+		t.Error("Replace removed the ARIA, which makes it a different component rather than a restyled one")
+	}
+}
+
 func TestAClassIsNotWrittenTwice(t *testing.T) {
 	c := components.ComponentProps{Class: "btn p-8 p-8"}
 
