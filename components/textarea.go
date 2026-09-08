@@ -42,6 +42,23 @@ type TextareaProps struct {
 	Rows int
 	// Required marks the box required.
 	Required bool
+	// Autosize grows and shrinks the box to fit what is in it, with Rows as
+	// the floor.
+	//
+	// It is one CSS declaration -- field-sizing: content -- and not the loop
+	// that reads scrollHeight and writes a height back on every keystroke.
+	// That loop is what this replaces: it forces layout twice per character,
+	// and it is wrong the first time a font loads late or the box is drawn
+	// while hidden. A browser without the declaration draws a fixed box of
+	// Rows lines, which is the box that was there before.
+	//
+	// There is no ceiling here, and that is deliberate: a maximum height is a
+	// length, and a length written as a field would be a length this component
+	// has to turn into CSS at run time -- which is the one thing a class
+	// cannot be built from. A caller who wants one adds it where every other
+	// class goes: Parts["input"].Class, with "max-h-64" or whatever the design
+	// says.
+	Autosize bool
 }
 
 // Message is what validation left for this box, or empty.
@@ -77,7 +94,7 @@ func (p TextareaProps) PartNames() []string {
 	return []string{"root", "label", "input", "message", "hint"}
 }
 
-//line components/textarea.go:81
+//line components/textarea.go:98
 
 // Textarea renders the textarea component.
 func Textarea(kyse__props TextareaProps) kyse__template.HTML {
@@ -100,20 +117,20 @@ func Textarea(kyse__props TextareaProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/textarea.kyse.go:68
+//line components/textarea.kyse.go:85
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("field")))
-//line components/textarea.go:106
+//line components/textarea.go:123
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/textarea.kyse.go:69
+//line components/textarea.kyse.go:86
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/textarea.go:115
+//line components/textarea.go:132
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/textarea.kyse.go:69", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/textarea.kyse.go:86", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
@@ -131,9 +148,9 @@ func Textarea(kyse__props TextareaProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/textarea.kyse.go:73
+//line components/textarea.kyse.go:90
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("label", "label")))
-//line components/textarea.go:137
+//line components/textarea.go:154
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -142,20 +159,20 @@ func Textarea(kyse__props TextareaProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tfor=\"")
 	}
 	if kyse__err == nil {
-//line components/textarea.kyse.go:74
+//line components/textarea.kyse.go:91
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/textarea.go:148
+//line components/textarea.go:165
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v2 string
-//line components/textarea.kyse.go:75
+//line components/textarea.kyse.go:92
 		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("label"))
-//line components/textarea.go:157
+//line components/textarea.go:174
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/textarea.kyse.go:75", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/textarea.kyse.go:92", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
@@ -164,9 +181,9 @@ func Textarea(kyse__props TextareaProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>")
 	}
 	if kyse__err == nil {
-//line components/textarea.kyse.go:76
+//line components/textarea.kyse.go:93
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
-//line components/textarea.go:170
+//line components/textarea.go:187
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</label>\n")
@@ -181,9 +198,9 @@ func Textarea(kyse__props TextareaProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/textarea.kyse.go:79
+//line components/textarea.kyse.go:96
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("input", "textarea")))
-//line components/textarea.go:187
+//line components/textarea.go:204
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -192,9 +209,9 @@ func Textarea(kyse__props TextareaProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/textarea.kyse.go:80
+//line components/textarea.kyse.go:97
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/textarea.go:198
+//line components/textarea.go:215
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -203,79 +220,86 @@ func Textarea(kyse__props TextareaProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tname=\"")
 	}
 	if kyse__err == nil {
-//line components/textarea.kyse.go:81
+//line components/textarea.kyse.go:98
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/textarea.go:209
+//line components/textarea.go:226
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v3 string
-//line components/textarea.kyse.go:82
+//line components/textarea.kyse.go:99
 		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/textarea.go:218
+//line components/textarea.go:235
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/textarea.kyse.go:82", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/textarea.kyse.go:99", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
 	}
-//line components/textarea.kyse.go:83
+//line components/textarea.kyse.go:100
+	if kyse__d.Autosize {
+//line components/textarea.go:244
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-autosize=\"true\"\n")
+		}
+	}
+//line components/textarea.kyse.go:103
 	if kyse__d.Rows > 0 {
-//line components/textarea.go:227
+//line components/textarea.go:251
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\trows=\"")
 		}
 		if kyse__err == nil {
-//line components/textarea.kyse.go:84
+//line components/textarea.kyse.go:104
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Rows))
-//line components/textarea.go:234
+//line components/textarea.go:258
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/textarea.kyse.go:86
+//line components/textarea.kyse.go:106
 	if kyse__d.Placeholder != "" {
-//line components/textarea.go:242
+//line components/textarea.go:266
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tplaceholder=\"")
 		}
 		if kyse__err == nil {
-//line components/textarea.kyse.go:87
+//line components/textarea.kyse.go:107
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Placeholder))
-//line components/textarea.go:249
+//line components/textarea.go:273
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/textarea.kyse.go:89
+//line components/textarea.kyse.go:109
 	if kyse__d.DescribedBy() != "" {
-//line components/textarea.go:257
+//line components/textarea.go:281
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/textarea.kyse.go:90
+//line components/textarea.kyse.go:110
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/textarea.go:264
+//line components/textarea.go:288
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/textarea.kyse.go:92
+//line components/textarea.kyse.go:112
 	if kyse__d.Message() != "" {
-//line components/textarea.go:272
+//line components/textarea.go:296
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/textarea.kyse.go:95
+//line components/textarea.kyse.go:115
 	if kyse__d.Required {
-//line components/textarea.go:279
+//line components/textarea.go:303
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\trequired\n")
 		}
@@ -284,16 +308,16 @@ func Textarea(kyse__props TextareaProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>")
 	}
 	if kyse__err == nil {
-//line components/textarea.kyse.go:98
+//line components/textarea.kyse.go:118
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Current())))
-//line components/textarea.go:290
+//line components/textarea.go:314
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</textarea>\n")
 	}
-//line components/textarea.kyse.go:99
+//line components/textarea.kyse.go:119
 	if kyse__d.Message() != "" {
-//line components/textarea.go:297
+//line components/textarea.go:321
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<p\n")
 		}
@@ -304,9 +328,9 @@ func Textarea(kyse__props TextareaProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
 		}
 		if kyse__err == nil {
-//line components/textarea.kyse.go:102
+//line components/textarea.kyse.go:122
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/textarea.go:310
+//line components/textarea.go:334
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "-error\"\n")
@@ -315,20 +339,20 @@ func Textarea(kyse__props TextareaProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/textarea.kyse.go:103
+//line components/textarea.kyse.go:123
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("message", "text-destructive text-sm")))
-//line components/textarea.go:321
+//line components/textarea.go:345
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v4 string
-//line components/textarea.kyse.go:104
+//line components/textarea.kyse.go:124
 			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("message"))
-//line components/textarea.go:330
+//line components/textarea.go:354
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/textarea.kyse.go:104", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/textarea.kyse.go:124", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 			}
@@ -337,20 +361,20 @@ func Textarea(kyse__props TextareaProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
 		}
 		if kyse__err == nil {
-//line components/textarea.kyse.go:105
+//line components/textarea.kyse.go:125
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message())))
-//line components/textarea.go:343
+//line components/textarea.go:367
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
 		}
 	}
-//line components/textarea.kyse.go:107
+//line components/textarea.kyse.go:127
 	if kyse__d.Message() == "" {
-//line components/textarea.go:351
-//line components/textarea.kyse.go:108
+//line components/textarea.go:375
+//line components/textarea.kyse.go:128
 		if kyse__d.Hint != "" {
-//line components/textarea.go:354
+//line components/textarea.go:378
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<p\n")
 			}
@@ -361,9 +385,9 @@ func Textarea(kyse__props TextareaProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tid=\"")
 			}
 			if kyse__err == nil {
-//line components/textarea.kyse.go:111
+//line components/textarea.kyse.go:131
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/textarea.go:367
+//line components/textarea.go:391
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "-hint\"\n")
@@ -372,20 +396,20 @@ func Textarea(kyse__props TextareaProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/textarea.kyse.go:112
+//line components/textarea.kyse.go:132
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("hint", "text-muted-foreground text-sm")))
-//line components/textarea.go:378
+//line components/textarea.go:402
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 			if kyse__err == nil {
 				var kyse__v5 string
-//line components/textarea.kyse.go:113
+//line components/textarea.kyse.go:133
 				kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("hint"))
-//line components/textarea.go:387
+//line components/textarea.go:411
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/textarea.kyse.go:113", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/textarea.kyse.go:133", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 				}
@@ -394,9 +418,9 @@ func Textarea(kyse__props TextareaProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/textarea.kyse.go:114
+//line components/textarea.kyse.go:134
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Hint)))
-//line components/textarea.go:400
+//line components/textarea.go:424
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")

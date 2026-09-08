@@ -94,12 +94,21 @@ var extensible = []struct {
 	{
 		"Table",
 		func(c components.ComponentProps) []string {
-			return []string{string(components.Table(components.TableProps{
+			props := components.TableProps{
 				ComponentProps: c,
 				Caption:        "Invoices",
-				Columns:        []components.TableColumn{{Label: "Number"}},
-				Rows:           []components.TableRow{{Cells: []components.TableCell{{Text: "0001"}}}},
-			}))}
+				Columns:        []components.TableColumn{{Label: "Number"}, {Label: "Total", Align: "end"}},
+				Rows: []components.TableRow{{
+					Key:   "114",
+					Label: "Select invoice 2026-114",
+					Cells: []components.TableCell{{Text: "2026-114"}, {Text: "1.240,00"}},
+				}},
+			}
+			plain := string(components.Table(props))
+			props.SelectName = "invoices"
+			props.BulkActions = []components.ButtonProps{{Label: "Archive"}}
+			props.Navigable = true
+			return []string{plain, string(components.Table(props))}
 		},
 		components.TableProps{}.PartNames,
 	},
@@ -476,6 +485,396 @@ var extensible = []struct {
 			return []string{withHint, string(components.Textarea(props))}
 		},
 		components.TextareaProps{}.PartNames,
+	},
+	{
+		"ActiveSearch",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.ActiveSearch(components.ActiveSearchProps{
+				ComponentProps: c, Name: "q", Label: "Search invoices",
+				URL: "/invoices/search", Hint: "By number or payer.",
+			}))}
+		},
+		components.ActiveSearchProps{}.PartNames,
+	},
+	{
+		"Carousel",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Carousel(components.CarouselProps{
+				ComponentProps: c, ID: "gallery", Label: "Gallery", Dots: true,
+				Slides: []components.CarouselSlide{
+					{Title: "First", Caption: "One", ImageURL: "/1.jpg", Alt: "One"},
+					{Title: "Second", Caption: "Two", ImageURL: "/2.jpg", Alt: "Two"},
+				},
+			}))}
+		},
+		components.CarouselProps{}.PartNames,
+	},
+	{
+		"ContainerCard",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.ContainerCard(components.ContainerCardProps{
+				ComponentProps: c, Title: "A post", Description: "What it is about.",
+				ImageURL: "/cover.jpg", Alt: "A cover", Meta: "7 September",
+				ActionLabel: "Read", ActionURL: "/posts/1",
+			}))}
+		},
+		components.ContainerCardProps{}.PartNames,
+	},
+	{
+		"DeleteRow",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.DeleteRow(components.DeleteRowProps{
+				ComponentProps: c, URL: "/invoices/1", Description: "Delete invoice 2026-114",
+			}))}
+		},
+		components.DeleteRowProps{}.PartNames,
+	},
+	{
+		"EditInPlace",
+		func(c components.ComponentProps) []string {
+			props := components.EditInPlaceProps{
+				ComponentProps: c, ID: "name", Name: "name", Label: "Display name",
+				Value: "Ada", EditURL: "/name/edit", SaveURL: "/name", CancelURL: "/name",
+			}
+			reading := string(components.EditInPlace(props))
+			props.Editing = true
+			props.Message = "Already taken."
+			return []string{reading, string(components.EditInPlace(props))}
+		},
+		components.EditInPlaceProps{}.PartNames,
+	},
+	{
+		"Feed",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Feed(components.FeedProps{
+				ComponentProps: c, Label: "Updates",
+				Items: []components.FeedItem{{
+					ID: "a1", Title: "Shipped", Meta: "7 September", Body: "It is live.",
+					ImageURL: "/shot.png", Alt: "A screenshot", Footer: "3 comments",
+				}},
+			}))}
+		},
+		components.FeedProps{}.PartNames,
+	},
+	{
+		"FileUpload",
+		func(c components.ComponentProps) []string {
+			props := components.FileUploadProps{
+				ComponentProps: c, Name: "attachment", Label: "Attachment",
+				Accept: ".pdf", Hint: "PDF up to 10 MB.",
+			}
+			withHint := string(components.FileUpload(props))
+			props.Page = page{errs: map[string]string{"attachment": "Required."}}
+			return []string{withHint, string(components.FileUpload(props))}
+		},
+		components.FileUploadProps{}.PartNames,
+	},
+	{
+		"HoverCard",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.HoverCard(components.HoverCardProps{
+				ComponentProps: c, ID: "ada", Label: "@ada", URL: "/ada",
+				Title: "Ada Lovelace", Subtitle: "@ada", Description: "Wrote the first program.",
+				ImageURL: "/ada.png", Alt: "Ada", Meta: "Joined 1843",
+			}))}
+		},
+		components.HoverCardProps{}.PartNames,
+	},
+	{
+		"LazyLoad",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.LazyLoad(components.LazyLoadProps{
+				ComponentProps: c, URL: "/summary", Label: "Summary", Message: "Loading",
+			}))}
+		},
+		components.LazyLoadProps{}.PartNames,
+	},
+	{
+		"LoadMore",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.LoadMore(components.LoadMoreProps{
+				ComponentProps: c, URL: "/posts?page=2",
+			}))}
+		},
+		components.LoadMoreProps{}.PartNames,
+	},
+	{
+		"MediaPlayer",
+		func(c components.ComponentProps) []string {
+			props := components.MediaPlayerProps{
+				ComponentProps: c, Label: "The talk", Caption: "Recorded in September.",
+				Sources: []components.MediaSource{{URL: "/talk.mp4", Type: "video/mp4"}},
+				Tracks:  []components.MediaTrack{{URL: "/talk.vtt", Language: "en", Label: "English"}},
+			}
+			video := string(components.MediaPlayer(props))
+			props.Audio = true
+			return []string{video, string(components.MediaPlayer(props))}
+		},
+		components.MediaPlayerProps{}.PartNames,
+	},
+	{
+		"Menubar",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Menubar(components.MenubarProps{
+				ComponentProps: c, ID: "app", Label: "Application",
+				Menus: []components.MenubarMenu{{Label: "File", Items: []components.MenuItem{
+					{Label: "New", Shortcut: "N"},
+					{Label: "Open recent", URL: "/recent", Shortcut: "O"},
+				}}},
+			}))}
+		},
+		components.MenubarProps{}.PartNames,
+	},
+	{
+		"OptimisticToggle",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.OptimisticToggle(components.OptimisticToggleProps{
+				ComponentProps: c, URL: "/posts/1/like", Label: "Like", Count: "12",
+			}))}
+		},
+		components.OptimisticToggleProps{}.PartNames,
+	},
+	{
+		"Pagination",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Pagination(components.PaginationProps{
+				ComponentProps: c, Page: 3, Pages: 40, URL: "/invoices?page={page}",
+			}))}
+		},
+		components.PaginationProps{}.PartNames,
+	},
+	{
+		"ResponsiveImage",
+		func(c components.ComponentProps) []string {
+			props := components.ResponsiveImageProps{
+				ComponentProps: c, URL: "/cover.jpg", Alt: "The cover",
+				Width: 1200, Height: 675,
+				Sources: []components.ImageSource{{SrcSet: "/cover.avif", Type: "image/avif"}},
+			}
+			plain := string(components.ResponsiveImage(props))
+			props.Caption = "The cover, 2026."
+			return []string{plain, string(components.ResponsiveImage(props))}
+		},
+		components.ResponsiveImageProps{}.PartNames,
+	},
+	{
+		"Toolbar",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Toolbar(components.ToolbarProps{
+				ComponentProps: c, Label: "Formatting",
+				Items: []components.ToolbarItem{
+					{Label: "Bold", Toggle: true, Pressed: true},
+					{Separator: true},
+					{Label: "Link", URL: "/link"},
+				},
+			}))}
+		},
+		components.ToolbarProps{}.PartNames,
+	},
+	{
+		"Tooltip",
+		func(c components.ComponentProps) []string {
+			props := components.TooltipProps{
+				ComponentProps: c, ID: "save", Text: "Saves the draft", Label: "Save",
+			}
+			asButton := string(components.Tooltip(props))
+			props.URL = "/save"
+			return []string{asButton, string(components.Tooltip(props))}
+		},
+		components.TooltipProps{}.PartNames,
+	},
+	{
+		"Tree",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Tree(components.TreeProps{
+				ComponentProps: c, ID: "files", Label: "Files",
+				Nodes: []components.TreeNode{{
+					Label: "src", Expanded: true,
+					Icon:     template.HTML(`<svg aria-hidden="true"></svg>`),
+					Children: []components.TreeNode{{Label: "main.go", URL: "/src/main.go"}},
+				}},
+			}))}
+		},
+		components.TreeProps{}.PartNames,
+	},
+	{
+		"Autocomplete",
+		func(c components.ComponentProps) []string {
+			props := components.AutocompleteProps{
+				ComponentProps: c, Name: "city", Label: "City", Hint: "Where the event is.",
+				Options: []components.AutocompleteOption{{Value: "Lisbon", Label: "Portugal"}},
+			}
+			withHint := string(components.Autocomplete(props))
+			props.Page = page{errs: map[string]string{"city": "Required."}}
+			return []string{withHint, string(components.Autocomplete(props))}
+		},
+		components.AutocompleteProps{}.PartNames,
+	},
+	{
+		"ColorPicker",
+		func(c components.ComponentProps) []string {
+			props := components.ColorPickerProps{
+				ComponentProps: c, Name: "brand", Label: "Brand colour",
+				Value: "#1d4ed8", ShowValue: true, Hint: "Used on buttons.",
+			}
+			withHint := string(components.ColorPicker(props))
+			props.Page = page{errs: map[string]string{"brand": "Required."}}
+			return []string{withHint, string(components.ColorPicker(props))}
+		},
+		components.ColorPickerProps{}.PartNames,
+	},
+	{
+		"DateTimePicker",
+		func(c components.ComponentProps) []string {
+			props := components.DateTimePickerProps{
+				ComponentProps: c, Name: "starts_at", Label: "Starts at",
+				Kind: "datetime", Hint: "Times are UTC.",
+			}
+			withHint := string(components.DateTimePicker(props))
+			props.Page = page{errs: map[string]string{"starts_at": "Required."}}
+			return []string{withHint, string(components.DateTimePicker(props))}
+		},
+		components.DateTimePickerProps{}.PartNames,
+	},
+	{
+		"NumberInput",
+		func(c components.ComponentProps) []string {
+			props := components.NumberInputProps{
+				ComponentProps: c, Name: "quantity", Label: "Quantity",
+				Value: "1", Min: "1", Unit: "kg", Hint: "Whole kilos.",
+			}
+			withHint := string(components.NumberInput(props))
+			props.Page = page{errs: map[string]string{"quantity": "Required."}}
+			return []string{withHint, string(components.NumberInput(props))}
+		},
+		components.NumberInputProps{}.PartNames,
+	},
+	{
+		"Rating",
+		func(c components.ComponentProps) []string {
+			props := components.RatingProps{
+				ComponentProps: c, Name: "score", Label: "How was it",
+				Value: "4", Hint: "Five is best.",
+			}
+			withHint := string(components.Rating(props))
+			props.Page = page{errs: map[string]string{"score": "Required."}}
+			return []string{withHint, string(components.Rating(props))}
+		},
+		components.RatingProps{}.PartNames,
+	},
+	{
+		"SegmentedControl",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.SegmentedControl(components.SegmentedControlProps{
+				ComponentProps: c, Name: "period", Label: "Period",
+				Options: []components.SegmentedOption{
+					{Label: "Day", Value: "day"},
+					{Label: "Week", Value: "week"},
+				},
+			}))}
+		},
+		components.SegmentedControlProps{}.PartNames,
+	},
+	{
+		"CopyButton",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.CopyButton(components.CopyButtonProps{
+				ComponentProps: c, Value: "arandu-key",
+			}))}
+		},
+		components.CopyButtonProps{}.PartNames,
+	},
+	{
+		"Figure",
+		func(c components.ComponentProps) []string {
+			props := components.FigureProps{
+				ComponentProps: c, ImageURL: "/chart.png", Alt: "Revenue by quarter",
+				Caption: "Revenue, 2026", Credit: "Finance",
+			}
+			below := string(components.Figure(props))
+			props.CaptionOnTop = true
+			return []string{below, string(components.Figure(props))}
+		},
+		components.FigureProps{}.PartNames,
+	},
+	{
+		"Highlight",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Highlight(components.HighlightProps{
+				ComponentProps: c, Text: "Ada Lovelace", Query: "love",
+			}))}
+		},
+		components.HighlightProps{}.PartNames,
+	},
+	{
+		"Link",
+		func(c components.ComponentProps) []string {
+			props := components.LinkProps{ComponentProps: c, Label: "Docs", URL: "/docs"}
+			anchor := string(components.Link(props))
+			props.URL = ""
+			return []string{anchor, string(components.Link(props))}
+		},
+		components.LinkProps{}.PartNames,
+	},
+	{
+		"Meter",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Meter(components.MeterProps{
+				ComponentProps: c, Value: 6, Max: 10, Label: "Disk used",
+			}))}
+		},
+		components.MeterProps{}.PartNames,
+	},
+	{
+		"Output",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Output(components.OutputProps{
+				ComponentProps: c, Name: "total", Value: "42",
+			}))}
+		},
+		components.OutputProps{}.PartNames,
+	},
+	{
+		"RelativeTime",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.RelativeTime(components.RelativeTimeProps{
+				ComponentProps: c, DateTime: "2026-09-07T14:30:00Z",
+				Label: "7 September 2026", Style: "relative",
+			}))}
+		},
+		components.RelativeTimeProps{}.PartNames,
+	},
+	{
+		"SkipLink",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.SkipLink(components.SkipLinkProps{ComponentProps: c}))}
+		},
+		components.SkipLinkProps{}.PartNames,
+	},
+	{
+		"SplitButton",
+		func(c components.ComponentProps) []string {
+			props := components.SplitButtonProps{
+				ComponentProps: c, ID: "send", Label: "Send", MenuLabel: "More send options",
+				Items: []components.MenuItem{
+					{Label: "Schedule", Shortcut: "S"},
+					{Label: "Open drafts", URL: "/drafts", Shortcut: "D"},
+				},
+			}
+			asButton := string(components.SplitButton(props))
+			props.URL = "/send"
+			return []string{asButton, string(components.SplitButton(props))}
+		},
+		components.SplitButtonProps{}.PartNames,
+	},
+	{
+		"Status",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Status(components.StatusProps{
+				ComponentProps: c, Message: "Saved",
+			}))}
+		},
+		components.StatusProps{}.PartNames,
 	},
 }
 

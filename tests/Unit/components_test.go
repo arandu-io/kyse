@@ -113,6 +113,106 @@ func TestEveryComponentRenders(t *testing.T) {
 		{"Textarea", string(components.Textarea(components.TextareaProps{Name: "body", Label: "Body"}))},
 		{"ThemeToggle", string(components.ThemeToggle(components.ThemeToggleProps{}))},
 		{"Toast", string(components.Toast(components.ToastProps{Title: "Saved"}))},
+		{"ActiveSearch", string(components.ActiveSearch(components.ActiveSearchProps{
+			Name: "q", Label: "Search invoices", URL: "/invoices/search",
+		}))},
+		{"Carousel", string(components.Carousel(components.CarouselProps{
+			ID: "gallery", Label: "Gallery", Dots: true,
+			Slides: []components.CarouselSlide{{Title: "First"}, {Title: "Second"}},
+		}))},
+		{"ContainerCard", string(components.ContainerCard(components.ContainerCardProps{
+			Title: "A post", Description: "What it is about.",
+		}))},
+		{"DeleteRow", string(components.DeleteRow(components.DeleteRowProps{
+			URL: "/invoices/1", Description: "Delete invoice 2026-114",
+		}))},
+		{"EditInPlace", string(components.EditInPlace(components.EditInPlaceProps{
+			ID: "name", Name: "name", Label: "Display name", Value: "Ada",
+			EditURL: "/name/edit", SaveURL: "/name",
+		}))},
+		{"Feed", string(components.Feed(components.FeedProps{
+			Label: "Updates",
+			Items: []components.FeedItem{{ID: "a1", Title: "Shipped", Body: "It is live."}},
+		}))},
+		{"FileUpload", string(components.FileUpload(components.FileUploadProps{
+			Name: "attachment", Label: "Attachment", Accept: ".pdf",
+		}))},
+		{"HoverCard", string(components.HoverCard(components.HoverCardProps{
+			ID: "ada", Label: "@ada", URL: "/ada", Title: "Ada Lovelace",
+		}))},
+		{"LazyLoad", string(components.LazyLoad(components.LazyLoadProps{
+			URL: "/summary", Label: "Summary",
+		}))},
+		{"LoadMore", string(components.LoadMore(components.LoadMoreProps{URL: "/posts?page=2"}))},
+		{"MediaPlayer", string(components.MediaPlayer(components.MediaPlayerProps{
+			Label:   "The talk",
+			Sources: []components.MediaSource{{URL: "/talk.mp4", Type: "video/mp4"}},
+		}))},
+		{"Menubar", string(components.Menubar(components.MenubarProps{
+			ID: "app", Label: "Application",
+			Menus: []components.MenubarMenu{{Label: "File", Items: []components.MenuItem{{Label: "New"}}}},
+		}))},
+		{"OptimisticToggle", string(components.OptimisticToggle(components.OptimisticToggleProps{
+			URL: "/posts/1/like", Label: "Like", Count: "12",
+		}))},
+		{"Pagination", string(components.Pagination(components.PaginationProps{
+			Page: 3, Pages: 40, URL: "/invoices?page={page}",
+		}))},
+		{"ResponsiveImage", string(components.ResponsiveImage(components.ResponsiveImageProps{
+			URL: "/cover.jpg", Alt: "The cover", Width: 1200, Height: 675,
+		}))},
+		{"Toolbar", string(components.Toolbar(components.ToolbarProps{
+			Label: "Formatting",
+			Items: []components.ToolbarItem{{Label: "Bold", Toggle: true}, {Separator: true}, {Label: "Link"}},
+		}))},
+		{"Tooltip", string(components.Tooltip(components.TooltipProps{
+			ID: "save", Text: "Saves the draft", Label: "Save",
+		}))},
+		{"Tree", string(components.Tree(components.TreeProps{
+			ID: "files", Label: "Files",
+			Nodes: []components.TreeNode{{Label: "src", Expanded: true, Children: []components.TreeNode{{Label: "main.go"}}}},
+		}))},
+		{"Autocomplete", string(components.Autocomplete(components.AutocompleteProps{
+			Name: "city", Label: "City",
+			Options: []components.AutocompleteOption{{Value: "Lisbon"}, {Value: "Porto"}},
+		}))},
+		{"ColorPicker", string(components.ColorPicker(components.ColorPickerProps{
+			Name: "brand", Label: "Brand colour", Value: "#1d4ed8", ShowValue: true,
+		}))},
+		{"DateTimePicker", string(components.DateTimePicker(components.DateTimePickerProps{
+			Name: "starts_at", Label: "Starts at", Kind: "datetime",
+		}))},
+		{"NumberInput", string(components.NumberInput(components.NumberInputProps{
+			Name: "quantity", Label: "Quantity", Value: "1", Min: "1", Unit: "kg",
+		}))},
+		{"Rating", string(components.Rating(components.RatingProps{
+			Name: "score", Label: "How was it", Value: "4",
+		}))},
+		{"SegmentedControl", string(components.SegmentedControl(components.SegmentedControlProps{
+			Name: "period", Label: "Period",
+			Options: []components.SegmentedOption{{Label: "Day", Value: "day"}, {Label: "Week", Value: "week"}},
+		}))},
+		{"CopyButton", string(components.CopyButton(components.CopyButtonProps{Value: "arandu-key"}))},
+		{"Figure", string(components.Figure(components.FigureProps{
+			ImageURL: "/chart.png", Alt: "Revenue by quarter", Caption: "Revenue, 2026",
+		}))},
+		{"Highlight", string(components.Highlight(components.HighlightProps{
+			Text: "Ada Lovelace", Query: "love",
+		}))},
+		{"Link", string(components.Link(components.LinkProps{Label: "Docs", URL: "/docs"}))},
+		{"Meter", string(components.Meter(components.MeterProps{
+			Value: 6, Max: 10, Label: "Disk used", Title: "gigabytes",
+		}))},
+		{"Output", string(components.Output(components.OutputProps{Name: "total", Value: "42"}))},
+		{"RelativeTime", string(components.RelativeTime(components.RelativeTimeProps{
+			DateTime: "2026-09-07T14:30:00Z", Label: "7 September 2026", Style: "relative",
+		}))},
+		{"SkipLink", string(components.SkipLink(components.SkipLinkProps{}))},
+		{"SplitButton", string(components.SplitButton(components.SplitButtonProps{
+			ID: "send", Label: "Send", MenuLabel: "More send options",
+			Items: []components.MenuItem{{Label: "Schedule"}, {Label: "Send later"}},
+		}))},
+		{"Status", string(components.Status(components.StatusProps{Message: "Saved"}))},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			if strings.TrimSpace(c.html) == "" {
