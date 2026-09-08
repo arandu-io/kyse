@@ -176,6 +176,9 @@ func TestEveryComponentRenders(t *testing.T) {
 			Name: "city", Label: "City",
 			Options: []components.AutocompleteOption{{Value: "Lisbon"}, {Value: "Porto"}},
 		}))},
+		{"Calendar", string(components.Calendar(components.CalendarProps{
+			ID: "when", Label: "Choose a date", Month: "2026-09", Value: "2026-09-08",
+		}))},
 		{"ColorPicker", string(components.ColorPicker(components.ColorPickerProps{
 			Name: "brand", Label: "Brand colour", Value: "#1d4ed8", ShowValue: true,
 		}))},

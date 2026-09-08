@@ -35,7 +35,16 @@ package components
 type DrawerProps struct {
 	// ComponentProps is the class, attributes and parts the caller adds.
 	ComponentProps
-	// ID is what a trigger targets to open this: `onclick="ID.showModal()"`.
+	// ID is what a trigger targets to open this:
+	//
+	//	<button data-dialog-open="ID">Filters</button>
+	//
+	// Not an inline onclick. The policy this framework serves under is
+	// script-src 'self' with no 'unsafe-inline', and that blocks an inline
+	// handler exactly as it blocks an inline script -- so the handler works
+	// while somebody is building and fails when the headers go on. The
+	// attribute is read by the shipped script, which looks the id up and
+	// never evaluates anything.
 	ID string
 	// Side is the edge it comes in from: "left", "right", "top" or "bottom".
 	// Empty is the bottom, because that is what the stylesheet draws when
