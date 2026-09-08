@@ -725,6 +725,27 @@ var extensible = []struct {
 		components.AutocompleteProps{}.PartNames,
 	},
 	{
+		"DataTable",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.DataTable(components.DataTableProps{
+				ComponentProps: c, ID: "invoices", Label: "Invoices", URL: "/invoices",
+				Caption:    "Invoices, most recent first",
+				SearchName: "q", Query: "ada", SortKey: "total", SortDir: "desc",
+				Page: 2, Pages: 9, SelectName: "ids", Token: "csrf",
+				BulkActions: []components.ButtonProps{{Label: "Archive"}},
+				Columns: []components.TableColumn{
+					{Label: "Number", Key: "number", Sortable: true, Hideable: true},
+					{Label: "Total", Key: "total", Align: "end", Sortable: true},
+				},
+				Rows: []components.TableRow{{
+					Key: "114", Label: "Select 2026-114",
+					Cells: []components.TableCell{{Text: "2026-114"}, {Text: "1.240,00"}},
+				}},
+			}))}
+		},
+		components.DataTableProps{}.PartNames,
+	},
+	{
 		"Calendar",
 		func(c components.ComponentProps) []string {
 			return []string{string(components.Calendar(components.CalendarProps{

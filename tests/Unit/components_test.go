@@ -176,6 +176,15 @@ func TestEveryComponentRenders(t *testing.T) {
 			Name: "city", Label: "City",
 			Options: []components.AutocompleteOption{{Value: "Lisbon"}, {Value: "Porto"}},
 		}))},
+		{"DataTable", string(components.DataTable(components.DataTableProps{
+			ID: "invoices", Label: "Invoices", URL: "/invoices",
+			SearchName: "q", Page: 2, Pages: 9, SelectName: "ids",
+			BulkActions: []components.ButtonProps{{Label: "Archive"}},
+			Columns: []components.TableColumn{
+				{Label: "Number", Key: "number", Sortable: true, Hideable: true},
+			},
+			Rows: []components.TableRow{{Key: "1", Cells: []components.TableCell{{Text: "2026-114"}}}},
+		}))},
 		{"Calendar", string(components.Calendar(components.CalendarProps{
 			ID: "when", Label: "Choose a date", Month: "2026-09", Value: "2026-09-08",
 		}))},
