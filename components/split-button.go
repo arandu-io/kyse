@@ -734,51 +734,64 @@ func SplitButton(kyse__props SplitButtonProps) kyse__template.HTML {
 				}
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>\n")
 			}
 			if kyse__err == nil {
-//line components/split-button.kyse.go:197
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t")
+			}
+			if kyse__err == nil {
+//line components/split-button.kyse.go:198
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Items[at].Label)))
-//line components/split-button.go:743
+//line components/split-button.go:746
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "@if(.Items[at].Shortcut != \"\")<kbd\n")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-part=\"shortcut\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
-			}
-			if kyse__err == nil {
 //line components/split-button.kyse.go:199
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("shortcut", "kbd")))
-//line components/split-button.go:757
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
-				var kyse__v12 string
-//line components/split-button.kyse.go:200
-				kyse__v12, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("shortcut"))
+			if kyse__d.Items[at].Shortcut != "" {
+//line components/split-button.go:753
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<kbd\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-part=\"shortcut\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/split-button.kyse.go:202
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("shortcut", "kbd")))
 //line components/split-button.go:766
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/split-button.kyse.go:200", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v12)
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					var kyse__v12 string
+//line components/split-button.kyse.go:203
+					kyse__v12, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("shortcut"))
+//line components/split-button.go:775
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/split-button.kyse.go:203", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v12)
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t>")
+				}
+				if kyse__err == nil {
+//line components/split-button.kyse.go:204
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Items[at].Shortcut)))
+//line components/split-button.go:788
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</kbd>\n")
 				}
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>")
-			}
-			if kyse__err == nil {
-//line components/split-button.kyse.go:201
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Items[at].Shortcut)))
-//line components/split-button.go:779
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "</kbd>@endif</a>\n")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t</a>\n")
 			}
 		} else {
 			if kyse__err == nil {
@@ -787,16 +800,16 @@ func SplitButton(kyse__props SplitButtonProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-part=\"item\"\n")
 			}
-//line components/split-button.kyse.go:205
+//line components/split-button.kyse.go:210
 			if kyse__d.PartClass("item") != "" {
-//line components/split-button.go:793
+//line components/split-button.go:806
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
 				}
 				if kyse__err == nil {
-//line components/split-button.kyse.go:206
+//line components/split-button.kyse.go:211
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("item")))
-//line components/split-button.go:800
+//line components/split-button.go:813
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -808,23 +821,23 @@ func SplitButton(kyse__props SplitButtonProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\ttype=\"button\"\n")
 			}
-//line components/split-button.kyse.go:210
+//line components/split-button.kyse.go:215
 			if kyse__d.Items[at].Disabled {
-//line components/split-button.go:814
+//line components/split-button.go:827
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdisabled\n")
 				}
 			}
-//line components/split-button.kyse.go:213
+//line components/split-button.kyse.go:218
 			if kyse__d.Items[at].Variant != "" {
-//line components/split-button.go:821
+//line components/split-button.go:834
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-variant=\"")
 				}
 				if kyse__err == nil {
-//line components/split-button.kyse.go:214
+//line components/split-button.kyse.go:219
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Items[at].Variant))
-//line components/split-button.go:828
+//line components/split-button.go:841
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -832,61 +845,74 @@ func SplitButton(kyse__props SplitButtonProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v13 string
-//line components/split-button.kyse.go:216
+//line components/split-button.kyse.go:221
 				kyse__v13, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("item"))
-//line components/split-button.go:838
+//line components/split-button.go:851
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/split-button.kyse.go:216", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/split-button.kyse.go:221", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v13)
 				}
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>\n")
 			}
 			if kyse__err == nil {
-//line components/split-button.kyse.go:217
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t")
+			}
+			if kyse__err == nil {
+//line components/split-button.kyse.go:223
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Items[at].Label)))
-//line components/split-button.go:851
+//line components/split-button.go:867
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "@if(.Items[at].Shortcut != \"\")<kbd\n")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-part=\"shortcut\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
-			}
-			if kyse__err == nil {
-//line components/split-button.kyse.go:219
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("shortcut", "kbd")))
-//line components/split-button.go:865
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
-				var kyse__v14 string
-//line components/split-button.kyse.go:220
-				kyse__v14, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("shortcut"))
+//line components/split-button.kyse.go:224
+			if kyse__d.Items[at].Shortcut != "" {
 //line components/split-button.go:874
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/split-button.kyse.go:220", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v14)
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<kbd\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-part=\"shortcut\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/split-button.kyse.go:227
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("shortcut", "kbd")))
+//line components/split-button.go:887
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					var kyse__v14 string
+//line components/split-button.kyse.go:228
+					kyse__v14, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("shortcut"))
+//line components/split-button.go:896
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/split-button.kyse.go:228", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v14)
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t>")
+				}
+				if kyse__err == nil {
+//line components/split-button.kyse.go:229
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Items[at].Shortcut)))
+//line components/split-button.go:909
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</kbd>\n")
 				}
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>")
-			}
-			if kyse__err == nil {
-//line components/split-button.kyse.go:221
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Items[at].Shortcut)))
-//line components/split-button.go:887
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "</kbd>@endif</button>\n")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t</button>\n")
 			}
 		}
 	}

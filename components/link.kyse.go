@@ -77,7 +77,12 @@ func (p LinkProps) PartNames() []string { return []string{"root"} }
 		@if(.Current)
 			aria-current="page"
 		@endif
-	>{{ .Label }}@if(.Icon != ""){!! .Icon !!}@endif</a>
+	>
+		{{ .Label }}
+		@if(.Icon != "")
+			{!! .Icon !!}
+		@endif
+	</a>
 @endif
 @if(.URL == "")
 	<span
@@ -90,5 +95,10 @@ func (p LinkProps) PartNames() []string { return []string{"root"} }
 			aria-current="page"
 		@endif
 		@attributes(.RootAttrs())
-	>{{ .Label }}@if(.Icon != ""){!! .Icon !!}@endif</span>
+	>
+		{{ .Label }}
+		@if(.Icon != "")
+			{!! .Icon !!}
+		@endif
+	</span>
 @endif

@@ -95,7 +95,12 @@ func (p TooltipProps) PartNames() []string {
 				data-size="{{ .Size }}"
 			@endif
 			@attributes(.PartAttrs("trigger"))
-		>@if(.Icon != ""){!! .Icon !!}@endif{{ .Label }}</a>
+		>
+			@if(.Icon != "")
+				{!! .Icon !!}
+			@endif
+			{{ .Label }}
+		</a>
 	@endif
 	@if(.URL == "")
 		<button
@@ -118,7 +123,12 @@ func (p TooltipProps) PartNames() []string {
 				data-size="{{ .Size }}"
 			@endif
 			@attributes(.PartAttrs("trigger"))
-		>@if(.Icon != ""){!! .Icon !!}@endif{{ .Label }}</button>
+		>
+			@if(.Icon != "")
+				{!! .Icon !!}
+			@endif
+			{{ .Label }}
+		</button>
 	@endif
 
 	<span

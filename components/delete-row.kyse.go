@@ -118,4 +118,11 @@ func (p DeleteRowProps) PartNames() []string { return []string{"root"} }
 	@if(.Disabled)
 		disabled
 	@endif
->@if(.Icon != ""){!! .Icon !!}@endif@if(!.IconOnly){{ .Text() }}@endif</button>
+>
+	@if(.Icon != "")
+		{!! .Icon !!}
+	@endif
+	@if(!.IconOnly)
+		{{ .Text() }}
+	@endif
+</button>

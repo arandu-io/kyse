@@ -140,7 +140,12 @@ func (p MediaPlayerProps) PartNames() []string {
 			@endif
 		>
 			@foreach(.Sources as source)
-				<source src="{{ source.URL }}" @if(source.Type != "")type="{{ source.Type }}"@endif>
+				<source
+					src="{{ source.URL }}"
+					@if(source.Type != "")
+						type="{{ source.Type }}"
+					@endif
+				>
 			@endforeach
 			@foreach(.Tracks as track)
 				<track
@@ -180,7 +185,12 @@ func (p MediaPlayerProps) PartNames() []string {
 			@endif
 		>
 			@foreach(.Sources as source)
-				<source src="{{ source.URL }}" @if(source.Type != "")type="{{ source.Type }}"@endif>
+				<source
+					src="{{ source.URL }}"
+					@if(source.Type != "")
+						type="{{ source.Type }}"
+					@endif
+				>
 			@endforeach
 			@foreach(.Tracks as track)
 				<track

@@ -194,11 +194,16 @@ func (p SplitButtonProps) PartNames() []string {
 							data-variant="{{ .Items[at].Variant }}"
 						@endif
 						@attributes(.PartAttrs("item"))
-					>{{ .Items[at].Label }}@if(.Items[at].Shortcut != "")<kbd
-							data-part="shortcut"
-							class="{{ .PartClass("shortcut", "kbd") }}"
-							@attributes(.PartAttrs("shortcut"))
-						>{{ .Items[at].Shortcut }}</kbd>@endif</a>
+					>
+						{{ .Items[at].Label }}
+						@if(.Items[at].Shortcut != "")
+							<kbd
+								data-part="shortcut"
+								class="{{ .PartClass("shortcut", "kbd") }}"
+								@attributes(.PartAttrs("shortcut"))
+							>{{ .Items[at].Shortcut }}</kbd>
+						@endif
+					</a>
 				@else
 					<button
 						data-part="item"
@@ -214,11 +219,16 @@ func (p SplitButtonProps) PartNames() []string {
 							data-variant="{{ .Items[at].Variant }}"
 						@endif
 						@attributes(.PartAttrs("item"))
-					>{{ .Items[at].Label }}@if(.Items[at].Shortcut != "")<kbd
-							data-part="shortcut"
-							class="{{ .PartClass("shortcut", "kbd") }}"
-							@attributes(.PartAttrs("shortcut"))
-						>{{ .Items[at].Shortcut }}</kbd>@endif</button>
+					>
+						{{ .Items[at].Label }}
+						@if(.Items[at].Shortcut != "")
+							<kbd
+								data-part="shortcut"
+								class="{{ .PartClass("shortcut", "kbd") }}"
+								@attributes(.PartAttrs("shortcut"))
+							>{{ .Items[at].Shortcut }}</kbd>
+						@endif
+					</button>
 				@endif
 			@endfor
 		</div>

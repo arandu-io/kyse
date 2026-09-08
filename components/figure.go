@@ -129,56 +129,69 @@ func Figure(kyse__props FigureProps) kyse__template.HTML {
 			}
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>\n")
 		}
 		if kyse__err == nil {
-//line components/figure.kyse.go:55
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t")
+		}
+		if kyse__err == nil {
+//line components/figure.kyse.go:56
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Caption)))
-//line components/figure.go:138
+//line components/figure.go:141
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "@if(.Credit != \"\")<span\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"credit\"\n")
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
-		}
-		if kyse__err == nil {
 //line components/figure.kyse.go:57
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("credit", "figure-credit")))
-//line components/figure.go:152
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-		}
-		if kyse__err == nil {
-			var kyse__v3 string
-//line components/figure.kyse.go:58
-			kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("credit"))
+		if kyse__d.Credit != "" {
+//line components/figure.go:148
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<span\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-part=\"credit\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/figure.kyse.go:60
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("credit", "figure-credit")))
 //line components/figure.go:161
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/figure.kyse.go:58", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				var kyse__v3 string
+//line components/figure.kyse.go:61
+				kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("credit"))
+//line components/figure.go:170
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/figure.kyse.go:61", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>")
+			}
+			if kyse__err == nil {
+//line components/figure.kyse.go:62
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Credit)))
+//line components/figure.go:183
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
 			}
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
-		}
-		if kyse__err == nil {
-//line components/figure.kyse.go:59
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Credit)))
-//line components/figure.go:174
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "</span>@endif</figcaption>\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t</figcaption>\n")
 		}
 	}
-//line components/figure.kyse.go:61
+//line components/figure.kyse.go:66
 	if kyse__d.ImageURL != "" {
-//line components/figure.go:182
+//line components/figure.go:195
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<img\n")
 		}
@@ -189,9 +202,9 @@ func Figure(kyse__props FigureProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/figure.kyse.go:64
+//line components/figure.kyse.go:69
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("media", "figure-media")))
-//line components/figure.go:195
+//line components/figure.go:208
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -201,11 +214,11 @@ func Figure(kyse__props FigureProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 			var kyse__v4 string
-//line components/figure.kyse.go:65
+//line components/figure.kyse.go:70
 			kyse__v4, kyse__err = kyse__view.TextURL(kyse__d.ImageURL)
-//line components/figure.go:207
+//line components/figure.go:220
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/figure.kyse.go:65", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/figure.kyse.go:70", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 			}
@@ -217,20 +230,20 @@ func Figure(kyse__props FigureProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\talt=\"")
 		}
 		if kyse__err == nil {
-//line components/figure.kyse.go:66
+//line components/figure.kyse.go:71
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Alt))
-//line components/figure.go:223
+//line components/figure.go:236
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v5 string
-//line components/figure.kyse.go:67
+//line components/figure.kyse.go:72
 			kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("media"))
-//line components/figure.go:232
+//line components/figure.go:245
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/figure.kyse.go:67", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/figure.kyse.go:72", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 			}
@@ -239,9 +252,9 @@ func Figure(kyse__props FigureProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>\n")
 		}
 	}
-//line components/figure.kyse.go:70
+//line components/figure.kyse.go:75
 	if !kyse__d.CaptionOnTop && kyse__d.Caption != "" {
-//line components/figure.go:245
+//line components/figure.go:258
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<figcaption\n")
 		}
@@ -252,70 +265,83 @@ func Figure(kyse__props FigureProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/figure.kyse.go:73
+//line components/figure.kyse.go:78
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("caption", "figure-caption")))
-//line components/figure.go:258
+//line components/figure.go:271
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v6 string
-//line components/figure.kyse.go:74
+//line components/figure.kyse.go:79
 			kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("caption"))
-//line components/figure.go:267
+//line components/figure.go:280
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/figure.kyse.go:74", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/figure.kyse.go:79", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 			}
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>\n")
 		}
 		if kyse__err == nil {
-//line components/figure.kyse.go:75
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t")
+		}
+		if kyse__err == nil {
+//line components/figure.kyse.go:81
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Caption)))
-//line components/figure.go:280
+//line components/figure.go:296
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "@if(.Credit != \"\")<span\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"credit\"\n")
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
-		}
-		if kyse__err == nil {
-//line components/figure.kyse.go:77
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("credit", "figure-credit")))
-//line components/figure.go:294
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-		}
-		if kyse__err == nil {
-			var kyse__v7 string
-//line components/figure.kyse.go:78
-			kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("credit"))
+//line components/figure.kyse.go:82
+		if kyse__d.Credit != "" {
 //line components/figure.go:303
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/figure.kyse.go:78", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<span\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-part=\"credit\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/figure.kyse.go:85
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("credit", "figure-credit")))
+//line components/figure.go:316
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				var kyse__v7 string
+//line components/figure.kyse.go:86
+				kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("credit"))
+//line components/figure.go:325
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/figure.kyse.go:86", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>")
+			}
+			if kyse__err == nil {
+//line components/figure.kyse.go:87
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Credit)))
+//line components/figure.go:338
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
 			}
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
-		}
-		if kyse__err == nil {
-//line components/figure.kyse.go:79
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Credit)))
-//line components/figure.go:316
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "</span>@endif</figcaption>\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t</figcaption>\n")
 		}
 	}
 	if kyse__err == nil {

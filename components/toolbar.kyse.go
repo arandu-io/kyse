@@ -148,7 +148,14 @@ func (p ToolbarProps) PartNames() []string {
 				@if(.Items[at].IconOnly)
 					aria-label="{{ .Items[at].Label }}"
 				@endif
-			>@if(.Items[at].Icon != ""){!! .Items[at].Icon !!}@endif@if(!.Items[at].IconOnly){{ .Items[at].Label }}@endif</a>
+			>
+				@if(.Items[at].Icon != "")
+					{!! .Items[at].Icon !!}
+				@endif
+				@if(!.Items[at].IconOnly)
+					{{ .Items[at].Label }}
+				@endif
+			</a>
 		@else
 			<button
 				data-part="control"
@@ -192,7 +199,14 @@ func (p ToolbarProps) PartNames() []string {
 				@if(.Items[at].HxSwap != "")
 					hx-swap="{{ .Items[at].HxSwap }}"
 				@endif
-			>@if(.Items[at].Icon != ""){!! .Items[at].Icon !!}@endif@if(!.Items[at].IconOnly){{ .Items[at].Label }}@endif</button>
+			>
+				@if(.Items[at].Icon != "")
+					{!! .Items[at].Icon !!}
+				@endif
+				@if(!.Items[at].IconOnly)
+					{{ .Items[at].Label }}
+				@endif
+			</button>
 		@endif
 	@endfor
 </div>

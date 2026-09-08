@@ -491,51 +491,64 @@ func Menubar(kyse__props MenubarProps) kyse__template.HTML {
 					}
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t>")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t>\n")
 				}
 				if kyse__err == nil {
-//line components/menubar.kyse.go:166
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t")
+				}
+				if kyse__err == nil {
+//line components/menubar.kyse.go:167
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Menus[at].Items[line].Label)))
-//line components/menubar.go:500
+//line components/menubar.go:503
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "@if(.Menus[at].Items[line].Shortcut != \"\")<kbd\n")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-part=\"shortcut\"\n")
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tclass=\"")
-				}
-				if kyse__err == nil {
 //line components/menubar.kyse.go:168
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("shortcut", "kbd")))
-//line components/menubar.go:514
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-				}
-				if kyse__err == nil {
-					var kyse__v7 string
-//line components/menubar.kyse.go:169
-					kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("shortcut"))
+				if kyse__d.Menus[at].Items[line].Shortcut != "" {
+//line components/menubar.go:510
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t<kbd\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tdata-part=\"shortcut\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tclass=\"")
+					}
+					if kyse__err == nil {
+//line components/menubar.kyse.go:171
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("shortcut", "kbd")))
 //line components/menubar.go:523
-					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/menubar.kyse.go:169", kyse__err)
-					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						var kyse__v7 string
+//line components/menubar.kyse.go:172
+						kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("shortcut"))
+//line components/menubar.go:532
+						if kyse__err != nil {
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/menubar.kyse.go:172", kyse__err)
+						} else {
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t>")
+					}
+					if kyse__err == nil {
+//line components/menubar.kyse.go:173
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Menus[at].Items[line].Shortcut)))
+//line components/menubar.go:545
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "</kbd>\n")
 					}
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t>")
-				}
-				if kyse__err == nil {
-//line components/menubar.kyse.go:170
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Menus[at].Items[line].Shortcut)))
-//line components/menubar.go:536
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "</kbd>@endif</a>\n")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t</a>\n")
 				}
 			} else {
 				if kyse__err == nil {
@@ -544,16 +557,16 @@ func Menubar(kyse__props MenubarProps) kyse__template.HTML {
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-part=\"item\"\n")
 				}
-//line components/menubar.kyse.go:174
+//line components/menubar.kyse.go:179
 				if kyse__d.PartClass("item") != "" {
-//line components/menubar.go:550
+//line components/menubar.go:563
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tclass=\"")
 					}
 					if kyse__err == nil {
-//line components/menubar.kyse.go:175
+//line components/menubar.kyse.go:180
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("item")))
-//line components/menubar.go:557
+//line components/menubar.go:570
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -570,83 +583,96 @@ func Menubar(kyse__props MenubarProps) kyse__template.HTML {
 				}
 				if kyse__err == nil {
 					var kyse__v8 string
-//line components/menubar.kyse.go:180
+//line components/menubar.kyse.go:185
 					kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("item"))
-//line components/menubar.go:576
+//line components/menubar.go:589
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/menubar.kyse.go:180", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/menubar.kyse.go:185", kyse__err)
 					} else {
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 					}
 				}
-//line components/menubar.kyse.go:181
+//line components/menubar.kyse.go:186
 				if kyse__d.Menus[at].Items[line].Disabled {
-//line components/menubar.go:585
+//line components/menubar.go:598
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdisabled\n")
 					}
 				}
-//line components/menubar.kyse.go:184
+//line components/menubar.kyse.go:189
 				if kyse__d.Menus[at].Items[line].Variant != "" {
-//line components/menubar.go:592
+//line components/menubar.go:605
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-variant=\"")
 					}
 					if kyse__err == nil {
-//line components/menubar.kyse.go:185
+//line components/menubar.kyse.go:190
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Menus[at].Items[line].Variant))
-//line components/menubar.go:599
+//line components/menubar.go:612
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 					}
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t>")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t>\n")
 				}
 				if kyse__err == nil {
-//line components/menubar.kyse.go:187
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t")
+				}
+				if kyse__err == nil {
+//line components/menubar.kyse.go:193
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Menus[at].Items[line].Label)))
-//line components/menubar.go:611
+//line components/menubar.go:627
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "@if(.Menus[at].Items[line].Shortcut != \"\")<kbd\n")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-part=\"shortcut\"\n")
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tclass=\"")
-				}
-				if kyse__err == nil {
-//line components/menubar.kyse.go:189
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("shortcut", "kbd")))
-//line components/menubar.go:625
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-				}
-				if kyse__err == nil {
-					var kyse__v9 string
-//line components/menubar.kyse.go:190
-					kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("shortcut"))
+//line components/menubar.kyse.go:194
+				if kyse__d.Menus[at].Items[line].Shortcut != "" {
 //line components/menubar.go:634
-					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/menubar.kyse.go:190", kyse__err)
-					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t<kbd\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tdata-part=\"shortcut\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tclass=\"")
+					}
+					if kyse__err == nil {
+//line components/menubar.kyse.go:197
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("shortcut", "kbd")))
+//line components/menubar.go:647
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						var kyse__v9 string
+//line components/menubar.kyse.go:198
+						kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("shortcut"))
+//line components/menubar.go:656
+						if kyse__err != nil {
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/menubar.kyse.go:198", kyse__err)
+						} else {
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t>")
+					}
+					if kyse__err == nil {
+//line components/menubar.kyse.go:199
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Menus[at].Items[line].Shortcut)))
+//line components/menubar.go:669
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "</kbd>\n")
 					}
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t>")
-				}
-				if kyse__err == nil {
-//line components/menubar.kyse.go:191
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Menus[at].Items[line].Shortcut)))
-//line components/menubar.go:647
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "</kbd>@endif</button>\n")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t</button>\n")
 				}
 			}
 		}
