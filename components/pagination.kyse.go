@@ -47,6 +47,10 @@ type PaginationProps struct {
 	// "Next".
 	PreviousLabel string
 	NextLabel     string
+	// PageLabel names one numbered control, with the number written as "{n}":
+	// "Page {n}". Empty says that in English, which is a floor and not a
+	// default worth shipping.
+	PageLabel string
 
 	// The HTMX attributes, written on every entry, for a pager that swaps the
 	// list instead of loading a document. The links stay real addresses either
@@ -153,7 +157,11 @@ func (p PaginationProps) NextName() string {
 // PageName is what one number reads to a screen reader. The digit alone is
 // read as a digit, which in a row of them says nothing about what it does.
 func (p PaginationProps) PageName(number int) string {
-	return "Page " + strconv.Itoa(number)
+	sentence := p.PageLabel
+	if sentence == "" {
+		sentence = "Page {n}"
+	}
+	return strings.ReplaceAll(sentence, "{n}", strconv.Itoa(number))
 }
 
 // PartNames are the parts this component publishes.
@@ -192,6 +200,7 @@ func (p PaginationProps) PartNames() []string {
 						@attributes(.PartAttrs("previous"))
 						href="{{ .PreviousHref() }}"
 						rel="prev"
+						data-page="{{ .Page - 1 }}"
 						@if(.HxTarget != "")
 							hx-get="{{ .PreviousHref() }}"
 							hx-target="{{ .HxTarget }}"
@@ -227,6 +236,7 @@ func (p PaginationProps) PartNames() []string {
 							@endif
 							@attributes(.PartAttrs("link"))
 							href="{{ .Href(entry.Number) }}"
+							data-page="{{ entry.Number }}"
 							aria-label="{{ .PageName(entry.Number) }}"
 							@if(entry.Current)
 								aria-current="page"
@@ -259,6 +269,7 @@ func (p PaginationProps) PartNames() []string {
 						@attributes(.PartAttrs("next"))
 						href="{{ .NextHref() }}"
 						rel="next"
+						data-page="{{ .Page + 1 }}"
 						@if(.HxTarget != "")
 							hx-get="{{ .NextHref() }}"
 							hx-target="{{ .HxTarget }}"

@@ -56,6 +56,10 @@ type PaginationProps struct {
 	// "Next".
 	PreviousLabel string
 	NextLabel     string
+	// PageLabel names one numbered control, with the number written as "{n}":
+	// "Page {n}". Empty says that in English, which is a floor and not a
+	// default worth shipping.
+	PageLabel string
 
 	// The HTMX attributes, written on every entry, for a pager that swaps the
 	// list instead of loading a document. The links stay real addresses either
@@ -162,7 +166,11 @@ func (p PaginationProps) NextName() string {
 // PageName is what one number reads to a screen reader. The digit alone is
 // read as a digit, which in a row of them says nothing about what it does.
 func (p PaginationProps) PageName(number int) string {
-	return "Page " + strconv.Itoa(number)
+	sentence := p.PageLabel
+	if sentence == "" {
+		sentence = "Page {n}"
+	}
+	return strings.ReplaceAll(sentence, "{n}", strconv.Itoa(number))
 }
 
 // PartNames are the parts this component publishes.
@@ -170,7 +178,7 @@ func (p PaginationProps) PartNames() []string {
 	return []string{"root", "list", "item", "link", "previous", "next", "ellipsis"}
 }
 
-//line components/pagination.go:174
+//line components/pagination.go:182
 
 // Pagination renders the pagination component.
 func Pagination(kyse__props PaginationProps) kyse__template.HTML {
@@ -183,9 +191,9 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/pagination.kyse.go:165
+//line components/pagination.kyse.go:173
 	if kyse__d.Pages > 1 {
-//line components/pagination.go:189
+//line components/pagination.go:197
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t<nav\n")
 		}
@@ -196,9 +204,9 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/pagination.kyse.go:168
+//line components/pagination.kyse.go:176
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("pagination")))
-//line components/pagination.go:202
+//line components/pagination.go:210
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -207,20 +215,20 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-label=\"")
 		}
 		if kyse__err == nil {
-//line components/pagination.kyse.go:169
+//line components/pagination.kyse.go:177
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.LandmarkName()))
-//line components/pagination.go:213
+//line components/pagination.go:221
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v1 string
-//line components/pagination.kyse.go:170
+//line components/pagination.kyse.go:178
 			kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/pagination.go:222
+//line components/pagination.go:230
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:170", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:178", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 			}
@@ -234,16 +242,16 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"list\"\n")
 		}
-//line components/pagination.kyse.go:174
+//line components/pagination.kyse.go:182
 		if kyse__d.PartClass("list") != "" {
-//line components/pagination.go:240
+//line components/pagination.go:248
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/pagination.kyse.go:175
+//line components/pagination.kyse.go:183
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("list")))
-//line components/pagination.go:247
+//line components/pagination.go:255
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -251,11 +259,11 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 			var kyse__v2 string
-//line components/pagination.kyse.go:177
+//line components/pagination.kyse.go:185
 			kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("list"))
-//line components/pagination.go:257
+//line components/pagination.go:265
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:177", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:185", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 			}
@@ -263,25 +271,25 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>\n")
 		}
-//line components/pagination.kyse.go:179
+//line components/pagination.kyse.go:187
 		if kyse__d.HasPrevious() {
-//line components/pagination.go:269
+//line components/pagination.go:277
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<li\n")
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-part=\"item\"\n")
 			}
-//line components/pagination.kyse.go:182
+//line components/pagination.kyse.go:190
 			if kyse__d.PartClass("item") != "" {
-//line components/pagination.go:278
+//line components/pagination.go:286
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
 				}
 				if kyse__err == nil {
-//line components/pagination.kyse.go:183
+//line components/pagination.kyse.go:191
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("item")))
-//line components/pagination.go:285
+//line components/pagination.go:293
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -289,11 +297,11 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v3 string
-//line components/pagination.kyse.go:185
+//line components/pagination.kyse.go:193
 				kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("item"))
-//line components/pagination.go:295
+//line components/pagination.go:303
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:185", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:193", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 				}
@@ -307,16 +315,16 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-part=\"previous\"\n")
 			}
-//line components/pagination.kyse.go:189
+//line components/pagination.kyse.go:197
 			if kyse__d.PartClass("previous") != "" {
-//line components/pagination.go:313
+//line components/pagination.go:321
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
 				}
 				if kyse__err == nil {
-//line components/pagination.kyse.go:190
+//line components/pagination.kyse.go:198
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("previous")))
-//line components/pagination.go:320
+//line components/pagination.go:328
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -324,11 +332,11 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v4 string
-//line components/pagination.kyse.go:192
+//line components/pagination.kyse.go:200
 				kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("previous"))
-//line components/pagination.go:330
+//line components/pagination.go:338
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:192", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:200", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 				}
@@ -338,11 +346,11 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v5 string
-//line components/pagination.kyse.go:193
+//line components/pagination.kyse.go:201
 				kyse__v5, kyse__err = kyse__view.TextURL(kyse__d.PreviousHref())
-//line components/pagination.go:344
+//line components/pagination.go:352
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:193", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:201", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 				}
@@ -353,19 +361,30 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\trel=\"prev\"\n")
 			}
-//line components/pagination.kyse.go:195
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-page=\"")
+			}
+			if kyse__err == nil {
+//line components/pagination.kyse.go:203
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Page-1))
+//line components/pagination.go:371
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+//line components/pagination.kyse.go:204
 			if kyse__d.HxTarget != "" {
-//line components/pagination.go:359
+//line components/pagination.go:378
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\thx-get=\"")
 				}
 				if kyse__err == nil {
 					var kyse__v6 string
-//line components/pagination.kyse.go:196
+//line components/pagination.kyse.go:205
 					kyse__v6, kyse__err = kyse__view.TextURL(kyse__d.PreviousHref())
-//line components/pagination.go:367
+//line components/pagination.go:386
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:196", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:205", kyse__err)
 					} else {
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 					}
@@ -377,24 +396,24 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\thx-target=\"")
 				}
 				if kyse__err == nil {
-//line components/pagination.kyse.go:197
+//line components/pagination.kyse.go:206
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxTarget))
-//line components/pagination.go:383
+//line components/pagination.go:402
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 			}
-//line components/pagination.kyse.go:199
+//line components/pagination.kyse.go:208
 			if kyse__d.HxSwap != "" {
-//line components/pagination.go:391
+//line components/pagination.go:410
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\thx-swap=\"")
 				}
 				if kyse__err == nil {
-//line components/pagination.kyse.go:200
+//line components/pagination.kyse.go:209
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxSwap))
-//line components/pagination.go:398
+//line components/pagination.go:417
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -404,9 +423,9 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/pagination.kyse.go:202
+//line components/pagination.kyse.go:211
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.PreviousName())))
-//line components/pagination.go:410
+//line components/pagination.go:429
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</a>\n")
@@ -418,26 +437,26 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 		}
-//line components/pagination.kyse.go:206
+//line components/pagination.kyse.go:215
 		for _, entry := range kyse__d.Entries() {
 			_ = entry
-//line components/pagination.go:425
+//line components/pagination.go:444
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<li\n")
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-part=\"item\"\n")
 			}
-//line components/pagination.kyse.go:209
+//line components/pagination.kyse.go:218
 			if kyse__d.PartClass("item") != "" {
-//line components/pagination.go:434
+//line components/pagination.go:453
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
 				}
 				if kyse__err == nil {
-//line components/pagination.kyse.go:210
+//line components/pagination.kyse.go:219
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("item")))
-//line components/pagination.go:441
+//line components/pagination.go:460
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -445,11 +464,11 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v7 string
-//line components/pagination.kyse.go:212
+//line components/pagination.kyse.go:221
 				kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("item"))
-//line components/pagination.go:451
+//line components/pagination.go:470
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:212", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:221", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 				}
@@ -457,9 +476,9 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>\n")
 			}
-//line components/pagination.kyse.go:214
+//line components/pagination.kyse.go:223
 			if entry.Ellipsis {
-//line components/pagination.go:463
+//line components/pagination.go:482
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<span\n")
 				}
@@ -470,9 +489,9 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
 				}
 				if kyse__err == nil {
-//line components/pagination.kyse.go:217
+//line components/pagination.kyse.go:226
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("ellipsis", "pagination-ellipsis")))
-//line components/pagination.go:476
+//line components/pagination.go:495
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -482,11 +501,11 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 				}
 				if kyse__err == nil {
 					var kyse__v8 string
-//line components/pagination.kyse.go:219
+//line components/pagination.kyse.go:228
 					kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("ellipsis"))
-//line components/pagination.go:488
+//line components/pagination.go:507
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:219", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:228", kyse__err)
 					} else {
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 					}
@@ -495,25 +514,25 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>&hellip;</span>\n")
 				}
 			}
-//line components/pagination.kyse.go:222
+//line components/pagination.kyse.go:231
 			if !entry.Ellipsis {
-//line components/pagination.go:501
+//line components/pagination.go:520
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<a\n")
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-part=\"link\"\n")
 				}
-//line components/pagination.kyse.go:225
+//line components/pagination.kyse.go:234
 				if kyse__d.PartClass("link") != "" {
-//line components/pagination.go:510
+//line components/pagination.go:529
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"")
 					}
 					if kyse__err == nil {
-//line components/pagination.kyse.go:226
+//line components/pagination.kyse.go:235
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("link")))
-//line components/pagination.go:517
+//line components/pagination.go:536
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -521,11 +540,11 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 				}
 				if kyse__err == nil {
 					var kyse__v9 string
-//line components/pagination.kyse.go:228
+//line components/pagination.kyse.go:237
 					kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("link"))
-//line components/pagination.go:527
+//line components/pagination.go:546
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:228", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:237", kyse__err)
 					} else {
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
 					}
@@ -535,11 +554,11 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 				}
 				if kyse__err == nil {
 					var kyse__v10 string
-//line components/pagination.kyse.go:229
+//line components/pagination.kyse.go:238
 					kyse__v10, kyse__err = kyse__view.TextURL(kyse__d.Href(entry.Number))
-//line components/pagination.go:541
+//line components/pagination.go:560
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:229", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:238", kyse__err)
 					} else {
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v10)
 					}
@@ -548,36 +567,47 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-label=\"")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-page=\"")
 				}
 				if kyse__err == nil {
-//line components/pagination.kyse.go:230
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PageName(entry.Number)))
-//line components/pagination.go:557
+//line components/pagination.kyse.go:239
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(entry.Number))
+//line components/pagination.go:576
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
-//line components/pagination.kyse.go:231
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-label=\"")
+				}
+				if kyse__err == nil {
+//line components/pagination.kyse.go:240
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PageName(entry.Number)))
+//line components/pagination.go:587
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+//line components/pagination.kyse.go:241
 				if entry.Current {
-//line components/pagination.go:564
+//line components/pagination.go:594
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-current=\"page\"\n")
 					}
 				}
-//line components/pagination.kyse.go:234
+//line components/pagination.kyse.go:244
 				if kyse__d.HxTarget != "" {
-//line components/pagination.go:571
+//line components/pagination.go:601
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-get=\"")
 					}
 					if kyse__err == nil {
 						var kyse__v11 string
-//line components/pagination.kyse.go:235
+//line components/pagination.kyse.go:245
 						kyse__v11, kyse__err = kyse__view.TextURL(kyse__d.Href(entry.Number))
-//line components/pagination.go:579
+//line components/pagination.go:609
 						if kyse__err != nil {
-							kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:235", kyse__err)
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:245", kyse__err)
 						} else {
 							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v11)
 						}
@@ -589,24 +619,24 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-target=\"")
 					}
 					if kyse__err == nil {
-//line components/pagination.kyse.go:236
+//line components/pagination.kyse.go:246
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxTarget))
-//line components/pagination.go:595
+//line components/pagination.go:625
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 					}
 				}
-//line components/pagination.kyse.go:238
+//line components/pagination.kyse.go:248
 				if kyse__d.HxSwap != "" {
-//line components/pagination.go:603
+//line components/pagination.go:633
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-swap=\"")
 					}
 					if kyse__err == nil {
-//line components/pagination.kyse.go:239
+//line components/pagination.kyse.go:249
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxSwap))
-//line components/pagination.go:610
+//line components/pagination.go:640
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -616,9 +646,9 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>")
 				}
 				if kyse__err == nil {
-//line components/pagination.kyse.go:241
+//line components/pagination.kyse.go:251
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(entry.Number)))
-//line components/pagination.go:622
+//line components/pagination.go:652
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "</a>\n")
@@ -631,25 +661,25 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 		}
-//line components/pagination.kyse.go:246
+//line components/pagination.kyse.go:256
 		if kyse__d.HasNext() {
-//line components/pagination.go:637
+//line components/pagination.go:667
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<li\n")
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-part=\"item\"\n")
 			}
-//line components/pagination.kyse.go:249
+//line components/pagination.kyse.go:259
 			if kyse__d.PartClass("item") != "" {
-//line components/pagination.go:646
+//line components/pagination.go:676
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
 				}
 				if kyse__err == nil {
-//line components/pagination.kyse.go:250
+//line components/pagination.kyse.go:260
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("item")))
-//line components/pagination.go:653
+//line components/pagination.go:683
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -657,11 +687,11 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v12 string
-//line components/pagination.kyse.go:252
+//line components/pagination.kyse.go:262
 				kyse__v12, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("item"))
-//line components/pagination.go:663
+//line components/pagination.go:693
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:252", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:262", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v12)
 				}
@@ -675,16 +705,16 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-part=\"next\"\n")
 			}
-//line components/pagination.kyse.go:256
+//line components/pagination.kyse.go:266
 			if kyse__d.PartClass("next") != "" {
-//line components/pagination.go:681
+//line components/pagination.go:711
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
 				}
 				if kyse__err == nil {
-//line components/pagination.kyse.go:257
+//line components/pagination.kyse.go:267
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("next")))
-//line components/pagination.go:688
+//line components/pagination.go:718
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -692,11 +722,11 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v13 string
-//line components/pagination.kyse.go:259
+//line components/pagination.kyse.go:269
 				kyse__v13, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("next"))
-//line components/pagination.go:698
+//line components/pagination.go:728
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:259", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:269", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v13)
 				}
@@ -706,11 +736,11 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v14 string
-//line components/pagination.kyse.go:260
+//line components/pagination.kyse.go:270
 				kyse__v14, kyse__err = kyse__view.TextURL(kyse__d.NextHref())
-//line components/pagination.go:712
+//line components/pagination.go:742
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:260", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:270", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v14)
 				}
@@ -721,19 +751,30 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\trel=\"next\"\n")
 			}
-//line components/pagination.kyse.go:262
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-page=\"")
+			}
+			if kyse__err == nil {
+//line components/pagination.kyse.go:272
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Page+1))
+//line components/pagination.go:761
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+//line components/pagination.kyse.go:273
 			if kyse__d.HxTarget != "" {
-//line components/pagination.go:727
+//line components/pagination.go:768
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\thx-get=\"")
 				}
 				if kyse__err == nil {
 					var kyse__v15 string
-//line components/pagination.kyse.go:263
+//line components/pagination.kyse.go:274
 					kyse__v15, kyse__err = kyse__view.TextURL(kyse__d.NextHref())
-//line components/pagination.go:735
+//line components/pagination.go:776
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:263", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/pagination.kyse.go:274", kyse__err)
 					} else {
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v15)
 					}
@@ -745,24 +786,24 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\thx-target=\"")
 				}
 				if kyse__err == nil {
-//line components/pagination.kyse.go:264
+//line components/pagination.kyse.go:275
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxTarget))
-//line components/pagination.go:751
+//line components/pagination.go:792
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 			}
-//line components/pagination.kyse.go:266
+//line components/pagination.kyse.go:277
 			if kyse__d.HxSwap != "" {
-//line components/pagination.go:759
+//line components/pagination.go:800
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\thx-swap=\"")
 				}
 				if kyse__err == nil {
-//line components/pagination.kyse.go:267
+//line components/pagination.kyse.go:278
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxSwap))
-//line components/pagination.go:766
+//line components/pagination.go:807
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -772,9 +813,9 @@ func Pagination(kyse__props PaginationProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/pagination.kyse.go:269
+//line components/pagination.kyse.go:280
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.NextName())))
-//line components/pagination.go:778
+//line components/pagination.go:819
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</a>\n")
