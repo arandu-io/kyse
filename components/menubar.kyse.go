@@ -163,11 +163,16 @@ func (p MenubarProps) PartNames() []string {
 								@if(.Menus[at].Items[line].Variant != "")
 									data-variant="{{ .Menus[at].Items[line].Variant }}"
 								@endif
-							>{{ .Menus[at].Items[line].Label }}@if(.Menus[at].Items[line].Shortcut != "")<kbd
-									data-part="shortcut"
-									class="{{ .PartClass("shortcut", "kbd") }}"
-									@attributes(.PartAttrs("shortcut"))
-								>{{ .Menus[at].Items[line].Shortcut }}</kbd>@endif</a>
+							>
+								{{ .Menus[at].Items[line].Label }}
+								@if(.Menus[at].Items[line].Shortcut != "")
+									<kbd
+										data-part="shortcut"
+										class="{{ .PartClass("shortcut", "kbd") }}"
+										@attributes(.PartAttrs("shortcut"))
+									>{{ .Menus[at].Items[line].Shortcut }}</kbd>
+								@endif
+							</a>
 						@else
 							<button
 								data-part="item"
@@ -184,11 +189,16 @@ func (p MenubarProps) PartNames() []string {
 								@if(.Menus[at].Items[line].Variant != "")
 									data-variant="{{ .Menus[at].Items[line].Variant }}"
 								@endif
-							>{{ .Menus[at].Items[line].Label }}@if(.Menus[at].Items[line].Shortcut != "")<kbd
-									data-part="shortcut"
-									class="{{ .PartClass("shortcut", "kbd") }}"
-									@attributes(.PartAttrs("shortcut"))
-								>{{ .Menus[at].Items[line].Shortcut }}</kbd>@endif</button>
+							>
+								{{ .Menus[at].Items[line].Label }}
+								@if(.Menus[at].Items[line].Shortcut != "")
+									<kbd
+										data-part="shortcut"
+										class="{{ .PartClass("shortcut", "kbd") }}"
+										@attributes(.PartAttrs("shortcut"))
+									>{{ .Menus[at].Items[line].Shortcut }}</kbd>
+								@endif
+							</button>
 						@endif
 					@endfor
 				</div>

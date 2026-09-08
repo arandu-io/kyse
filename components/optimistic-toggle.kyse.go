@@ -127,7 +127,12 @@ func (p OptimisticToggleProps) PartNames() []string {
 		@if(!.Pressed)
 			hidden
 		@endif
-	>@if(.OnIcon != ""){!! .OnIcon !!}@endif{{ .OnText() }}</span>
+	>
+		@if(.OnIcon != "")
+			{!! .OnIcon !!}
+		@endif
+		{{ .OnText() }}
+	</span>
 	<span
 		data-part="off"
 		@if(.PartClass("off") != "")
@@ -138,7 +143,12 @@ func (p OptimisticToggleProps) PartNames() []string {
 		@if(.Pressed)
 			hidden
 		@endif
-	>@if(.OffIcon != ""){!! .OffIcon !!}@endif{{ .OffText() }}</span>
+	>
+		@if(.OffIcon != "")
+			{!! .OffIcon !!}
+		@endif
+		{{ .OffText() }}
+	</span>
 	@if(.Count != "")
 		<span
 			data-part="count"

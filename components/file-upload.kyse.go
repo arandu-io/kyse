@@ -183,7 +183,12 @@ func (p FileUploadProps) PartNames() []string {
 			data-part="prompt"
 			class="{{ .PartClass("prompt", "file-upload-prompt") }}"
 			@attributes(.PartAttrs("prompt"))
-		>{{ .PromptText() }}@if(.MaxSizeLabel != "") <small>{{ .MaxSizeLabel }}</small>@endif</span>
+		>
+			{{ .PromptText() }}
+			@if(.MaxSizeLabel != "")
+				<small>{{ .MaxSizeLabel }}</small>
+			@endif
+		</span>
 	</label>
 
 	{{-- The list is on the page before anything is chosen, and it is polite:

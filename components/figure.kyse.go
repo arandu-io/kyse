@@ -52,11 +52,16 @@ func (p FigureProps) PartNames() []string {
 			data-part="caption"
 			class="{{ .PartClass("caption", "figure-caption") }}"
 			@attributes(.PartAttrs("caption"))
-		>{{ .Caption }}@if(.Credit != "")<span
-				data-part="credit"
-				class="{{ .PartClass("credit", "figure-credit") }}"
-				@attributes(.PartAttrs("credit"))
-			>{{ .Credit }}</span>@endif</figcaption>
+		>
+			{{ .Caption }}
+			@if(.Credit != "")
+				<span
+					data-part="credit"
+					class="{{ .PartClass("credit", "figure-credit") }}"
+					@attributes(.PartAttrs("credit"))
+				>{{ .Credit }}</span>
+			@endif
+		</figcaption>
 	@endif
 	@if(.ImageURL != "")
 		<img
@@ -72,10 +77,15 @@ func (p FigureProps) PartNames() []string {
 			data-part="caption"
 			class="{{ .PartClass("caption", "figure-caption") }}"
 			@attributes(.PartAttrs("caption"))
-		>{{ .Caption }}@if(.Credit != "")<span
-				data-part="credit"
-				class="{{ .PartClass("credit", "figure-credit") }}"
-				@attributes(.PartAttrs("credit"))
-			>{{ .Credit }}</span>@endif</figcaption>
+		>
+			{{ .Caption }}
+			@if(.Credit != "")
+				<span
+					data-part="credit"
+					class="{{ .PartClass("credit", "figure-credit") }}"
+					@attributes(.PartAttrs("credit"))
+				>{{ .Credit }}</span>
+			@endif
+		</figcaption>
 	@endif
 </figure>
