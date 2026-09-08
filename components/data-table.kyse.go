@@ -62,8 +62,33 @@ type DataTableProps struct {
 	// Columns are the headers. A column with a Key can be ordered by and
 	// switched off; see TableColumn.
 	Columns []TableColumn
-	// Rows are the lines of the page being shown.
+	// Rows are the lines of the page being shown, or the whole list when
+	// Complete says so.
 	Rows []TableRow
+	// Complete says the rows above are the whole list and not a page of it.
+	//
+	// It is a fact about the data and not a preference, and everything else
+	// follows from it. When the page holds every row, the browser can search,
+	// order and page correctly because it has everything -- and it does, so a
+	// click costs nothing and the server is not asked. When the page holds a
+	// window onto something longer, the browser cannot: ordering the rows in
+	// hand orders only those, and filtering them hides matches that were never
+	// sent. Then every control is an address and the server answers.
+	//
+	// Saying true about a page of a longer list is the bug this field is named
+	// to prevent: it reads as rows in the wrong order to everyone except
+	// whoever wrote it, and nothing crashes.
+	//
+	// A complete list still keeps its addresses. The headers are still links
+	// and the search is still a form, so the page works with no script -- the
+	// behaviour takes the click before the link is followed. That is what
+	// makes this an enhancement rather than a second implementation.
+	Complete bool
+	// PageSize is how many rows a browser-paged list shows at once. Zero shows
+	// them all, which is right for anything short enough not to need a pager.
+	// It means nothing when the server is paging, because then the page it
+	// sent is the page.
+	PageSize int
 	// Empty is what stands in when the list has nothing -- which on a searched
 	// list means "nothing matched" and not "nothing exists", so the message is
 	// the caller's to write.
@@ -185,8 +210,24 @@ func (p DataTableProps) Hideable() bool {
 	return false
 }
 
+// Sheets is how many pages there are.
+//
+// A complete list counts its own: the server sent every row, so how many
+// pages that makes is arithmetic and not something a caller should have to
+// pass in beside the rows it already passed. A windowed list is told, because
+// only the server knows how much it did not send.
+func (p DataTableProps) Sheets() int {
+	if p.Complete && p.PageSize > 0 {
+		if len(p.Rows) == 0 {
+			return 1
+		}
+		return (len(p.Rows) + p.PageSize - 1) / p.PageSize
+	}
+	return p.Pages
+}
+
 // Paged is whether there is more than one page to move between.
-func (p DataTableProps) Paged() bool { return p.Pages > 1 }
+func (p DataTableProps) Paged() bool { return p.Sheets() > 1 }
 
 // Grid is the table this draws, built from this component's own fields so the
 // two cannot disagree about the order, the selection or the rows.
@@ -226,7 +267,7 @@ func (p DataTableProps) Pager() PaginationProps {
 	return PaginationProps{
 		ComponentProps: ComponentProps{Parts: p.Parts},
 		Page:           p.Page,
-		Pages:          p.Pages,
+		Pages:          p.Sheets(),
 		URL:            p.PageURL(),
 		Label:          p.Label,
 		PreviousLabel:  p.PreviousLabel,
@@ -266,6 +307,10 @@ func (p DataTableProps) RootAttrs() map[string]string {
 	if p.Behavior.Name == "" {
 		p.Behavior = Behavior{Name: TableBehavior, Props: map[string]any{
 			"selected": p.SelectedLabel,
+			"complete": p.Complete,
+			"pageSize": p.PageSize,
+			"search":   p.SearchName,
+			"empty":    p.Empty.Title,
 		}}
 	}
 	return p.ComponentProps.RootAttrs()
@@ -290,6 +335,9 @@ func (p DataTableProps) PartNames() []string {
 	class="{{ .RootClass("data-table") }}"
 	id="{{ .ID }}"
 	role="region"
+	@if(.Complete)
+		data-complete="true"
+	@endif
 	@if(.Label != "")
 		aria-label="{{ .Label }}"
 	@endif
