@@ -2,6 +2,12 @@
 
 package components
 
+import (
+	"time"
+
+	"github.com/arandu-io/kyse/icons"
+)
+
 @go
 // DateTimePickerProps is a date, a time, or both, in the field the browser
 // already draws a calendar for.
@@ -54,6 +60,36 @@ type DateTimePickerProps struct {
 	// ReadOnly shows the value without letting it change. It still submits,
 	// which is what separates it from Disabled.
 	ReadOnly bool
+
+	// Calendar draws a month grid beside the box instead of leaving the
+	// choosing to the browser's own picker.
+	//
+	// The native popup is chrome: no rule reaches inside it, in any engine,
+	// so a project with a design cannot have the picker look like the rest of
+	// its screens. This draws one that can.
+	//
+	// What does not change is where the value lives. The input is still the
+	// field, still submits, and still enforces Min, Max, Step and Required --
+	// the calendar writes into it. So the native picker remains the whole
+	// answer before any script has run, which is why this is drawn beside the
+	// box rather than in place of it.
+	//
+	// It has no effect on a time, a month or a week: there is no grid of
+	// those, and the browser's own control for them is not the one that is
+	// ugly.
+	Calendar bool
+	// MonthNames, WeekdayNames and FirstDay are handed to that grid. See
+	// CalendarProps, where the reason they are data rather than a guess is
+	// written out.
+	MonthNames   []string
+	WeekdayNames []string
+	FirstDay     time.Weekday
+	// OpenLabel names the control that opens the grid. Empty says "Choose a
+	// date", which a screen reader needs because the control is an icon.
+	OpenLabel string
+	// TodayLabel and ClearLabel are the two controls under the grid.
+	TodayLabel string
+	ClearLabel string
 }
 
 // InputType is the element type for the kind asked for. An unknown kind is a
@@ -101,9 +137,84 @@ func (p DateTimePickerProps) DescribedBy() string {
 	return ""
 }
 
+// Griddable is whether a month grid means anything for what is being asked
+// for. A time, a month and a week have no grid of days to draw.
+func (p DateTimePickerProps) Griddable() bool {
+	return p.Calendar && (p.Kind == "" || p.Kind == "date" || p.Kind == "datetime")
+}
+
+// Day is the date half of the value, which is what the grid selects. A
+// datetime carries a time after it, and the grid neither reads nor writes
+// that -- it replaces the ten characters in front.
+func (p DateTimePickerProps) Day() string {
+	current := p.Current()
+	if len(current) >= 10 {
+		return current[:10]
+	}
+	return current
+}
+
+// DayMin and DayMax are the bounds as the grid reads them, which is the date
+// half of whatever the field was given.
+func (p DateTimePickerProps) DayMin() string { return firstTen(p.Min) }
+
+// DayMax is the ceiling as the grid reads it.
+func (p DateTimePickerProps) DayMax() string { return firstTen(p.Max) }
+
+// firstTen is the date half of a value that may carry a time.
+func firstTen(value string) string {
+	if len(value) >= 10 {
+		return value[:10]
+	}
+	return value
+}
+
+// OpenName is what the control that opens the grid is called.
+func (p DateTimePickerProps) OpenName() string {
+	if p.OpenLabel != "" {
+		return p.OpenLabel
+	}
+	return "Choose a date"
+}
+
+// CalendarID and PanelID are the ids the grid and the panel hang off.
+func (p DateTimePickerProps) CalendarID() string { return p.Name + "-calendar" }
+
+// PanelID is the id of the element that opens.
+func (p DateTimePickerProps) PanelID() string { return p.Name + "-calendar-panel" }
+
+// Grid is the calendar this picker draws, built from the picker's own fields
+// so the two cannot disagree about the day, the bounds or the language.
+func (p DateTimePickerProps) Grid() CalendarProps {
+	return CalendarProps{
+		// The caller's parts go through, so a name published here reaches the
+		// element it names whether that element is drawn by this component or
+		// by the one it composes. A composition that swallowed them would
+		// publish names nothing could reach.
+		ComponentProps: ComponentProps{Parts: p.Parts},
+		ID:           p.CalendarID(),
+		Label:        p.OpenName(),
+		Value:        p.Day(),
+		Min:          p.DayMin(),
+		Max:          p.DayMax(),
+		MonthNames:   p.MonthNames,
+		WeekdayNames: p.WeekdayNames,
+		FirstDay:     p.FirstDay,
+		TodayLabel:   p.TodayLabel,
+		ClearLabel:   p.ClearLabel,
+		Target:       p.Name,
+	}
+}
+
 // PartNames are the parts this component publishes.
 func (p DateTimePickerProps) PartNames() []string {
-	return []string{"root", "label", "input", "message", "hint"}
+	// The calendar's names are published here as well, because this draws one
+	// and the parts a caller can reach are the parts on the page -- not the
+	// parts this file happens to write itself.
+	return append(
+		[]string{"root", "label", "group", "input", "open", "panel", "message", "hint"},
+		CalendarProps{}.PartNames()[1:]...,
+	)
 }
 @endgo
 
@@ -118,6 +229,18 @@ func (p DateTimePickerProps) PartNames() []string {
 		for="{{ .Name }}"
 		@attributes(.PartAttrs("label"))
 	>{{ .Label }}</label>
+
+	{{-- The group is only drawn when there is a grid to sit beside the box.
+	     A field with one child in a flex row is a wrapper that exists for
+	     nothing, and it would change the markup of every picker that does not
+	     ask for a calendar. --}}
+	@if(.Griddable())
+		<div
+			data-part="group"
+			class="{{ .PartClass("group", "date-picker") }}"
+			@attributes(.PartAttrs("group"))
+		>
+	@endif
 
 	<input
 		data-part="input"
@@ -152,6 +275,42 @@ func (p DateTimePickerProps) PartNames() []string {
 			readonly
 		@endif
 	>
+
+	@if(.Griddable())
+			{{-- The panel is a popover the shipped behaviour already opens and
+			     light-dismisses, so nothing here decides when it is on screen.
+			     The grid inside it is the Calendar component, built from this
+			     picker's own fields -- the two cannot disagree about the day,
+			     the bounds or the language, because there is one source for
+			     each. --}}
+			<button
+				data-part="open"
+				class="{{ .PartClass("open", "btn") }}"
+				type="button"
+				data-variant="ghost"
+				data-size="sm"
+				data-align="end"
+				id="{{ .PanelID() }}-trigger"
+				aria-controls="{{ .PanelID() }}"
+				aria-expanded="false"
+				aria-label="{{ .OpenName() }}"
+				@if(.Disabled)
+					disabled
+				@endif
+				@attributes(.PartAttrs("open"))
+			>{!! icons.CalendarBlank(icons.Props{}) !!}</button>
+
+			<div
+				data-part="panel"
+				class="{{ .PartClass("panel", "date-picker-panel") }}"
+				id="{{ .PanelID() }}"
+				data-popover
+				aria-hidden="true"
+				aria-labelledby="{{ .PanelID() }}-trigger"
+				@attributes(.PartAttrs("panel"))
+			>{!! Calendar(.Grid()) !!}</div>
+		</div>
+	@endif
 
 	@if(.Message() != "")
 		<p

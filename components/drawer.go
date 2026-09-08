@@ -47,7 +47,16 @@ import (
 type DrawerProps struct {
 	// ComponentProps is the class, attributes and parts the caller adds.
 	ComponentProps
-	// ID is what a trigger targets to open this: `onclick="ID.showModal()"`.
+	// ID is what a trigger targets to open this:
+	//
+	//	<button data-dialog-open="ID">Filters</button>
+	//
+	// Not an inline onclick. The policy this framework serves under is
+	// script-src 'self' with no 'unsafe-inline', and that blocks an inline
+	// handler exactly as it blocks an inline script -- so the handler works
+	// while somebody is building and fails when the headers go on. The
+	// attribute is read by the shipped script, which looks the id up and
+	// never evaluates anything.
 	ID string
 	// Side is the edge it comes in from: "left", "right", "top" or "bottom".
 	// Empty is the bottom, because that is what the stylesheet draws when
@@ -99,7 +108,7 @@ func (p DrawerProps) PartNames() []string {
 	return []string{"root", "content", "header", "title", "description", "nav", "link", "footer", "close"}
 }
 
-//line components/drawer.go:103
+//line components/drawer.go:112
 
 // Drawer renders the drawer component.
 func Drawer(kyse__props DrawerProps) kyse__template.HTML {
@@ -122,9 +131,9 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/drawer.kyse.go:92
+//line components/drawer.kyse.go:101
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/drawer.go:128
+//line components/drawer.go:137
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -133,9 +142,9 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/drawer.kyse.go:93
+//line components/drawer.kyse.go:102
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("drawer")))
-//line components/drawer.go:139
+//line components/drawer.go:148
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -144,49 +153,49 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\taria-labelledby=\"")
 	}
 	if kyse__err == nil {
-//line components/drawer.kyse.go:94
+//line components/drawer.kyse.go:103
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/drawer.go:150
+//line components/drawer.go:159
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "-title\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/drawer.kyse.go:95
+//line components/drawer.kyse.go:104
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/drawer.go:159
+//line components/drawer.go:168
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:95", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:104", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
 	}
-//line components/drawer.kyse.go:96
+//line components/drawer.kyse.go:105
 	if kyse__d.Side != "" {
-//line components/drawer.go:168
+//line components/drawer.go:177
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-side=\"")
 		}
 		if kyse__err == nil {
-//line components/drawer.kyse.go:97
+//line components/drawer.kyse.go:106
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Side))
-//line components/drawer.go:175
+//line components/drawer.go:184
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/drawer.kyse.go:99
+//line components/drawer.kyse.go:108
 	if kyse__d.DescribedBy() != "" {
-//line components/drawer.go:183
+//line components/drawer.go:192
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/drawer.kyse.go:100
+//line components/drawer.kyse.go:109
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/drawer.go:190
+//line components/drawer.go:199
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -201,16 +210,16 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-part=\"content\"\n")
 	}
-//line components/drawer.kyse.go:105
+//line components/drawer.kyse.go:114
 	if kyse__d.PartClass("content") != "" {
-//line components/drawer.go:207
+//line components/drawer.go:216
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/drawer.kyse.go:106
+//line components/drawer.kyse.go:115
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("content")))
-//line components/drawer.go:214
+//line components/drawer.go:223
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -218,11 +227,11 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v2 string
-//line components/drawer.kyse.go:108
+//line components/drawer.kyse.go:117
 		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("content"))
-//line components/drawer.go:224
+//line components/drawer.go:233
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:108", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:117", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
@@ -236,16 +245,16 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"header\"\n")
 	}
-//line components/drawer.kyse.go:112
+//line components/drawer.kyse.go:121
 	if kyse__d.PartClass("header") != "" {
-//line components/drawer.go:242
+//line components/drawer.go:251
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/drawer.kyse.go:113
+//line components/drawer.kyse.go:122
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("header")))
-//line components/drawer.go:249
+//line components/drawer.go:258
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -253,11 +262,11 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v3 string
-//line components/drawer.kyse.go:115
+//line components/drawer.kyse.go:124
 		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("header"))
-//line components/drawer.go:259
+//line components/drawer.go:268
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:115", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:124", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
@@ -271,16 +280,16 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"title\"\n")
 	}
-//line components/drawer.kyse.go:119
+//line components/drawer.kyse.go:128
 	if kyse__d.PartClass("title") != "" {
-//line components/drawer.go:277
+//line components/drawer.go:286
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/drawer.kyse.go:120
+//line components/drawer.kyse.go:129
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("title")))
-//line components/drawer.go:284
+//line components/drawer.go:293
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -290,20 +299,20 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/drawer.kyse.go:122
+//line components/drawer.kyse.go:131
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/drawer.go:296
+//line components/drawer.go:305
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "-title\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v4 string
-//line components/drawer.kyse.go:123
+//line components/drawer.kyse.go:132
 		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("title"))
-//line components/drawer.go:305
+//line components/drawer.go:314
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:123", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:132", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 		}
@@ -312,32 +321,32 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 	}
 	if kyse__err == nil {
-//line components/drawer.kyse.go:124
+//line components/drawer.kyse.go:133
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Title)))
-//line components/drawer.go:318
+//line components/drawer.go:327
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</h2>\n")
 	}
-//line components/drawer.kyse.go:125
+//line components/drawer.kyse.go:134
 	if kyse__d.Description != "" {
-//line components/drawer.go:325
+//line components/drawer.go:334
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<p\n")
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-part=\"description\"\n")
 		}
-//line components/drawer.kyse.go:128
+//line components/drawer.kyse.go:137
 		if kyse__d.PartClass("description") != "" {
-//line components/drawer.go:334
+//line components/drawer.go:343
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/drawer.kyse.go:129
+//line components/drawer.kyse.go:138
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("description")))
-//line components/drawer.go:341
+//line components/drawer.go:350
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -347,20 +356,20 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tid=\"")
 		}
 		if kyse__err == nil {
-//line components/drawer.kyse.go:131
+//line components/drawer.kyse.go:140
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/drawer.go:353
+//line components/drawer.go:362
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "-description\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v5 string
-//line components/drawer.kyse.go:132
+//line components/drawer.kyse.go:141
 			kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("description"))
-//line components/drawer.go:362
+//line components/drawer.go:371
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:132", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:141", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 			}
@@ -369,9 +378,9 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>")
 		}
 		if kyse__err == nil {
-//line components/drawer.kyse.go:133
+//line components/drawer.kyse.go:142
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Description)))
-//line components/drawer.go:375
+//line components/drawer.go:384
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
@@ -383,9 +392,9 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/drawer.kyse.go:137
+//line components/drawer.kyse.go:146
 	if len(kyse__d.Links) > 0 {
-//line components/drawer.go:389
+//line components/drawer.go:398
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<section class=\"p-4\">\n")
 		}
@@ -399,20 +408,20 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/drawer.kyse.go:141
+//line components/drawer.kyse.go:150
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("nav", "grid gap-1")))
-//line components/drawer.go:405
+//line components/drawer.go:414
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v6 string
-//line components/drawer.kyse.go:142
+//line components/drawer.kyse.go:151
 			kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("nav"))
-//line components/drawer.go:414
+//line components/drawer.go:423
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:142", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:151", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 			}
@@ -420,10 +429,10 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>\n")
 		}
-//line components/drawer.kyse.go:144
+//line components/drawer.kyse.go:153
 		for _, link := range kyse__d.Links {
 			_ = link
-//line components/drawer.go:427
+//line components/drawer.go:436
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<a\n")
 			}
@@ -434,9 +443,9 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/drawer.kyse.go:147
+//line components/drawer.kyse.go:156
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("link", "btn justify-start")))
-//line components/drawer.go:440
+//line components/drawer.go:449
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -449,11 +458,11 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v7 string
-//line components/drawer.kyse.go:149
+//line components/drawer.kyse.go:158
 				kyse__v7, kyse__err = kyse__view.TextURL(link.Href)
-//line components/drawer.go:455
+//line components/drawer.go:464
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:149", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:158", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 				}
@@ -463,18 +472,18 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v8 string
-//line components/drawer.kyse.go:150
+//line components/drawer.kyse.go:159
 				kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("link"))
-//line components/drawer.go:469
+//line components/drawer.go:478
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:150", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:159", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 				}
 			}
-//line components/drawer.kyse.go:151
+//line components/drawer.kyse.go:160
 			if link.Current {
-//line components/drawer.go:478
+//line components/drawer.go:487
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-current=\"page\"\n")
 				}
@@ -483,9 +492,9 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/drawer.kyse.go:154
+//line components/drawer.kyse.go:163
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(link.Label)))
-//line components/drawer.go:489
+//line components/drawer.go:498
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</a>\n")
@@ -507,16 +516,16 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"footer\"\n")
 	}
-//line components/drawer.kyse.go:162
+//line components/drawer.kyse.go:171
 	if kyse__d.PartClass("footer") != "" {
-//line components/drawer.go:513
+//line components/drawer.go:522
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/drawer.kyse.go:163
+//line components/drawer.kyse.go:172
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("footer")))
-//line components/drawer.go:520
+//line components/drawer.go:529
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -524,11 +533,11 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v9 string
-//line components/drawer.kyse.go:165
+//line components/drawer.kyse.go:174
 		kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("footer"))
-//line components/drawer.go:530
+//line components/drawer.go:539
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:165", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:174", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
 		}
@@ -552,9 +561,9 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/drawer.kyse.go:171
+//line components/drawer.kyse.go:180
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("close", "btn")))
-//line components/drawer.go:558
+//line components/drawer.go:567
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -564,11 +573,11 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v10 string
-//line components/drawer.kyse.go:173
+//line components/drawer.kyse.go:182
 		kyse__v10, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("close"))
-//line components/drawer.go:570
+//line components/drawer.go:579
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:173", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/drawer.kyse.go:182", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v10)
 		}
@@ -577,9 +586,9 @@ func Drawer(kyse__props DrawerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>")
 	}
 	if kyse__err == nil {
-//line components/drawer.kyse.go:174
+//line components/drawer.kyse.go:183
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Close())))
-//line components/drawer.go:583
+//line components/drawer.go:592
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</button>\n")

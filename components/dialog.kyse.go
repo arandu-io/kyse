@@ -24,7 +24,16 @@ import "strings"
 type DialogProps struct {
 	// ComponentProps is the class, attributes and parts the caller adds.
 	ComponentProps
-	// ID is what a button targets to open this: `onclick="ID.showModal()"`.
+	// ID is what a button targets to open this:
+	//
+	//	<button data-dialog-open="ID">Delete</button>
+	//
+	// Not an inline onclick. The policy this framework serves under is
+	// script-src 'self' with no 'unsafe-inline', and that blocks an inline
+	// handler exactly as it blocks an inline script -- so the handler works
+	// while somebody is building and fails when the headers go on. The
+	// attribute is read by the shipped script, which looks the id up and
+	// never evaluates anything.
 	ID string
 	// Title is the question.
 	Title string

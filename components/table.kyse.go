@@ -2,6 +2,11 @@
 
 package components
 
+import (
+	"strconv"
+	"strings"
+)
+
 @go
 // TableProps is a grid of rows under a row of headers.
 //
@@ -71,6 +76,31 @@ type TableProps struct {
 	// A row that carries a Level makes it a treegrid instead, and the arrow
 	// keys then open and close as well as move.
 	Navigable bool
+	// SortKey and SortDir are the ordering in force: the column's Key, and
+	// "asc" or "desc". They are what the server sorted by, drawn back onto the
+	// header so the table says how it is ordered rather than leaving somebody
+	// to infer it.
+	SortKey string
+	SortDir string
+	// SortURL is the address a sort link goes to, with the column written as
+	// "{sort}" and the direction as "{dir}": "/invoices?sort={sort}&dir={dir}".
+	// Empty draws no sort links even on a sortable column, because a link with
+	// nowhere to go is a header that looks like a control and is not one.
+	SortURL string
+	// ColumnsLabel names the menu that switches columns off. Empty says
+	// "Columns". The menu is drawn only when some column is Hideable.
+	ColumnsLabel string
+	// SelectedLabel is the line saying how many rows are chosen, with the
+	// count written as "{n}" and the total as "{total}": "{n} of {total} rows
+	// selected". Empty draws that sentence in English.
+	SelectedLabel string
+
+	// The HTMX attributes for a sort link or a column menu, so the table can
+	// swap itself instead of loading a document. The links stay real
+	// addresses either way.
+	HxTarget string
+	HxSwap   string
+
 	// Token is the CSRF token for the bulk form. A form that changes something
 	// and carries none is refused by the framework, which is the intended
 	// outcome and a confusing one to debug -- so it is a field here rather
@@ -82,6 +112,22 @@ type TableProps struct {
 type TableColumn struct {
 	// Label is the header text.
 	Label string
+	// Key names the column: what a sort link sends, and what a visibility
+	// toggle switches. Empty leaves the column unsortable and unhideable,
+	// which is right for a column of controls.
+	Key string
+	// Sortable draws the header as the control that orders by it.
+	//
+	// The ordering happens on the server. A table sorted in the browser is
+	// sorted only within the page that was fetched, so page two of a list
+	// sorted by name holds whatever the server thought page two was -- and the
+	// bug shows up as rows that seem to be in the wrong order to everyone
+	// except whoever wrote it.
+	Sortable bool
+	// Hideable lets the column be switched off from the columns menu.
+	Hideable bool
+	// Hidden starts it switched off.
+	Hidden bool
 	// Align is "start", "center" or "end". Empty means "start".
 	//
 	// A column of numbers is "end": the digits then line up on the units, which
@@ -218,11 +264,142 @@ func (p TableProps) FirstRow() int {
 	return 0
 }
 
+// Sortable is whether any column offers to order the table, which is what
+// decides whether the header cells are controls at all.
+func (p TableProps) Sortable() bool {
+	if p.SortURL == "" {
+		return false
+	}
+	for _, column := range p.Columns {
+		if column.Sortable && column.Key != "" {
+			return true
+		}
+	}
+	return false
+}
+
+// SortedBy is whether the table is ordered by this column.
+func (p TableProps) SortedBy(column TableColumn) bool {
+	return column.Key != "" && column.Key == p.SortKey
+}
+
+// Order is what aria-sort says for one column: the direction when it is the
+// one in force, and "none" on every other sortable column.
+//
+// A column that cannot be sorted carries nothing. aria-sort of "none" is a
+// claim that the column could be sorted and is not, which on a column of
+// avatars is a promise nobody can keep.
+func (p TableProps) Order(column TableColumn) string {
+	if !column.Sortable || column.Key == "" {
+		return ""
+	}
+	if !p.SortedBy(column) {
+		return "none"
+	}
+	if p.SortDir == "desc" {
+		return "descending"
+	}
+	return "ascending"
+}
+
+// NextDir is the direction a click on this header asks for: the other one when
+// the table is already ordered by it, and ascending when it is not.
+func (p TableProps) NextDir(column TableColumn) string {
+	if p.SortedBy(column) && p.SortDir != "desc" {
+		return "desc"
+	}
+	return "asc"
+}
+
+// SortHref is where one header points.
+func (p TableProps) SortHref(column TableColumn) string {
+	href := strings.ReplaceAll(p.SortURL, "{sort}", column.Key)
+	return strings.ReplaceAll(href, "{dir}", p.NextDir(column))
+}
+
+// Hideable is whether any column can be switched off, which is what decides
+// whether the columns menu is drawn.
+func (p TableProps) Hideable() bool {
+	for _, column := range p.Columns {
+		if column.Hideable && column.Key != "" {
+			return true
+		}
+	}
+	return false
+}
+
+// ColumnsName is what the menu of columns is called.
+func (p TableProps) ColumnsName() string {
+	if p.ColumnsLabel != "" {
+		return p.ColumnsLabel
+	}
+	return "Columns"
+}
+
+// Chosen is how many rows are drawn as selected.
+func (p TableProps) Chosen() int {
+	count := 0
+	for _, row := range p.Rows {
+		if row.Selected {
+			count++
+		}
+	}
+	return count
+}
+
+// SelectedText is the line saying how many rows are chosen.
+//
+// It is drawn by the server from what the server sent, and kept in step by the
+// behaviour as boxes are ticked. Both write the same sentence, because both
+// take it from here.
+func (p TableProps) SelectedText() string {
+	sentence := p.SelectedLabel
+	if sentence == "" {
+		sentence = "{n} of {total} rows selected"
+	}
+	sentence = strings.ReplaceAll(sentence, "{n}", strconv.Itoa(p.Chosen()))
+	return strings.ReplaceAll(sentence, "{total}", strconv.Itoa(len(p.Rows)))
+}
+
+// ColumnKey is the key of the column at position i, and empty where a row
+// carries more cells than the table has columns.
+func (p TableProps) ColumnKey(i int) string {
+	if i < len(p.Columns) {
+		return p.Columns[i].Key
+	}
+	return ""
+}
+
+// ColumnHidden is whether the column at position i starts switched off.
+func (p TableProps) ColumnHidden(i int) bool {
+	return i < len(p.Columns) && p.Columns[i].Hidden
+}
+
+// TableBehavior is the name the client behaviour is registered under with
+// arandu.ui.define.
+const TableBehavior = "table"
+
+// RootAttrs are the outermost element's attributes, with the client bridge
+// filled in when the table has anything for it to do.
+//
+// Sorting is not on that list: it is a link the server answers, and a link
+// needs nothing mounted. What the behaviour does is the three things only the
+// browser can -- keep the count in step as boxes are ticked, switch a column
+// off, and move a cell at a time on a navigable table.
+func (p TableProps) RootAttrs() map[string]string {
+	if p.Behavior.Name == "" && (p.Selectable() || p.Hideable() || p.Navigable) {
+		p.Behavior = Behavior{Name: TableBehavior, Props: map[string]any{
+			"selected": p.SelectedLabel,
+		}}
+	}
+	return p.ComponentProps.RootAttrs()
+}
+
 // PartNames are the parts this component publishes.
 func (p TableProps) PartNames() []string {
 	return []string{
 		"root", "table", "caption", "head", "header-cell", "row", "cell",
-		"select-all", "select", "bulk",
+		"select-all", "select", "bulk", "count", "sort", "columns", "toggle",
 	}
 }
 @endgo
@@ -242,6 +419,55 @@ func (p TableProps) PartNames() []string {
 			data-navigable="true"
 		@endif
 	>
+		{{-- The count is drawn from what the server sent and kept in step by the
+		     behaviour as boxes are ticked. Both write the same sentence, from
+		     SelectedText, so the two cannot say different things. --}}
+		@if(.Selectable())
+			<p
+				data-part="count"
+				class="{{ .PartClass("count", "table-count") }}"
+				role="status"
+				aria-live="polite"
+				data-selected-template="{{ .SelectedLabel }}"
+				@attributes(.PartAttrs("count"))
+			>{{ .SelectedText() }}</p>
+		@endif
+
+		@if(.Hideable())
+			{{-- Checkboxes and not menu items: switching a column off is a
+			     two-state choice that stays chosen, which is what a checkbox
+			     is and what a menu item is not. --}}
+			<details
+				data-part="columns"
+				class="{{ .PartClass("columns", "table-columns") }}"
+				@attributes(.PartAttrs("columns"))
+			>
+				<summary>{{ .ColumnsName() }}</summary>
+				<div>
+					@foreach(.Columns as column)
+						@if(column.Hideable && column.Key != "")
+							<label
+								data-part="toggle"
+								@if(.PartClass("toggle") != "")
+									class="{{ .PartClass("toggle") }}"
+								@endif
+								@attributes(.PartAttrs("toggle"))
+							>
+								<input
+									type="checkbox"
+									data-column-toggle="{{ column.Key }}"
+									@if(!column.Hidden)
+										checked
+									@endif
+								>
+								{{ column.Label }}
+							</label>
+						@endif
+					@endforeach
+				</div>
+			</details>
+		@endif
+
 		@if(.Selectable() && len(.BulkActions) > 0)
 			<form
 				data-part="bulk"
@@ -313,7 +539,35 @@ func (p TableProps) PartNames() []string {
 							scope="col"
 							class="{{ .PartClass("header-cell", column.AlignClass()) }}"
 							@attributes(.PartAttrs("header-cell"))
-						>{{ column.Label }}</th>
+							@if(column.Key != "")
+								data-column="{{ column.Key }}"
+							@endif
+							@if(column.Hidden)
+								hidden
+							@endif
+							@if(.Order(column) != "")
+								aria-sort="{{ .Order(column) }}"
+							@endif
+						>
+							@if(column.Sortable && .Sortable() && column.Key != "")
+								<a
+									data-part="sort"
+									class="{{ .PartClass("sort", "table-sort") }}"
+									href="{{ .SortHref(column) }}"
+									@attributes(.PartAttrs("sort"))
+									@if(.HxTarget != "")
+										hx-get="{{ .SortHref(column) }}"
+										hx-target="{{ .HxTarget }}"
+									@endif
+									@if(.HxSwap != "")
+										hx-swap="{{ .HxSwap }}"
+									@endif
+								>{{ column.Label }}</a>
+							@endif
+							@if(!column.Sortable || !.Sortable() || column.Key == "")
+								{{ column.Label }}
+							@endif
+						</th>
 					@endforeach
 				</tr>
 			</thead>
@@ -367,6 +621,12 @@ func (p TableProps) PartNames() []string {
 								data-part="cell"
 								class="{{ .PartClass("cell", .AlignClass(i)) }}"
 								@attributes(.PartAttrs("cell"))
+								@if(.ColumnKey(i) != "")
+									data-column="{{ .ColumnKey(i) }}"
+								@endif
+								@if(.ColumnHidden(i))
+									hidden
+								@endif
 							>
 								@if(row.Cells[i].HTML != "")
 									{!! row.Cells[i].HTML !!}

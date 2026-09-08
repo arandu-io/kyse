@@ -108,6 +108,13 @@ var extensible = []struct {
 			props.SelectName = "invoices"
 			props.BulkActions = []components.ButtonProps{{Label: "Archive"}}
 			props.Navigable = true
+			props.SortURL = "/invoices?sort={sort}&dir={dir}"
+			props.SortKey = "number"
+			props.SortDir = "asc"
+			props.Columns = []components.TableColumn{
+				{Label: "Number", Key: "number", Sortable: true, Hideable: true},
+				{Label: "Total", Key: "total", Align: "end", Sortable: true, Hideable: true},
+			}
 			return []string{plain, string(components.Table(props))}
 		},
 		components.TableProps{}.PartNames,
@@ -718,6 +725,17 @@ var extensible = []struct {
 		components.AutocompleteProps{}.PartNames,
 	},
 	{
+		"Calendar",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.Calendar(components.CalendarProps{
+				ComponentProps: c, ID: "when", Label: "Choose a date",
+				Month: "2026-09", Value: "2026-09-08", Min: "2026-09-03",
+				Target: "starts_at",
+			}))}
+		},
+		components.CalendarProps{}.PartNames,
+	},
+	{
 		"ColorPicker",
 		func(c components.ComponentProps) []string {
 			props := components.ColorPickerProps{
@@ -739,7 +757,12 @@ var extensible = []struct {
 			}
 			withHint := string(components.DateTimePicker(props))
 			props.Page = page{errs: map[string]string{"starts_at": "Required."}}
-			return []string{withHint, string(components.DateTimePicker(props))}
+			rejected := string(components.DateTimePicker(props))
+			// The group, the trigger and the panel exist only when a grid is
+			// drawn beside the box, so they are reachable in this state alone.
+			props.Page = nil
+			props.Calendar = true
+			return []string{withHint, rejected, string(components.DateTimePicker(props))}
 		},
 		components.DateTimePickerProps{}.PartNames,
 	},
