@@ -103,6 +103,18 @@ type PasswordProps struct {
 	Required bool
 	// Autofocus puts the cursor here on load. At most one per screen.
 	Autofocus bool
+	// Confirming draws the box with the eye and the message and without the
+	// policy panel: no meter, no checklist, nothing that grades what is typed.
+	//
+	// It is for the three places where a password is entered rather than
+	// chosen -- the sign-in form, the second box of a pair, and the re-entry a
+	// protected area asks for. A checklist there grades a password somebody
+	// already has against the policy that governs new ones, and tells them a
+	// value the server will accept is wrong.
+	//
+	// The reveal stays, because that is the control those screens need most:
+	// a sign-in that failed is usually a sign-in that was mistyped.
+	Confirming bool
 }
 
 // PasswordRequirement is one line of the checklist: the key the policy declares
@@ -257,6 +269,15 @@ func (p PasswordProps) Message() string {
 // announced when it changes; naming it here as well would read the count out on
 // every focus and again on every keystroke that moved it.
 func (p PasswordProps) DescribedBy() string {
+	if p.Confirming {
+		switch {
+		case p.Message() != "":
+			return p.Name + "-error"
+		case p.Hint != "":
+			return p.Name + "-hint"
+		}
+		return ""
+	}
 	switch {
 	case p.Message() != "":
 		return p.Name + "-error " + p.RequirementsID()
@@ -269,6 +290,12 @@ func (p PasswordProps) DescribedBy() string {
 // RootAttrs are the outermost element's attributes, with the client bridge
 // filled in from the policy when the caller named no behaviour of their own.
 //
+// A confirming box arms it too. The behaviour ticks a checklist and it also
+// works the reveal, and the reveal is the control those screens need most --
+// dropping the behaviour with the panel would leave an eye that does nothing.
+// Everything it touches inside the panel is guarded, so with no panel it wires
+// the reveal and finds nothing else to do.
+//
 // The props handed over are AppliedRules verbatim, so the behaviour ticking the
 // lines is reading the same declaration the server rejects with. A caller who
 // named a behaviour keeps it and owns its props: overriding theirs would make
@@ -279,6 +306,12 @@ func (p PasswordProps) RootAttrs() map[string]string {
 	}
 	return p.ComponentProps.RootAttrs()
 }
+
+// DescribedBy is the id of whatever is explaining the box.
+//
+// A confirming box has no panel, so it points at the message or the hint and
+// at nothing else -- aria-describedby naming an element that is not in the
+// document is a description a screen reader reads as silence.
 
 // PartNames are the parts this component publishes.
 func (p PasswordProps) PartNames() []string {
@@ -335,7 +368,9 @@ func (p PasswordProps) PartNames() []string {
 			spellcheck="false"
 			autocapitalize="none"
 			autocorrect="off"
-			aria-describedby="{{ .DescribedBy() }}"
+			@if(.DescribedBy() != "")
+				aria-describedby="{{ .DescribedBy() }}"
+			@endif
 			@attributes(.PartAttrs("input"))
 			@if(.Placeholder != "")
 				placeholder="{{ .Placeholder }}"
@@ -378,6 +413,7 @@ func (p PasswordProps) PartNames() []string {
 	     under a box nobody has typed in yet. The behaviour drops the attribute
 	     on the first keystroke, which is also when aria-describedby starts
 	     resolving to the checklist. --}}
+@if(!.Confirming)
 	<section
 		data-part="panel"
 		class="{{ .PartClass("panel", "password-panel") }}"
@@ -444,6 +480,7 @@ func (p PasswordProps) PartNames() []string {
 			@attributes(.PartAttrs("done"))
 		>{{ .DoneText() }}</button>
 	</section>
+@endif
 
 	@if(.Message() != "")
 		<p

@@ -193,7 +193,14 @@ var extensible = []struct {
 			}
 			withHint := string(components.Password(props))
 			props.Page = page{errs: map[string]string{"password": "Required."}}
-			return []string{withHint, string(components.Password(props))}
+			rejected := string(components.Password(props))
+			// A confirming box drops the whole panel, so its parts have to be
+			// reachable in one of the other states rather than in this one.
+			confirming := components.PasswordProps{
+				ComponentProps: c, Name: "password", Label: "Password",
+				Autocomplete: "current-password", Confirming: true,
+			}
+			return []string{withHint, rejected, string(components.Password(confirming))}
 		},
 		components.PasswordProps{}.PartNames,
 	},
