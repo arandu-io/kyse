@@ -47,6 +47,42 @@ type SelectProps struct {
 	Required bool
 	// Disabled takes the list out of the form and out of the tab order.
 	Disabled bool
+	// Multiple lets more than one line be chosen, and turns the control from a
+	// dropdown into a list with the lines visible. That is the platform's own
+	// listbox: the role, the multi-selectability, the arrow keys, shift over a
+	// range and typing to jump all come with it, and a list written out of
+	// divs has to grow every one of them back.
+	//
+	// A multiple select submits the field once per chosen line, so what
+	// arrives at the server is a list and not a string.
+	Multiple bool
+	// Size is how many lines are visible at once. It means something only on a
+	// list -- a dropdown shows one by definition -- and zero leaves the
+	// browser's own count.
+	Size int
+	// Values are the lines chosen when Multiple is set, because one string
+	// cannot hold two answers. Value is ignored then, rather than merged: two
+	// fields describing one state is two fields that disagree.
+	//
+	// A rejected attempt does not come back through here. Page.OldOr answers
+	// with one string, so a multiple list redraws from what the caller passes
+	// -- which for a rejected form is what the handler parsed out of it.
+	Values []string
+
+	// The HTMX attributes, written only when they carry something. An empty
+	// hx-get is an attribute HTMX acts on: it would get the current URL.
+	//
+	// They are what makes one list fill another: the first names the endpoint,
+	// the endpoint answers with the second's options, and the dependent pair
+	// needs no script. HxTrigger defaults to change, because a list that
+	// fetched on anything else would fetch while somebody is still arrowing
+	// through it towards what they meant.
+	HxGet     string
+	HxPost    string
+	HxTarget  string
+	HxSwap    string
+	HxTrigger string
+	HxInclude string
 }
 
 // SelectOption is one line of the list.
@@ -98,6 +134,42 @@ func (p SelectProps) DescribedBy() string {
 	}
 	return ""
 }
+// Trigger is when the request is made, and is change unless the caller said
+// otherwise.
+func (p SelectProps) Trigger() string {
+	if p.HxTrigger != "" {
+		return p.HxTrigger
+	}
+	return "change"
+}
+
+// Fetches is whether this list asks the server for anything at all.
+func (p SelectProps) Fetches() bool { return p.HxGet != "" || p.HxPost != "" }
+
+// FieldName is what the control submits under. A multiple select submits once
+// per chosen line, and the bracket is what tells a form parser to keep them as
+// a list rather than to overwrite the value with the last one.
+func (p SelectProps) FieldName() string {
+	if p.Multiple {
+		return p.Name + "[]"
+	}
+	return p.Name
+}
+
+// Selected is whether one line is chosen: against Values on a list, and
+// against Current on a dropdown.
+func (p SelectProps) Selected(option SelectOption) bool {
+	if !p.Multiple {
+		return option.Value == p.Current()
+	}
+	for _, chosen := range p.Values {
+		if chosen == option.Value {
+			return true
+		}
+	}
+	return false
+}
+
 // PartNames are the parts this component publishes.
 func (p SelectProps) PartNames() []string {
 	return []string{"root", "label", "input", "option", "message", "hint"}
@@ -125,8 +197,32 @@ func (p SelectProps) PartNames() []string {
 		data-part="input"
 		class="{{ .PartClass("input", "select") }}"
 		id="{{ .ElementID() }}"
-		name="{{ .Name }}"
+		name="{{ .FieldName() }}"
 		@attributes(.PartAttrs("input"))
+		@if(.Multiple)
+			multiple
+		@endif
+		@if(.Size > 0)
+			size="{{ .Size }}"
+		@endif
+		@if(.HxGet != "")
+			hx-get="{{ .HxGet }}"
+		@endif
+		@if(.HxPost != "")
+			hx-post="{{ .HxPost }}"
+		@endif
+		@if(.Fetches())
+			hx-trigger="{{ .Trigger() }}"
+		@endif
+		@if(.HxTarget != "")
+			hx-target="{{ .HxTarget }}"
+		@endif
+		@if(.HxSwap != "")
+			hx-swap="{{ .HxSwap }}"
+		@endif
+		@if(.HxInclude != "")
+			hx-include="{{ .HxInclude }}"
+		@endif
 		@if(.DescribedBy() != "")
 			aria-describedby="{{ .DescribedBy() }}"
 		@endif
@@ -161,7 +257,7 @@ func (p SelectProps) PartNames() []string {
 				@endif
 				value="{{ option.Value }}"
 				@attributes(.PartAttrs("option"))
-				@if(option.Value == .Current())
+				@if(.Selected(option))
 					selected
 				@endif
 				@if(option.Disabled)

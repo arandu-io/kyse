@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/arandu-io/hesape/validation"
+	"github.com/arandu-io/kyse/icons"
 )
 
 @go
@@ -307,7 +308,7 @@ func (p PasswordProps) PartNames() []string {
 
 <div
 	data-part="root"
-	class="{{ .RootClass("field") }}"
+	class="{{ .RootClass("field password") }}"
 	@attributes(.RootAttrs())
 >
 	<label
@@ -364,10 +365,11 @@ func (p PasswordProps) PartNames() []string {
 			data-align="end"
 			data-reveal-hidden="{{ .RevealText() }}"
 			data-reveal-shown="{{ .ConcealText() }}"
+			aria-label="{{ .RevealText() }}"
 			aria-pressed="false"
 			aria-controls="{{ .Name }}"
 			@attributes(.PartAttrs("reveal"))
-		>{{ .RevealText() }}</button>
+		><span data-reveal-icon-hidden aria-hidden="true">{!! icons.Eye(icons.Props{}) !!}</span><span data-reveal-icon-shown aria-hidden="true" hidden>{!! icons.EyeSlash(icons.Props{}) !!}</span></button>
 	</div>
 
 	{{-- Closed, and closed by the hidden attribute rather than by a class: what
@@ -378,7 +380,7 @@ func (p PasswordProps) PartNames() []string {
 	     resolving to the checklist. --}}
 	<section
 		data-part="panel"
-		class="{{ .PartClass("panel", "mt-2 flex flex-col gap-2") }}"
+		class="{{ .PartClass("panel", "password-panel") }}"
 		id="{{ .PanelID() }}"
 		hidden
 		@attributes(.PartAttrs("panel"))
@@ -428,7 +430,7 @@ func (p PasswordProps) PartNames() []string {
 					data-requirement="{{ requirement.Key }}"
 					data-met="false"
 					@attributes(.PartAttrs("requirement"))
-				><span class="sr-only">Not met:</span>{{ requirement.Text }}</li>
+				><span data-requirement-met aria-hidden="true">{!! icons.CheckCircle(icons.Props{}) !!}</span><span data-requirement-unmet aria-hidden="true">{!! icons.XCircle(icons.Props{}) !!}</span><span class="sr-only">Not met:</span>{{ requirement.Text }}</li>
 			@endforeach
 		</ul>
 

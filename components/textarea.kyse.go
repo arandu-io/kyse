@@ -30,6 +30,23 @@ type TextareaProps struct {
 	Rows int
 	// Required marks the box required.
 	Required bool
+	// Autosize grows and shrinks the box to fit what is in it, with Rows as
+	// the floor.
+	//
+	// It is one CSS declaration -- field-sizing: content -- and not the loop
+	// that reads scrollHeight and writes a height back on every keystroke.
+	// That loop is what this replaces: it forces layout twice per character,
+	// and it is wrong the first time a font loads late or the box is drawn
+	// while hidden. A browser without the declaration draws a fixed box of
+	// Rows lines, which is the box that was there before.
+	//
+	// There is no ceiling here, and that is deliberate: a maximum height is a
+	// length, and a length written as a field would be a length this component
+	// has to turn into CSS at run time -- which is the one thing a class
+	// cannot be built from. A caller who wants one adds it where every other
+	// class goes: Parts["input"].Class, with "max-h-64" or whatever the design
+	// says.
+	Autosize bool
 }
 
 // Message is what validation left for this box, or empty.
@@ -80,6 +97,9 @@ func (p TextareaProps) PartNames() []string { return []string{"root", "label", "
 		id="{{ .Name }}"
 		name="{{ .Name }}"
 		@attributes(.PartAttrs("input"))
+		@if(.Autosize)
+			data-autosize="true"
+		@endif
 		@if(.Rows > 0)
 			rows="{{ .Rows }}"
 		@endif
