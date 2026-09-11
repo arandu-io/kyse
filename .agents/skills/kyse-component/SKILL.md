@@ -70,7 +70,7 @@ export GOWORK=off
 aru view:build
 ```
 
-It reports how many views it compiled — `kyse: 37 view(s) compiled` before you
+It reports how many views it compiled — `kyse: 76 view(s) compiled` before you
 added yours — and writes the `.go` beside each source. **Commit what it
 writes.** `go get` has no build step to run, so the compiled
 files in the repository are the ones every consumer imports; a missing one is a
@@ -80,7 +80,7 @@ source says something else. `TestTheGeneratedFilesMatchTheirSources` in
 rebuilds everything and fails if the tree moved.
 
 **3. Add the row to the smoke table.** `TestEveryComponentRenders` in
-`tests/Unit/components_test.go:30` is a table, one line per component, each one
+`tests/Unit/components_test.go:76` is a table, one line per component, each one
 calling it with the smallest props that make sense:
 
 ```go
@@ -88,17 +88,52 @@ calling it with the smallest props that make sense:
 ```
 
 This is not optional and it is not on your honour.
-`TestEveryComponentIsInTheTable` at `tests/Unit/components_test.go:417` globs
+`TestEveryComponentIsInTheTable` at `tests/Unit/components_test.go:584` globs
 `components/*.kyse.go`, turns each file name into the function name, and fails
 when the table has no row starting `{"StatCard",`. The library went from twelve
 components to thirty-seven in one change and the table stayed green at sixteen,
-because nothing compared it to anything. Now something does.
+because nothing compared it to anything. Now something does, and it has held
+through everything added since: seventy-six components, seventy-six rows.
 
 The row also asserts three things about what came back: it is not empty, it
 contains a `<`, and it contains a `class="`. The last one is why a component
 with no class fails here rather than looking unstyled in somebody's project.
 
-**4. Run the gates.**
+**4. Say what the window half does about it.** There is a second library of
+these components that draws to a window instead of to HTML, in `ayra/widget`
+beside this repository, and the two share their names on purpose: somebody who
+can write a screen for the browser should recognise every word on the other
+side. `plans/cmd/native-coverage` sorts every component here into one of four
+outcomes and `plans/checklist.sh` runs it as a gate. It reads both trees, so it
+runs from the root of the workspace rather than from this module:
+
+```sh
+GOWORK=off go -C plans run ./cmd/native-coverage "$PWD"
+```
+
+Three of those outcomes can be published. The fourth is a name nobody
+classified, and a new component is that by default — the instrument exits
+non-zero the moment `components/stat-card.kyse.go` exists with nothing said
+about it. Adding a component here is what breaks it, so the answer is written in
+the same change. All three answers are edits to
+`plans/cmd/native-coverage/main.go`:
+
+- **The window half has the control.** It resolves on its own when the control's
+  props type is the file name with the dashes taken out — `accordion.kyse.go`
+  finds `AccordionProps`. Where the two are spelled differently, `aliases` is
+  where you say so; `stat-card` is `Stat` there. An alias naming a control that
+  does not exist covers nothing, which is what stops a typo in that table from
+  reading as coverage.
+- **The control does part of what the name promises.** Then it goes in `partial`
+  with the missing half written beside it. A date picker with no time in it is
+  coverage only to whoever wrote the table; to whoever reaches for the time it
+  is a component that does not work.
+- **The window half is not going to have it.** Then it goes in `absent` with the
+  reason. A gap with a reason is a decision and can be published; a gap with no
+  reason is something nobody has looked at, and it is the only one of the four
+  that fails.
+
+**5. Run the gates.**
 
 ```sh
 export GOWORK=off
@@ -130,7 +165,7 @@ component library is the whole point.
 - **An optional attribute is written only when it carries something.**
   `hx-post=""` is not the absence of `hx-post` — HTMX acts on it and posts to
   the current URL. `TestAnEmptyOptionalAttributeIsNotWritten` at
-  `tests/Unit/components_test.go:174` holds `Button` to this.
+  `tests/Unit/components_test.go:341` holds `Button` to this.
 - **An input asks the page rather than being handed its message.** Take
   `Page Page` and look the message and the typed value up by the `Name` the
   component already has. The alternative writes the field's name three times in
