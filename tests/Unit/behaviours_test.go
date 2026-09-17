@@ -1,6 +1,9 @@
 package unit_test
 
 import (
+	"github.com/arandu-io/hesape/view"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -15,10 +18,9 @@ import (
 // constants in the component package and requires each one to be registered in
 // hesape's ui.js. The other half lives there and reads the script.
 //
-// Two halves because neither repository can hold both: this one declares the
-// names and cannot import the view runtime, and that one serves the script and
-// must not depend on a component library. What connects them is the string, so
-// the string is what each side checks.
+// The component suite compares its names against the runtime linked by go.mod.
+// Reading a neighboring checkout would test unrelated bytes or skip on a clean
+// consumer. The runtime's own suite independently checks its implementation.
 //
 // The password box shipped without an answer from the day it was written. Every
 // project that drew a sign-up form implemented the behaviour by hand, and the
@@ -71,15 +73,18 @@ func TestEveryBehaviourTheComponentsEmitHasAnAnswer(t *testing.T) {
 	}
 }
 
-// servedScript reads ui.js out of the hesape checkout beside this one, so what
-// is checked is the file this build would serve.
+// servedScript reads the bytes linked into this build, not a sibling checkout.
+// A module release has no neighboring source tree and must never skip this proof.
 func servedScript(t *testing.T) string {
 	t.Helper()
-
-	beside := filepath.Join("..", "..", "..", "hesape", "view", "assets", "ui.js")
-	body, err := os.ReadFile(beside)
-	if err != nil {
-		t.Skipf("no hesape checkout beside this one: the served script cannot be read (%v)", err)
+	path := view.Asset("ui.js")
+	response := httptest.NewRecorder()
+	view.Handler(response, httptest.NewRequest(http.MethodGet, path, nil))
+	if response.Code != http.StatusOK {
+		t.Fatalf("linked ui.js status = %d", response.Code)
 	}
-	return string(body)
+	if !strings.Contains(path, view.AssetHash(response.Body.Bytes())) {
+		t.Fatal("linked runtime bytes do not match their content-addressed URL")
+	}
+	return response.Body.String()
 }
