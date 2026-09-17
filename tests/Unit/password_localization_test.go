@@ -12,7 +12,7 @@ func TestPasswordLabelsDoNotChangeTheNativePolicy(t *testing.T) {
 	props := components.PasswordProps{Name: "password", Policy: policy,
 		RequirementLabels: map[string]string{"min": "Pelo menos {value} caracteres", "max": "Até {value} caracteres"},
 		StrengthLabel:     "{met} de {total} requisitos atendidos", MetLabel: "Atendido:", UnmetLabel: "Pendente:"}
-	if props.StrengthText() != "0 de 2 requisitos atendidos" {
+	if props.StrengthText() != "0 de 1 requisitos atendidos" {
 		t.Fatal("initial summary does not use the label template")
 	}
 	requirements := props.Requirements()

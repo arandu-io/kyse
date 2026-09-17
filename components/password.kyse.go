@@ -213,9 +213,13 @@ func (p PasswordProps) customRuleText() string {
 	return "Meets the remaining rules, checked when the form is sent"
 }
 
-// RequirementTotal is how many lines the checklist has, which is the scale the
-// strength summary counts against.
-func (p PasswordProps) RequirementTotal() int { return len(p.Requirements()) }
+// RequirementTotal counts composition goals, excluding the maximum length.
+// The upper bound is enforced separately and only shown when exceeded.
+func (p PasswordProps) RequirementTotal() int {
+ count := 0
+ for _, requirement := range p.Requirements() { if requirement.Key != "max" { count++ } }
+ return count
+}
 
 // StrengthText is what the summary says before anything has been typed.
 //
@@ -462,7 +466,7 @@ func (p PasswordProps) PartNames() []string {
 @if(!.Confirming)
 	<section
 		data-part="panel"
-		class="{{ .PartClass("panel", "password-panel") }}"
+		class="{{ .PartClass("panel", "password-panel top-auto! bottom-full! mt-0! mb-2 p-3! border-primary/35 bg-popover! text-popover-foreground! gap-2!") }}"
 		id="{{ .PanelID() }}"
 		hidden
 		@attributes(.PartAttrs("panel"))
@@ -474,8 +478,10 @@ func (p PasswordProps) PartNames() []string {
 		     with. The fill starts empty because the box does. --}}
 		<div
 			data-part="meter"
-			class="{{ .PartClass("meter", "progress") }}"
+			class="{{ .PartClass("meter", "progress h-1.5! rounded-full bg-foreground/10 [&>span]:rounded-full [&>span]:bg-destructive [&[data-password-complete=true]>span]:bg-primary") }}"
 			aria-hidden="true"
+			aria-valuenow="0"
+			aria-valuemax="{{ .RequirementTotal() }}"
 			@attributes(.PartAttrs("meter"))
 		>
 			<span
@@ -487,7 +493,7 @@ func (p PasswordProps) PartNames() []string {
 
 		<p
 			data-part="strength"
-			class="{{ .PartClass("strength", "text-muted-foreground text-sm") }}"
+			class="{{ .PartClass("strength", "sr-only") }}"
             id="{{ .StrengthID() }}"
             data-password-summary="{{ .SummaryTemplate() }}"
 			aria-live="polite"
@@ -502,26 +508,28 @@ func (p PasswordProps) PartNames() []string {
 		     colour or only a shape is a line whose state cannot be read out. --}}
 		<ul
 			data-part="requirements"
-			class="{{ .PartClass("requirements", "flex flex-col gap-1 text-sm") }}"
+			class="{{ .PartClass("requirements", "flex flex-wrap gap-1.5") }}"
 			id="{{ .RequirementsID() }}"
 			@attributes(.PartAttrs("requirements"))
 		>
 			@foreach(.Requirements() as requirement)
 				<li
 					data-part="requirement"
-					class="{{ .PartClass("requirement", "flex items-center gap-2") }}"
+					class="{{ .PartClass("requirement", "flex items-center gap-1! rounded-full border border-dashed border-foreground/25 bg-foreground/5 px-2 py-1 text-xs! leading-none! font-medium [&[hidden]]:hidden! [&>span>svg]:size-3! [&>span]:size-auto! data-[met=true]:border-solid data-[met=true]:border-primary/60 data-[met=true]:bg-primary/10") }}"
 					data-requirement="{{ requirement.Key }}"
 					data-met="false"
+					@if(requirement.Key == "max")
+						hidden
+					@endif
 					@attributes(.PartAttrs("requirement"))
-				><span data-requirement-met aria-hidden="true">{!! icons.CheckCircle(icons.Props{}) !!}</span><span data-requirement-unmet aria-hidden="true">{!! icons.XCircle(icons.Props{}) !!}</span><span class="sr-only" data-password-status>{{ .UnmetText() }}</span>{{ requirement.Text }}</li>
+				><span data-requirement-met aria-hidden="true">{!! icons.CheckCircle(icons.Props{}) !!}</span><span data-requirement-unmet aria-hidden="true">{!! icons.Circle(icons.Props{}) !!}</span><span class="sr-only" data-password-status>{{ .UnmetText() }}</span>{{ requirement.Text }}</li>
 			@endforeach
 		</ul>
 
 		<button
 			data-part="done"
-			class="{{ .PartClass("done", "btn") }}"
+			class="{{ .PartClass("done", "btn self-start w-auto! rounded-full px-2! py-1! h-auto! min-h-0! text-xs!") }}"
 			type="button"
-			data-variant="ghost"
 			data-size="sm"
 			aria-controls="{{ .PanelID() }}"
 			@attributes(.PartAttrs("done"))
