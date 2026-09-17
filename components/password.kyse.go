@@ -4,6 +4,7 @@ package components
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/arandu-io/hesape/validation"
 	"github.com/arandu-io/kyse/icons"
@@ -80,6 +81,16 @@ type PasswordProps struct {
 	// that asks for something the panel never mentions is a rejection nobody
 	// was warned about.
 	CustomRuleLabel string
+	// RequirementLabels overrides visible requirement sentences by key. A {value}
+	// placeholder is replaced by the applicable numeric limit; policy stays unchanged.
+	RequirementLabels map[string]string
+	// StrengthLabel is the summary template. {met} and {total} are replaced with
+	// counts on the server and in the native runtime. Empty keeps the English default.
+	StrengthLabel string
+	// MetLabel announces a satisfied requirement; empty keeps the English default.
+	MetLabel string
+	// UnmetLabel announces an unmet requirement; empty keeps the English default.
+	UnmetLabel string
 	// Hint is the sentence under the box that is always there.
 	Hint string
 	// Page is the screen's own view.Page, which is what this box asks for its
@@ -182,6 +193,11 @@ func (p PasswordProps) Requirements() []PasswordRequirement {
 	if merged, _ := rules["customRules"].([]string); len(merged) > 0 {
 		out = append(out, PasswordRequirement{"custom", p.customRuleText()})
 	}
+	for i := range out {
+		if label := p.RequirementLabels[out[i].Key]; label != "" {
+			out[i].Text = strings.ReplaceAll(label, "{value}", strconv.Itoa(number(out[i].Key)))
+		}
+	}
 	return out
 }
 
@@ -207,7 +223,31 @@ func (p PasswordProps) RequirementTotal() int { return len(p.Requirements()) }
 // progress and the only way to read it is to see it, so the same count is
 // written out here and this is the element pointed at as the live region.
 func (p PasswordProps) StrengthText() string {
-	return "0 of " + strconv.Itoa(p.RequirementTotal()) + " requirements met"
+	return strings.NewReplacer("{met}", "0", "{total}", strconv.Itoa(p.RequirementTotal())).Replace(p.SummaryTemplate())
+}
+
+// SummaryTemplate returns the inert template used by the live requirement counter.
+func (p PasswordProps) SummaryTemplate() string {
+	if p.StrengthLabel != "" {
+		return p.StrengthLabel
+	}
+	return "{met} of {total} requirements met"
+}
+
+// MetText is the checklist state announcement after a requirement is met.
+func (p PasswordProps) MetText() string {
+	if p.MetLabel != "" {
+		return p.MetLabel
+	}
+	return "Met:"
+}
+
+// UnmetText is the checklist state announcement before a requirement is met.
+func (p PasswordProps) UnmetText() string {
+	if p.UnmetLabel != "" {
+		return p.UnmetLabel
+	}
+	return "Not met:"
 }
 
 // InputAutocomplete is the browser hint, defaulting to a password being chosen
@@ -341,7 +381,9 @@ func (p PasswordProps) PartNames() []string {
 
 <div
 	data-part="root"
-	class="{{ .RootClass("field password") }}"
+    class="{{ .RootClass("field password") }}"
+    data-password-met="{{ .MetText() }}"
+    data-password-unmet="{{ .UnmetText() }}"
 	@attributes(.RootAttrs())
 >
 	<label
@@ -367,7 +409,11 @@ func (p PasswordProps) PartNames() []string {
 			autocomplete="{{ .InputAutocomplete() }}"
 			spellcheck="false"
 			autocapitalize="none"
-			autocorrect="off"
+            autocorrect="off"
+            @if(!.Confirming)
+                aria-controls="{{ .PanelID() }}"
+                aria-expanded="false"
+            @endif
 			@if(.DescribedBy() != "")
 				aria-describedby="{{ .DescribedBy() }}"
 			@endif
@@ -442,7 +488,8 @@ func (p PasswordProps) PartNames() []string {
 		<p
 			data-part="strength"
 			class="{{ .PartClass("strength", "text-muted-foreground text-sm") }}"
-			id="{{ .StrengthID() }}"
+            id="{{ .StrengthID() }}"
+            data-password-summary="{{ .SummaryTemplate() }}"
 			aria-live="polite"
 			aria-atomic="true"
 			@attributes(.PartAttrs("strength"))
@@ -466,7 +513,7 @@ func (p PasswordProps) PartNames() []string {
 					data-requirement="{{ requirement.Key }}"
 					data-met="false"
 					@attributes(.PartAttrs("requirement"))
-				><span data-requirement-met aria-hidden="true">{!! icons.CheckCircle(icons.Props{}) !!}</span><span data-requirement-unmet aria-hidden="true">{!! icons.XCircle(icons.Props{}) !!}</span><span class="sr-only">Not met:</span>{{ requirement.Text }}</li>
+				><span data-requirement-met aria-hidden="true">{!! icons.CheckCircle(icons.Props{}) !!}</span><span data-requirement-unmet aria-hidden="true">{!! icons.XCircle(icons.Props{}) !!}</span><span class="sr-only" data-password-status>{{ .UnmetText() }}</span>{{ requirement.Text }}</li>
 			@endforeach
 		</ul>
 
