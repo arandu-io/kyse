@@ -189,6 +189,9 @@ type DataTableLines struct {
 	// SelectAll names the header checkbox, and Bulk the bar of actions.
 	SelectAll string
 	Bulk      string
+	// Apply names the submit control that makes server-side facets work when
+	// JavaScript is unavailable. Empty uses "Apply filters".
+	Apply string
 	// Ascending, Descending and Unsorted are what a sortable header is called
 	// in each of its three states: "{column}, sorted ascending". A header that
 	// only draws an arrow is a header a screen reader reads as a link.
@@ -222,6 +225,7 @@ func (l DataTableLines) Sentences() map[string]any {
 		"unsorted":   fallback(l.Unsorted, "{column}, not sorted"),
 		"selectAll":  fallback(l.SelectAll, "Select all rows"),
 		"bulk":       fallback(l.Bulk, "Bulk actions"),
+		"apply":      fallback(l.Apply, "Apply filters"),
 	}
 }
 
@@ -506,6 +510,73 @@ func (p DataTableProps) ColumnsName() string {
 	return "Columns"
 }
 
+// DataTableQueryField is one hidden field that preserves query state across
+// a native GET form submission.
+type DataTableQueryField struct {
+	Name  string
+	Value string
+}
+
+// QueryFormID is the one form search and facets submit through.
+func (p DataTableProps) QueryFormID() string { return p.ID + "-query" }
+
+// QueryAction is URL without its query. The state that belongs to the
+// DataTable is submitted as named fields so a native GET form cannot discard it.
+func (p DataTableProps) QueryAction() string {
+	base, err := url.Parse(p.URL)
+	if err != nil {
+		return p.URL
+	}
+	base.RawQuery = ""
+	base.ForceQuery = false
+	base.Fragment = ""
+	return base.String()
+}
+
+
+// QueryFields preserves caller-owned query parameters plus the current sort.
+// Search, page and facet fields are rendered by their visible controls instead.
+func (p DataTableProps) QueryFields() []DataTableQueryField {
+	base, err := url.Parse(p.URL)
+	if err != nil {
+		base = &url.URL{}
+	}
+	values := base.Query()
+	if p.SearchName != "" {
+		values.Del(p.SearchName)
+	}
+	values.Del("page")
+	values.Del("sort")
+	values.Del("dir")
+	for _, filter := range p.Filters {
+		values.Del(filter.Key)
+	}
+	if p.SortKey != "" {
+		values.Set("sort", p.SortKey)
+		values.Set("dir", p.SortDir)
+	}
+	keys := make([]string, 0, len(values))
+	for key := range values {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	out := make([]DataTableQueryField, 0)
+	for _, key := range keys {
+		for _, value := range values[key] {
+			out = append(out, DataTableQueryField{Name: key, Value: value})
+		}
+	}
+	return out
+}
+
+// ApplyText is the no-script facet submit label.
+func (p DataTableProps) ApplyText() string {
+	if p.Lines.Apply != "" {
+		return p.Lines.Apply
+	}
+	return "Apply filters"
+}
+
 // SearchTrigger is when the list is refetched as somebody types: after typing
 // has paused, and only when what is in the box actually changed.
 func (p DataTableProps) SearchTrigger() string {
@@ -574,6 +645,9 @@ func (p DataTableProps) window() (int, int, int) {
 	}
 	if total == 0 {
 		return 0, 0, 0
+	}
+	if !p.Complete && len(p.Rows) == 0 {
+		return 0, 0, total
 	}
 	at := p.Page
 	if at < 1 {
@@ -651,76 +725,89 @@ func (p DataTableProps) PartNames() []string {
 			class="{{ .PartClass("toolbar", "data-table-toolbar") }}"
 			@attributes(.PartAttrs("toolbar"))
 		>
-			@if(.Searchable())
-				{{-- A form, so Enter submits to the same endpoint and the page
-				     comes back with the results in it. HTMX takes the typing
-				     before that ever happens. --}}
+			@if(.Searchable() || .Filtered())
+				{{-- Search and facets are one native GET form. Keeping them in one
+				     form is what makes the no-script path preserve the same state
+				     HTMX sends, instead of turning each control into a separate
+				     implementation. --}}
 				<form
 					class="data-table-controls"
-					action="{{ .SearchAddress() }}"
+					id="{{ .QueryFormID() }}"
+					action="{{ .QueryAction() }}"
 					method="get"
-					role="search"
+					@if(.Searchable())
+						role="search"
+					@endif
 				>
-					<label class="sr-only" for="{{ .ID }}-search">{{ .SearchTitle() }}</label>
-					<input
-						data-part="search"
-						class="{{ .PartClass("search", "input") }}"
-						type="search"
-						id="{{ .ID }}-search"
-						name="{{ .SearchName }}"
-						value="{{ .Query }}"
-						autocomplete="off"
-						@if(!.Complete)
-							hx-get="{{ .SearchAddress() }}"
-							hx-trigger="{{ .SearchTrigger() }}"
-							hx-target="{{ .Target() }}"
-							hx-swap="outerHTML"
-							hx-sync="this:replace"
-							hx-indicator="#{{ .ID }}-indicator"
-						@endif
-						@attributes(.PartAttrs("search"))
-						@if(.SearchPlaceholder != "")
-							placeholder="{{ .SearchPlaceholder }}"
-						@endif
-					>
-					<span
-						data-part="indicator"
-						class="{{ .PartClass("indicator", "spinner") }}"
-						id="{{ .ID }}-indicator"
-						aria-hidden="true"
-						@attributes(.PartAttrs("indicator"))
-					></span>
-				</form>
-			@endif
-
-			@if(.Filtered())
-				{{-- A facet is a native multiple select inside the same GET form
-				     as the search, so choosing narrows the list with no script
-				     and the chosen values ride on every sort and page link --
-				     which is what stops the next click from throwing the facet
-				     away. --}}
-				@foreach(.Filters as filter)
-					<label class="data-table-facet">
-						<span class="sr-only">{{ filter.Label }}</span>
-						<select
-							data-part="filter"
-							class="{{ .PartClass("filter", "select") }}"
-							name="{{ filter.Key }}"
-							multiple
-							size="1"
-							@attributes(.PartAttrs("filter"))
+					@foreach(.QueryFields() as field)
+						<input type="hidden" name="{{ field.Name }}" value="{{ field.Value }}">
+					@endforeach
+					@if(.Searchable())
+						<label class="sr-only" for="{{ .ID }}-search">{{ .SearchTitle() }}</label>
+						<input
+							data-part="search"
+							class="{{ .PartClass("search", "input") }}"
+							type="search"
+							id="{{ .ID }}-search"
+							name="{{ .SearchName }}"
+							value="{{ .Query }}"
+							autocomplete="off"
+							@if(!.Complete)
+								hx-get="{{ .SearchAddress() }}"
+								hx-trigger="{{ .SearchTrigger() }}"
+								hx-include="closest form"
+								hx-target="{{ .Target() }}"
+								hx-swap="outerHTML"
+								hx-sync="this:replace"
+								hx-indicator="#{{ .ID }}-indicator"
+							@endif
+							@attributes(.PartAttrs("search"))
+							@if(.SearchPlaceholder != "")
+								placeholder="{{ .SearchPlaceholder }}"
+							@endif
 						>
-							@foreach(filter.Options as option)
-								<option
-									value="{{ option.Value }}"
-									@if(.Chosen(filter, option))
-										selected
-									@endif
-								>{{ option.Label }}</option>
-							@endforeach
-						</select>
-					</label>
-				@endforeach
+						<span
+							data-part="indicator"
+							class="{{ .PartClass("indicator", "spinner") }}"
+							id="{{ .ID }}-indicator"
+							aria-hidden="true"
+							@attributes(.PartAttrs("indicator"))
+						></span>
+					@endif
+
+					@if(.Filtered())
+						@foreach(.Filters as filter)
+							<label class="data-table-facet">
+								<span class="sr-only">{{ filter.Label }}</span>
+								<select
+									data-part="filter"
+									class="{{ .PartClass("filter", "select") }}"
+									name="{{ filter.Key }}"
+									multiple
+									size="1"
+									hx-get="{{ .SearchAddress() }}"
+									hx-trigger="change"
+									hx-include="closest form"
+									hx-target="{{ .Target() }}"
+									hx-swap="outerHTML"
+									hx-sync="closest form:replace"
+									hx-indicator="#{{ .ID }}-indicator"
+									@attributes(.PartAttrs("filter"))
+								>
+									@foreach(filter.Options as option)
+										<option
+											value="{{ option.Value }}"
+											@if(.Chosen(filter, option))
+												selected
+											@endif
+										>{{ option.Label }}</option>
+									@endforeach
+								</select>
+							</label>
+						@endforeach
+						{!! Button(ButtonProps{Label: .ApplyText(), Type: "submit", Variant: "outline", Size: "sm"}) !!}
+					@endif
+				</form>
 			@endif
 
 			@if(.Chooses())
