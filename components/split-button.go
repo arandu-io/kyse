@@ -928,7 +928,9 @@ func SplitButton(kyse__props SplitButtonProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-	_ = kyse__err
+	if kyse__err != nil {
+		return ""
+	}
 	return kyse__template.HTML(kyse__w.String())
 }
 
