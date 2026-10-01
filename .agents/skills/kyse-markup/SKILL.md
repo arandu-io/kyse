@@ -90,8 +90,16 @@ globs `components/*.kyse.go` and `components/*.go`, and fails on any `x-name` or
 be written, the compiled file is what a browser is actually sent. The failure
 names the file, the line, the attribute, and what to do instead.
 
-`hx-get`, `hx-post`, `hx-target`, `hx-on:click` are not matched and are correct
-here. HTMX parses attributes rather than evaluating them.
+`hx-get`, `hx-post` and `hx-target` are not matched and are correct here: their
+values are an address and a selector, which HTMX reads as data.
+
+**`hx-on` is forbidden all the same**, in every spelling — `hx-on:click`,
+`hx-on::after-request`, `data-hx-on:click`. Its value is JavaScript that HTMX
+compiles and runs, exactly like `x-on:click`, so under `script-src 'self'` it is
+dead, and if the policy were ever loosened it would be script written into an
+attribute. The view compiler treats it as a code attribute and refuses any
+value interpolated into it. Behaviour goes where every other behaviour goes: a
+`data-*` attribute the shared `ui.js` dispatches on.
 
 ## The loop wraps the repeated element and nothing else
 
@@ -137,11 +145,15 @@ named function that returns `template.HTML` — another component, or an icon:
 
 A component is entitled to skip escaping because everything it interpolated was
 escaped by the view compiler when it was generated. **A value has been through
-nothing.** `{!! .Body !!}` is stored cross-site scripting the first time one of
-them comes from a person, and it runs for every reader of the page. In an
-application `aru doctor` reports the shape as `raw-output-is-not-a-component`;
-that check reads applications, not this library, so here the rule is yours to
-keep.
+nothing.** `{!! .Body !!}` with a `string` field does not compile: the view
+compiler assigns every `{!! !!}` value to a `template.HTML` before writing it,
+so the Go compiler accepts a component, an icon, a field typed as markup and a
+constant the view spells out, and stops the build at the line of the
+`.kyse.go` on a string that arrived as data. That rule holds here as much as in
+an application. Do not convert to `template.HTML` to get past it — a prop
+somebody typed, converted, is stored cross-site scripting that runs for every
+reader of the page. In an application `aru doctor` also reports the shape as
+`raw-output-is-not-a-component`.
 
 `TestAPropIsEscaped` at `tests/Unit/components_test.go:131` renders twelve
 components with `<script>alert(1)</script>` in a prop and fails if it survives.
