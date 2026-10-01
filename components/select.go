@@ -5,6 +5,7 @@
 package components
 
 import (
+	kyse__errors "errors"
 	kyse__fmt "fmt"
 	kyse__template "html/template"
 	kyse__io "io"
@@ -188,7 +189,7 @@ func (p SelectProps) PartNames() []string {
 	return []string{"root", "label", "input", "option", "message", "hint"}
 }
 
-//line components/select.go:192
+//line components/select.go:193
 
 // Select renders the select component.
 func Select(kyse__props SelectProps) kyse__template.HTML {
@@ -213,21 +214,21 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/select.kyse.go:181
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("field")))
-//line components/select.go:217
+//line components/select.go:218
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 //line components/select.kyse.go:182
 	if kyse__d.Message() != "" {
-//line components/select.go:224
+//line components/select.go:225
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-invalid=\"true\"\n")
 		}
 	}
 //line components/select.kyse.go:185
 	if kyse__d.Disabled {
-//line components/select.go:231
+//line components/select.go:232
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-disabled=\"true\"\n")
 		}
@@ -236,7 +237,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 		var kyse__v1 string
 //line components/select.kyse.go:188
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/select.go:240
+//line components/select.go:241
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/select.kyse.go:188", kyse__err)
 		} else {
@@ -258,7 +259,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/select.kyse.go:192
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("label", "label")))
-//line components/select.go:262
+//line components/select.go:263
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -269,7 +270,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/select.kyse.go:193
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/select.go:273
+//line components/select.go:274
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -278,7 +279,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 		var kyse__v2 string
 //line components/select.kyse.go:194
 		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("label"))
-//line components/select.go:282
+//line components/select.go:283
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/select.kyse.go:194", kyse__err)
 		} else {
@@ -291,7 +292,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/select.kyse.go:195
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
-//line components/select.go:295
+//line components/select.go:296
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</label>\n")
@@ -308,7 +309,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/select.kyse.go:198
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("input", "select")))
-//line components/select.go:312
+//line components/select.go:313
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -319,7 +320,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/select.kyse.go:199
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/select.go:323
+//line components/select.go:324
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -330,28 +331,28 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/select.kyse.go:200
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.FieldName()))
-//line components/select.go:334
+//line components/select.go:335
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 //line components/select.kyse.go:201
 	if kyse__d.Multiple {
-//line components/select.go:341
+//line components/select.go:342
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tmultiple\n")
 		}
 	}
 //line components/select.kyse.go:204
 	if kyse__d.Size > 0 {
-//line components/select.go:348
+//line components/select.go:349
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tsize=\"")
 		}
 		if kyse__err == nil {
 //line components/select.kyse.go:205
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Size))
-//line components/select.go:355
+//line components/select.go:356
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -359,7 +360,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	}
 //line components/select.kyse.go:207
 	if kyse__d.HxGet != "" {
-//line components/select.go:363
+//line components/select.go:364
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-get=\"")
 		}
@@ -367,7 +368,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 			var kyse__v3 string
 //line components/select.kyse.go:208
 			kyse__v3, kyse__err = kyse__view.TextURL(kyse__d.HxGet)
-//line components/select.go:371
+//line components/select.go:372
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/select.kyse.go:208", kyse__err)
 			} else {
@@ -380,7 +381,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	}
 //line components/select.kyse.go:210
 	if kyse__d.HxPost != "" {
-//line components/select.go:384
+//line components/select.go:385
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-post=\"")
 		}
@@ -388,7 +389,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 			var kyse__v4 string
 //line components/select.kyse.go:211
 			kyse__v4, kyse__err = kyse__view.TextURL(kyse__d.HxPost)
-//line components/select.go:392
+//line components/select.go:393
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/select.kyse.go:211", kyse__err)
 			} else {
@@ -401,14 +402,18 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	}
 //line components/select.kyse.go:213
 	if kyse__d.Fetches() {
-//line components/select.go:405
+//line components/select.go:406
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-trigger=\"")
 		}
 		if kyse__err == nil {
 //line components/select.kyse.go:214
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Trigger()))
-//line components/select.go:412
+			if kyse__v5 := kyse__view.Text(kyse__d.Trigger()); kyse__strings.ContainsAny(kyse__v5, "[]") {
+//line components/select.go:413
+				kyse__err = kyse__errors.New("components/select.kyse.go:214: the value interpolated into an HTMX trigger holds a square bracket, and HTMX evaluates what a trigger holds between square brackets as a script")
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__v5))
+			}
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -416,14 +421,14 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	}
 //line components/select.kyse.go:216
 	if kyse__d.HxTarget != "" {
-//line components/select.go:420
+//line components/select.go:425
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-target=\"")
 		}
 		if kyse__err == nil {
 //line components/select.kyse.go:217
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxTarget))
-//line components/select.go:427
+//line components/select.go:432
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -431,14 +436,14 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	}
 //line components/select.kyse.go:219
 	if kyse__d.HxSwap != "" {
-//line components/select.go:435
+//line components/select.go:440
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-swap=\"")
 		}
 		if kyse__err == nil {
 //line components/select.kyse.go:220
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxSwap))
-//line components/select.go:442
+//line components/select.go:447
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -446,14 +451,14 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	}
 //line components/select.kyse.go:222
 	if kyse__d.HxInclude != "" {
-//line components/select.go:450
+//line components/select.go:455
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-include=\"")
 		}
 		if kyse__err == nil {
 //line components/select.kyse.go:223
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxInclude))
-//line components/select.go:457
+//line components/select.go:462
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -461,14 +466,14 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	}
 //line components/select.kyse.go:225
 	if kyse__d.DescribedBy() != "" {
-//line components/select.go:465
+//line components/select.go:470
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
 //line components/select.kyse.go:226
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/select.go:472
+//line components/select.go:477
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -476,34 +481,34 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	}
 //line components/select.kyse.go:228
 	if kyse__d.Message() != "" {
-//line components/select.go:480
+//line components/select.go:485
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-invalid=\"true\"\n")
 		}
 	}
 //line components/select.kyse.go:231
 	if kyse__d.Required {
-//line components/select.go:487
+//line components/select.go:492
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\trequired\n")
 		}
 	}
 //line components/select.kyse.go:234
 	if kyse__d.Disabled {
-//line components/select.go:494
+//line components/select.go:499
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdisabled\n")
 		}
 	}
 	if kyse__err == nil {
-		var kyse__v5 string
+		var kyse__v6 string
 //line components/select.kyse.go:237
-		kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/select.go:503
+		kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
+//line components/select.go:508
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/select.kyse.go:237", kyse__err)
 		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 		}
 	}
 	if kyse__err == nil {
@@ -511,7 +516,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	}
 //line components/select.kyse.go:239
 	if kyse__d.Placeholder != "" {
-//line components/select.go:515
+//line components/select.go:520
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<option\n")
 		}
@@ -520,14 +525,14 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 		}
 //line components/select.kyse.go:242
 		if kyse__d.PartClass("option") != "" {
-//line components/select.go:524
+//line components/select.go:529
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
 //line components/select.kyse.go:243
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("option")))
-//line components/select.go:531
+//line components/select.go:536
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -538,20 +543,20 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 		}
 //line components/select.kyse.go:246
 		if kyse__d.Current() == "" {
-//line components/select.go:542
+//line components/select.go:547
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tselected\n")
 			}
 		}
 		if kyse__err == nil {
-			var kyse__v6 string
+			var kyse__v7 string
 //line components/select.kyse.go:249
-			kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("option"))
-//line components/select.go:551
+			kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("option"))
+//line components/select.go:556
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/select.kyse.go:249", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 			}
 		}
 		if kyse__err == nil {
@@ -560,7 +565,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/select.kyse.go:250
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Placeholder)))
-//line components/select.go:564
+//line components/select.go:569
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</option>\n")
@@ -569,7 +574,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 //line components/select.kyse.go:252
 	for _, option := range kyse__d.Options {
 		_ = option
-//line components/select.go:573
+//line components/select.go:578
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<option\n")
 		}
@@ -578,14 +583,14 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 		}
 //line components/select.kyse.go:255
 		if kyse__d.PartClass("option") != "" {
-//line components/select.go:582
+//line components/select.go:587
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
 //line components/select.kyse.go:256
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("option")))
-//line components/select.go:589
+//line components/select.go:594
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -597,34 +602,34 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/select.kyse.go:258
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(option.Value))
-//line components/select.go:601
+//line components/select.go:606
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 //line components/select.kyse.go:259
 		if kyse__d.Selected(option) {
-//line components/select.go:608
+//line components/select.go:613
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tselected\n")
 			}
 		}
 //line components/select.kyse.go:262
 		if option.Disabled {
-//line components/select.go:615
+//line components/select.go:620
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdisabled\n")
 			}
 		}
 		if kyse__err == nil {
-			var kyse__v7 string
+			var kyse__v8 string
 //line components/select.kyse.go:265
-			kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("option"))
-//line components/select.go:624
+			kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("option"))
+//line components/select.go:629
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/select.kyse.go:265", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 			}
 		}
 		if kyse__err == nil {
@@ -633,7 +638,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/select.kyse.go:266
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(option.Label)))
-//line components/select.go:637
+//line components/select.go:642
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</option>\n")
@@ -644,7 +649,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	}
 //line components/select.kyse.go:269
 	if kyse__d.Message() != "" {
-//line components/select.go:648
+//line components/select.go:653
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<p\n")
 		}
@@ -657,7 +662,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/select.kyse.go:272
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/select.go:661
+//line components/select.go:666
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "-error\"\n")
@@ -668,20 +673,20 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/select.kyse.go:273
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("message", "text-destructive text-sm")))
-//line components/select.go:672
+//line components/select.go:677
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			var kyse__v8 string
+			var kyse__v9 string
 //line components/select.kyse.go:274
-			kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("message"))
-//line components/select.go:681
+			kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("message"))
+//line components/select.go:686
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/select.kyse.go:274", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
 			}
 		}
 		if kyse__err == nil {
@@ -690,7 +695,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/select.kyse.go:275
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message())))
-//line components/select.go:694
+//line components/select.go:699
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
@@ -698,10 +703,10 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	}
 //line components/select.kyse.go:277
 	if kyse__d.Message() == "" {
-//line components/select.go:702
+//line components/select.go:707
 //line components/select.kyse.go:278
 		if kyse__d.Hint != "" {
-//line components/select.go:705
+//line components/select.go:710
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<p\n")
 			}
@@ -714,7 +719,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 			if kyse__err == nil {
 //line components/select.kyse.go:281
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/select.go:718
+//line components/select.go:723
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "-hint\"\n")
@@ -725,20 +730,20 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 			if kyse__err == nil {
 //line components/select.kyse.go:282
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("hint", "text-muted-foreground text-sm")))
-//line components/select.go:729
+//line components/select.go:734
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 			if kyse__err == nil {
-				var kyse__v9 string
+				var kyse__v10 string
 //line components/select.kyse.go:283
-				kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("hint"))
-//line components/select.go:738
+				kyse__v10, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("hint"))
+//line components/select.go:743
 				if kyse__err != nil {
 					kyse__err = kyse__fmt.Errorf("%s: %w", "components/select.kyse.go:283", kyse__err)
 				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v10)
 				}
 			}
 			if kyse__err == nil {
@@ -747,7 +752,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 			if kyse__err == nil {
 //line components/select.kyse.go:284
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Hint)))
-//line components/select.go:751
+//line components/select.go:756
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")

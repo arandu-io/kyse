@@ -5,6 +5,7 @@
 package components
 
 import (
+	kyse__errors "errors"
 	kyse__fmt "fmt"
 	kyse__template "html/template"
 	kyse__io "io"
@@ -106,7 +107,7 @@ func (p ActiveSearchProps) PartNames() []string {
 	return []string{"root", "label", "group", "input", "indicator", "results", "hint"}
 }
 
-//line components/active-search.go:110
+//line components/active-search.go:111
 
 // ActiveSearch renders the active-search component.
 func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
@@ -131,7 +132,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/active-search.kyse.go:104
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("field")))
-//line components/active-search.go:135
+//line components/active-search.go:136
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -143,7 +144,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 		var kyse__v1 string
 //line components/active-search.kyse.go:105
 		kyse__v1, kyse__err = kyse__view.TextURL(kyse__d.URL)
-//line components/active-search.go:147
+//line components/active-search.go:148
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/active-search.kyse.go:105", kyse__err)
 		} else {
@@ -163,7 +164,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 		var kyse__v2 string
 //line components/active-search.kyse.go:108
 		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/active-search.go:167
+//line components/active-search.go:168
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/active-search.kyse.go:108", kyse__err)
 		} else {
@@ -181,14 +182,14 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	}
 //line components/active-search.kyse.go:112
 	if kyse__d.LabelHidden {
-//line components/active-search.go:185
+//line components/active-search.go:186
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
 //line components/active-search.kyse.go:113
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("label", "sr-only")))
-//line components/active-search.go:192
+//line components/active-search.go:193
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -196,14 +197,14 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	}
 //line components/active-search.kyse.go:115
 	if !kyse__d.LabelHidden {
-//line components/active-search.go:200
+//line components/active-search.go:201
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
 //line components/active-search.kyse.go:116
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("label", "label")))
-//line components/active-search.go:207
+//line components/active-search.go:208
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -215,7 +216,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/active-search.kyse.go:118
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/active-search.go:219
+//line components/active-search.go:220
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -224,7 +225,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 		var kyse__v3 string
 //line components/active-search.kyse.go:119
 		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("label"))
-//line components/active-search.go:228
+//line components/active-search.go:229
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/active-search.kyse.go:119", kyse__err)
 		} else {
@@ -237,7 +238,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/active-search.kyse.go:120
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
-//line components/active-search.go:241
+//line components/active-search.go:242
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</label>\n")
@@ -257,7 +258,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/active-search.kyse.go:124
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("group", "input-group")))
-//line components/active-search.go:261
+//line components/active-search.go:262
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -266,7 +267,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 		var kyse__v4 string
 //line components/active-search.kyse.go:125
 		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("group"))
-//line components/active-search.go:270
+//line components/active-search.go:271
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/active-search.kyse.go:125", kyse__err)
 		} else {
@@ -284,14 +285,14 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	}
 //line components/active-search.kyse.go:132
 	if kyse__d.PartClass("input") != "" {
-//line components/active-search.go:288
+//line components/active-search.go:289
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
 //line components/active-search.kyse.go:133
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("input")))
-//line components/active-search.go:295
+//line components/active-search.go:296
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -306,7 +307,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/active-search.kyse.go:136
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/active-search.go:310
+//line components/active-search.go:311
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -317,7 +318,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/active-search.kyse.go:137
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/active-search.go:321
+//line components/active-search.go:322
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -328,7 +329,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/active-search.kyse.go:138
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Value))
-//line components/active-search.go:332
+//line components/active-search.go:333
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -343,7 +344,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 		var kyse__v5 string
 //line components/active-search.kyse.go:140
 		kyse__v5, kyse__err = kyse__view.TextURL(kyse__d.URL)
-//line components/active-search.go:347
+//line components/active-search.go:348
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/active-search.kyse.go:140", kyse__err)
 		} else {
@@ -358,8 +359,12 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 //line components/active-search.kyse.go:141
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Trigger()))
-//line components/active-search.go:363
+		if kyse__v6 := kyse__view.Text(kyse__d.Trigger()); kyse__strings.ContainsAny(kyse__v6, "[]") {
+//line components/active-search.go:364
+			kyse__err = kyse__errors.New("components/active-search.kyse.go:141: the value interpolated into an HTMX trigger holds a square bracket, and HTMX evaluates what a trigger holds between square brackets as a script")
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__v6))
+		}
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -370,7 +375,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/active-search.kyse.go:142
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Region()))
-//line components/active-search.go:374
+//line components/active-search.go:379
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -387,21 +392,21 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/active-search.kyse.go:145
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/active-search.go:391
+//line components/active-search.go:396
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "-indicator\"\n")
 	}
 //line components/active-search.kyse.go:146
 	if kyse__d.Placeholder != "" {
-//line components/active-search.go:398
+//line components/active-search.go:403
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tplaceholder=\"")
 		}
 		if kyse__err == nil {
 //line components/active-search.kyse.go:147
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Placeholder))
-//line components/active-search.go:405
+//line components/active-search.go:410
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -409,14 +414,14 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	}
 //line components/active-search.kyse.go:149
 	if kyse__d.MinLength > 0 {
-//line components/active-search.go:413
+//line components/active-search.go:418
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tminlength=\"")
 		}
 		if kyse__err == nil {
 //line components/active-search.kyse.go:150
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.MinLength))
-//line components/active-search.go:420
+//line components/active-search.go:425
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -424,28 +429,28 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	}
 //line components/active-search.kyse.go:152
 	if kyse__d.DescribedBy() != "" {
-//line components/active-search.go:428
+//line components/active-search.go:433
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
 //line components/active-search.kyse.go:153
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/active-search.go:435
+//line components/active-search.go:440
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
 	if kyse__err == nil {
-		var kyse__v6 string
+		var kyse__v7 string
 //line components/active-search.kyse.go:155
-		kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/active-search.go:445
+		kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
+//line components/active-search.go:450
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/active-search.kyse.go:155", kyse__err)
 		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 		}
 	}
 	if kyse__err == nil {
@@ -466,7 +471,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/active-search.kyse.go:160
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("indicator", "spinner")))
-//line components/active-search.go:470
+//line components/active-search.go:475
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -477,7 +482,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/active-search.kyse.go:161
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/active-search.go:481
+//line components/active-search.go:486
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "-indicator\"\n")
@@ -489,14 +494,14 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-hidden=\"true\"\n")
 	}
 	if kyse__err == nil {
-		var kyse__v7 string
+		var kyse__v8 string
 //line components/active-search.kyse.go:164
-		kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("indicator"))
-//line components/active-search.go:496
+		kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("indicator"))
+//line components/active-search.go:501
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/active-search.kyse.go:164", kyse__err)
 		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 		}
 	}
 	if kyse__err == nil {
@@ -510,7 +515,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	}
 //line components/active-search.kyse.go:168
 	if kyse__d.Hint != "" {
-//line components/active-search.go:514
+//line components/active-search.go:519
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<p\n")
 		}
@@ -523,7 +528,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/active-search.kyse.go:171
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/active-search.go:527
+//line components/active-search.go:532
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "-hint\"\n")
@@ -534,20 +539,20 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/active-search.kyse.go:172
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("hint", "text-muted-foreground text-sm")))
-//line components/active-search.go:538
+//line components/active-search.go:543
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			var kyse__v8 string
+			var kyse__v9 string
 //line components/active-search.kyse.go:173
-			kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("hint"))
-//line components/active-search.go:547
+			kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("hint"))
+//line components/active-search.go:552
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/active-search.kyse.go:173", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
 			}
 		}
 		if kyse__err == nil {
@@ -556,7 +561,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/active-search.kyse.go:174
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Hint)))
-//line components/active-search.go:560
+//line components/active-search.go:565
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
@@ -573,14 +578,14 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	}
 //line components/active-search.kyse.go:183
 	if kyse__d.PartClass("results") != "" {
-//line components/active-search.go:577
+//line components/active-search.go:582
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
 //line components/active-search.kyse.go:184
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("results")))
-//line components/active-search.go:584
+//line components/active-search.go:589
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -592,7 +597,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/active-search.kyse.go:186
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Region()))
-//line components/active-search.go:596
+//line components/active-search.go:601
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -612,20 +617,20 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/active-search.kyse.go:190
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
-//line components/active-search.go:616
+//line components/active-search.go:621
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
-		var kyse__v9 string
+		var kyse__v10 string
 //line components/active-search.kyse.go:191
-		kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("results"))
-//line components/active-search.go:625
+		kyse__v10, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("results"))
+//line components/active-search.go:630
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/active-search.kyse.go:191", kyse__err)
 		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v10)
 		}
 	}
 	if kyse__err == nil {
@@ -634,7 +639,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/active-search.kyse.go:192
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.EmptyMessage)))
-//line components/active-search.go:638
+//line components/active-search.go:643
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</div>\n")

@@ -446,8 +446,9 @@ func Tabs(kyse__props TabsProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 //line components/tabs.kyse.go:172
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(tab.Panel))
+			var kyse__v5 kyse__template.HTML = tab.Panel
 //line components/tabs.go:451
+			_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v5))
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</div>\n")

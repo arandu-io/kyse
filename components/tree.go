@@ -403,8 +403,9 @@ func Tree(kyse__props TreeProps) kyse__template.HTML {
 				}
 				if kyse__err == nil {
 //line components/tree.kyse.go:193
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(icons.CaretRight(icons.Props{})))
+					var kyse__v4 kyse__template.HTML = icons.CaretRight(icons.Props{})
 //line components/tree.go:408
+					_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v4))
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
@@ -412,7 +413,7 @@ func Tree(kyse__props TreeProps) kyse__template.HTML {
 			}
 //line components/tree.kyse.go:195
 			if row.Node.Icon != "" {
-//line components/tree.go:416
+//line components/tree.go:417
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<span\n")
 				}
@@ -425,7 +426,7 @@ func Tree(kyse__props TreeProps) kyse__template.HTML {
 				if kyse__err == nil {
 //line components/tree.kyse.go:198
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("icon", "tree-icon")))
-//line components/tree.go:429
+//line components/tree.go:430
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -434,14 +435,14 @@ func Tree(kyse__props TreeProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\taria-hidden=\"true\"\n")
 				}
 				if kyse__err == nil {
-					var kyse__v4 string
+					var kyse__v5 string
 //line components/tree.kyse.go:200
-					kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("icon"))
-//line components/tree.go:441
+					kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("icon"))
+//line components/tree.go:442
 					if kyse__err != nil {
 						kyse__err = kyse__fmt.Errorf("%s: %w", "components/tree.kyse.go:200", kyse__err)
 					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 					}
 				}
 				if kyse__err == nil {
@@ -449,8 +450,9 @@ func Tree(kyse__props TreeProps) kyse__template.HTML {
 				}
 				if kyse__err == nil {
 //line components/tree.kyse.go:201
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(row.Node.Icon))
-//line components/tree.go:454
+					var kyse__v6 kyse__template.HTML = row.Node.Icon
+//line components/tree.go:455
+					_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v6))
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
@@ -458,7 +460,7 @@ func Tree(kyse__props TreeProps) kyse__template.HTML {
 			}
 //line components/tree.kyse.go:203
 			if row.Node.URL != "" {
-//line components/tree.go:462
+//line components/tree.go:464
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<a\n")
 				}
@@ -467,14 +469,14 @@ func Tree(kyse__props TreeProps) kyse__template.HTML {
 				}
 //line components/tree.kyse.go:206
 				if kyse__d.PartClass("label") != "" {
-//line components/tree.go:471
+//line components/tree.go:473
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
 					}
 					if kyse__err == nil {
 //line components/tree.kyse.go:207
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("label")))
-//line components/tree.go:478
+//line components/tree.go:480
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -484,14 +486,14 @@ func Tree(kyse__props TreeProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thref=\"")
 				}
 				if kyse__err == nil {
-					var kyse__v5 string
+					var kyse__v7 string
 //line components/tree.kyse.go:209
-					kyse__v5, kyse__err = kyse__view.TextURL(row.Node.URL)
-//line components/tree.go:491
+					kyse__v7, kyse__err = kyse__view.TextURL(row.Node.URL)
+//line components/tree.go:493
 					if kyse__err != nil {
 						kyse__err = kyse__fmt.Errorf("%s: %w", "components/tree.kyse.go:209", kyse__err)
 					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 					}
 				}
 				if kyse__err == nil {
@@ -501,14 +503,14 @@ func Tree(kyse__props TreeProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\ttabindex=\"-1\"\n")
 				}
 				if kyse__err == nil {
-					var kyse__v6 string
+					var kyse__v8 string
 //line components/tree.kyse.go:211
-					kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("label"))
-//line components/tree.go:508
+					kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("label"))
+//line components/tree.go:510
 					if kyse__err != nil {
 						kyse__err = kyse__fmt.Errorf("%s: %w", "components/tree.kyse.go:211", kyse__err)
 					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 					}
 				}
 				if kyse__err == nil {
@@ -517,7 +519,7 @@ func Tree(kyse__props TreeProps) kyse__template.HTML {
 				if kyse__err == nil {
 //line components/tree.kyse.go:212
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(row.Node.Label)))
-//line components/tree.go:521
+//line components/tree.go:523
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "</a>\n")
@@ -525,7 +527,7 @@ func Tree(kyse__props TreeProps) kyse__template.HTML {
 			}
 //line components/tree.kyse.go:214
 			if row.Node.URL == "" {
-//line components/tree.go:529
+//line components/tree.go:531
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<span\n")
 				}
@@ -534,28 +536,28 @@ func Tree(kyse__props TreeProps) kyse__template.HTML {
 				}
 //line components/tree.kyse.go:217
 				if kyse__d.PartClass("label") != "" {
-//line components/tree.go:538
+//line components/tree.go:540
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
 					}
 					if kyse__err == nil {
 //line components/tree.kyse.go:218
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("label")))
-//line components/tree.go:545
+//line components/tree.go:547
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 					}
 				}
 				if kyse__err == nil {
-					var kyse__v7 string
+					var kyse__v9 string
 //line components/tree.kyse.go:220
-					kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("label"))
-//line components/tree.go:555
+					kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("label"))
+//line components/tree.go:557
 					if kyse__err != nil {
 						kyse__err = kyse__fmt.Errorf("%s: %w", "components/tree.kyse.go:220", kyse__err)
 					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
 					}
 				}
 				if kyse__err == nil {
@@ -564,7 +566,7 @@ func Tree(kyse__props TreeProps) kyse__template.HTML {
 				if kyse__err == nil {
 //line components/tree.kyse.go:221
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(row.Node.Label)))
-//line components/tree.go:568
+//line components/tree.go:570
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")

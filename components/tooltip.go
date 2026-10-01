@@ -254,8 +254,9 @@ func Tooltip(kyse__props TooltipProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 //line components/tooltip.kyse.go:100
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(kyse__d.Icon))
+				var kyse__v4 kyse__template.HTML = kyse__d.Icon
 //line components/tooltip.go:259
+				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v4))
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
@@ -267,7 +268,7 @@ func Tooltip(kyse__props TooltipProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/tooltip.kyse.go:102
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
-//line components/tooltip.go:271
+//line components/tooltip.go:272
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
@@ -278,7 +279,7 @@ func Tooltip(kyse__props TooltipProps) kyse__template.HTML {
 	}
 //line components/tooltip.kyse.go:105
 	if kyse__d.URL == "" {
-//line components/tooltip.go:282
+//line components/tooltip.go:283
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<button\n")
 		}
@@ -291,7 +292,7 @@ func Tooltip(kyse__props TooltipProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/tooltip.kyse.go:108
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("trigger", "btn")))
-//line components/tooltip.go:295
+//line components/tooltip.go:296
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -301,14 +302,14 @@ func Tooltip(kyse__props TooltipProps) kyse__template.HTML {
 		}
 //line components/tooltip.kyse.go:110
 		if kyse__d.Named() {
-//line components/tooltip.go:305
+//line components/tooltip.go:306
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-describedby=\"")
 			}
 			if kyse__err == nil {
 //line components/tooltip.kyse.go:111
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ContentID()))
-//line components/tooltip.go:312
+//line components/tooltip.go:313
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -316,14 +317,14 @@ func Tooltip(kyse__props TooltipProps) kyse__template.HTML {
 		}
 //line components/tooltip.kyse.go:113
 		if !kyse__d.Named() {
-//line components/tooltip.go:320
+//line components/tooltip.go:321
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-labelledby=\"")
 			}
 			if kyse__err == nil {
 //line components/tooltip.kyse.go:114
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ContentID()))
-//line components/tooltip.go:327
+//line components/tooltip.go:328
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -331,21 +332,21 @@ func Tooltip(kyse__props TooltipProps) kyse__template.HTML {
 		}
 //line components/tooltip.kyse.go:116
 		if kyse__d.Disabled {
-//line components/tooltip.go:335
+//line components/tooltip.go:336
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdisabled\n")
 			}
 		}
 //line components/tooltip.kyse.go:119
 		if kyse__d.Variant != "" {
-//line components/tooltip.go:342
+//line components/tooltip.go:343
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-variant=\"")
 			}
 			if kyse__err == nil {
 //line components/tooltip.kyse.go:120
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Variant))
-//line components/tooltip.go:349
+//line components/tooltip.go:350
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -353,28 +354,28 @@ func Tooltip(kyse__props TooltipProps) kyse__template.HTML {
 		}
 //line components/tooltip.kyse.go:122
 		if kyse__d.Size != "" {
-//line components/tooltip.go:357
+//line components/tooltip.go:358
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-size=\"")
 			}
 			if kyse__err == nil {
 //line components/tooltip.kyse.go:123
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Size))
-//line components/tooltip.go:364
+//line components/tooltip.go:365
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
 		if kyse__err == nil {
-			var kyse__v4 string
+			var kyse__v5 string
 //line components/tooltip.kyse.go:125
-			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("trigger"))
-//line components/tooltip.go:374
+			kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("trigger"))
+//line components/tooltip.go:375
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/tooltip.kyse.go:125", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 			}
 		}
 		if kyse__err == nil {
@@ -382,14 +383,15 @@ func Tooltip(kyse__props TooltipProps) kyse__template.HTML {
 		}
 //line components/tooltip.kyse.go:127
 		if kyse__d.Icon != "" {
-//line components/tooltip.go:386
+//line components/tooltip.go:387
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t")
 			}
 			if kyse__err == nil {
 //line components/tooltip.kyse.go:128
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(kyse__d.Icon))
-//line components/tooltip.go:393
+				var kyse__v6 kyse__template.HTML = kyse__d.Icon
+//line components/tooltip.go:394
+				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v6))
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
@@ -401,7 +403,7 @@ func Tooltip(kyse__props TooltipProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/tooltip.kyse.go:130
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
-//line components/tooltip.go:405
+//line components/tooltip.go:407
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
@@ -425,7 +427,7 @@ func Tooltip(kyse__props TooltipProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/tooltip.kyse.go:136
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("content", "tooltip-content")))
-//line components/tooltip.go:429
+//line components/tooltip.go:431
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -436,7 +438,7 @@ func Tooltip(kyse__props TooltipProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/tooltip.kyse.go:137
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ContentID()))
-//line components/tooltip.go:440
+//line components/tooltip.go:442
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -446,28 +448,28 @@ func Tooltip(kyse__props TooltipProps) kyse__template.HTML {
 	}
 //line components/tooltip.kyse.go:139
 	if kyse__d.Side != "" {
-//line components/tooltip.go:450
+//line components/tooltip.go:452
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-side=\"")
 		}
 		if kyse__err == nil {
 //line components/tooltip.kyse.go:140
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Side))
-//line components/tooltip.go:457
+//line components/tooltip.go:459
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
 	if kyse__err == nil {
-		var kyse__v5 string
+		var kyse__v7 string
 //line components/tooltip.kyse.go:142
-		kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("content"))
-//line components/tooltip.go:467
+		kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("content"))
+//line components/tooltip.go:469
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/tooltip.kyse.go:142", kyse__err)
 		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 		}
 	}
 	if kyse__err == nil {
@@ -476,7 +478,7 @@ func Tooltip(kyse__props TooltipProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/tooltip.kyse.go:143
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Text)))
-//line components/tooltip.go:480
+//line components/tooltip.go:482
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")

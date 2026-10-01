@@ -161,8 +161,9 @@ func ButtonGroup(kyse__props ButtonGroupProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 //line components/button-group.kyse.go:77
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(Button(kyse__d.Buttons[at])))
+			var kyse__v2 kyse__template.HTML = Button(kyse__d.Buttons[at])
 //line components/button-group.go:166
+			_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v2))
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")

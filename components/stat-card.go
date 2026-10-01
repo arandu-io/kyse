@@ -353,8 +353,9 @@ func StatCard(kyse__props StatCardProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 //line components/stat-card.kyse.go:109
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(Empty(kyse__d.Empty)))
+			var kyse__v6 kyse__template.HTML = Empty(kyse__d.Empty)
 //line components/stat-card.go:358
+			_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v6))
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</div>\n")

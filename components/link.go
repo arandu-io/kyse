@@ -206,8 +206,9 @@ func Link(kyse__props LinkProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 //line components/link.kyse.go:83
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(kyse__d.Icon))
+				var kyse__v3 kyse__template.HTML = kyse__d.Icon
 //line components/link.go:211
+				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v3))
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
@@ -219,7 +220,7 @@ func Link(kyse__props LinkProps) kyse__template.HTML {
 	}
 //line components/link.kyse.go:87
 	if kyse__d.URL == "" {
-//line components/link.go:223
+//line components/link.go:224
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t<span\n")
 		}
@@ -232,21 +233,21 @@ func Link(kyse__props LinkProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/link.kyse.go:90
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("link")))
-//line components/link.go:236
+//line components/link.go:237
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 //line components/link.kyse.go:91
 		if kyse__d.Variant != "" {
-//line components/link.go:243
+//line components/link.go:244
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-variant=\"")
 			}
 			if kyse__err == nil {
 //line components/link.kyse.go:92
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Variant))
-//line components/link.go:250
+//line components/link.go:251
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -254,20 +255,20 @@ func Link(kyse__props LinkProps) kyse__template.HTML {
 		}
 //line components/link.kyse.go:94
 		if kyse__d.Current {
-//line components/link.go:258
+//line components/link.go:259
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-current=\"page\"\n")
 			}
 		}
 		if kyse__err == nil {
-			var kyse__v3 string
+			var kyse__v4 string
 //line components/link.kyse.go:97
-			kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/link.go:267
+			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/link.go:268
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/link.kyse.go:97", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 			}
 		}
 		if kyse__err == nil {
@@ -279,21 +280,22 @@ func Link(kyse__props LinkProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/link.kyse.go:99
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
-//line components/link.go:283
+//line components/link.go:284
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 		}
 //line components/link.kyse.go:100
 		if kyse__d.Icon != "" {
-//line components/link.go:290
+//line components/link.go:291
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t")
 			}
 			if kyse__err == nil {
 //line components/link.kyse.go:101
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(kyse__d.Icon))
-//line components/link.go:297
+				var kyse__v5 kyse__template.HTML = kyse__d.Icon
+//line components/link.go:298
+				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v5))
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\n")

@@ -443,8 +443,9 @@ func Popover(kyse__props PopoverProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 //line components/popover.kyse.go:125
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(kyse__d.Content))
+		var kyse__v7 kyse__template.HTML = kyse__d.Content
 //line components/popover.go:448
+		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v7))
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")

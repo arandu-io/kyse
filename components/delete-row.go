@@ -265,8 +265,9 @@ func DeleteRow(kyse__props DeleteRowProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 //line components/delete-row.kyse.go:123
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(kyse__d.Icon))
+			var kyse__v3 kyse__template.HTML = kyse__d.Icon
 //line components/delete-row.go:270
+			_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v3))
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
@@ -274,14 +275,14 @@ func DeleteRow(kyse__props DeleteRowProps) kyse__template.HTML {
 	}
 //line components/delete-row.kyse.go:125
 	if !kyse__d.IconOnly {
-//line components/delete-row.go:278
+//line components/delete-row.go:279
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t")
 		}
 		if kyse__err == nil {
 //line components/delete-row.kyse.go:126
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Text())))
-//line components/delete-row.go:285
+//line components/delete-row.go:286
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")

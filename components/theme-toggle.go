@@ -134,8 +134,9 @@ func ThemeToggle(kyse__props ThemeToggleProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 //line components/theme-toggle.kyse.go:71
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(icons.Sun(icons.Props{})))
+		var kyse__v3 kyse__template.HTML = icons.Sun(icons.Props{})
 //line components/theme-toggle.go:139
+		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v3))
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
@@ -145,8 +146,9 @@ func ThemeToggle(kyse__props ThemeToggleProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 //line components/theme-toggle.kyse.go:72
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(icons.Moon(icons.Props{})))
-//line components/theme-toggle.go:150
+		var kyse__v4 kyse__template.HTML = icons.Moon(icons.Props{})
+//line components/theme-toggle.go:151
+		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v4))
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
@@ -168,14 +170,14 @@ func ThemeToggle(kyse__props ThemeToggleProps) kyse__template.HTML {
 	}
 //line components/theme-toggle.kyse.go:83
 	if kyse__d.PartClass("menu") != "" {
-//line components/theme-toggle.go:172
+//line components/theme-toggle.go:174
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
 //line components/theme-toggle.kyse.go:84
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("menu")))
-//line components/theme-toggle.go:179
+//line components/theme-toggle.go:181
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -188,14 +190,14 @@ func ThemeToggle(kyse__props ThemeToggleProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-label=\"Theme\"\n")
 	}
 	if kyse__err == nil {
-		var kyse__v3 string
+		var kyse__v5 string
 //line components/theme-toggle.kyse.go:88
-		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("menu"))
-//line components/theme-toggle.go:195
+		kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("menu"))
+//line components/theme-toggle.go:197
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/theme-toggle.kyse.go:88", kyse__err)
 		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 		}
 	}
 	if kyse__err == nil {
@@ -209,14 +211,14 @@ func ThemeToggle(kyse__props ThemeToggleProps) kyse__template.HTML {
 	}
 //line components/theme-toggle.kyse.go:92
 	if kyse__d.PartClass("option") != "" {
-//line components/theme-toggle.go:213
+//line components/theme-toggle.go:215
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
 //line components/theme-toggle.kyse.go:93
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("option")))
-//line components/theme-toggle.go:220
+//line components/theme-toggle.go:222
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -235,14 +237,14 @@ func ThemeToggle(kyse__props ThemeToggleProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-theme-mode=\"auto\"\n")
 	}
 	if kyse__err == nil {
-		var kyse__v4 string
+		var kyse__v6 string
 //line components/theme-toggle.kyse.go:99
-		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("option"))
-//line components/theme-toggle.go:242
+		kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("option"))
+//line components/theme-toggle.go:244
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/theme-toggle.kyse.go:99", kyse__err)
 		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 		}
 	}
 	if kyse__err == nil {
@@ -253,8 +255,9 @@ func ThemeToggle(kyse__props ThemeToggleProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 //line components/theme-toggle.kyse.go:101
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(icons.Desktop(icons.Props{})))
-//line components/theme-toggle.go:258
+		var kyse__v7 kyse__template.HTML = icons.Desktop(icons.Props{})
+//line components/theme-toggle.go:260
+		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v7))
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
@@ -273,14 +276,14 @@ func ThemeToggle(kyse__props ThemeToggleProps) kyse__template.HTML {
 	}
 //line components/theme-toggle.kyse.go:106
 	if kyse__d.PartClass("option") != "" {
-//line components/theme-toggle.go:277
+//line components/theme-toggle.go:280
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
 //line components/theme-toggle.kyse.go:107
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("option")))
-//line components/theme-toggle.go:284
+//line components/theme-toggle.go:287
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -299,14 +302,14 @@ func ThemeToggle(kyse__props ThemeToggleProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-theme-mode=\"light\"\n")
 	}
 	if kyse__err == nil {
-		var kyse__v5 string
+		var kyse__v8 string
 //line components/theme-toggle.kyse.go:113
-		kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("option"))
-//line components/theme-toggle.go:306
+		kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("option"))
+//line components/theme-toggle.go:309
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/theme-toggle.kyse.go:113", kyse__err)
 		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 		}
 	}
 	if kyse__err == nil {
@@ -317,8 +320,9 @@ func ThemeToggle(kyse__props ThemeToggleProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 //line components/theme-toggle.kyse.go:115
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(icons.Sun(icons.Props{})))
-//line components/theme-toggle.go:322
+		var kyse__v9 kyse__template.HTML = icons.Sun(icons.Props{})
+//line components/theme-toggle.go:325
+		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v9))
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
@@ -337,14 +341,14 @@ func ThemeToggle(kyse__props ThemeToggleProps) kyse__template.HTML {
 	}
 //line components/theme-toggle.kyse.go:120
 	if kyse__d.PartClass("option") != "" {
-//line components/theme-toggle.go:341
+//line components/theme-toggle.go:345
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
 //line components/theme-toggle.kyse.go:121
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("option")))
-//line components/theme-toggle.go:348
+//line components/theme-toggle.go:352
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -363,14 +367,14 @@ func ThemeToggle(kyse__props ThemeToggleProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-theme-mode=\"dark\"\n")
 	}
 	if kyse__err == nil {
-		var kyse__v6 string
+		var kyse__v10 string
 //line components/theme-toggle.kyse.go:127
-		kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("option"))
-//line components/theme-toggle.go:370
+		kyse__v10, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("option"))
+//line components/theme-toggle.go:374
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/theme-toggle.kyse.go:127", kyse__err)
 		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v10)
 		}
 	}
 	if kyse__err == nil {
@@ -381,8 +385,9 @@ func ThemeToggle(kyse__props ThemeToggleProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 //line components/theme-toggle.kyse.go:129
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(icons.Moon(icons.Props{})))
-//line components/theme-toggle.go:386
+		var kyse__v11 kyse__template.HTML = icons.Moon(icons.Props{})
+//line components/theme-toggle.go:390
+		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v11))
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")

@@ -245,8 +245,9 @@ func Accordion(kyse__props AccordionProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 //line components/accordion.kyse.go:100
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(icons.CaretDown(icons.Props{})))
+			var kyse__v4 kyse__template.HTML = icons.CaretDown(icons.Props{})
 //line components/accordion.go:250
+			_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v4))
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</summary>\n")
@@ -259,28 +260,28 @@ func Accordion(kyse__props AccordionProps) kyse__template.HTML {
 		}
 //line components/accordion.kyse.go:103
 		if kyse__d.PartClass("panel") != "" {
-//line components/accordion.go:263
+//line components/accordion.go:264
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
 //line components/accordion.kyse.go:104
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("panel")))
-//line components/accordion.go:270
+//line components/accordion.go:271
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
 		if kyse__err == nil {
-			var kyse__v4 string
+			var kyse__v5 string
 //line components/accordion.kyse.go:106
-			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("panel"))
-//line components/accordion.go:280
+			kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("panel"))
+//line components/accordion.go:281
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/accordion.kyse.go:106", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 			}
 		}
 		if kyse__err == nil {
@@ -288,8 +289,9 @@ func Accordion(kyse__props AccordionProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 //line components/accordion.kyse.go:107
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(item.Content))
-//line components/accordion.go:293
+			var kyse__v6 kyse__template.HTML = item.Content
+//line components/accordion.go:294
+			_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v6))
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</section>\n")

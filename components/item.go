@@ -184,8 +184,9 @@ func Item(kyse__props ItemProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 //line components/item.kyse.go:79
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(kyse__d.Icon))
+			var kyse__v3 kyse__template.HTML = kyse__d.Icon
 //line components/item.go:189
+			_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v3))
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</figure>\n")
@@ -199,28 +200,28 @@ func Item(kyse__props ItemProps) kyse__template.HTML {
 	}
 //line components/item.kyse.go:83
 	if kyse__d.PartClass("content") != "" {
-//line components/item.go:203
+//line components/item.go:204
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
 //line components/item.kyse.go:84
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("content")))
-//line components/item.go:210
+//line components/item.go:211
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
 	if kyse__err == nil {
-		var kyse__v3 string
+		var kyse__v4 string
 //line components/item.kyse.go:86
-		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("content"))
-//line components/item.go:220
+		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("content"))
+//line components/item.go:221
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/item.kyse.go:86", kyse__err)
 		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 		}
 	}
 	if kyse__err == nil {
@@ -234,28 +235,28 @@ func Item(kyse__props ItemProps) kyse__template.HTML {
 	}
 //line components/item.kyse.go:90
 	if kyse__d.PartClass("title") != "" {
-//line components/item.go:238
+//line components/item.go:239
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
 //line components/item.kyse.go:91
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("title")))
-//line components/item.go:245
+//line components/item.go:246
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
 	if kyse__err == nil {
-		var kyse__v4 string
+		var kyse__v5 string
 //line components/item.kyse.go:93
-		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("title"))
-//line components/item.go:255
+		kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("title"))
+//line components/item.go:256
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/item.kyse.go:93", kyse__err)
 		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 		}
 	}
 	if kyse__err == nil {
@@ -264,14 +265,14 @@ func Item(kyse__props ItemProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/item.kyse.go:94
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Title)))
-//line components/item.go:268
+//line components/item.go:269
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</h3>\n")
 	}
 //line components/item.kyse.go:95
 	if kyse__d.Description != "" {
-//line components/item.go:275
+//line components/item.go:276
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<p\n")
 		}
@@ -280,28 +281,28 @@ func Item(kyse__props ItemProps) kyse__template.HTML {
 		}
 //line components/item.kyse.go:98
 		if kyse__d.PartClass("description") != "" {
-//line components/item.go:284
+//line components/item.go:285
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
 //line components/item.kyse.go:99
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("description")))
-//line components/item.go:291
+//line components/item.go:292
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
 		if kyse__err == nil {
-			var kyse__v5 string
+			var kyse__v6 string
 //line components/item.kyse.go:101
-			kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("description"))
-//line components/item.go:301
+			kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("description"))
+//line components/item.go:302
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/item.kyse.go:101", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 			}
 		}
 		if kyse__err == nil {
@@ -310,7 +311,7 @@ func Item(kyse__props ItemProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/item.kyse.go:102
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Description)))
-//line components/item.go:314
+//line components/item.go:315
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
@@ -321,7 +322,7 @@ func Item(kyse__props ItemProps) kyse__template.HTML {
 	}
 //line components/item.kyse.go:105
 	if kyse__d.Action != "" {
-//line components/item.go:325
+//line components/item.go:326
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<aside\n")
 		}
@@ -330,28 +331,28 @@ func Item(kyse__props ItemProps) kyse__template.HTML {
 		}
 //line components/item.kyse.go:108
 		if kyse__d.PartClass("action") != "" {
-//line components/item.go:334
+//line components/item.go:335
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
 //line components/item.kyse.go:109
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("action")))
-//line components/item.go:341
+//line components/item.go:342
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
 		if kyse__err == nil {
-			var kyse__v6 string
+			var kyse__v7 string
 //line components/item.kyse.go:111
-			kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("action"))
-//line components/item.go:351
+			kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("action"))
+//line components/item.go:352
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/item.kyse.go:111", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 			}
 		}
 		if kyse__err == nil {
@@ -359,8 +360,9 @@ func Item(kyse__props ItemProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 //line components/item.kyse.go:112
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(kyse__d.Action))
-//line components/item.go:364
+			var kyse__v8 kyse__template.HTML = kyse__d.Action
+//line components/item.go:365
+			_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v8))
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</aside>\n")

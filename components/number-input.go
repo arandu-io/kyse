@@ -335,8 +335,9 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 //line components/number-input.kyse.go:173
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(icons.Minus(icons.Props{})))
+		var kyse__v5 kyse__template.HTML = icons.Minus(icons.Props{})
 //line components/number-input.go:340
+		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v5))
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</button>\n")
@@ -352,14 +353,14 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 	}
 //line components/number-input.kyse.go:177
 	if kyse__d.PartClass("input") != "" {
-//line components/number-input.go:356
+//line components/number-input.go:357
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
 //line components/number-input.kyse.go:178
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("input")))
-//line components/number-input.go:363
+//line components/number-input.go:364
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -377,7 +378,7 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/number-input.kyse.go:182
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/number-input.go:381
+//line components/number-input.go:382
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -388,7 +389,7 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/number-input.kyse.go:183
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/number-input.go:392
+//line components/number-input.go:393
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -399,21 +400,21 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/number-input.kyse.go:184
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Current()))
-//line components/number-input.go:403
+//line components/number-input.go:404
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 //line components/number-input.kyse.go:185
 	if kyse__d.Min != "" {
-//line components/number-input.go:410
+//line components/number-input.go:411
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tmin=\"")
 		}
 		if kyse__err == nil {
 //line components/number-input.kyse.go:186
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Min))
-//line components/number-input.go:417
+//line components/number-input.go:418
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -421,14 +422,14 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 	}
 //line components/number-input.kyse.go:188
 	if kyse__d.Max != "" {
-//line components/number-input.go:425
+//line components/number-input.go:426
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tmax=\"")
 		}
 		if kyse__err == nil {
 //line components/number-input.kyse.go:189
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Max))
-//line components/number-input.go:432
+//line components/number-input.go:433
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -436,14 +437,14 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 	}
 //line components/number-input.kyse.go:191
 	if kyse__d.Step != "" {
-//line components/number-input.go:440
+//line components/number-input.go:441
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tstep=\"")
 		}
 		if kyse__err == nil {
 //line components/number-input.kyse.go:192
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Step))
-//line components/number-input.go:447
+//line components/number-input.go:448
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -451,14 +452,14 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 	}
 //line components/number-input.kyse.go:194
 	if kyse__d.Placeholder != "" {
-//line components/number-input.go:455
+//line components/number-input.go:456
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tplaceholder=\"")
 		}
 		if kyse__err == nil {
 //line components/number-input.kyse.go:195
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Placeholder))
-//line components/number-input.go:462
+//line components/number-input.go:463
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -466,14 +467,14 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 	}
 //line components/number-input.kyse.go:197
 	if kyse__d.DescribedBy() != "" {
-//line components/number-input.go:470
+//line components/number-input.go:471
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
 //line components/number-input.kyse.go:198
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/number-input.go:477
+//line components/number-input.go:478
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -481,34 +482,34 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 	}
 //line components/number-input.kyse.go:200
 	if kyse__d.Message() != "" {
-//line components/number-input.go:485
+//line components/number-input.go:486
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-invalid=\"true\"\n")
 		}
 	}
 //line components/number-input.kyse.go:203
 	if kyse__d.Required {
-//line components/number-input.go:492
+//line components/number-input.go:493
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\trequired\n")
 		}
 	}
 //line components/number-input.kyse.go:206
 	if kyse__d.Disabled {
-//line components/number-input.go:499
+//line components/number-input.go:500
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdisabled\n")
 		}
 	}
 	if kyse__err == nil {
-		var kyse__v5 string
+		var kyse__v6 string
 //line components/number-input.kyse.go:209
-		kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/number-input.go:508
+		kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
+//line components/number-input.go:509
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/number-input.kyse.go:209", kyse__err)
 		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 		}
 	}
 	if kyse__err == nil {
@@ -519,7 +520,7 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 	}
 //line components/number-input.kyse.go:212
 	if kyse__d.Unit != "" {
-//line components/number-input.go:523
+//line components/number-input.go:524
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<span\n")
 		}
@@ -532,7 +533,7 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/number-input.kyse.go:215
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("unit", "text-muted-foreground text-sm")))
-//line components/number-input.go:536
+//line components/number-input.go:537
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -541,14 +542,14 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-align=\"end\"\n")
 		}
 		if kyse__err == nil {
-			var kyse__v6 string
+			var kyse__v7 string
 //line components/number-input.kyse.go:217
-			kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("unit"))
-//line components/number-input.go:548
+			kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("unit"))
+//line components/number-input.go:549
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/number-input.kyse.go:217", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 			}
 		}
 		if kyse__err == nil {
@@ -557,7 +558,7 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/number-input.kyse.go:218
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Unit)))
-//line components/number-input.go:561
+//line components/number-input.go:562
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
@@ -578,7 +579,7 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/number-input.kyse.go:223
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("increment", "btn")))
-//line components/number-input.go:582
+//line components/number-input.go:583
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -606,20 +607,20 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 	}
 //line components/number-input.kyse.go:231
 	if kyse__d.Disabled {
-//line components/number-input.go:610
+//line components/number-input.go:611
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdisabled\n")
 		}
 	}
 	if kyse__err == nil {
-		var kyse__v7 string
+		var kyse__v8 string
 //line components/number-input.kyse.go:234
-		kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("increment"))
-//line components/number-input.go:619
+		kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("increment"))
+//line components/number-input.go:620
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/number-input.kyse.go:234", kyse__err)
 		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 		}
 	}
 	if kyse__err == nil {
@@ -627,8 +628,9 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 //line components/number-input.kyse.go:235
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(icons.Plus(icons.Props{})))
-//line components/number-input.go:632
+		var kyse__v9 kyse__template.HTML = icons.Plus(icons.Props{})
+//line components/number-input.go:633
+		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v9))
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</button>\n")
@@ -641,7 +643,7 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 	}
 //line components/number-input.kyse.go:238
 	if kyse__d.Message() != "" {
-//line components/number-input.go:645
+//line components/number-input.go:647
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<p\n")
 		}
@@ -654,7 +656,7 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/number-input.kyse.go:241
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/number-input.go:658
+//line components/number-input.go:660
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "-error\"\n")
@@ -665,20 +667,20 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/number-input.kyse.go:242
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("message", "text-destructive text-sm")))
-//line components/number-input.go:669
+//line components/number-input.go:671
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			var kyse__v8 string
+			var kyse__v10 string
 //line components/number-input.kyse.go:243
-			kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("message"))
-//line components/number-input.go:678
+			kyse__v10, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("message"))
+//line components/number-input.go:680
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/number-input.kyse.go:243", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v10)
 			}
 		}
 		if kyse__err == nil {
@@ -687,7 +689,7 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/number-input.kyse.go:244
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message())))
-//line components/number-input.go:691
+//line components/number-input.go:693
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
@@ -695,10 +697,10 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 	}
 //line components/number-input.kyse.go:246
 	if kyse__d.Message() == "" {
-//line components/number-input.go:699
+//line components/number-input.go:701
 //line components/number-input.kyse.go:247
 		if kyse__d.Hint != "" {
-//line components/number-input.go:702
+//line components/number-input.go:704
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<p\n")
 			}
@@ -711,7 +713,7 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 			if kyse__err == nil {
 //line components/number-input.kyse.go:250
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/number-input.go:715
+//line components/number-input.go:717
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "-hint\"\n")
@@ -722,20 +724,20 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 			if kyse__err == nil {
 //line components/number-input.kyse.go:251
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("hint", "text-muted-foreground text-sm")))
-//line components/number-input.go:726
+//line components/number-input.go:728
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 			if kyse__err == nil {
-				var kyse__v9 string
+				var kyse__v11 string
 //line components/number-input.kyse.go:252
-				kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("hint"))
-//line components/number-input.go:735
+				kyse__v11, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("hint"))
+//line components/number-input.go:737
 				if kyse__err != nil {
 					kyse__err = kyse__fmt.Errorf("%s: %w", "components/number-input.kyse.go:252", kyse__err)
 				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v11)
 				}
 			}
 			if kyse__err == nil {
@@ -744,7 +746,7 @@ func NumberInput(kyse__props NumberInputProps) kyse__template.HTML {
 			if kyse__err == nil {
 //line components/number-input.kyse.go:253
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Hint)))
-//line components/number-input.go:748
+//line components/number-input.go:750
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")

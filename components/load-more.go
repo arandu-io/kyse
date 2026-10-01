@@ -5,6 +5,7 @@
 package components
 
 import (
+	kyse__errors "errors"
 	kyse__fmt "fmt"
 	kyse__template "html/template"
 	kyse__io "io"
@@ -86,7 +87,7 @@ func (p LoadMoreProps) Trigger() string {
 // PartNames are the parts this component publishes.
 func (p LoadMoreProps) PartNames() []string { return []string{"root", "indicator"} }
 
-//line components/load-more.go:90
+//line components/load-more.go:91
 
 // LoadMore renders the load-more component.
 func LoadMore(kyse__props LoadMoreProps) kyse__template.HTML {
@@ -101,7 +102,7 @@ func LoadMore(kyse__props LoadMoreProps) kyse__template.HTML {
 	}
 //line components/load-more.kyse.go:78
 	if !kyse__d.Exhausted {
-//line components/load-more.go:105
+//line components/load-more.go:106
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t<button\n")
 		}
@@ -114,7 +115,7 @@ func LoadMore(kyse__props LoadMoreProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/load-more.kyse.go:84
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("btn")))
-//line components/load-more.go:118
+//line components/load-more.go:119
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -128,7 +129,7 @@ func LoadMore(kyse__props LoadMoreProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/load-more.kyse.go:86
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Look()))
-//line components/load-more.go:132
+//line components/load-more.go:133
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -140,7 +141,7 @@ func LoadMore(kyse__props LoadMoreProps) kyse__template.HTML {
 			var kyse__v1 string
 //line components/load-more.kyse.go:87
 			kyse__v1, kyse__err = kyse__view.TextURL(kyse__d.URL)
-//line components/load-more.go:144
+//line components/load-more.go:145
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/load-more.kyse.go:87", kyse__err)
 			} else {
@@ -155,8 +156,12 @@ func LoadMore(kyse__props LoadMoreProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 //line components/load-more.kyse.go:88
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Trigger()))
-//line components/load-more.go:160
+			if kyse__v2 := kyse__view.Text(kyse__d.Trigger()); kyse__strings.ContainsAny(kyse__v2, "[]") {
+//line components/load-more.go:161
+				kyse__err = kyse__errors.New("components/load-more.kyse.go:88: the value interpolated into an HTMX trigger holds a square bracket, and HTMX evaluates what a trigger holds between square brackets as a script")
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__v2))
+			}
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -169,28 +174,28 @@ func LoadMore(kyse__props LoadMoreProps) kyse__template.HTML {
 		}
 //line components/load-more.kyse.go:91
 		if kyse__d.Size != "" {
-//line components/load-more.go:173
+//line components/load-more.go:178
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-size=\"")
 			}
 			if kyse__err == nil {
 //line components/load-more.kyse.go:92
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Size))
-//line components/load-more.go:180
+//line components/load-more.go:185
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
 		if kyse__err == nil {
-			var kyse__v2 string
+			var kyse__v3 string
 //line components/load-more.kyse.go:94
-			kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/load-more.go:190
+			kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/load-more.go:195
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/load-more.kyse.go:94", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 			}
 		}
 		if kyse__err == nil {
@@ -202,7 +207,7 @@ func LoadMore(kyse__props LoadMoreProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/load-more.kyse.go:96
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Text())))
-//line components/load-more.go:206
+//line components/load-more.go:211
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
@@ -219,7 +224,7 @@ func LoadMore(kyse__props LoadMoreProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/load-more.kyse.go:99
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("indicator", "spinner")))
-//line components/load-more.go:223
+//line components/load-more.go:228
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -228,14 +233,14 @@ func LoadMore(kyse__props LoadMoreProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-hidden=\"true\"\n")
 		}
 		if kyse__err == nil {
-			var kyse__v3 string
+			var kyse__v4 string
 //line components/load-more.kyse.go:101
-			kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("indicator"))
-//line components/load-more.go:235
+			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("indicator"))
+//line components/load-more.go:240
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/load-more.kyse.go:101", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 			}
 		}
 		if kyse__err == nil {

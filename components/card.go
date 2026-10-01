@@ -207,8 +207,9 @@ func Card(kyse__props CardProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 //line components/card.kyse.go:61
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(Badge(BadgeProps{Label: kyse__d.Badge, Variant: kyse__d.BadgeVariant})))
+			var kyse__v5 kyse__template.HTML = Badge(BadgeProps{Label: kyse__d.Badge, Variant: kyse__d.BadgeVariant})
 //line components/card.go:212
+			_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v5))
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
@@ -222,7 +223,7 @@ func Card(kyse__props CardProps) kyse__template.HTML {
 	}
 //line components/card.kyse.go:65
 	if kyse__d.Description != "" {
-//line components/card.go:226
+//line components/card.go:227
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<p\n")
 		}
@@ -235,20 +236,20 @@ func Card(kyse__props CardProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/card.kyse.go:68
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("description", "text-muted-foreground mt-2 text-sm")))
-//line components/card.go:239
+//line components/card.go:240
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			var kyse__v5 string
+			var kyse__v6 string
 //line components/card.kyse.go:69
-			kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("description"))
-//line components/card.go:248
+			kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("description"))
+//line components/card.go:249
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/card.kyse.go:69", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 			}
 		}
 		if kyse__err == nil {
@@ -257,7 +258,7 @@ func Card(kyse__props CardProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/card.kyse.go:70
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Description)))
-//line components/card.go:261
+//line components/card.go:262
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
@@ -265,7 +266,7 @@ func Card(kyse__props CardProps) kyse__template.HTML {
 	}
 //line components/card.kyse.go:72
 	if kyse__d.Meta != "" {
-//line components/card.go:269
+//line components/card.go:270
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<p\n")
 		}
@@ -278,20 +279,20 @@ func Card(kyse__props CardProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/card.kyse.go:75
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("meta", "text-muted-foreground mt-3 text-xs")))
-//line components/card.go:282
+//line components/card.go:283
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			var kyse__v6 string
+			var kyse__v7 string
 //line components/card.kyse.go:76
-			kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("meta"))
-//line components/card.go:291
+			kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("meta"))
+//line components/card.go:292
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/card.kyse.go:76", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 			}
 		}
 		if kyse__err == nil {
@@ -300,7 +301,7 @@ func Card(kyse__props CardProps) kyse__template.HTML {
 		if kyse__err == nil {
 //line components/card.kyse.go:77
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Meta)))
-//line components/card.go:304
+//line components/card.go:305
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")

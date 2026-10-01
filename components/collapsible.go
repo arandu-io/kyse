@@ -181,8 +181,9 @@ func Collapsible(kyse__props CollapsibleProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 //line components/collapsible.kyse.go:66
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(icons.CaretDown(icons.Props{})))
+		var kyse__v4 kyse__template.HTML = icons.CaretDown(icons.Props{})
 //line components/collapsible.go:186
+		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v4))
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</summary>\n")
@@ -195,28 +196,28 @@ func Collapsible(kyse__props CollapsibleProps) kyse__template.HTML {
 	}
 //line components/collapsible.kyse.go:69
 	if kyse__d.PartClass("panel") != "" {
-//line components/collapsible.go:199
+//line components/collapsible.go:200
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
 //line components/collapsible.kyse.go:70
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("panel")))
-//line components/collapsible.go:206
+//line components/collapsible.go:207
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
 	if kyse__err == nil {
-		var kyse__v4 string
+		var kyse__v5 string
 //line components/collapsible.kyse.go:72
-		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("panel"))
-//line components/collapsible.go:216
+		kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("panel"))
+//line components/collapsible.go:217
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/collapsible.kyse.go:72", kyse__err)
 		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 		}
 	}
 	if kyse__err == nil {
@@ -225,7 +226,7 @@ func Collapsible(kyse__props CollapsibleProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/collapsible.kyse.go:73
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Content)))
-//line components/collapsible.go:229
+//line components/collapsible.go:230
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</section>\n")

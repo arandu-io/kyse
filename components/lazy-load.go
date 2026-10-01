@@ -5,6 +5,7 @@
 package components
 
 import (
+	kyse__errors "errors"
 	kyse__fmt "fmt"
 	kyse__template "html/template"
 	kyse__io "io"
@@ -61,7 +62,7 @@ func (p LazyLoadProps) Trigger() string {
 // PartNames are the parts this component publishes.
 func (p LazyLoadProps) PartNames() []string { return []string{"root", "placeholder"} }
 
-//line components/lazy-load.go:65
+//line components/lazy-load.go:66
 
 // LazyLoad renders the lazy-load component.
 func LazyLoad(kyse__props LazyLoadProps) kyse__template.HTML {
@@ -86,7 +87,7 @@ func LazyLoad(kyse__props LazyLoadProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/lazy-load.kyse.go:58
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("lazy-load")))
-//line components/lazy-load.go:90
+//line components/lazy-load.go:91
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -100,7 +101,7 @@ func LazyLoad(kyse__props LazyLoadProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/lazy-load.kyse.go:60
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
-//line components/lazy-load.go:104
+//line components/lazy-load.go:105
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -115,7 +116,7 @@ func LazyLoad(kyse__props LazyLoadProps) kyse__template.HTML {
 		var kyse__v1 string
 //line components/lazy-load.kyse.go:62
 		kyse__v1, kyse__err = kyse__view.TextURL(kyse__d.URL)
-//line components/lazy-load.go:119
+//line components/lazy-load.go:120
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/lazy-load.kyse.go:62", kyse__err)
 		} else {
@@ -130,8 +131,12 @@ func LazyLoad(kyse__props LazyLoadProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 //line components/lazy-load.kyse.go:63
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Trigger()))
-//line components/lazy-load.go:135
+		if kyse__v2 := kyse__view.Text(kyse__d.Trigger()); kyse__strings.ContainsAny(kyse__v2, "[]") {
+//line components/lazy-load.go:136
+			kyse__err = kyse__errors.New("components/lazy-load.kyse.go:63: the value interpolated into an HTMX trigger holds a square bracket, and HTMX evaluates what a trigger holds between square brackets as a script")
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__v2))
+		}
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -143,14 +148,14 @@ func LazyLoad(kyse__props LazyLoadProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-swap=\"outerHTML\"\n")
 	}
 	if kyse__err == nil {
-		var kyse__v2 string
+		var kyse__v3 string
 //line components/lazy-load.kyse.go:66
-		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/lazy-load.go:150
+		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/lazy-load.go:155
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/lazy-load.kyse.go:66", kyse__err)
 		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
 	}
 	if kyse__err == nil {
@@ -168,20 +173,20 @@ func LazyLoad(kyse__props LazyLoadProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/lazy-load.kyse.go:70
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("placeholder", "skeleton")))
-//line components/lazy-load.go:172
+//line components/lazy-load.go:177
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
-		var kyse__v3 string
+		var kyse__v4 string
 //line components/lazy-load.kyse.go:71
-		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("placeholder"))
-//line components/lazy-load.go:181
+		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("placeholder"))
+//line components/lazy-load.go:186
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/lazy-load.kyse.go:71", kyse__err)
 		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 		}
 	}
 	if kyse__err == nil {
@@ -190,7 +195,7 @@ func LazyLoad(kyse__props LazyLoadProps) kyse__template.HTML {
 	if kyse__err == nil {
 //line components/lazy-load.kyse.go:72
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message)))
-//line components/lazy-load.go:194
+//line components/lazy-load.go:199
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</div>\n")

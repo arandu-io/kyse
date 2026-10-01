@@ -221,8 +221,9 @@ func Highlight(kyse__props HighlightProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 //line components/highlight.kyse.go:175
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(kyse__d.Marked()))
+		var kyse__v2 kyse__template.HTML = kyse__d.Marked()
 //line components/highlight.go:226
+		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v2))
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
