@@ -1,5 +1,15 @@
 # Release Notes
 
+## [v0.30.0](https://github.com/arandu-io/kyse/compare/v0.29.4...v0.30.0) - 2026-10-01
+
+## What's Changed
+* Bump the gomod group with 2 updates by @dependabot[bot] in https://github.com/arandu-io/kyse/pull/2
+
+## New Contributors
+* @dependabot[bot] made their first contribution in https://github.com/arandu-io/kyse/pull/2
+
+**Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.29.4...v0.30.0
+
 ## [v0.29.4](https://github.com/arandu-io/kyse/compare/v0.29.3...v0.29.4) - 2026-09-18
 
 **Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.29.3...v0.29.4
