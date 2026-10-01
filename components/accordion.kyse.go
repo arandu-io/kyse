@@ -68,10 +68,10 @@ func (p AccordionProps) PartNames() []string { return []string{"root", "item", "
 <section
 	data-part="root"
 	class="{{ .RootClass("accordion") }}"
-	@attributes(.RootAttrs())
 	@if(.ID != "")
 		id="{{ .ID }}"
 	@endif
+	@attributes(.RootAttrs())
 >
 	@foreach(.Items as item)
 		<details
@@ -79,24 +79,24 @@ func (p AccordionProps) PartNames() []string { return []string{"root", "item", "
 			@if(.PartClass("item") != "")
 				class="{{ .PartClass("item") }}"
 			@endif
-			@attributes(.PartAttrs("item"))
 			@if(.Group() != "")
 				name="{{ .Group() }}"
 			@endif
 			@if(item.Open)
 				open
 			@endif
+			@attributes(.PartAttrs("item"))
 		>
 			<summary
 				data-part="trigger"
 				@if(.PartClass("trigger") != "")
 					class="{{ .PartClass("trigger") }}"
 				@endif
-				@attributes(.PartAttrs("trigger"))
 				@if(item.Disabled)
 					aria-disabled="true"
 					tabindex="-1"
 				@endif
+				@attributes(.PartAttrs("trigger"))
 			>{{ item.Label }}{!! icons.CaretDown(icons.Props{}) !!}</summary>
 			<section
 				data-part="panel"

@@ -96,7 +96,6 @@ func (p TextareaProps) PartNames() []string { return []string{"root", "label", "
 		class="{{ .PartClass("input", "textarea") }}"
 		id="{{ .Name }}"
 		name="{{ .Name }}"
-		@attributes(.PartAttrs("input"))
 		@if(.Autosize)
 			data-autosize="true"
 		@endif
@@ -115,6 +114,7 @@ func (p TextareaProps) PartNames() []string { return []string{"root", "label", "
 		@if(.Required)
 			required
 		@endif
+		@attributes(.PartAttrs("input"))
 	>{{ .Current() }}</textarea>
 	@if(.Message() != "")
 		<p

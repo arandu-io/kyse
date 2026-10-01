@@ -95,6 +95,15 @@ type ComponentProps struct {
 // an Alpine directive, a style, an address, and the class, role and aria- a
 // component owns. Those have somewhere else to go -- a field of the component,
 // or the class field beside this one.
+//
+// They are written after every attribute the component writes itself, on
+// every element of every component. An HTML parser keeps the first of two
+// attributes with the same name and drops the second, so on a collision the
+// component's value is the one the browser sees: an Attrs entry can add an
+// attribute the component left out, and can never replace one it wrote --
+// the name, value, type and form a control submits with, or the id that a
+// label and an aria-describedby point at. A value for one of those goes in the
+// component's own field.
 type Attrs map[string]string
 
 // Parts is what a caller adds to each named element of a component.

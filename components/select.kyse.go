@@ -179,13 +179,13 @@ func (p SelectProps) PartNames() []string {
 <div
 	data-part="root"
 	class="{{ .RootClass("field") }}"
-	@attributes(.RootAttrs())
 	@if(.Message() != "")
 		data-invalid="true"
 	@endif
 	@if(.Disabled)
 		data-disabled="true"
 	@endif
+	@attributes(.RootAttrs())
 >
 	<label
 		data-part="label"
@@ -198,7 +198,6 @@ func (p SelectProps) PartNames() []string {
 		class="{{ .PartClass("input", "select") }}"
 		id="{{ .ElementID() }}"
 		name="{{ .FieldName() }}"
-		@attributes(.PartAttrs("input"))
 		@if(.Multiple)
 			multiple
 		@endif
@@ -235,6 +234,7 @@ func (p SelectProps) PartNames() []string {
 		@if(.Disabled)
 			disabled
 		@endif
+		@attributes(.PartAttrs("input"))
 	>
 		@if(.Placeholder != "")
 			<option
@@ -243,10 +243,10 @@ func (p SelectProps) PartNames() []string {
 					class="{{ .PartClass("option") }}"
 				@endif
 				value=""
-				@attributes(.PartAttrs("option"))
 				@if(.Current() == "")
 					selected
 				@endif
+				@attributes(.PartAttrs("option"))
 			>{{ .Placeholder }}</option>
 		@endif
 		@foreach(.Options as option)
@@ -256,13 +256,13 @@ func (p SelectProps) PartNames() []string {
 					class="{{ .PartClass("option") }}"
 				@endif
 				value="{{ option.Value }}"
-				@attributes(.PartAttrs("option"))
 				@if(.Selected(option))
 					selected
 				@endif
 				@if(option.Disabled)
 					disabled
 				@endif
+				@attributes(.PartAttrs("option"))
 			>{{ option.Label }}</option>
 		@endforeach
 	</select>

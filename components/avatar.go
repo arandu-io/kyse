@@ -100,30 +100,30 @@ func Avatar(kyse__props AvatarProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v1 string
 //line components/avatar.kyse.go:66
-		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/avatar.go:108
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/avatar.kyse.go:66", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-		}
-	}
-//line components/avatar.kyse.go:67
 	if kyse__d.Size != "" {
-//line components/avatar.go:117
+//line components/avatar.go:106
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-size=\"")
 		}
 		if kyse__err == nil {
-//line components/avatar.kyse.go:68
+//line components/avatar.kyse.go:67
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Size))
-//line components/avatar.go:124
+//line components/avatar.go:113
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/avatar.kyse.go:69
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/avatar.go:123
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/avatar.kyse.go:69", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
 	}
 	if kyse__err == nil {

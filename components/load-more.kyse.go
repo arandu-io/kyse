@@ -84,7 +84,6 @@ func (p LoadMoreProps) PartNames() []string { return []string{"root", "indicator
 		class="{{ .RootClass("btn") }}"
 		type="button"
 		data-variant="{{ .Look() }}"
-		@attributes(.RootAttrs())
 		hx-get="{{ .URL }}"
 		hx-trigger="{{ .Trigger() }}"
 		hx-target="this"
@@ -92,6 +91,7 @@ func (p LoadMoreProps) PartNames() []string { return []string{"root", "indicator
 		@if(.Size != "")
 			data-size="{{ .Size }}"
 		@endif
+		@attributes(.RootAttrs())
 	>
 		{{ .Text() }}
 		<span

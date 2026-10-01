@@ -61,13 +61,13 @@ func (p ItemProps) PartNames() []string {
 <article
 	data-part="root"
 	class="{{ .RootClass("item") }}"
-	@attributes(.RootAttrs())
 	@if(.Variant != "")
 		data-variant="{{ .Variant }}"
 	@endif
 	@if(.Size != "")
 		data-size="{{ .Size }}"
 	@endif
+	@attributes(.RootAttrs())
 >
 	@if(.Icon != "")
 		<figure

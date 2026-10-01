@@ -69,7 +69,6 @@ func (p ButtonProps) PartNames() []string { return []string{"root"} }
 	data-part="root"
 	type="{{ .ButtonType() }}"
 	class="{{ .RootClass("btn") }}"
-	@attributes(.RootAttrs())
 	@if(.Variant != "")
 		data-variant="{{ .Variant }}"
 	@endif
@@ -94,4 +93,5 @@ func (p ButtonProps) PartNames() []string { return []string{"root"} }
 	@if(.HxConfirm != "")
 		hx-confirm="{{ .HxConfirm }}"
 	@endif
+	@attributes(.RootAttrs())
 >{{ .Label }}</button>

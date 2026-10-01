@@ -151,7 +151,6 @@ func (p FileUploadProps) PartNames() []string {
 			type="file"
 			id="{{ .Name }}"
 			name="{{ .FieldName() }}"
-			@attributes(.PartAttrs("input"))
 			@if(.Accept != "")
 				accept="{{ .Accept }}"
 			@endif
@@ -177,6 +176,7 @@ func (p FileUploadProps) PartNames() []string {
 			@if(.Disabled)
 				disabled
 			@endif
+			@attributes(.PartAttrs("input"))
 		>
 
 		<span

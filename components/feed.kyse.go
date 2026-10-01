@@ -103,13 +103,13 @@ func (p FeedProps) PartNames() []string {
 			tabindex="0"
 			aria-labelledby="{{ .ArticleID(.Items[at], at) }}-title"
 			aria-posinset="{{ .Position(at) }}"
-			@attributes(.PartAttrs("article"))
 			@if(.Total > 0)
 				aria-setsize="{{ .Total }}"
 			@endif
 			@if(.Total == 0)
 				aria-setsize="-1"
 			@endif
+			@attributes(.PartAttrs("article"))
 		>
 			<h3
 				data-part="title"

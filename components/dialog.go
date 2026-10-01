@@ -208,37 +208,37 @@ func Dialog(kyse__props DialogProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "-title\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v1 string
 //line components/dialog.kyse.go:154
-		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/dialog.go:216
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/dialog.kyse.go:154", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-		}
-	}
-//line components/dialog.kyse.go:155
 	if kyse__d.Alert {
-//line components/dialog.go:225
+//line components/dialog.go:214
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\trole=\"alertdialog\"\n")
 		}
 	}
-//line components/dialog.kyse.go:158
+//line components/dialog.kyse.go:157
 	if kyse__d.DescribedBy() != "" {
-//line components/dialog.go:232
+//line components/dialog.go:221
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/dialog.kyse.go:159
+//line components/dialog.kyse.go:158
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/dialog.go:239
+//line components/dialog.go:228
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/dialog.kyse.go:160
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/dialog.go:238
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/dialog.kyse.go:160", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
 	}
 	if kyse__err == nil {
@@ -485,22 +485,22 @@ func Dialog(kyse__props DialogProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-variant=\"outline\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v7 string
 //line components/dialog.kyse.go:205
-		kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("cancel"))
-//line components/dialog.go:493
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/dialog.kyse.go:205", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
-		}
-	}
-//line components/dialog.kyse.go:206
 	if kyse__d.Alert {
-//line components/dialog.go:502
+//line components/dialog.go:491
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tautofocus\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v7 string
+//line components/dialog.kyse.go:208
+		kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("cancel"))
+//line components/dialog.go:500
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/dialog.kyse.go:208", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 		}
 	}
 	if kyse__err == nil {

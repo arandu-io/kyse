@@ -37,10 +37,10 @@ func (p AlertProps) PartNames() []string { return []string{"root", "title", "mes
 	data-part="root"
 	class="{{ .RootClass("alert") }}"
 	role="{{ .Role() }}"
-	@attributes(.RootAttrs())
 	@if(.Variant != "")
 		data-variant="{{ .Variant }}"
 	@endif
+	@attributes(.RootAttrs())
 >
 	<h2
 		data-part="title"

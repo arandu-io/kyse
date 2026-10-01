@@ -143,7 +143,6 @@ func (p ActiveSearchProps) PartNames() []string {
 			hx-swap="innerHTML"
 			hx-sync="this:replace"
 			hx-indicator="#{{ .Name }}-indicator"
-			@attributes(.PartAttrs("input"))
 			@if(.Placeholder != "")
 				placeholder="{{ .Placeholder }}"
 			@endif
@@ -153,6 +152,7 @@ func (p ActiveSearchProps) PartNames() []string {
 			@if(.DescribedBy() != "")
 				aria-describedby="{{ .DescribedBy() }}"
 			@endif
+			@attributes(.PartAttrs("input"))
 		>
 
 		<span

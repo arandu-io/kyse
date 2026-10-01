@@ -132,10 +132,10 @@ func (p CommandProps) PartNames() []string {
 	class="{{ .RootClass("command") }}"
 	id="{{ .ID }}"
 	data-command
-	@attributes(.RootAttrs())
 	@if(.Label != "")
 		aria-label="{{ .Label }}"
 	@endif
+	@attributes(.RootAttrs())
 >
 	<header
 		data-part="header"
@@ -153,7 +153,6 @@ func (p CommandProps) PartNames() []string {
 			type="text"
 			role="combobox"
 			id="{{ .InputID() }}"
-			@attributes(.PartAttrs("input"))
 			autocomplete="off"
 			autocorrect="off"
 			spellcheck="false"
@@ -163,6 +162,7 @@ func (p CommandProps) PartNames() []string {
 			@if(.Placeholder != "")
 				placeholder="{{ .Placeholder }}"
 			@endif
+			@attributes(.PartAttrs("input"))
 		>
 	</header>
 
@@ -174,10 +174,10 @@ func (p CommandProps) PartNames() []string {
 		role="menu"
 		id="{{ .MenuID() }}"
 		aria-orientation="vertical"
-		@attributes(.PartAttrs("menu"))
 		@if(.EmptyText != "")
 			data-empty="{{ .EmptyText }}"
 		@endif
+		@attributes(.PartAttrs("menu"))
 	>
 		@for(g := 0; g < len(.Groups); g++)
 			<div
@@ -186,10 +186,10 @@ func (p CommandProps) PartNames() []string {
 					class="{{ .PartClass("group") }}"
 				@endif
 				role="group"
-				@attributes(.PartAttrs("group"))
 				@if(.Groups[g].Heading != "")
 					aria-labelledby="{{ .HeadingID(g) }}"
 				@endif
+				@attributes(.PartAttrs("group"))
 			>
 				@if(.Groups[g].Heading != "")
 					<span
@@ -212,13 +212,13 @@ func (p CommandProps) PartNames() []string {
 						role="menuitem"
 						id="{{ .ItemID(g, i) }}"
 						data-search="{{ .Groups[g].Items[i].Search() }}"
-						@attributes(.PartAttrs("item"))
 						@if(.Groups[g].Items[i].Available())
 							href="{{ .Groups[g].Items[i].URL }}"
 						@endif
 						@if(!.Groups[g].Items[i].Available())
 							aria-disabled="true"
 						@endif
+						@attributes(.PartAttrs("item"))
 					>
 						<span>{{ .Groups[g].Items[i].Label }}</span>
 						@if(.Groups[g].Items[i].Shortcut != "")

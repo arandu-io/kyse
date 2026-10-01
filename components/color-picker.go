@@ -290,66 +290,66 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v4 string
 //line components/color-picker.kyse.go:123
-		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/color-picker.go:298
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/color-picker.kyse.go:123", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
-		}
-	}
-//line components/color-picker.kyse.go:124
 	if kyse__d.ListID() != "" {
-//line components/color-picker.go:307
+//line components/color-picker.go:296
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tlist=\"")
 		}
 		if kyse__err == nil {
-//line components/color-picker.kyse.go:125
+//line components/color-picker.kyse.go:124
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ListID()))
-//line components/color-picker.go:314
+//line components/color-picker.go:303
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/color-picker.kyse.go:127
+//line components/color-picker.kyse.go:126
 	if kyse__d.DescribedBy() != "" {
-//line components/color-picker.go:322
+//line components/color-picker.go:311
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/color-picker.kyse.go:128
+//line components/color-picker.kyse.go:127
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/color-picker.go:329
+//line components/color-picker.go:318
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/color-picker.kyse.go:130
+//line components/color-picker.kyse.go:129
 	if kyse__d.Message() != "" {
-//line components/color-picker.go:337
+//line components/color-picker.go:326
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/color-picker.kyse.go:133
+//line components/color-picker.kyse.go:132
 	if kyse__d.Required {
-//line components/color-picker.go:344
+//line components/color-picker.go:333
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\trequired\n")
 		}
 	}
-//line components/color-picker.kyse.go:136
+//line components/color-picker.kyse.go:135
 	if kyse__d.Disabled {
-//line components/color-picker.go:351
+//line components/color-picker.go:340
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdisabled\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v4 string
+//line components/color-picker.kyse.go:138
+		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
+//line components/color-picker.go:349
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/color-picker.kyse.go:138", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 		}
 	}
 	if kyse__err == nil {

@@ -117,10 +117,10 @@ func (p RatingProps) PartNames() []string {
 <fieldset
 	data-part="root"
 	class="{{ .RootClass("field rating") }}"
-	@attributes(.RootAttrs())
 	@if(.DescribedBy() != "")
 		aria-describedby="{{ .DescribedBy() }}"
 	@endif
+	@attributes(.RootAttrs())
 >
 	<legend
 		data-part="label"
@@ -141,7 +141,6 @@ func (p RatingProps) PartNames() []string {
 				id="{{ .OptionID(star) }}"
 				name="{{ .Name }}"
 				value="{{ star }}"
-				@attributes(.PartAttrs("option"))
 				@if(.Chosen(star))
 					checked
 				@endif
@@ -151,6 +150,7 @@ func (p RatingProps) PartNames() []string {
 				@if(.ReadOnly)
 					disabled
 				@endif
+				@attributes(.PartAttrs("option"))
 			>
 			<label
 				data-part="star"

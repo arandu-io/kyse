@@ -119,7 +119,6 @@ func (p SegmentedControlProps) PartNames() []string {
 	<div
 		data-part="group"
 		class="{{ .PartClass("group", "segmented-control") }}"
-		@attributes(.PartAttrs("group"))
 		@if(.Size != "")
 			data-size="{{ .Size }}"
 		@endif
@@ -138,6 +137,7 @@ func (p SegmentedControlProps) PartNames() []string {
 		@if(.HxSwap != "")
 			hx-swap="{{ .HxSwap }}"
 		@endif
+		@attributes(.PartAttrs("group"))
 	>
 		@foreach(.Options as option)
 			<input
@@ -147,13 +147,13 @@ func (p SegmentedControlProps) PartNames() []string {
 				id="{{ .OptionID(option) }}"
 				name="{{ .Name }}"
 				value="{{ option.Value }}"
-				@attributes(.PartAttrs("option"))
 				@if(.Chosen(option))
 					checked
 				@endif
 				@if(option.Disabled)
 					disabled
 				@endif
+				@attributes(.PartAttrs("option"))
 			>
 			<label
 				data-part="segment"

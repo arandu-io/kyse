@@ -421,7 +421,6 @@ func (p PasswordProps) PartNames() []string {
 			@if(.DescribedBy() != "")
 				aria-describedby="{{ .DescribedBy() }}"
 			@endif
-			@attributes(.PartAttrs("input"))
 			@if(.Placeholder != "")
 				placeholder="{{ .Placeholder }}"
 			@endif
@@ -434,6 +433,7 @@ func (p PasswordProps) PartNames() []string {
 			@if(.Autofocus)
 				autofocus
 			@endif
+			@attributes(.PartAttrs("input"))
 		>
 
 		{{-- The word flips and aria-pressed carries the state, so the control

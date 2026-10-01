@@ -308,30 +308,30 @@ func Carousel(kyse__props CarouselProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-		if kyse__err == nil {
-			var kyse__v3 string
 //line components/carousel.kyse.go:151
-			kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("slide"))
-//line components/carousel.go:316
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/carousel.kyse.go:151", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
-			}
-		}
-//line components/carousel.kyse.go:152
 		if kyse__d.Dots {
-//line components/carousel.go:325
+//line components/carousel.go:314
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-labelledby=\"")
 			}
 			if kyse__err == nil {
-//line components/carousel.kyse.go:153
+//line components/carousel.kyse.go:152
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DotID(at)))
-//line components/carousel.go:332
+//line components/carousel.go:321
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v3 string
+//line components/carousel.kyse.go:154
+			kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("slide"))
+//line components/carousel.go:331
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/carousel.kyse.go:154", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 			}
 		}
 		if kyse__err == nil {

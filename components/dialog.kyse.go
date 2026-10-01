@@ -151,13 +151,13 @@ func (p DialogProps) PartNames() []string {
 	id="{{ .ID }}"
 	class="{{ .RootClass(.Surface()) }}"
 	aria-labelledby="{{ .ID }}-title"
-	@attributes(.RootAttrs())
 	@if(.Alert)
 		role="alertdialog"
 	@endif
 	@if(.DescribedBy() != "")
 		aria-describedby="{{ .DescribedBy() }}"
 	@endif
+	@attributes(.RootAttrs())
 >
 	<article
 		data-part="content"
@@ -202,10 +202,10 @@ func (p DialogProps) PartNames() []string {
 					type="submit"
 					class="{{ .PartClass("cancel", "btn") }}"
 					data-variant="outline"
-					@attributes(.PartAttrs("cancel"))
 					@if(.Alert)
 						autofocus
 					@endif
+					@attributes(.PartAttrs("cancel"))
 				>{{ .Cancel() }}</button>
 			</form>
 			<form method="{{ .FormMethod() }}" action="{{ .Action }}">

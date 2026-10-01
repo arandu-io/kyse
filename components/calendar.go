@@ -829,64 +829,64 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
-			if kyse__err == nil {
-				var kyse__v9 string
 //line components/calendar.kyse.go:384
-				kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("day"))
-//line components/calendar.go:837
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:384", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
-				}
-			}
-//line components/calendar.kyse.go:385
 			if day.Outside {
-//line components/calendar.go:846
+//line components/calendar.go:835
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-outside=\"true\"\n")
 				}
 			}
-//line components/calendar.kyse.go:388
+//line components/calendar.kyse.go:387
 			if day.Today {
-//line components/calendar.go:853
+//line components/calendar.go:842
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-today=\"true\"\n")
 				}
 			}
-//line components/calendar.kyse.go:391
+//line components/calendar.kyse.go:390
 			if day.Selected {
-//line components/calendar.go:860
+//line components/calendar.go:849
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-selected=\"true\"\n")
 				}
 			}
-//line components/calendar.kyse.go:394
+//line components/calendar.kyse.go:393
 			if !day.Selected {
-//line components/calendar.go:867
+//line components/calendar.go:856
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-selected=\"false\"\n")
 				}
 			}
-//line components/calendar.kyse.go:397
+//line components/calendar.kyse.go:396
 			if day.Disabled {
-//line components/calendar.go:874
+//line components/calendar.go:863
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-disabled=\"true\"\n")
 				}
 			}
-//line components/calendar.kyse.go:400
+//line components/calendar.kyse.go:399
 			if kyse__d.Stop(day) {
-//line components/calendar.go:881
+//line components/calendar.go:870
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\ttabindex=\"0\"\n")
 				}
 			}
-//line components/calendar.kyse.go:403
+//line components/calendar.kyse.go:402
 			if !kyse__d.Stop(day) {
-//line components/calendar.go:888
+//line components/calendar.go:877
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\ttabindex=\"-1\"\n")
+				}
+			}
+			if kyse__err == nil {
+				var kyse__v9 string
+//line components/calendar.kyse.go:405
+				kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("day"))
+//line components/calendar.go:886
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:405", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
 				}
 			}
 			if kyse__err == nil {

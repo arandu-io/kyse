@@ -1040,8 +1040,10 @@ func TestAnAttrCannotCarryAScript(t *testing.T) {
 				{`x" onerror="alert(1)`: "1"},
 			} {
 				for _, got := range c.render(components.ComponentProps{Attrs: attrs}) {
-					for name := range attrs {
-						if strings.Contains(got, name) {
+					for name, value := range attrs {
+						// The name and the value both: a link writes an href of
+						// its own, and that one is not the caller's.
+						if strings.Contains(got, name) && strings.Contains(got, template.HTMLEscapeString(value)) {
 							t.Errorf("the attribute %q was written:\n%s", name, got)
 						}
 					}

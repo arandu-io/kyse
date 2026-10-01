@@ -392,60 +392,60 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "-indicator\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v6 string
 //line components/active-search.kyse.go:146
-		kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/active-search.go:400
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/active-search.kyse.go:146", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
-		}
-	}
-//line components/active-search.kyse.go:147
 	if kyse__d.Placeholder != "" {
-//line components/active-search.go:409
+//line components/active-search.go:398
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tplaceholder=\"")
 		}
 		if kyse__err == nil {
-//line components/active-search.kyse.go:148
+//line components/active-search.kyse.go:147
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Placeholder))
-//line components/active-search.go:416
+//line components/active-search.go:405
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/active-search.kyse.go:150
+//line components/active-search.kyse.go:149
 	if kyse__d.MinLength > 0 {
-//line components/active-search.go:424
+//line components/active-search.go:413
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tminlength=\"")
 		}
 		if kyse__err == nil {
-//line components/active-search.kyse.go:151
+//line components/active-search.kyse.go:150
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.MinLength))
-//line components/active-search.go:431
+//line components/active-search.go:420
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/active-search.kyse.go:153
+//line components/active-search.kyse.go:152
 	if kyse__d.DescribedBy() != "" {
-//line components/active-search.go:439
+//line components/active-search.go:428
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/active-search.kyse.go:154
+//line components/active-search.kyse.go:153
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/active-search.go:446
+//line components/active-search.go:435
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v6 string
+//line components/active-search.kyse.go:155
+		kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
+//line components/active-search.go:445
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/active-search.kyse.go:155", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 		}
 	}
 	if kyse__err == nil {

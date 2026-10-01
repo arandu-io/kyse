@@ -124,10 +124,10 @@ func (p EditInPlaceProps) PartNames() []string {
 			data-variant="ghost"
 			data-size="sm"
 			aria-label="{{ .EditName() }}"
-			@attributes(.PartAttrs("edit"))
 			hx-get="{{ .EditURL }}"
 			hx-target="#{{ .ID }}"
 			hx-swap="outerHTML"
+			@attributes(.PartAttrs("edit"))
 		>{{ .EditName() }}</button>
 	</div>
 @endif
@@ -140,10 +140,10 @@ func (p EditInPlaceProps) PartNames() []string {
 		data-part="root"
 		class="{{ .RootClass("edit-in-place") }}"
 		id="{{ .ID }}"
-		@attributes(.RootAttrs())
 		hx-put="{{ .SaveURL }}"
 		hx-target="#{{ .ID }}"
 		hx-swap="outerHTML"
+		@attributes(.RootAttrs())
 	>
 		<label
 			data-part="label"
@@ -159,11 +159,11 @@ func (p EditInPlaceProps) PartNames() []string {
 				id="{{ .ID }}-input"
 				name="{{ .Name }}"
 				autofocus
-				@attributes(.PartAttrs("input"))
 				@if(.Message != "")
 					aria-invalid="true"
 					aria-describedby="{{ .ID }}-error"
 				@endif
+				@attributes(.PartAttrs("input"))
 			>{{ .Value }}</textarea>
 		@endif
 		@if(!.Multiline)
@@ -175,11 +175,11 @@ func (p EditInPlaceProps) PartNames() []string {
 				name="{{ .Name }}"
 				value="{{ .Value }}"
 				autofocus
-				@attributes(.PartAttrs("input"))
 				@if(.Message != "")
 					aria-invalid="true"
 					aria-describedby="{{ .ID }}-error"
 				@endif
+				@attributes(.PartAttrs("input"))
 			>
 		@endif
 
@@ -198,10 +198,10 @@ func (p EditInPlaceProps) PartNames() []string {
 				type="button"
 				data-variant="ghost"
 				data-size="sm"
-				@attributes(.PartAttrs("cancel"))
 				hx-get="{{ .CancelURL }}"
 				hx-target="#{{ .ID }}"
 				hx-swap="outerHTML"
+				@attributes(.PartAttrs("cancel"))
 			>{{ .CancelName() }}</button>
 		@endif
 

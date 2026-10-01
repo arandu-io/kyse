@@ -112,7 +112,6 @@ func (p InputProps) PartNames() []string { return []string{"root"} }
 	id="{{ .ElementID() }}"
 	name="{{ .Name }}"
 	value="{{ .Current() }}"
-	@attributes(.RootAttrs())
 	@if(.Placeholder != "")
 		placeholder="{{ .Placeholder }}"
 	@endif
@@ -140,4 +139,5 @@ func (p InputProps) PartNames() []string { return []string{"root"} }
 	@if(.Autofocus)
 		autofocus
 	@endif
+	@attributes(.RootAttrs())
 >

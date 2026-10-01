@@ -103,7 +103,6 @@ func (p OptimisticToggleProps) PartNames() []string {
 	type="button"
 	aria-pressed="{{ .State() }}"
 	aria-label="{{ .Label }}"
-	@attributes(.RootAttrs())
 	hx-post="{{ .URL }}"
 	hx-target="this"
 	hx-swap="outerHTML"
@@ -116,6 +115,7 @@ func (p OptimisticToggleProps) PartNames() []string {
 	@if(.Disabled)
 		disabled
 	@endif
+	@attributes(.RootAttrs())
 >
 	<span
 		data-part="on"
@@ -123,10 +123,10 @@ func (p OptimisticToggleProps) PartNames() []string {
 			class="{{ .PartClass("on") }}"
 		@endif
 		data-toggle-on
-		@attributes(.PartAttrs("on"))
 		@if(!.Pressed)
 			hidden
 		@endif
+		@attributes(.PartAttrs("on"))
 	>
 		@if(.OnIcon != "")
 			{!! .OnIcon !!}
@@ -139,10 +139,10 @@ func (p OptimisticToggleProps) PartNames() []string {
 			class="{{ .PartClass("off") }}"
 		@endif
 		data-toggle-off
-		@attributes(.PartAttrs("off"))
 		@if(.Pressed)
 			hidden
 		@endif
+		@attributes(.PartAttrs("off"))
 	>
 		@if(.OffIcon != "")
 			{!! .OffIcon !!}

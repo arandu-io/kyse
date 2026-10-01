@@ -164,29 +164,29 @@ func Sidebar(kyse__props SidebarProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v1 string
 //line components/sidebar.kyse.go:109
-		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/sidebar.go:172
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/sidebar.kyse.go:109", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-		}
-	}
-//line components/sidebar.kyse.go:110
 	if kyse__d.Collapsed {
-//line components/sidebar.go:181
+//line components/sidebar.go:170
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-initial-open=\"false\"\n")
 		}
 	}
-//line components/sidebar.kyse.go:113
+//line components/sidebar.kyse.go:112
 	if kyse__d.MobileOpen {
-//line components/sidebar.go:188
+//line components/sidebar.go:177
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-initial-mobile-open=\"true\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/sidebar.kyse.go:115
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/sidebar.go:186
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/sidebar.kyse.go:115", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
 	}
 	if kyse__err == nil {
@@ -319,30 +319,30 @@ func Sidebar(kyse__props SidebarProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\trole=\"group\"\n")
 		}
-		if kyse__err == nil {
-			var kyse__v4 string
 //line components/sidebar.kyse.go:143
-			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("group"))
-//line components/sidebar.go:327
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/sidebar.kyse.go:143", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
-			}
-		}
-//line components/sidebar.kyse.go:144
 		if group.Label != "" {
-//line components/sidebar.go:336
+//line components/sidebar.go:325
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\taria-label=\"")
 			}
 			if kyse__err == nil {
-//line components/sidebar.kyse.go:145
+//line components/sidebar.kyse.go:144
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(group.Label))
-//line components/sidebar.go:343
+//line components/sidebar.go:332
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v4 string
+//line components/sidebar.kyse.go:146
+			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("group"))
+//line components/sidebar.go:342
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/sidebar.kyse.go:146", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 			}
 		}
 		if kyse__err == nil {
@@ -507,29 +507,29 @@ func Sidebar(kyse__props SidebarProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
-			if kyse__err == nil {
-				var kyse__v9 string
 //line components/sidebar.kyse.go:178
-				kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("link"))
-//line components/sidebar.go:515
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/sidebar.kyse.go:178", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
-				}
-			}
-//line components/sidebar.kyse.go:179
 			if item.Current {
-//line components/sidebar.go:524
+//line components/sidebar.go:513
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\taria-current=\"page\"\n")
 				}
 			}
-//line components/sidebar.kyse.go:182
+//line components/sidebar.kyse.go:181
 			if item.Disabled {
-//line components/sidebar.go:531
+//line components/sidebar.go:520
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\taria-disabled=\"true\"\n")
+				}
+			}
+			if kyse__err == nil {
+				var kyse__v9 string
+//line components/sidebar.kyse.go:184
+				kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("link"))
+//line components/sidebar.go:529
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/sidebar.kyse.go:184", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
 				}
 			}
 			if kyse__err == nil {

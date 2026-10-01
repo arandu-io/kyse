@@ -24,8 +24,8 @@ func (p BadgeProps) PartNames() []string { return []string{"root"} }
 <span
 	data-part="root"
 	class="{{ .RootClass("badge") }}"
-	@attributes(.RootAttrs())
 	@if(.Variant != "")
 		data-variant="{{ .Variant }}"
 	@endif
+	@attributes(.RootAttrs())
 >{{ .Label }}</span>

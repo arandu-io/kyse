@@ -127,13 +127,13 @@ func (p TabsProps) PartNames() []string { return []string{"root", "list", "trigg
 		@endif
 		role="tablist"
 		aria-orientation="{{ .Orientation() }}"
-		@attributes(.PartAttrs("list"))
 		@if(.Label != "")
 			aria-label="{{ .Label }}"
 		@endif
 		@if(.Variant != "")
 			data-variant="{{ .Variant }}"
 		@endif
+		@attributes(.PartAttrs("list"))
 	>
 		@foreach(.Tabs as tab)
 			<button
@@ -143,7 +143,6 @@ func (p TabsProps) PartNames() []string { return []string{"root", "list", "trigg
 				@endif
 				type="button"
 				role="tab"
-				@attributes(.PartAttrs("trigger"))
 				id="{{ .TabID(tab) }}"
 				aria-controls="{{ .PanelID(tab) }}"
 				aria-selected="{{ .Selected(tab) }}"
@@ -151,6 +150,7 @@ func (p TabsProps) PartNames() []string { return []string{"root", "list", "trigg
 				@if(tab.Disabled)
 					aria-disabled="true"
 				@endif
+				@attributes(.PartAttrs("trigger"))
 			>{{ tab.Label }}</button>
 		@endforeach
 	</div>
@@ -165,10 +165,10 @@ func (p TabsProps) PartNames() []string { return []string{"root", "list", "trigg
 			id="{{ .PanelID(tab) }}"
 			aria-labelledby="{{ .TabID(tab) }}"
 			tabindex="0"
-			@attributes(.PartAttrs("panel"))
 			@if(.Folded(tab))
 				hidden
 			@endif
+			@attributes(.PartAttrs("panel"))
 		>{!! tab.Panel !!}</div>
 	@endforeach
 </div>

@@ -116,10 +116,10 @@ func (p RadioGroupProps) PartNames() []string {
 <div
 	data-part="root"
 	class="{{ .RootClass("field") }}"
-	@attributes(.RootAttrs())
 	@if(.Message() != "")
 		data-invalid="true"
 	@endif
+	@attributes(.RootAttrs())
 >
 	<span
 		data-part="label"
@@ -134,7 +134,6 @@ func (p RadioGroupProps) PartNames() []string {
 		@endif
 		role="radiogroup"
 		aria-labelledby="{{ .Name }}-label"
-		@attributes(.PartAttrs("group"))
 		@if(.DescribedBy() != "")
 			aria-describedby="{{ .DescribedBy() }}"
 		@endif
@@ -144,16 +143,17 @@ func (p RadioGroupProps) PartNames() []string {
 		@if(.Required)
 			aria-required="true"
 		@endif
+		@attributes(.PartAttrs("group"))
 	>
 		@foreach(.Options as option)
 			<div
 				data-part="option"
 				class="{{ .PartClass("option", "field") }}"
 				data-orientation="horizontal"
-				@attributes(.PartAttrs("option"))
 				@if(option.Disabled)
 					data-disabled="true"
 				@endif
+				@attributes(.PartAttrs("option"))
 			>
 				<input
 					data-part="input"
@@ -162,7 +162,6 @@ func (p RadioGroupProps) PartNames() []string {
 					id="{{ .OptionID(option.Value) }}"
 					name="{{ .Name }}"
 					value="{{ option.Value }}"
-					@attributes(.PartAttrs("input"))
 					@if(option.Value == .Current())
 						checked
 					@endif
@@ -175,6 +174,7 @@ func (p RadioGroupProps) PartNames() []string {
 					@if(option.Disabled)
 						disabled
 					@endif
+					@attributes(.PartAttrs("input"))
 				>
 				<section>
 					<label

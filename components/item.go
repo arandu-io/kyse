@@ -100,45 +100,45 @@ func Item(kyse__props ItemProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v1 string
 //line components/item.kyse.go:64
-		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/item.go:108
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/item.kyse.go:64", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-		}
-	}
-//line components/item.kyse.go:65
 	if kyse__d.Variant != "" {
-//line components/item.go:117
+//line components/item.go:106
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-variant=\"")
 		}
 		if kyse__err == nil {
-//line components/item.kyse.go:66
+//line components/item.kyse.go:65
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Variant))
-//line components/item.go:124
+//line components/item.go:113
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/item.kyse.go:68
+//line components/item.kyse.go:67
 	if kyse__d.Size != "" {
-//line components/item.go:132
+//line components/item.go:121
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-size=\"")
 		}
 		if kyse__err == nil {
-//line components/item.kyse.go:69
+//line components/item.kyse.go:68
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Size))
-//line components/item.go:139
+//line components/item.go:128
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/item.kyse.go:70
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/item.go:138
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/item.kyse.go:70", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
 	}
 	if kyse__err == nil {

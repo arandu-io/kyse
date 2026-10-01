@@ -101,13 +101,13 @@ func (p DrawerProps) PartNames() []string {
 	id="{{ .ID }}"
 	class="{{ .RootClass("drawer") }}"
 	aria-labelledby="{{ .ID }}-title"
-	@attributes(.RootAttrs())
 	@if(.Side != "")
 		data-side="{{ .Side }}"
 	@endif
 	@if(.DescribedBy() != "")
 		aria-describedby="{{ .DescribedBy() }}"
 	@endif
+	@attributes(.RootAttrs())
 >
 	<article
 		data-part="content"
@@ -156,10 +156,10 @@ func (p DrawerProps) PartNames() []string {
 							class="{{ .PartClass("link", "btn justify-start") }}"
 							data-variant="ghost"
 							href="{{ link.Href }}"
-							@attributes(.PartAttrs("link"))
 							@if(link.Current)
 								aria-current="page"
 							@endif
+							@attributes(.PartAttrs("link"))
 						>{{ link.Label }}</a>
 					@endforeach
 				</nav>

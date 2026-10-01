@@ -109,28 +109,17 @@ func LazyLoad(kyse__props LazyLoadProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\taria-busy=\"true\"\n")
 	}
 	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-get=\"")
+	}
+	if kyse__err == nil {
 		var kyse__v1 string
 //line components/lazy-load.kyse.go:62
-		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/lazy-load.go:116
+		kyse__v1, kyse__err = kyse__view.TextURL(kyse__d.URL)
+//line components/lazy-load.go:119
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/lazy-load.kyse.go:62", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-		}
-	}
-	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-get=\"")
-	}
-	if kyse__err == nil {
-		var kyse__v2 string
-//line components/lazy-load.kyse.go:63
-		kyse__v2, kyse__err = kyse__view.TextURL(kyse__d.URL)
-//line components/lazy-load.go:130
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/lazy-load.kyse.go:63", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
 	}
 	if kyse__err == nil {
@@ -140,9 +129,9 @@ func LazyLoad(kyse__props LazyLoadProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-trigger=\"")
 	}
 	if kyse__err == nil {
-//line components/lazy-load.kyse.go:64
+//line components/lazy-load.kyse.go:63
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Trigger()))
-//line components/lazy-load.go:146
+//line components/lazy-load.go:135
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -152,6 +141,17 @@ func LazyLoad(kyse__props LazyLoadProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-swap=\"outerHTML\"\n")
+	}
+	if kyse__err == nil {
+		var kyse__v2 string
+//line components/lazy-load.kyse.go:66
+		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/lazy-load.go:150
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/lazy-load.kyse.go:66", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
+		}
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")

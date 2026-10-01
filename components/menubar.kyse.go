@@ -113,7 +113,6 @@ func (p MenubarProps) PartNames() []string {
 				aria-haspopup="menu"
 				aria-controls="{{ .MenuID(at) }}"
 				aria-expanded="false"
-				@attributes(.PartAttrs("trigger"))
 				@if(.Stop(at))
 					tabindex="0"
 				@endif
@@ -123,6 +122,7 @@ func (p MenubarProps) PartNames() []string {
 				@if(.Menus[at].Disabled)
 					disabled
 				@endif
+				@attributes(.PartAttrs("trigger"))
 			>{{ .Menus[at].Label }}</button>
 
 			<div
@@ -159,10 +159,10 @@ func (p MenubarProps) PartNames() []string {
 								role="menuitem"
 								href="{{ .Menus[at].Items[line].URL }}"
 								tabindex="-1"
-								@attributes(.PartAttrs("item"))
 								@if(.Menus[at].Items[line].Variant != "")
 									data-variant="{{ .Menus[at].Items[line].Variant }}"
 								@endif
+								@attributes(.PartAttrs("item"))
 							>
 								{{ .Menus[at].Items[line].Label }}
 								@if(.Menus[at].Items[line].Shortcut != "")
@@ -182,13 +182,13 @@ func (p MenubarProps) PartNames() []string {
 								role="menuitem"
 								type="button"
 								tabindex="-1"
-								@attributes(.PartAttrs("item"))
 								@if(.Menus[at].Items[line].Disabled)
 									disabled
 								@endif
 								@if(.Menus[at].Items[line].Variant != "")
 									data-variant="{{ .Menus[at].Items[line].Variant }}"
 								@endif
+								@attributes(.PartAttrs("item"))
 							>
 								{{ .Menus[at].Items[line].Label }}
 								@if(.Menus[at].Items[line].Shortcut != "")

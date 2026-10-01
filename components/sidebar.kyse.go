@@ -106,13 +106,13 @@ func (p SidebarProps) PartNames() []string {
 	class="{{ .RootClass("sidebar") }}"
 	id="{{ .ID }}"
 	data-side="{{ .Edge() }}"
-	@attributes(.RootAttrs())
 	@if(.Collapsed)
 		data-initial-open="false"
 	@endif
 	@if(.MobileOpen)
 		data-initial-mobile-open="true"
 	@endif
+	@attributes(.RootAttrs())
 >
 	<nav
 		data-part="nav"
@@ -140,10 +140,10 @@ func (p SidebarProps) PartNames() []string {
 						class="{{ .PartClass("group") }}"
 					@endif
 					role="group"
-					@attributes(.PartAttrs("group"))
 					@if(group.Label != "")
 						aria-label="{{ group.Label }}"
 					@endif
+					@attributes(.PartAttrs("group"))
 				>
 					@if(group.Label != "")
 						<h3
@@ -175,13 +175,13 @@ func (p SidebarProps) PartNames() []string {
 										class="{{ .PartClass("link") }}"
 									@endif
 									href="{{ item.URL }}"
-									@attributes(.PartAttrs("link"))
 									@if(item.Current)
 										aria-current="page"
 									@endif
 									@if(item.Disabled)
 										aria-disabled="true"
 									@endif
+									@attributes(.PartAttrs("link"))
 								><span>{{ item.Label }}</span></a>
 							</li>
 						@endforeach

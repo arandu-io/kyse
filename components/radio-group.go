@@ -154,22 +154,22 @@ func RadioGroup(kyse__props RadioGroupProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v1 string
 //line components/radio-group.kyse.go:119
-		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/radio-group.go:162
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/radio-group.kyse.go:119", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-		}
-	}
-//line components/radio-group.kyse.go:120
 	if kyse__d.Message() != "" {
-//line components/radio-group.go:171
+//line components/radio-group.go:160
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-invalid=\"true\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/radio-group.kyse.go:122
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/radio-group.go:169
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/radio-group.kyse.go:122", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
 	}
 	if kyse__err == nil {
@@ -260,44 +260,44 @@ func RadioGroup(kyse__props RadioGroupProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "-label\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v3 string
 //line components/radio-group.kyse.go:137
-		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("group"))
-//line components/radio-group.go:268
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/radio-group.kyse.go:137", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
-		}
-	}
-//line components/radio-group.kyse.go:138
 	if kyse__d.DescribedBy() != "" {
-//line components/radio-group.go:277
+//line components/radio-group.go:266
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/radio-group.kyse.go:139
+//line components/radio-group.kyse.go:138
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/radio-group.go:284
+//line components/radio-group.go:273
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/radio-group.kyse.go:141
+//line components/radio-group.kyse.go:140
 	if kyse__d.Message() != "" {
-//line components/radio-group.go:292
+//line components/radio-group.go:281
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/radio-group.kyse.go:144
+//line components/radio-group.kyse.go:143
 	if kyse__d.Required {
-//line components/radio-group.go:299
+//line components/radio-group.go:288
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-required=\"true\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v3 string
+//line components/radio-group.kyse.go:146
+		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("group"))
+//line components/radio-group.go:297
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/radio-group.kyse.go:146", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
 	}
 	if kyse__err == nil {
@@ -327,22 +327,22 @@ func RadioGroup(kyse__props RadioGroupProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-orientation=\"horizontal\"\n")
 		}
-		if kyse__err == nil {
-			var kyse__v4 string
 //line components/radio-group.kyse.go:153
-			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("option"))
-//line components/radio-group.go:335
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/radio-group.kyse.go:153", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
-			}
-		}
-//line components/radio-group.kyse.go:154
 		if option.Disabled {
-//line components/radio-group.go:344
+//line components/radio-group.go:333
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-disabled=\"true\"\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v4 string
+//line components/radio-group.kyse.go:156
+			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("option"))
+//line components/radio-group.go:342
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/radio-group.kyse.go:156", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 			}
 		}
 		if kyse__err == nil {
@@ -401,51 +401,51 @@ func RadioGroup(kyse__props RadioGroupProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-		if kyse__err == nil {
-			var kyse__v5 string
 //line components/radio-group.kyse.go:165
-			kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/radio-group.go:409
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/radio-group.kyse.go:165", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
-			}
-		}
-//line components/radio-group.kyse.go:166
 		if option.Value == kyse__d.Current() {
-//line components/radio-group.go:418
+//line components/radio-group.go:407
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tchecked\n")
 			}
 		}
-//line components/radio-group.kyse.go:169
+//line components/radio-group.kyse.go:168
 		if option.Hint != "" {
-//line components/radio-group.go:425
+//line components/radio-group.go:414
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\taria-describedby=\"")
 			}
 			if kyse__err == nil {
-//line components/radio-group.kyse.go:170
+//line components/radio-group.kyse.go:169
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.OptionID(option.Value)))
-//line components/radio-group.go:432
+//line components/radio-group.go:421
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "-hint\"\n")
 			}
 		}
-//line components/radio-group.kyse.go:172
+//line components/radio-group.kyse.go:171
 		if kyse__d.Required {
-//line components/radio-group.go:440
+//line components/radio-group.go:429
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\trequired\n")
 			}
 		}
-//line components/radio-group.kyse.go:175
+//line components/radio-group.kyse.go:174
 		if option.Disabled {
-//line components/radio-group.go:447
+//line components/radio-group.go:436
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdisabled\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v5 string
+//line components/radio-group.kyse.go:177
+			kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
+//line components/radio-group.go:445
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/radio-group.kyse.go:177", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 			}
 		}
 		if kyse__err == nil {

@@ -485,13 +485,13 @@ func (p TableProps) PartNames() []string {
 			data-part="root"
 		@endif
 		class="{{ .RootClass("table-container") }}"
-		@attributes(.RootAttrs())
 		@if(.Selectable())
 			data-selectable="true"
 		@endif
 		@if(.Navigable)
 			data-navigable="true"
 		@endif
+		@attributes(.RootAttrs())
 	>
 		{{-- The count is drawn from what the server sent and kept in step by the
 		     behaviour as boxes are ticked. Both write the same sentence, from
@@ -549,10 +549,10 @@ func (p TableProps) PartNames() []string {
 				id="{{ .FormID() }}"
 				method="{{ .PostMethod() }}"
 				aria-label="{{ .BulkName() }}"
-				@attributes(.PartAttrs("bulk"))
 				@if(.BulkAction != "")
 					action="{{ .BulkAction }}"
 				@endif
+				@attributes(.PartAttrs("bulk"))
 			>
 				@if(.SendsToken())
 					<input type="hidden" name="_token" value="{{ .Token }}">
@@ -566,10 +566,10 @@ func (p TableProps) PartNames() []string {
 		<table
 			data-part="table"
 			class="{{ .PartClass("table", "table") }}"
-			@attributes(.PartAttrs("table"))
 			@if(.Role() != "")
 				role="{{ .Role() }}"
 			@endif
+			@attributes(.PartAttrs("table"))
 		>
 			@if(.Caption != "")
 				<caption
@@ -612,7 +612,6 @@ func (p TableProps) PartNames() []string {
 							data-part="header-cell"
 							scope="col"
 							class="{{ .PartClass("header-cell", column.AlignClass()) }}"
-							@attributes(.PartAttrs("header-cell"))
 							@if(column.Key != "")
 								data-column="{{ column.Key }}"
 							@endif
@@ -622,13 +621,13 @@ func (p TableProps) PartNames() []string {
 							@if(.Order(column) != "")
 								aria-sort="{{ .Order(column) }}"
 							@endif
+							@attributes(.PartAttrs("header-cell"))
 						>
 							@if(column.Sortable && .Sortable() && column.Key != "")
 								<a
 									data-part="sort"
 									class="{{ .PartClass("sort", "table-sort") }}"
 									href="{{ .SortHref(column) }}"
-									@attributes(.PartAttrs("sort"))
 									@if(.SortName(column) != "")
 										aria-label="{{ .SortName(column) }}"
 									@endif
@@ -639,6 +638,7 @@ func (p TableProps) PartNames() []string {
 									@if(.HxSwap != "")
 										hx-swap="{{ .HxSwap }}"
 									@endif
+									@attributes(.PartAttrs("sort"))
 								>{{ column.Label }}</a>
 							@endif
 							@if(!column.Sortable || !.Sortable() || column.Key == "")
@@ -655,7 +655,6 @@ func (p TableProps) PartNames() []string {
 						@if(.PartClass("row") != "")
 							class="{{ .PartClass("row") }}"
 						@endif
-						@attributes(.PartAttrs("row"))
 						@if(row.Hidden)
 							hidden
 						@endif
@@ -672,6 +671,7 @@ func (p TableProps) PartNames() []string {
 						@if(.Selectable() && row.Selected)
 							aria-selected="true"
 						@endif
+						@attributes(.PartAttrs("row"))
 					>
 						@if(.Selectable())
 							<td
@@ -694,10 +694,10 @@ func (p TableProps) PartNames() []string {
 										disabled
 									@endif
 									aria-label="{{ .RowName(row) }}"
-									@attributes(.PartAttrs("select"))
 									@if(row.Selected)
 										checked
 									@endif
+									@attributes(.PartAttrs("select"))
 								>
 							</td>
 						@endif
@@ -705,7 +705,6 @@ func (p TableProps) PartNames() []string {
 							<td
 								data-part="cell"
 								class="{{ .PartClass("cell", .AlignClass(i)) }}"
-								@attributes(.PartAttrs("cell"))
 								@if(.ColumnKey(i) != "")
 									data-column="{{ .ColumnKey(i) }}"
 								@endif
@@ -715,6 +714,7 @@ func (p TableProps) PartNames() []string {
 								@if(row.Cells[i].SortValue != "")
 									data-sort-value="{{ row.Cells[i].SortValue }}"
 								@endif
+								@attributes(.PartAttrs("cell"))
 							>
 								@if(row.Cells[i].HTML != "")
 									{!! row.Cells[i].HTML !!}

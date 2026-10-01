@@ -77,7 +77,6 @@ func (p SkeletonProps) PartNames() []string { return []string{"root"} }
 <div
 	data-part="root"
 	class="{{ .RootClass("skeleton", .Geometry()) }}"
-	@attributes(.RootAttrs())
 	@if(.Label != "")
 		role="status"
 		aria-busy="true"
@@ -86,4 +85,5 @@ func (p SkeletonProps) PartNames() []string { return []string{"root"} }
 	@if(.Label == "")
 		aria-hidden="true"
 	@endif
+	@attributes(.RootAttrs())
 ></div>

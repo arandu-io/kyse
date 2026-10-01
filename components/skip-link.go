@@ -89,10 +89,13 @@ func SkipLink(kyse__props SkipLinkProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\thref=\"")
+	}
+	if kyse__err == nil {
 		var kyse__v1 string
 //line components/skip-link.kyse.go:53
-		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/skip-link.go:96
+		kyse__v1, kyse__err = kyse__view.TextURL(kyse__d.Href())
+//line components/skip-link.go:99
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/skip-link.kyse.go:53", kyse__err)
 		} else {
@@ -100,21 +103,18 @@ func SkipLink(kyse__props SkipLinkProps) kyse__template.HTML {
 		}
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\thref=\"")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v2 string
 //line components/skip-link.kyse.go:54
-		kyse__v2, kyse__err = kyse__view.TextURL(kyse__d.Href())
-//line components/skip-link.go:110
+		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/skip-link.go:113
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/skip-link.kyse.go:54", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
-	}
-	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, ">")

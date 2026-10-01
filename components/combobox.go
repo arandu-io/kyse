@@ -376,23 +376,12 @@ func Combobox(kyse__props ComboboxProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			var kyse__v4 string
-//line components/combobox.kyse.go:231
-			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/combobox.go:383
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/combobox.kyse.go:231", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
-			}
-		}
-		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tname=\"")
 		}
 		if kyse__err == nil {
-//line components/combobox.kyse.go:232
+//line components/combobox.kyse.go:231
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Query()))
-//line components/combobox.go:396
+//line components/combobox.go:385
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -401,9 +390,9 @@ func Combobox(kyse__props ComboboxProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tvalue=\"")
 		}
 		if kyse__err == nil {
-//line components/combobox.kyse.go:233
+//line components/combobox.kyse.go:232
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.CurrentLabel()))
-//line components/combobox.go:407
+//line components/combobox.go:396
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -427,9 +416,9 @@ func Combobox(kyse__props ComboboxProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-controls=\"")
 		}
 		if kyse__err == nil {
-//line components/combobox.kyse.go:239
+//line components/combobox.kyse.go:238
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ListboxID()))
-//line components/combobox.go:433
+//line components/combobox.go:422
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -438,14 +427,14 @@ func Combobox(kyse__props ComboboxProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-get=\"")
 		}
 		if kyse__err == nil {
-			var kyse__v5 string
-//line components/combobox.kyse.go:240
-			kyse__v5, kyse__err = kyse__view.TextURL(kyse__d.SearchURL)
-//line components/combobox.go:445
+			var kyse__v4 string
+//line components/combobox.kyse.go:239
+			kyse__v4, kyse__err = kyse__view.TextURL(kyse__d.SearchURL)
+//line components/combobox.go:434
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/combobox.kyse.go:240", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/combobox.kyse.go:239", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 			}
 		}
 		if kyse__err == nil {
@@ -455,15 +444,26 @@ func Combobox(kyse__props ComboboxProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-trigger=\"")
 		}
 		if kyse__err == nil {
-//line components/combobox.kyse.go:241
+//line components/combobox.kyse.go:240
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Trigger()))
-//line components/combobox.go:461
+//line components/combobox.go:450
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-target=\"")
+		}
+		if kyse__err == nil {
+//line components/combobox.kyse.go:241
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ListboxTarget()))
+//line components/combobox.go:461
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-select=\"")
 		}
 		if kyse__err == nil {
 //line components/combobox.kyse.go:242
@@ -474,78 +474,78 @@ func Combobox(kyse__props ComboboxProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-select=\"")
-		}
-		if kyse__err == nil {
-//line components/combobox.kyse.go:243
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ListboxTarget()))
-//line components/combobox.go:483
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-		}
-		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-swap=\"outerHTML\"\n")
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-sync=\"this:replace\"\n")
 		}
-//line components/combobox.kyse.go:246
+//line components/combobox.kyse.go:245
 		if kyse__d.Placeholder != "" {
-//line components/combobox.go:496
+//line components/combobox.go:485
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tplaceholder=\"")
 			}
 			if kyse__err == nil {
-//line components/combobox.kyse.go:247
+//line components/combobox.kyse.go:246
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Placeholder))
-//line components/combobox.go:503
+//line components/combobox.go:492
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/combobox.kyse.go:249
+//line components/combobox.kyse.go:248
 		if kyse__d.DescribedBy() != "" {
-//line components/combobox.go:511
+//line components/combobox.go:500
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-describedby=\"")
 			}
 			if kyse__err == nil {
-//line components/combobox.kyse.go:250
+//line components/combobox.kyse.go:249
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/combobox.go:518
+//line components/combobox.go:507
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/combobox.kyse.go:252
+//line components/combobox.kyse.go:251
 		if kyse__d.Message() != "" {
-//line components/combobox.go:526
+//line components/combobox.go:515
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-invalid=\"true\"\n")
 			}
 		}
-//line components/combobox.kyse.go:255
+//line components/combobox.kyse.go:254
 		if kyse__d.Required {
-//line components/combobox.go:533
+//line components/combobox.go:522
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\trequired\n")
 			}
 		}
-//line components/combobox.kyse.go:258
+//line components/combobox.kyse.go:257
 		if kyse__d.Disabled {
-//line components/combobox.go:540
+//line components/combobox.go:529
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdisabled\n")
 			}
 		}
-//line components/combobox.kyse.go:261
+//line components/combobox.kyse.go:260
 		if kyse__d.Autofocus {
-//line components/combobox.go:547
+//line components/combobox.go:536
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tautofocus\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v5 string
+//line components/combobox.kyse.go:263
+			kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
+//line components/combobox.go:545
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/combobox.kyse.go:263", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 			}
 		}
 		if kyse__err == nil {
@@ -647,30 +647,30 @@ func Combobox(kyse__props ComboboxProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-orientation=\"vertical\"\n")
 		}
-		if kyse__err == nil {
-			var kyse__v7 string
 //line components/combobox.kyse.go:285
-			kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("listbox"))
-//line components/combobox.go:655
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/combobox.kyse.go:285", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
-			}
-		}
-//line components/combobox.kyse.go:286
 		if kyse__d.EmptyText != "" {
-//line components/combobox.go:664
+//line components/combobox.go:653
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-empty=\"")
 			}
 			if kyse__err == nil {
-//line components/combobox.kyse.go:287
+//line components/combobox.kyse.go:286
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.EmptyText))
-//line components/combobox.go:671
+//line components/combobox.go:660
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v7 string
+//line components/combobox.kyse.go:288
+			kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("listbox"))
+//line components/combobox.go:670
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/combobox.kyse.go:288", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 			}
 		}
 		if kyse__err == nil {
@@ -736,29 +736,29 @@ func Combobox(kyse__props ComboboxProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
-			if kyse__err == nil {
-				var kyse__v8 string
 //line components/combobox.kyse.go:300
-				kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("option"))
-//line components/combobox.go:744
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/combobox.kyse.go:300", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
-				}
-			}
-//line components/combobox.kyse.go:301
 			if kyse__d.Options[at].Disabled {
-//line components/combobox.go:753
+//line components/combobox.go:742
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-disabled=\"true\"\n")
 				}
 			}
-//line components/combobox.kyse.go:304
+//line components/combobox.kyse.go:303
 			if kyse__d.Options[at].Value == kyse__d.Current() {
-//line components/combobox.go:760
+//line components/combobox.go:749
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-selected=\"true\"\n")
+				}
+			}
+			if kyse__err == nil {
+				var kyse__v8 string
+//line components/combobox.kyse.go:306
+				kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("option"))
+//line components/combobox.go:758
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/combobox.kyse.go:306", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 				}
 			}
 			if kyse__err == nil {

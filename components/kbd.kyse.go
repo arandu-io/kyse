@@ -68,10 +68,10 @@ func (p KbdProps) PartNames() []string { return []string{"root", "item"} }
 			<kbd
 				data-part="item"
 				class="{{ .PartClass("item", "kbd") }}"
-				@attributes(.PartAttrs("item"))
 				@if(.Name(i) != "")
 					aria-label="{{ .Name(i) }}"
 				@endif
+				@attributes(.PartAttrs("item"))
 			>{{ .Keys[i] }}</kbd>
 		@endfor
 	</span>

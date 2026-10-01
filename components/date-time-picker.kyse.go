@@ -249,7 +249,6 @@ func (p DateTimePickerProps) PartNames() []string {
 		id="{{ .Name }}"
 		name="{{ .Name }}"
 		value="{{ .Current() }}"
-		@attributes(.PartAttrs("input"))
 		@if(.Min != "")
 			min="{{ .Min }}"
 		@endif
@@ -274,6 +273,7 @@ func (p DateTimePickerProps) PartNames() []string {
 		@if(.ReadOnly)
 			readonly
 		@endif
+		@attributes(.PartAttrs("input"))
 	>
 
 	@if(.Griddable())

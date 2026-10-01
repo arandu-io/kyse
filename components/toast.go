@@ -115,45 +115,45 @@ func Toast(kyse__props ToastProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-		if kyse__err == nil {
-			var kyse__v1 string
 //line components/toast.kyse.go:65
-			kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/toast.go:123
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/toast.kyse.go:65", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-			}
-		}
-//line components/toast.kyse.go:66
 		if kyse__d.Category != "" {
-//line components/toast.go:132
+//line components/toast.go:121
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-category=\"")
 			}
 			if kyse__err == nil {
-//line components/toast.kyse.go:67
+//line components/toast.kyse.go:66
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Category))
-//line components/toast.go:139
+//line components/toast.go:128
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/toast.kyse.go:69
+//line components/toast.kyse.go:68
 		if kyse__d.Duration != 0 {
-//line components/toast.go:147
+//line components/toast.go:136
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-duration=\"")
 			}
 			if kyse__err == nil {
-//line components/toast.kyse.go:70
+//line components/toast.kyse.go:69
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Duration))
-//line components/toast.go:154
+//line components/toast.go:143
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v1 string
+//line components/toast.kyse.go:71
+			kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/toast.go:153
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/toast.kyse.go:71", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 			}
 		}
 		if kyse__err == nil {

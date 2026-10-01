@@ -308,57 +308,57 @@ func Tree(kyse__props TreeProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
-			if kyse__err == nil {
-				var kyse__v2 string
 //line components/tree.kyse.go:167
-				kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("item"))
-//line components/tree.go:316
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/tree.kyse.go:167", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
-				}
-			}
-//line components/tree.kyse.go:168
 			if row.Branch && row.Node.Expanded {
-//line components/tree.go:325
+//line components/tree.go:314
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-expanded=\"true\"\n")
 				}
 			}
-//line components/tree.kyse.go:171
+//line components/tree.kyse.go:170
 			if row.Branch && !row.Node.Expanded {
-//line components/tree.go:332
+//line components/tree.go:321
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-expanded=\"false\"\n")
 				}
 			}
-//line components/tree.kyse.go:174
+//line components/tree.kyse.go:173
 			if row.Node.Selected {
-//line components/tree.go:339
+//line components/tree.go:328
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-selected=\"true\"\n")
 				}
 			}
-//line components/tree.kyse.go:177
+//line components/tree.kyse.go:176
 			if row.Node.Disabled {
-//line components/tree.go:346
+//line components/tree.go:335
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-disabled=\"true\"\n")
 				}
 			}
-//line components/tree.kyse.go:180
+//line components/tree.kyse.go:179
 			if kyse__d.Stop(row) {
-//line components/tree.go:353
+//line components/tree.go:342
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\ttabindex=\"0\"\n")
 				}
 			}
-//line components/tree.kyse.go:183
+//line components/tree.kyse.go:182
 			if !kyse__d.Stop(row) {
-//line components/tree.go:360
+//line components/tree.go:349
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\ttabindex=\"-1\"\n")
+				}
+			}
+			if kyse__err == nil {
+				var kyse__v2 string
+//line components/tree.kyse.go:185
+				kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("item"))
+//line components/tree.go:358
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/tree.kyse.go:185", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 				}
 			}
 			if kyse__err == nil {
@@ -481,10 +481,13 @@ func Tree(kyse__props TreeProps) kyse__template.HTML {
 					}
 				}
 				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thref=\"")
+				}
+				if kyse__err == nil {
 					var kyse__v5 string
 //line components/tree.kyse.go:209
-					kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("label"))
-//line components/tree.go:488
+					kyse__v5, kyse__err = kyse__view.TextURL(row.Node.URL)
+//line components/tree.go:491
 					if kyse__err != nil {
 						kyse__err = kyse__fmt.Errorf("%s: %w", "components/tree.kyse.go:209", kyse__err)
 					} else {
@@ -492,24 +495,21 @@ func Tree(kyse__props TreeProps) kyse__template.HTML {
 					}
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thref=\"")
-				}
-				if kyse__err == nil {
-					var kyse__v6 string
-//line components/tree.kyse.go:210
-					kyse__v6, kyse__err = kyse__view.TextURL(row.Node.URL)
-//line components/tree.go:502
-					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/tree.kyse.go:210", kyse__err)
-					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
-					}
-				}
-				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\ttabindex=\"-1\"\n")
+				}
+				if kyse__err == nil {
+					var kyse__v6 string
+//line components/tree.kyse.go:211
+					kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("label"))
+//line components/tree.go:508
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/tree.kyse.go:211", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
+					}
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>")

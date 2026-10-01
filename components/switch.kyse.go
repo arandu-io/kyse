@@ -113,13 +113,13 @@ func (p SwitchProps) PartNames() []string { return []string{"root", "content", "
 	data-part="root"
 	class="{{ .RootClass("field") }}"
 	data-orientation="horizontal"
-	@attributes(.RootAttrs())
 	@if(.Message() != "")
 		data-invalid="true"
 	@endif
 	@if(.Disabled)
 		data-disabled="true"
 	@endif
+	@attributes(.RootAttrs())
 >
 	<section
 		data-part="content"
@@ -160,7 +160,6 @@ func (p SwitchProps) PartNames() []string { return []string{"root", "content", "
 		role="switch"
 		id="{{ .ElementID() }}"
 		name="{{ .Name }}"
-		@attributes(.PartAttrs("input"))
 		@if(.Value != "")
 			value="{{ .Value }}"
 		@endif
@@ -176,5 +175,6 @@ func (p SwitchProps) PartNames() []string { return []string{"root", "content", "
 		@if(.Disabled)
 			disabled
 		@endif
+		@attributes(.PartAttrs("input"))
 	>
 </div>

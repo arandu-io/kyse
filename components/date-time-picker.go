@@ -421,103 +421,103 @@ func DateTimePicker(kyse__props DateTimePickerProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v4 string
 //line components/date-time-picker.kyse.go:252
-		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/date-time-picker.go:429
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-time-picker.kyse.go:252", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
-		}
-	}
-//line components/date-time-picker.kyse.go:253
 	if kyse__d.Min != "" {
-//line components/date-time-picker.go:438
+//line components/date-time-picker.go:427
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tmin=\"")
 		}
 		if kyse__err == nil {
-//line components/date-time-picker.kyse.go:254
+//line components/date-time-picker.kyse.go:253
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Min))
-//line components/date-time-picker.go:445
+//line components/date-time-picker.go:434
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/date-time-picker.kyse.go:256
+//line components/date-time-picker.kyse.go:255
 	if kyse__d.Max != "" {
-//line components/date-time-picker.go:453
+//line components/date-time-picker.go:442
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tmax=\"")
 		}
 		if kyse__err == nil {
-//line components/date-time-picker.kyse.go:257
+//line components/date-time-picker.kyse.go:256
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Max))
-//line components/date-time-picker.go:460
+//line components/date-time-picker.go:449
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/date-time-picker.kyse.go:259
+//line components/date-time-picker.kyse.go:258
 	if kyse__d.Step != "" {
-//line components/date-time-picker.go:468
+//line components/date-time-picker.go:457
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tstep=\"")
 		}
 		if kyse__err == nil {
-//line components/date-time-picker.kyse.go:260
+//line components/date-time-picker.kyse.go:259
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Step))
-//line components/date-time-picker.go:475
+//line components/date-time-picker.go:464
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/date-time-picker.kyse.go:262
+//line components/date-time-picker.kyse.go:261
 	if kyse__d.DescribedBy() != "" {
-//line components/date-time-picker.go:483
+//line components/date-time-picker.go:472
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/date-time-picker.kyse.go:263
+//line components/date-time-picker.kyse.go:262
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/date-time-picker.go:490
+//line components/date-time-picker.go:479
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/date-time-picker.kyse.go:265
+//line components/date-time-picker.kyse.go:264
 	if kyse__d.Message() != "" {
-//line components/date-time-picker.go:498
+//line components/date-time-picker.go:487
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/date-time-picker.kyse.go:268
+//line components/date-time-picker.kyse.go:267
 	if kyse__d.Required {
-//line components/date-time-picker.go:505
+//line components/date-time-picker.go:494
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\trequired\n")
 		}
 	}
-//line components/date-time-picker.kyse.go:271
+//line components/date-time-picker.kyse.go:270
 	if kyse__d.Disabled {
-//line components/date-time-picker.go:512
+//line components/date-time-picker.go:501
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdisabled\n")
 		}
 	}
-//line components/date-time-picker.kyse.go:274
+//line components/date-time-picker.kyse.go:273
 	if kyse__d.ReadOnly {
-//line components/date-time-picker.go:519
+//line components/date-time-picker.go:508
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\treadonly\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v4 string
+//line components/date-time-picker.kyse.go:276
+		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
+//line components/date-time-picker.go:517
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-time-picker.kyse.go:276", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 		}
 	}
 	if kyse__err == nil {

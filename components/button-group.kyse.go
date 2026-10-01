@@ -62,13 +62,13 @@ func (p ButtonGroupProps) PartNames() []string { return []string{"root"} }
 	data-part="root"
 	class="{{ .RootClass("button-group") }}"
 	role="group"
-	@attributes(.RootAttrs())
 	@if(.Label != "")
 		aria-label="{{ .Label }}"
 	@endif
 	@if(.Orientation() != "")
 		data-orientation="{{ .Orientation() }}"
 	@endif
+	@attributes(.RootAttrs())
 >
 	@for(at := 0; at < len(.Buttons); at++)
 		@if(.Separated && at > 0)

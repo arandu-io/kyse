@@ -381,7 +381,6 @@ func (p CalendarProps) PartNames() []string {
 							class="{{ .PartClass("day", "calendar-day") }}"
 							role="gridcell"
 							data-date="{{ day.Date }}"
-							@attributes(.PartAttrs("day"))
 							@if(day.Outside)
 								data-outside="true"
 							@endif
@@ -403,6 +402,7 @@ func (p CalendarProps) PartNames() []string {
 							@if(!.Stop(day))
 								tabindex="-1"
 							@endif
+							@attributes(.PartAttrs("day"))
 						>{{ day.Number }}</td>
 					@endforeach
 				</tr>

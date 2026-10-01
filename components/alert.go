@@ -85,30 +85,30 @@ func Alert(kyse__props AlertProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v1 string
 //line components/alert.kyse.go:40
-		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/alert.go:93
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/alert.kyse.go:40", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-		}
-	}
-//line components/alert.kyse.go:41
 	if kyse__d.Variant != "" {
-//line components/alert.go:102
+//line components/alert.go:91
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-variant=\"")
 		}
 		if kyse__err == nil {
-//line components/alert.kyse.go:42
+//line components/alert.kyse.go:41
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Variant))
-//line components/alert.go:109
+//line components/alert.go:98
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/alert.kyse.go:43
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/alert.go:108
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/alert.kyse.go:43", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
 	}
 	if kyse__err == nil {

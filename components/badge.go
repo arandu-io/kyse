@@ -62,30 +62,30 @@ func Badge(kyse__props BadgeProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v1 string
 //line components/badge.kyse.go:27
-		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/badge.go:70
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/badge.kyse.go:27", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-		}
-	}
-//line components/badge.kyse.go:28
 	if kyse__d.Variant != "" {
-//line components/badge.go:79
+//line components/badge.go:68
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-variant=\"")
 		}
 		if kyse__err == nil {
-//line components/badge.kyse.go:29
+//line components/badge.kyse.go:28
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Variant))
-//line components/badge.go:86
+//line components/badge.go:75
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/badge.kyse.go:30
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/badge.go:85
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/badge.kyse.go:30", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
 	}
 	if kyse__err == nil {

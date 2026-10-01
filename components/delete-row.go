@@ -150,28 +150,17 @@ func DeleteRow(kyse__props DeleteRowProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-delete=\"")
+	}
+	if kyse__err == nil {
 		var kyse__v1 string
 //line components/delete-row.kyse.go:104
-		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/delete-row.go:157
+		kyse__v1, kyse__err = kyse__view.TextURL(kyse__d.URL)
+//line components/delete-row.go:160
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/delete-row.kyse.go:104", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-		}
-	}
-	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-delete=\"")
-	}
-	if kyse__err == nil {
-		var kyse__v2 string
-//line components/delete-row.kyse.go:105
-		kyse__v2, kyse__err = kyse__view.TextURL(kyse__d.URL)
-//line components/delete-row.go:171
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/delete-row.kyse.go:105", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
 	}
 	if kyse__err == nil {
@@ -181,9 +170,9 @@ func DeleteRow(kyse__props DeleteRowProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-confirm=\"")
 	}
 	if kyse__err == nil {
-//line components/delete-row.kyse.go:106
+//line components/delete-row.kyse.go:105
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Question()))
-//line components/delete-row.go:187
+//line components/delete-row.go:176
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -192,9 +181,9 @@ func DeleteRow(kyse__props DeleteRowProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-target=\"")
 	}
 	if kyse__err == nil {
-//line components/delete-row.kyse.go:107
+//line components/delete-row.kyse.go:106
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Removes()))
-//line components/delete-row.go:198
+//line components/delete-row.go:187
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -202,56 +191,67 @@ func DeleteRow(kyse__props DeleteRowProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-swap=\"outerHTML swap:200ms\"\n")
 	}
-//line components/delete-row.kyse.go:109
+//line components/delete-row.kyse.go:108
 	if kyse__d.Size != "" {
-//line components/delete-row.go:208
+//line components/delete-row.go:197
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-size=\"")
 		}
 		if kyse__err == nil {
-//line components/delete-row.kyse.go:110
+//line components/delete-row.kyse.go:109
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Size))
-//line components/delete-row.go:215
+//line components/delete-row.go:204
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/delete-row.kyse.go:112
+//line components/delete-row.kyse.go:111
 	if kyse__d.Description != "" {
-//line components/delete-row.go:223
+//line components/delete-row.go:212
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-label=\"")
 		}
 		if kyse__err == nil {
-//line components/delete-row.kyse.go:113
+//line components/delete-row.kyse.go:112
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name()))
-//line components/delete-row.go:230
+//line components/delete-row.go:219
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/delete-row.kyse.go:115
+//line components/delete-row.kyse.go:114
 	if kyse__d.IconOnly && kyse__d.Description == "" {
-//line components/delete-row.go:238
+//line components/delete-row.go:227
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-label=\"")
 		}
 		if kyse__err == nil {
-//line components/delete-row.kyse.go:116
+//line components/delete-row.kyse.go:115
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Text()))
-//line components/delete-row.go:245
+//line components/delete-row.go:234
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/delete-row.kyse.go:118
+//line components/delete-row.kyse.go:117
 	if kyse__d.Disabled {
-//line components/delete-row.go:253
+//line components/delete-row.go:242
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdisabled\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v2 string
+//line components/delete-row.kyse.go:120
+		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/delete-row.go:251
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/delete-row.kyse.go:120", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
 	}
 	if kyse__err == nil {

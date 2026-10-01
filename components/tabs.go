@@ -215,45 +215,45 @@ func Tabs(kyse__props TabsProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v2 string
 //line components/tabs.kyse.go:130
-		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("list"))
-//line components/tabs.go:223
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/tabs.kyse.go:130", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
-		}
-	}
-//line components/tabs.kyse.go:131
 	if kyse__d.Label != "" {
-//line components/tabs.go:232
+//line components/tabs.go:221
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-label=\"")
 		}
 		if kyse__err == nil {
-//line components/tabs.kyse.go:132
+//line components/tabs.kyse.go:131
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
-//line components/tabs.go:239
+//line components/tabs.go:228
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/tabs.kyse.go:134
+//line components/tabs.kyse.go:133
 	if kyse__d.Variant != "" {
-//line components/tabs.go:247
+//line components/tabs.go:236
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-variant=\"")
 		}
 		if kyse__err == nil {
-//line components/tabs.kyse.go:135
+//line components/tabs.kyse.go:134
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Variant))
-//line components/tabs.go:254
+//line components/tabs.go:243
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v2 string
+//line components/tabs.kyse.go:136
+		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("list"))
+//line components/tabs.go:253
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/tabs.kyse.go:136", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
 	}
 	if kyse__err == nil {
@@ -291,23 +291,12 @@ func Tabs(kyse__props TabsProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\trole=\"tab\"\n")
 		}
 		if kyse__err == nil {
-			var kyse__v3 string
-//line components/tabs.kyse.go:146
-			kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("trigger"))
-//line components/tabs.go:298
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/tabs.kyse.go:146", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
-			}
-		}
-		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tid=\"")
 		}
 		if kyse__err == nil {
-//line components/tabs.kyse.go:147
+//line components/tabs.kyse.go:146
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.TabID(tab)))
-//line components/tabs.go:311
+//line components/tabs.go:300
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -316,9 +305,9 @@ func Tabs(kyse__props TabsProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-controls=\"")
 		}
 		if kyse__err == nil {
-//line components/tabs.kyse.go:148
+//line components/tabs.kyse.go:147
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PanelID(tab)))
-//line components/tabs.go:322
+//line components/tabs.go:311
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -327,9 +316,9 @@ func Tabs(kyse__props TabsProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-selected=\"")
 		}
 		if kyse__err == nil {
-//line components/tabs.kyse.go:149
+//line components/tabs.kyse.go:148
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Selected(tab)))
-//line components/tabs.go:333
+//line components/tabs.go:322
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -338,18 +327,29 @@ func Tabs(kyse__props TabsProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\ttabindex=\"")
 		}
 		if kyse__err == nil {
-//line components/tabs.kyse.go:150
+//line components/tabs.kyse.go:149
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.TabIndex(tab)))
-//line components/tabs.go:344
+//line components/tabs.go:333
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-//line components/tabs.kyse.go:151
+//line components/tabs.kyse.go:150
 		if tab.Disabled {
-//line components/tabs.go:351
+//line components/tabs.go:340
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-disabled=\"true\"\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v3 string
+//line components/tabs.kyse.go:153
+			kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("trigger"))
+//line components/tabs.go:349
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/tabs.kyse.go:153", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 			}
 		}
 		if kyse__err == nil {
@@ -423,22 +423,22 @@ func Tabs(kyse__props TabsProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\ttabindex=\"0\"\n")
 		}
-		if kyse__err == nil {
-			var kyse__v4 string
 //line components/tabs.kyse.go:168
-			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("panel"))
-//line components/tabs.go:431
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/tabs.kyse.go:168", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
-			}
-		}
-//line components/tabs.kyse.go:169
 		if kyse__d.Folded(tab) {
-//line components/tabs.go:440
+//line components/tabs.go:429
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thidden\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v4 string
+//line components/tabs.kyse.go:171
+			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("panel"))
+//line components/tabs.go:438
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/tabs.kyse.go:171", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 			}
 		}
 		if kyse__err == nil {

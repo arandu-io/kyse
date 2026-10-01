@@ -88,7 +88,6 @@ func (p ProgressProps) PartNames() []string { return []string{"root", "fill"} }
 	data-part="root"
 	class="{{ .RootClass("progress") }}"
 	role="progressbar"
-	@attributes(.RootAttrs())
 	@if(.Label != "")
 		aria-label="{{ .Label }}"
 	@endif
@@ -97,6 +96,7 @@ func (p ProgressProps) PartNames() []string { return []string{"root", "fill"} }
 	@if(!.Indeterminate)
 		aria-valuenow="{{ .Now() }}"
 	@endif
+	@attributes(.RootAttrs())
 >
 	@if(.Indeterminate)
 		<span

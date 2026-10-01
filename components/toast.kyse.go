@@ -62,13 +62,13 @@ func (p ToastProps) PartNames() []string {
 		class="{{ .RootClass("toast") }}"
 		role="status"
 		aria-live="{{ .Live() }}"
-		@attributes(.RootAttrs())
 		@if(.Category != "")
 			data-category="{{ .Category }}"
 		@endif
 		@if(.Duration != 0)
 			data-duration="{{ .Duration }}"
 		@endif
+		@attributes(.RootAttrs())
 	>
 		<div
 			data-part="content"

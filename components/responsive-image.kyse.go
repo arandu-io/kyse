@@ -118,7 +118,6 @@ func (p ResponsiveImageProps) PartNames() []string {
 				loading="{{ .Loading() }}"
 				decoding="async"
 				fetchpriority="{{ .Priority() }}"
-				@attributes(.PartAttrs("image"))
 				@if(.Width > 0)
 					width="{{ .Width }}"
 				@endif
@@ -131,6 +130,7 @@ func (p ResponsiveImageProps) PartNames() []string {
 				@if(.Sizes != "")
 					sizes="{{ .Sizes }}"
 				@endif
+				@attributes(.PartAttrs("image"))
 			>
 		</picture>
 		<figcaption
@@ -170,7 +170,6 @@ func (p ResponsiveImageProps) PartNames() []string {
 			loading="{{ .Loading() }}"
 			decoding="async"
 			fetchpriority="{{ .Priority() }}"
-			@attributes(.PartAttrs("image"))
 			@if(.Width > 0)
 				width="{{ .Width }}"
 			@endif
@@ -183,6 +182,7 @@ func (p ResponsiveImageProps) PartNames() []string {
 			@if(.Sizes != "")
 				sizes="{{ .Sizes }}"
 			@endif
+			@attributes(.PartAttrs("image"))
 		>
 	</picture>
 @endif

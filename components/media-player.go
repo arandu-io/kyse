@@ -217,51 +217,51 @@ func MediaPlayer(kyse__props MediaPlayerProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-		if kyse__err == nil {
-			var kyse__v2 string
 //line components/media-player.kyse.go:128
-			kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("media"))
-//line components/media-player.go:225
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/media-player.kyse.go:128", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
-			}
-		}
-//line components/media-player.kyse.go:129
 		if kyse__d.Label != "" {
-//line components/media-player.go:234
+//line components/media-player.go:223
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-label=\"")
 			}
 			if kyse__err == nil {
-//line components/media-player.kyse.go:130
+//line components/media-player.kyse.go:129
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
-//line components/media-player.go:241
+//line components/media-player.go:230
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/media-player.kyse.go:132
+//line components/media-player.kyse.go:131
 		if kyse__d.Autoplay {
-//line components/media-player.go:249
+//line components/media-player.go:238
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tautoplay\n")
 			}
 		}
-//line components/media-player.kyse.go:135
+//line components/media-player.kyse.go:134
 		if kyse__d.Loop {
-//line components/media-player.go:256
+//line components/media-player.go:245
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tloop\n")
 			}
 		}
-//line components/media-player.kyse.go:138
+//line components/media-player.kyse.go:137
 		if kyse__d.Silent() {
-//line components/media-player.go:263
+//line components/media-player.go:252
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tmuted\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v2 string
+//line components/media-player.kyse.go:140
+			kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("media"))
+//line components/media-player.go:261
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/media-player.kyse.go:140", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 			}
 		}
 		if kyse__err == nil {
@@ -419,72 +419,72 @@ func MediaPlayer(kyse__props MediaPlayerProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-		if kyse__err == nil {
-			var kyse__v5 string
 //line components/media-player.kyse.go:170
-			kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("media"))
-//line components/media-player.go:427
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/media-player.kyse.go:170", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
-			}
-		}
-//line components/media-player.kyse.go:171
 		if kyse__d.PosterURL != "" {
-//line components/media-player.go:436
+//line components/media-player.go:425
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tposter=\"")
 			}
 			if kyse__err == nil {
-				var kyse__v6 string
-//line components/media-player.kyse.go:172
-				kyse__v6, kyse__err = kyse__view.TextURL(kyse__d.PosterURL)
-//line components/media-player.go:444
+				var kyse__v5 string
+//line components/media-player.kyse.go:171
+				kyse__v5, kyse__err = kyse__view.TextURL(kyse__d.PosterURL)
+//line components/media-player.go:433
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/media-player.kyse.go:172", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/media-player.kyse.go:171", kyse__err)
 				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 				}
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/media-player.kyse.go:174
+//line components/media-player.kyse.go:173
 		if kyse__d.Label != "" {
-//line components/media-player.go:457
+//line components/media-player.go:446
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-label=\"")
 			}
 			if kyse__err == nil {
-//line components/media-player.kyse.go:175
+//line components/media-player.kyse.go:174
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
-//line components/media-player.go:464
+//line components/media-player.go:453
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/media-player.kyse.go:177
+//line components/media-player.kyse.go:176
 		if kyse__d.Autoplay {
-//line components/media-player.go:472
+//line components/media-player.go:461
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tautoplay\n")
 			}
 		}
-//line components/media-player.kyse.go:180
+//line components/media-player.kyse.go:179
 		if kyse__d.Loop {
-//line components/media-player.go:479
+//line components/media-player.go:468
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tloop\n")
 			}
 		}
-//line components/media-player.kyse.go:183
+//line components/media-player.kyse.go:182
 		if kyse__d.Silent() {
-//line components/media-player.go:486
+//line components/media-player.go:475
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tmuted\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v6 string
+//line components/media-player.kyse.go:185
+			kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("media"))
+//line components/media-player.go:484
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/media-player.kyse.go:185", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 			}
 		}
 		if kyse__err == nil {

@@ -163,28 +163,17 @@ func OptimisticToggle(kyse__props OptimisticToggleProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-post=\"")
+	}
+	if kyse__err == nil {
 		var kyse__v1 string
 //line components/optimistic-toggle.kyse.go:106
-		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/optimistic-toggle.go:170
+		kyse__v1, kyse__err = kyse__view.TextURL(kyse__d.URL)
+//line components/optimistic-toggle.go:173
 		if kyse__err != nil {
 			kyse__err = kyse__fmt.Errorf("%s: %w", "components/optimistic-toggle.kyse.go:106", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-		}
-	}
-	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-post=\"")
-	}
-	if kyse__err == nil {
-		var kyse__v2 string
-//line components/optimistic-toggle.kyse.go:107
-		kyse__v2, kyse__err = kyse__view.TextURL(kyse__d.URL)
-//line components/optimistic-toggle.go:184
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/optimistic-toggle.kyse.go:107", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
 	}
 	if kyse__err == nil {
@@ -196,41 +185,52 @@ func OptimisticToggle(kyse__props OptimisticToggleProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-swap=\"outerHTML\"\n")
 	}
-//line components/optimistic-toggle.kyse.go:110
+//line components/optimistic-toggle.kyse.go:109
 	if kyse__d.Variant != "" {
-//line components/optimistic-toggle.go:202
+//line components/optimistic-toggle.go:191
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-variant=\"")
 		}
 		if kyse__err == nil {
-//line components/optimistic-toggle.kyse.go:111
+//line components/optimistic-toggle.kyse.go:110
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Variant))
-//line components/optimistic-toggle.go:209
+//line components/optimistic-toggle.go:198
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/optimistic-toggle.kyse.go:113
+//line components/optimistic-toggle.kyse.go:112
 	if kyse__d.Size != "" {
-//line components/optimistic-toggle.go:217
+//line components/optimistic-toggle.go:206
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-size=\"")
 		}
 		if kyse__err == nil {
-//line components/optimistic-toggle.kyse.go:114
+//line components/optimistic-toggle.kyse.go:113
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Size))
-//line components/optimistic-toggle.go:224
+//line components/optimistic-toggle.go:213
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/optimistic-toggle.kyse.go:116
+//line components/optimistic-toggle.kyse.go:115
 	if kyse__d.Disabled {
-//line components/optimistic-toggle.go:232
+//line components/optimistic-toggle.go:221
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdisabled\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v2 string
+//line components/optimistic-toggle.kyse.go:118
+		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/optimistic-toggle.go:230
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/optimistic-toggle.kyse.go:118", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
 	}
 	if kyse__err == nil {
@@ -260,22 +260,22 @@ func OptimisticToggle(kyse__props OptimisticToggleProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-toggle-on\n")
 	}
-	if kyse__err == nil {
-		var kyse__v3 string
 //line components/optimistic-toggle.kyse.go:126
-		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("on"))
-//line components/optimistic-toggle.go:268
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/optimistic-toggle.kyse.go:126", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
-		}
-	}
-//line components/optimistic-toggle.kyse.go:127
 	if !kyse__d.Pressed {
-//line components/optimistic-toggle.go:277
+//line components/optimistic-toggle.go:266
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thidden\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v3 string
+//line components/optimistic-toggle.kyse.go:129
+		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("on"))
+//line components/optimistic-toggle.go:275
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/optimistic-toggle.kyse.go:129", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
 	}
 	if kyse__err == nil {
@@ -334,22 +334,22 @@ func OptimisticToggle(kyse__props OptimisticToggleProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-toggle-off\n")
 	}
-	if kyse__err == nil {
-		var kyse__v4 string
 //line components/optimistic-toggle.kyse.go:142
-		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("off"))
-//line components/optimistic-toggle.go:342
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/optimistic-toggle.kyse.go:142", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
-		}
-	}
-//line components/optimistic-toggle.kyse.go:143
 	if kyse__d.Pressed {
-//line components/optimistic-toggle.go:351
+//line components/optimistic-toggle.go:340
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thidden\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v4 string
+//line components/optimistic-toggle.kyse.go:145
+		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("off"))
+//line components/optimistic-toggle.go:349
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/optimistic-toggle.kyse.go:145", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 		}
 	}
 	if kyse__err == nil {

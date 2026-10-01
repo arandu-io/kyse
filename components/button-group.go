@@ -102,45 +102,45 @@ func ButtonGroup(kyse__props ButtonGroupProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\trole=\"group\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v1 string
 //line components/button-group.kyse.go:65
-		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/button-group.go:110
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/button-group.kyse.go:65", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-		}
-	}
-//line components/button-group.kyse.go:66
 	if kyse__d.Label != "" {
-//line components/button-group.go:119
+//line components/button-group.go:108
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-label=\"")
 		}
 		if kyse__err == nil {
-//line components/button-group.kyse.go:67
+//line components/button-group.kyse.go:66
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
-//line components/button-group.go:126
+//line components/button-group.go:115
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/button-group.kyse.go:69
+//line components/button-group.kyse.go:68
 	if kyse__d.Orientation() != "" {
-//line components/button-group.go:134
+//line components/button-group.go:123
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-orientation=\"")
 		}
 		if kyse__err == nil {
-//line components/button-group.kyse.go:70
+//line components/button-group.kyse.go:69
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Orientation()))
-//line components/button-group.go:141
+//line components/button-group.go:130
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/button-group.kyse.go:71
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/button-group.go:140
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/button-group.kyse.go:71", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
 	}
 	if kyse__err == nil {

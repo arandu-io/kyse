@@ -182,7 +182,6 @@ func (p NumberInputProps) PartNames() []string {
 			id="{{ .Name }}"
 			name="{{ .Name }}"
 			value="{{ .Current() }}"
-			@attributes(.PartAttrs("input"))
 			@if(.Min != "")
 				min="{{ .Min }}"
 			@endif
@@ -207,6 +206,7 @@ func (p NumberInputProps) PartNames() []string {
 			@if(.Disabled)
 				disabled
 			@endif
+			@attributes(.PartAttrs("input"))
 		>
 
 		@if(.Unit != "")

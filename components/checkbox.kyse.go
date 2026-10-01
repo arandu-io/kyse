@@ -109,13 +109,13 @@ func (p CheckboxProps) PartNames() []string { return []string{"root", "input", "
 	data-part="root"
 	class="{{ .RootClass("field") }}"
 	data-orientation="horizontal"
-	@attributes(.RootAttrs())
 	@if(.Message() != "")
 		data-invalid="true"
 	@endif
 	@if(.Disabled)
 		data-disabled="true"
 	@endif
+	@attributes(.RootAttrs())
 >
 	<input
 		data-part="input"
@@ -123,7 +123,6 @@ func (p CheckboxProps) PartNames() []string { return []string{"root", "input", "
 		type="checkbox"
 		id="{{ .ElementID() }}"
 		name="{{ .Name }}"
-		@attributes(.PartAttrs("input"))
 		@if(.Value != "")
 			value="{{ .Value }}"
 		@endif
@@ -142,6 +141,7 @@ func (p CheckboxProps) PartNames() []string { return []string{"root", "input", "
 		@if(.Disabled)
 			disabled
 		@endif
+		@attributes(.PartAttrs("input"))
 	>
 	<section
 		data-part="content"

@@ -71,13 +71,13 @@ func (p PopoverProps) PartNames() []string {
 		id="{{ .TriggerID() }}"
 		aria-controls="{{ .PanelID() }}"
 		aria-expanded="false"
-		@attributes(.PartAttrs("trigger"))
 		@if(.Variant != "")
 			data-variant="{{ .Variant }}"
 		@endif
 		@if(.Size != "")
 			data-size="{{ .Size }}"
 		@endif
+		@attributes(.PartAttrs("trigger"))
 	>{{ .Label }}</button>
 
 	<div
@@ -88,13 +88,13 @@ func (p PopoverProps) PartNames() []string {
 		id="{{ .PanelID() }}"
 		data-popover
 		aria-hidden="true"
-		@attributes(.PartAttrs("panel"))
 		@if(.Side != "")
 			data-side="{{ .Side }}"
 		@endif
 		@if(.Align != "")
 			data-align="{{ .Align }}"
 		@endif
+		@attributes(.PartAttrs("panel"))
 	>
 		@if(.Title != "")
 			<header

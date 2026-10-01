@@ -337,88 +337,88 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v4 string
 //line components/input-group.kyse.go:162
-		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/input-group.go:345
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/input-group.kyse.go:162", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
-		}
-	}
-//line components/input-group.kyse.go:163
 	if kyse__d.Placeholder != "" {
-//line components/input-group.go:354
+//line components/input-group.go:343
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tplaceholder=\"")
 		}
 		if kyse__err == nil {
-//line components/input-group.kyse.go:164
+//line components/input-group.kyse.go:163
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Placeholder))
-//line components/input-group.go:361
+//line components/input-group.go:350
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/input-group.kyse.go:166
+//line components/input-group.kyse.go:165
 	if kyse__d.Autocomplete != "" {
-//line components/input-group.go:369
+//line components/input-group.go:358
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tautocomplete=\"")
 		}
 		if kyse__err == nil {
-//line components/input-group.kyse.go:167
+//line components/input-group.kyse.go:166
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Autocomplete))
-//line components/input-group.go:376
+//line components/input-group.go:365
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/input-group.kyse.go:169
+//line components/input-group.kyse.go:168
 	if kyse__d.DescribedBy() != "" {
-//line components/input-group.go:384
+//line components/input-group.go:373
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/input-group.kyse.go:170
+//line components/input-group.kyse.go:169
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/input-group.go:391
+//line components/input-group.go:380
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/input-group.kyse.go:172
+//line components/input-group.kyse.go:171
 	if kyse__d.Message() != "" {
-//line components/input-group.go:399
+//line components/input-group.go:388
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/input-group.kyse.go:175
+//line components/input-group.kyse.go:174
 	if kyse__d.Required {
-//line components/input-group.go:406
+//line components/input-group.go:395
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\trequired\n")
 		}
 	}
-//line components/input-group.kyse.go:178
+//line components/input-group.kyse.go:177
 	if kyse__d.Disabled {
-//line components/input-group.go:413
+//line components/input-group.go:402
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdisabled\n")
 		}
 	}
-//line components/input-group.kyse.go:181
+//line components/input-group.kyse.go:180
 	if kyse__d.Autofocus {
-//line components/input-group.go:420
+//line components/input-group.go:409
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tautofocus\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v4 string
+//line components/input-group.kyse.go:183
+		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
+//line components/input-group.go:418
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/input-group.kyse.go:183", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 		}
 	}
 	if kyse__err == nil {

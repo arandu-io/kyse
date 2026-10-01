@@ -520,29 +520,29 @@ func Table(kyse__props TableProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-		if kyse__err == nil {
-			var kyse__v1 string
 //line components/table.kyse.go:488
-			kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/table.go:528
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:488", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-			}
-		}
-//line components/table.kyse.go:489
 		if kyse__d.Selectable() {
-//line components/table.go:537
+//line components/table.go:526
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-selectable=\"true\"\n")
 			}
 		}
-//line components/table.kyse.go:492
+//line components/table.kyse.go:491
 		if kyse__d.Navigable {
-//line components/table.go:544
+//line components/table.go:533
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-navigable=\"true\"\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v1 string
+//line components/table.kyse.go:494
+			kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/table.go:542
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:494", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 			}
 		}
 		if kyse__err == nil {
@@ -807,36 +807,36 @@ func Table(kyse__props TableProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
-			if kyse__err == nil {
-				var kyse__v5 string
 //line components/table.kyse.go:552
-				kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("bulk"))
-//line components/table.go:815
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:552", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
-				}
-			}
-//line components/table.kyse.go:553
 			if kyse__d.BulkAction != "" {
-//line components/table.go:824
+//line components/table.go:813
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taction=\"")
 				}
 				if kyse__err == nil {
-					var kyse__v6 string
-//line components/table.kyse.go:554
-					kyse__v6, kyse__err = kyse__view.TextURL(kyse__d.BulkAction)
-//line components/table.go:832
+					var kyse__v5 string
+//line components/table.kyse.go:553
+					kyse__v5, kyse__err = kyse__view.TextURL(kyse__d.BulkAction)
+//line components/table.go:821
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:554", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:553", kyse__err)
 					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 					}
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+			}
+			if kyse__err == nil {
+				var kyse__v6 string
+//line components/table.kyse.go:555
+				kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("bulk"))
+//line components/table.go:836
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:555", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 				}
 			}
 			if kyse__err == nil {
@@ -897,30 +897,30 @@ func Table(kyse__props TableProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-		if kyse__err == nil {
-			var kyse__v7 string
 //line components/table.kyse.go:569
-			kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("table"))
-//line components/table.go:905
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:569", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
-			}
-		}
-//line components/table.kyse.go:570
 		if kyse__d.Role() != "" {
-//line components/table.go:914
+//line components/table.go:903
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\trole=\"")
 			}
 			if kyse__err == nil {
-//line components/table.kyse.go:571
+//line components/table.kyse.go:570
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Role()))
-//line components/table.go:921
+//line components/table.go:910
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v7 string
+//line components/table.kyse.go:572
+			kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("table"))
+//line components/table.go:920
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:572", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 			}
 		}
 		if kyse__err == nil {
@@ -1128,52 +1128,52 @@ func Table(kyse__props TableProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
-			if kyse__err == nil {
-				var kyse__v12 string
 //line components/table.kyse.go:615
-				kyse__v12, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("header-cell"))
-//line components/table.go:1136
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:615", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v12)
-				}
-			}
-//line components/table.kyse.go:616
 			if column.Key != "" {
-//line components/table.go:1145
+//line components/table.go:1134
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-column=\"")
 				}
 				if kyse__err == nil {
-//line components/table.kyse.go:617
+//line components/table.kyse.go:616
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(column.Key))
-//line components/table.go:1152
+//line components/table.go:1141
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 			}
-//line components/table.kyse.go:619
+//line components/table.kyse.go:618
 			if column.Hidden {
-//line components/table.go:1160
+//line components/table.go:1149
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thidden\n")
 				}
 			}
-//line components/table.kyse.go:622
+//line components/table.kyse.go:621
 			if kyse__d.Order(column) != "" {
-//line components/table.go:1167
+//line components/table.go:1156
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-sort=\"")
 				}
 				if kyse__err == nil {
-//line components/table.kyse.go:623
+//line components/table.kyse.go:622
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Order(column)))
-//line components/table.go:1174
+//line components/table.go:1163
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+			}
+			if kyse__err == nil {
+				var kyse__v12 string
+//line components/table.kyse.go:624
+				kyse__v12, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("header-cell"))
+//line components/table.go:1173
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:624", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v12)
 				}
 			}
 			if kyse__err == nil {
@@ -1216,47 +1216,36 @@ func Table(kyse__props TableProps) kyse__template.HTML {
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
-				if kyse__err == nil {
-					var kyse__v14 string
 //line components/table.kyse.go:631
-					kyse__v14, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("sort"))
-//line components/table.go:1224
-					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:631", kyse__err)
-					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v14)
-					}
-				}
-//line components/table.kyse.go:632
 				if kyse__d.SortName(column) != "" {
-//line components/table.go:1233
+//line components/table.go:1222
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\taria-label=\"")
 					}
 					if kyse__err == nil {
-//line components/table.kyse.go:633
+//line components/table.kyse.go:632
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SortName(column)))
-//line components/table.go:1240
+//line components/table.go:1229
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 					}
 				}
-//line components/table.kyse.go:635
+//line components/table.kyse.go:634
 				if kyse__d.HxTarget != "" {
-//line components/table.go:1248
+//line components/table.go:1237
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-get=\"")
 					}
 					if kyse__err == nil {
-						var kyse__v15 string
-//line components/table.kyse.go:636
-						kyse__v15, kyse__err = kyse__view.TextURL(kyse__d.SortHref(column))
-//line components/table.go:1256
+						var kyse__v14 string
+//line components/table.kyse.go:635
+						kyse__v14, kyse__err = kyse__view.TextURL(kyse__d.SortHref(column))
+//line components/table.go:1245
 						if kyse__err != nil {
-							kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:636", kyse__err)
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:635", kyse__err)
 						} else {
-							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v15)
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v14)
 						}
 					}
 					if kyse__err == nil {
@@ -1266,27 +1255,38 @@ func Table(kyse__props TableProps) kyse__template.HTML {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-target=\"")
 					}
 					if kyse__err == nil {
-//line components/table.kyse.go:637
+//line components/table.kyse.go:636
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxTarget))
-//line components/table.go:1272
+//line components/table.go:1261
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 					}
 				}
-//line components/table.kyse.go:639
+//line components/table.kyse.go:638
 				if kyse__d.HxSwap != "" {
-//line components/table.go:1280
+//line components/table.go:1269
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-swap=\"")
 					}
 					if kyse__err == nil {
-//line components/table.kyse.go:640
+//line components/table.kyse.go:639
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxSwap))
-//line components/table.go:1287
+//line components/table.go:1276
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+				if kyse__err == nil {
+					var kyse__v15 string
+//line components/table.kyse.go:641
+					kyse__v15, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("sort"))
+//line components/table.go:1286
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:641", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v15)
 					}
 				}
 				if kyse__err == nil {
@@ -1354,29 +1354,29 @@ func Table(kyse__props TableProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 			}
-			if kyse__err == nil {
-				var kyse__v16 string
 //line components/table.kyse.go:658
-				kyse__v16, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("row"))
-//line components/table.go:1362
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:658", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v16)
-				}
-			}
-//line components/table.kyse.go:659
 			if row.Hidden {
-//line components/table.go:1371
+//line components/table.go:1360
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\thidden\n")
 				}
 			}
-//line components/table.kyse.go:662
+//line components/table.kyse.go:661
 			if row.Level > 0 {
-//line components/table.go:1378
+//line components/table.go:1367
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-level=\"")
+				}
+				if kyse__err == nil {
+//line components/table.kyse.go:662
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(row.Level))
+//line components/table.go:1374
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-level=\"")
 				}
 				if kyse__err == nil {
 //line components/table.kyse.go:663
@@ -1386,37 +1386,37 @@ func Table(kyse__props TableProps) kyse__template.HTML {
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-level=\"")
-				}
-				if kyse__err == nil {
-//line components/table.kyse.go:664
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(row.Level))
-//line components/table.go:1396
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-				}
 			}
-//line components/table.kyse.go:666
+//line components/table.kyse.go:665
 			if row.Branch && row.Expanded {
-//line components/table.go:1404
+//line components/table.go:1393
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-expanded=\"true\"\n")
 				}
 			}
-//line components/table.kyse.go:669
+//line components/table.kyse.go:668
 			if row.Branch && !row.Expanded {
-//line components/table.go:1411
+//line components/table.go:1400
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-expanded=\"false\"\n")
 				}
 			}
-//line components/table.kyse.go:672
+//line components/table.kyse.go:671
 			if kyse__d.Selectable() && row.Selected {
-//line components/table.go:1418
+//line components/table.go:1407
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-selected=\"true\"\n")
+				}
+			}
+			if kyse__err == nil {
+				var kyse__v16 string
+//line components/table.kyse.go:674
+				kyse__v16, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("row"))
+//line components/table.go:1416
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:674", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v16)
 				}
 			}
 			if kyse__err == nil {
@@ -1535,22 +1535,22 @@ func Table(kyse__props TableProps) kyse__template.HTML {
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
-				if kyse__err == nil {
-					var kyse__v18 string
 //line components/table.kyse.go:697
-					kyse__v18, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("select"))
-//line components/table.go:1543
-					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:697", kyse__err)
-					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v18)
-					}
-				}
-//line components/table.kyse.go:698
 				if row.Selected {
-//line components/table.go:1552
+//line components/table.go:1541
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tchecked\n")
+					}
+				}
+				if kyse__err == nil {
+					var kyse__v18 string
+//line components/table.kyse.go:700
+					kyse__v18, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("select"))
+//line components/table.go:1550
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:700", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v18)
 					}
 				}
 				if kyse__err == nil {
@@ -1580,52 +1580,52 @@ func Table(kyse__props TableProps) kyse__template.HTML {
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
-				if kyse__err == nil {
-					var kyse__v19 string
 //line components/table.kyse.go:708
-					kyse__v19, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("cell"))
-//line components/table.go:1588
-					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:708", kyse__err)
-					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v19)
-					}
-				}
-//line components/table.kyse.go:709
 				if kyse__d.ColumnKey(i) != "" {
-//line components/table.go:1597
+//line components/table.go:1586
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-column=\"")
 					}
 					if kyse__err == nil {
-//line components/table.kyse.go:710
+//line components/table.kyse.go:709
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ColumnKey(i)))
-//line components/table.go:1604
+//line components/table.go:1593
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 					}
 				}
-//line components/table.kyse.go:712
+//line components/table.kyse.go:711
 				if kyse__d.ColumnHidden(i) {
-//line components/table.go:1612
+//line components/table.go:1601
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thidden\n")
 					}
 				}
-//line components/table.kyse.go:715
+//line components/table.kyse.go:714
 				if row.Cells[i].SortValue != "" {
-//line components/table.go:1619
+//line components/table.go:1608
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-sort-value=\"")
 					}
 					if kyse__err == nil {
-//line components/table.kyse.go:716
+//line components/table.kyse.go:715
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(row.Cells[i].SortValue))
-//line components/table.go:1626
+//line components/table.go:1615
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+				if kyse__err == nil {
+					var kyse__v19 string
+//line components/table.kyse.go:717
+					kyse__v19, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("cell"))
+//line components/table.go:1625
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/table.kyse.go:717", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v19)
 					}
 				}
 				if kyse__err == nil {

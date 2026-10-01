@@ -118,22 +118,22 @@ func Collapsible(kyse__props CollapsibleProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-	if kyse__err == nil {
-		var kyse__v2 string
 //line components/collapsible.kyse.go:55
-		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("item"))
-//line components/collapsible.go:126
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/collapsible.kyse.go:55", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
-		}
-	}
-//line components/collapsible.kyse.go:56
 	if kyse__d.Open {
-//line components/collapsible.go:135
+//line components/collapsible.go:124
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\topen\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v2 string
+//line components/collapsible.kyse.go:58
+		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("item"))
+//line components/collapsible.go:133
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/collapsible.kyse.go:58", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
 	}
 	if kyse__err == nil {

@@ -236,36 +236,36 @@ func Menubar(kyse__props MenubarProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-expanded=\"false\"\n")
 		}
-		if kyse__err == nil {
-			var kyse__v2 string
 //line components/menubar.kyse.go:116
-			kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("trigger"))
-//line components/menubar.go:244
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/menubar.kyse.go:116", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
-			}
-		}
-//line components/menubar.kyse.go:117
 		if kyse__d.Stop(at) {
-//line components/menubar.go:253
+//line components/menubar.go:242
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\ttabindex=\"0\"\n")
 			}
 		}
-//line components/menubar.kyse.go:120
+//line components/menubar.kyse.go:119
 		if !kyse__d.Stop(at) {
-//line components/menubar.go:260
+//line components/menubar.go:249
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\ttabindex=\"-1\"\n")
 			}
 		}
-//line components/menubar.kyse.go:123
+//line components/menubar.kyse.go:122
 		if kyse__d.Menus[at].Disabled {
-//line components/menubar.go:267
+//line components/menubar.go:256
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdisabled\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v2 string
+//line components/menubar.kyse.go:125
+			kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("trigger"))
+//line components/menubar.go:265
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/menubar.kyse.go:125", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 			}
 		}
 		if kyse__err == nil {
@@ -464,30 +464,30 @@ func Menubar(kyse__props MenubarProps) kyse__template.HTML {
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\ttabindex=\"-1\"\n")
 				}
-				if kyse__err == nil {
-					var kyse__v6 string
 //line components/menubar.kyse.go:162
-					kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("item"))
-//line components/menubar.go:472
-					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/menubar.kyse.go:162", kyse__err)
-					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
-					}
-				}
-//line components/menubar.kyse.go:163
 				if kyse__d.Menus[at].Items[line].Variant != "" {
-//line components/menubar.go:481
+//line components/menubar.go:470
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-variant=\"")
 					}
 					if kyse__err == nil {
-//line components/menubar.kyse.go:164
+//line components/menubar.kyse.go:163
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Menus[at].Items[line].Variant))
-//line components/menubar.go:488
+//line components/menubar.go:477
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+				if kyse__err == nil {
+					var kyse__v6 string
+//line components/menubar.kyse.go:165
+					kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("item"))
+//line components/menubar.go:487
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/menubar.kyse.go:165", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 					}
 				}
 				if kyse__err == nil {
@@ -581,37 +581,37 @@ func Menubar(kyse__props MenubarProps) kyse__template.HTML {
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\ttabindex=\"-1\"\n")
 				}
-				if kyse__err == nil {
-					var kyse__v8 string
 //line components/menubar.kyse.go:185
-					kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("item"))
-//line components/menubar.go:589
-					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/menubar.kyse.go:185", kyse__err)
-					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
-					}
-				}
-//line components/menubar.kyse.go:186
 				if kyse__d.Menus[at].Items[line].Disabled {
-//line components/menubar.go:598
+//line components/menubar.go:587
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdisabled\n")
 					}
 				}
-//line components/menubar.kyse.go:189
+//line components/menubar.kyse.go:188
 				if kyse__d.Menus[at].Items[line].Variant != "" {
-//line components/menubar.go:605
+//line components/menubar.go:594
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-variant=\"")
 					}
 					if kyse__err == nil {
-//line components/menubar.kyse.go:190
+//line components/menubar.kyse.go:189
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Menus[at].Items[line].Variant))
-//line components/menubar.go:612
+//line components/menubar.go:601
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+				if kyse__err == nil {
+					var kyse__v8 string
+//line components/menubar.kyse.go:191
+					kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("item"))
+//line components/menubar.go:611
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/menubar.kyse.go:191", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 					}
 				}
 				if kyse__err == nil {

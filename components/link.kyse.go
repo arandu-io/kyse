@@ -64,7 +64,6 @@ func (p LinkProps) PartNames() []string { return []string{"root"} }
 	<a
 		data-part="root"
 		class="{{ .RootClass("link") }}"
-		@attributes(.RootAttrs())
 		href="{{ .URL }}"
 		@if(.Variant != "")
 			data-variant="{{ .Variant }}"
@@ -77,6 +76,7 @@ func (p LinkProps) PartNames() []string { return []string{"root"} }
 		@if(.Current)
 			aria-current="page"
 		@endif
+		@attributes(.RootAttrs())
 	>
 		{{ .Label }}
 		@if(.Icon != "")

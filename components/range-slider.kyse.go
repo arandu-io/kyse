@@ -201,7 +201,6 @@ func (p RangeSliderProps) PartNames() []string {
 		max="{{ .Ceiling() }}"
 		step="{{ .Tick() }}"
 		data-slider-track
-		@attributes(.PartAttrs("input"))
 		@if(.DescribedBy() != "")
 			aria-describedby="{{ .DescribedBy() }}"
 		@endif
@@ -211,6 +210,7 @@ func (p RangeSliderProps) PartNames() []string {
 		@if(.Disabled)
 			disabled
 		@endif
+		@attributes(.PartAttrs("input"))
 	>
 
 	@if(.ShowValue)

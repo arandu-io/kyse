@@ -159,7 +159,6 @@ func (p InputGroupProps) PartNames() []string {
 			id="{{ .Name }}"
 			name="{{ .Name }}"
 			value="{{ .Current() }}"
-			@attributes(.PartAttrs("input"))
 			@if(.Placeholder != "")
 				placeholder="{{ .Placeholder }}"
 			@endif
@@ -181,6 +180,7 @@ func (p InputGroupProps) PartNames() []string {
 			@if(.Autofocus)
 				autofocus
 			@endif
+			@attributes(.PartAttrs("input"))
 		>
 
 		@if(.Start != "")

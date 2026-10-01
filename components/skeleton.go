@@ -115,20 +115,9 @@ func Skeleton(kyse__props SkeletonProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v1 string
 //line components/skeleton.kyse.go:80
-		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/skeleton.go:123
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/skeleton.kyse.go:80", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-		}
-	}
-//line components/skeleton.kyse.go:81
 	if kyse__d.Label != "" {
-//line components/skeleton.go:132
+//line components/skeleton.go:121
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\trole=\"status\"\n")
 		}
@@ -139,19 +128,30 @@ func Skeleton(kyse__props SkeletonProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-label=\"")
 		}
 		if kyse__err == nil {
-//line components/skeleton.kyse.go:84
+//line components/skeleton.kyse.go:83
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
-//line components/skeleton.go:145
+//line components/skeleton.go:134
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/skeleton.kyse.go:86
+//line components/skeleton.kyse.go:85
 	if kyse__d.Label == "" {
-//line components/skeleton.go:153
+//line components/skeleton.go:142
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-hidden=\"true\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/skeleton.kyse.go:88
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/skeleton.go:151
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/skeleton.kyse.go:88", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
 	}
 	if kyse__err == nil {

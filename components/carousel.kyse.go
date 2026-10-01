@@ -148,10 +148,10 @@ func (p CarouselProps) PartNames() []string {
 				role="group"
 				aria-roledescription="slide"
 				aria-label="{{ .SlideName(.Slides[at], at) }}"
-				@attributes(.PartAttrs("slide"))
 				@if(.Dots)
 					aria-labelledby="{{ .DotID(at) }}"
 				@endif
+				@attributes(.PartAttrs("slide"))
 			>
 				@if(.Slides[at].ImageURL != "")
 					<img

@@ -63,10 +63,10 @@ func (p AvatarProps) PartNames() []string { return []string{"root", "image", "in
 <span
 	data-part="root"
 	class="{{ .RootClass("avatar") }}"
-	@attributes(.RootAttrs())
 	@if(.Size != "")
 		data-size="{{ .Size }}"
 	@endif
+	@attributes(.RootAttrs())
 >
 	@if(.ImageURL != "")
 		<img

@@ -169,45 +169,45 @@ func Popover(kyse__props PopoverProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-expanded=\"false\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v2 string
 //line components/popover.kyse.go:74
-		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("trigger"))
-//line components/popover.go:177
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/popover.kyse.go:74", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
-		}
-	}
-//line components/popover.kyse.go:75
 	if kyse__d.Variant != "" {
-//line components/popover.go:186
+//line components/popover.go:175
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-variant=\"")
 		}
 		if kyse__err == nil {
-//line components/popover.kyse.go:76
+//line components/popover.kyse.go:75
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Variant))
-//line components/popover.go:193
+//line components/popover.go:182
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/popover.kyse.go:78
+//line components/popover.kyse.go:77
 	if kyse__d.Size != "" {
-//line components/popover.go:201
+//line components/popover.go:190
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-size=\"")
 		}
 		if kyse__err == nil {
-//line components/popover.kyse.go:79
+//line components/popover.kyse.go:78
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Size))
-//line components/popover.go:208
+//line components/popover.go:197
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v2 string
+//line components/popover.kyse.go:80
+		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("trigger"))
+//line components/popover.go:207
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/popover.kyse.go:80", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
 	}
 	if kyse__err == nil {
@@ -262,45 +262,45 @@ func Popover(kyse__props PopoverProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-hidden=\"true\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v3 string
 //line components/popover.kyse.go:91
-		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("panel"))
-//line components/popover.go:270
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/popover.kyse.go:91", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
-		}
-	}
-//line components/popover.kyse.go:92
 	if kyse__d.Side != "" {
-//line components/popover.go:279
+//line components/popover.go:268
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-side=\"")
 		}
 		if kyse__err == nil {
-//line components/popover.kyse.go:93
+//line components/popover.kyse.go:92
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Side))
-//line components/popover.go:286
+//line components/popover.go:275
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/popover.kyse.go:95
+//line components/popover.kyse.go:94
 	if kyse__d.Align != "" {
-//line components/popover.go:294
+//line components/popover.go:283
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-align=\"")
 		}
 		if kyse__err == nil {
-//line components/popover.kyse.go:96
+//line components/popover.kyse.go:95
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Align))
-//line components/popover.go:301
+//line components/popover.go:290
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v3 string
+//line components/popover.kyse.go:97
+		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("panel"))
+//line components/popover.go:300
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/popover.kyse.go:97", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
 	}
 	if kyse__err == nil {

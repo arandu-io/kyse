@@ -219,37 +219,37 @@ func Feed(kyse__props FeedProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-		if kyse__err == nil {
-			var kyse__v2 string
 //line components/feed.kyse.go:106
-			kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("article"))
-//line components/feed.go:227
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/feed.kyse.go:106", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
-			}
-		}
-//line components/feed.kyse.go:107
 		if kyse__d.Total > 0 {
-//line components/feed.go:236
+//line components/feed.go:225
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-setsize=\"")
 			}
 			if kyse__err == nil {
-//line components/feed.kyse.go:108
+//line components/feed.kyse.go:107
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Total))
-//line components/feed.go:243
+//line components/feed.go:232
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/feed.kyse.go:110
+//line components/feed.kyse.go:109
 		if kyse__d.Total == 0 {
-//line components/feed.go:251
+//line components/feed.go:240
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-setsize=\"-1\"\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v2 string
+//line components/feed.kyse.go:112
+			kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("article"))
+//line components/feed.go:249
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/feed.kyse.go:112", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 			}
 		}
 		if kyse__err == nil {

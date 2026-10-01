@@ -49,6 +49,18 @@ access log. The field is now written only when the form's method is POST —
 including PUT, PATCH and DELETE on `Dialog`, which travel as POST. Both props
 gained `SendsToken()`, which says whether it will be written.
 
+### `Attrs` can no longer replace an attribute the component writes
+
+The caller's `Attrs` — on the root or on any part — are now written after
+every attribute the component writes itself, on every element. A browser keeps
+the first of two attributes with the same name, so where `Attrs` used to win a
+collision on some elements (the `value` of `Checkbox` and `Switch`, the `name`
+and `value` of `Combobox`'s input, the `id` of a tab, among others) the
+component's own value now wins everywhere. An `Attrs` entry still adds any
+attribute the component did not write. A call that relied on `Attrs` to change
+a `name`, `value`, `type`, `form` or `id` sets the component's own field
+instead.
+
 ## v0.15.2 — Dialog submissions use the browser's native transport
 
 `DialogProps.Method` may still be PUT, PATCH or DELETE, but an HTML form cannot

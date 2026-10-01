@@ -197,7 +197,6 @@ func (p PaginationProps) PartNames() []string {
 						@if(.PartClass("previous") != "")
 							class="{{ .PartClass("previous") }}"
 						@endif
-						@attributes(.PartAttrs("previous"))
 						href="{{ .PreviousHref() }}"
 						rel="prev"
 						data-page="{{ .Page - 1 }}"
@@ -208,6 +207,7 @@ func (p PaginationProps) PartNames() []string {
 						@if(.HxSwap != "")
 							hx-swap="{{ .HxSwap }}"
 						@endif
+						@attributes(.PartAttrs("previous"))
 					>{{ .PreviousName() }}</a>
 				</li>
 			@endif
@@ -234,7 +234,6 @@ func (p PaginationProps) PartNames() []string {
 							@if(.PartClass("link") != "")
 								class="{{ .PartClass("link") }}"
 							@endif
-							@attributes(.PartAttrs("link"))
 							href="{{ .Href(entry.Number) }}"
 							data-page="{{ entry.Number }}"
 							aria-label="{{ .PageName(entry.Number) }}"
@@ -248,6 +247,7 @@ func (p PaginationProps) PartNames() []string {
 							@if(.HxSwap != "")
 								hx-swap="{{ .HxSwap }}"
 							@endif
+							@attributes(.PartAttrs("link"))
 						>{{ entry.Number }}</a>
 					@endif
 				</li>
@@ -266,7 +266,6 @@ func (p PaginationProps) PartNames() []string {
 						@if(.PartClass("next") != "")
 							class="{{ .PartClass("next") }}"
 						@endif
-						@attributes(.PartAttrs("next"))
 						href="{{ .NextHref() }}"
 						rel="next"
 						data-page="{{ .Page + 1 }}"
@@ -277,6 +276,7 @@ func (p PaginationProps) PartNames() []string {
 						@if(.HxSwap != "")
 							hx-swap="{{ .HxSwap }}"
 						@endif
+						@attributes(.PartAttrs("next"))
 					>{{ .NextName() }}</a>
 				</li>
 			@endif

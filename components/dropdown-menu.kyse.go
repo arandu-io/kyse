@@ -124,13 +124,13 @@ func (p DropdownMenuProps) PartNames() []string {
 		aria-haspopup="menu"
 		aria-controls="{{ .MenuID() }}"
 		aria-expanded="false"
-		@attributes(.PartAttrs("trigger"))
 		@if(.Variant != "")
 			data-variant="{{ .Variant }}"
 		@endif
 		@if(.Size != "")
 			data-size="{{ .Size }}"
 		@endif
+		@attributes(.PartAttrs("trigger"))
 	>{{ .Label }}</button>
 
 	<div
@@ -141,13 +141,13 @@ func (p DropdownMenuProps) PartNames() []string {
 		id="{{ .PanelID() }}"
 		data-popover
 		aria-hidden="true"
-		@attributes(.PartAttrs("panel"))
 		@if(.Side != "")
 			data-side="{{ .Side }}"
 		@endif
 		@if(.Align != "")
 			data-align="{{ .Align }}"
 		@endif
+		@attributes(.PartAttrs("panel"))
 	>
 		<div
 			data-part="menu"
@@ -173,13 +173,13 @@ func (p DropdownMenuProps) PartNames() []string {
 						role="menuitem"
 						id="{{ .ItemID(at) }}"
 						href="{{ .Items[at].URL }}"
-						@attributes(.PartAttrs("item"))
 						@if(.Items[at].Variant != "")
 							data-variant="{{ .Items[at].Variant }}"
 						@endif
 						@if(.Items[at].Disabled)
 							aria-disabled="true"
 						@endif
+						@attributes(.PartAttrs("item"))
 					>
 						{{ .Items[at].Label }}
 						@if(.Items[at].Shortcut != "")
@@ -195,7 +195,6 @@ func (p DropdownMenuProps) PartNames() []string {
 						type="button"
 						role="menuitem"
 						id="{{ .ItemID(at) }}"
-						@attributes(.PartAttrs("item"))
 						@if(.Items[at].Variant != "")
 							data-variant="{{ .Items[at].Variant }}"
 						@endif
@@ -214,6 +213,7 @@ func (p DropdownMenuProps) PartNames() []string {
 						@if(.Items[at].HxConfirm != "")
 							hx-confirm="{{ .Items[at].HxConfirm }}"
 						@endif
+						@attributes(.PartAttrs("item"))
 					>
 						{{ .Items[at].Label }}
 						@if(.Items[at].Shortcut != "")

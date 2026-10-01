@@ -101,7 +101,6 @@ func (p DeleteRowProps) PartNames() []string { return []string{"root"} }
 	class="{{ .RootClass("btn") }}"
 	type="button"
 	data-variant="{{ .Look() }}"
-	@attributes(.RootAttrs())
 	hx-delete="{{ .URL }}"
 	hx-confirm="{{ .Question() }}"
 	hx-target="{{ .Removes() }}"
@@ -118,6 +117,7 @@ func (p DeleteRowProps) PartNames() []string { return []string{"root"} }
 	@if(.Disabled)
 		disabled
 	@endif
+	@attributes(.RootAttrs())
 >
 	@if(.Icon != "")
 		{!! .Icon !!}

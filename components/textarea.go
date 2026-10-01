@@ -227,81 +227,81 @@ func Textarea(kyse__props TextareaProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v3 string
 //line components/textarea.kyse.go:99
-		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/textarea.go:235
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/textarea.kyse.go:99", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
-		}
-	}
-//line components/textarea.kyse.go:100
 	if kyse__d.Autosize {
-//line components/textarea.go:244
+//line components/textarea.go:233
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-autosize=\"true\"\n")
 		}
 	}
-//line components/textarea.kyse.go:103
+//line components/textarea.kyse.go:102
 	if kyse__d.Rows > 0 {
-//line components/textarea.go:251
+//line components/textarea.go:240
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\trows=\"")
 		}
 		if kyse__err == nil {
-//line components/textarea.kyse.go:104
+//line components/textarea.kyse.go:103
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Rows))
-//line components/textarea.go:258
+//line components/textarea.go:247
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/textarea.kyse.go:106
+//line components/textarea.kyse.go:105
 	if kyse__d.Placeholder != "" {
-//line components/textarea.go:266
+//line components/textarea.go:255
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tplaceholder=\"")
 		}
 		if kyse__err == nil {
-//line components/textarea.kyse.go:107
+//line components/textarea.kyse.go:106
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Placeholder))
-//line components/textarea.go:273
+//line components/textarea.go:262
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/textarea.kyse.go:109
+//line components/textarea.kyse.go:108
 	if kyse__d.DescribedBy() != "" {
-//line components/textarea.go:281
+//line components/textarea.go:270
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/textarea.kyse.go:110
+//line components/textarea.kyse.go:109
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/textarea.go:288
+//line components/textarea.go:277
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/textarea.kyse.go:112
+//line components/textarea.kyse.go:111
 	if kyse__d.Message() != "" {
-//line components/textarea.go:296
+//line components/textarea.go:285
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/textarea.kyse.go:115
+//line components/textarea.kyse.go:114
 	if kyse__d.Required {
-//line components/textarea.go:303
+//line components/textarea.go:292
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\trequired\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v3 string
+//line components/textarea.kyse.go:117
+		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
+//line components/textarea.go:301
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/textarea.kyse.go:117", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
 	}
 	if kyse__err == nil {

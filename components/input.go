@@ -191,110 +191,110 @@ func Input(kyse__props InputProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v1 string
 //line components/input.kyse.go:115
-		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/input.go:199
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/input.kyse.go:115", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-		}
-	}
-//line components/input.kyse.go:116
 	if kyse__d.Placeholder != "" {
-//line components/input.go:208
+//line components/input.go:197
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tplaceholder=\"")
 		}
 		if kyse__err == nil {
-//line components/input.kyse.go:117
+//line components/input.kyse.go:116
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Placeholder))
-//line components/input.go:215
+//line components/input.go:204
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/input.kyse.go:119
+//line components/input.kyse.go:118
 	if kyse__d.AriaLabel != "" {
-//line components/input.go:223
+//line components/input.go:212
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-label=\"")
 		}
 		if kyse__err == nil {
-//line components/input.kyse.go:120
+//line components/input.kyse.go:119
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.AriaLabel))
-//line components/input.go:230
+//line components/input.go:219
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/input.kyse.go:122
+//line components/input.kyse.go:121
 	if kyse__d.Autocomplete != "" {
-//line components/input.go:238
+//line components/input.go:227
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tautocomplete=\"")
 		}
 		if kyse__err == nil {
-//line components/input.kyse.go:123
+//line components/input.kyse.go:122
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Autocomplete))
-//line components/input.go:245
+//line components/input.go:234
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/input.kyse.go:125
+//line components/input.kyse.go:124
 	if kyse__d.DescribedBy != "" {
-//line components/input.go:253
+//line components/input.go:242
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/input.kyse.go:126
+//line components/input.kyse.go:125
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy))
-//line components/input.go:260
+//line components/input.go:249
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/input.kyse.go:128
+//line components/input.kyse.go:127
 	if kyse__d.Message() != "" {
-//line components/input.go:268
+//line components/input.go:257
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/input.kyse.go:131
+//line components/input.kyse.go:130
 	if kyse__d.Required {
-//line components/input.go:275
+//line components/input.go:264
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\trequired\n")
 		}
 	}
-//line components/input.kyse.go:134
+//line components/input.kyse.go:133
 	if kyse__d.Disabled {
-//line components/input.go:282
+//line components/input.go:271
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdisabled\n")
 		}
 	}
-//line components/input.kyse.go:137
+//line components/input.kyse.go:136
 	if kyse__d.Readonly {
-//line components/input.go:289
+//line components/input.go:278
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\treadonly\n")
 		}
 	}
-//line components/input.kyse.go:140
+//line components/input.kyse.go:139
 	if kyse__d.Autofocus {
-//line components/input.go:296
+//line components/input.go:285
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tautofocus\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/input.kyse.go:142
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/input.go:294
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/input.kyse.go:142", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
 	}
 	if kyse__err == nil {

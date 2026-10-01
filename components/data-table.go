@@ -1033,30 +1033,30 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "-indicator\"\n")
 					}
 				}
-				if kyse__err == nil {
-					var kyse__v5 string
 //line components/data-table.kyse.go:758
-					kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("search"))
-//line components/data-table.go:1041
-					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:758", kyse__err)
-					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
-					}
-				}
-//line components/data-table.kyse.go:759
 				if kyse__d.SearchPlaceholder != "" {
-//line components/data-table.go:1050
+//line components/data-table.go:1039
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tplaceholder=\"")
 					}
 					if kyse__err == nil {
-//line components/data-table.kyse.go:760
+//line components/data-table.kyse.go:759
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SearchPlaceholder))
-//line components/data-table.go:1057
+//line components/data-table.go:1046
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+				if kyse__err == nil {
+					var kyse__v5 string
+//line components/data-table.kyse.go:761
+					kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("search"))
+//line components/data-table.go:1056
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:761", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 					}
 				}
 				if kyse__err == nil {

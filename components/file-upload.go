@@ -318,54 +318,43 @@ func FileUpload(kyse__props FileUploadProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v4 string
 //line components/file-upload.kyse.go:154
-		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/file-upload.go:326
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/file-upload.kyse.go:154", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
-		}
-	}
-//line components/file-upload.kyse.go:155
 	if kyse__d.Accept != "" {
-//line components/file-upload.go:335
+//line components/file-upload.go:324
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taccept=\"")
 		}
 		if kyse__err == nil {
-//line components/file-upload.kyse.go:156
+//line components/file-upload.kyse.go:155
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Accept))
-//line components/file-upload.go:342
+//line components/file-upload.go:331
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/file-upload.kyse.go:158
+//line components/file-upload.kyse.go:157
 	if kyse__d.Multiple {
-//line components/file-upload.go:350
+//line components/file-upload.go:339
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tmultiple\n")
 		}
 	}
-//line components/file-upload.kyse.go:161
+//line components/file-upload.kyse.go:160
 	if kyse__d.UploadURL != "" {
-//line components/file-upload.go:357
+//line components/file-upload.go:346
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-post=\"")
 		}
 		if kyse__err == nil {
-			var kyse__v5 string
-//line components/file-upload.kyse.go:162
-			kyse__v5, kyse__err = kyse__view.TextURL(kyse__d.UploadURL)
-//line components/file-upload.go:365
+			var kyse__v4 string
+//line components/file-upload.kyse.go:161
+			kyse__v4, kyse__err = kyse__view.TextURL(kyse__d.UploadURL)
+//line components/file-upload.go:354
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/file-upload.kyse.go:162", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/file-upload.kyse.go:161", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 			}
 		}
 		if kyse__err == nil {
@@ -381,9 +370,9 @@ func FileUpload(kyse__props FileUploadProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-target=\"#")
 		}
 		if kyse__err == nil {
-//line components/file-upload.kyse.go:165
+//line components/file-upload.kyse.go:164
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Region()))
-//line components/file-upload.go:387
+//line components/file-upload.go:376
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -392,40 +381,51 @@ func FileUpload(kyse__props FileUploadProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-swap=\"beforeend\"\n")
 		}
 	}
-//line components/file-upload.kyse.go:168
+//line components/file-upload.kyse.go:167
 	if kyse__d.DescribedBy() != "" {
-//line components/file-upload.go:398
+//line components/file-upload.go:387
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/file-upload.kyse.go:169
+//line components/file-upload.kyse.go:168
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/file-upload.go:405
+//line components/file-upload.go:394
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/file-upload.kyse.go:171
+//line components/file-upload.kyse.go:170
 	if kyse__d.Message() != "" {
-//line components/file-upload.go:413
+//line components/file-upload.go:402
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/file-upload.kyse.go:174
+//line components/file-upload.kyse.go:173
 	if kyse__d.Required {
-//line components/file-upload.go:420
+//line components/file-upload.go:409
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\trequired\n")
 		}
 	}
-//line components/file-upload.kyse.go:177
+//line components/file-upload.kyse.go:176
 	if kyse__d.Disabled {
-//line components/file-upload.go:427
+//line components/file-upload.go:416
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdisabled\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v5 string
+//line components/file-upload.kyse.go:179
+		kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
+//line components/file-upload.go:425
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/file-upload.kyse.go:179", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 		}
 	}
 	if kyse__err == nil {

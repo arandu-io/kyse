@@ -52,10 +52,10 @@ func (p CollapsibleProps) PartNames() []string { return []string{"root", "item",
 		@if(.PartClass("item") != "")
 			class="{{ .PartClass("item") }}"
 		@endif
-		@attributes(.PartAttrs("item"))
 		@if(.Open)
 			open
 		@endif
+		@attributes(.PartAttrs("item"))
 	>
 		<summary
 			data-part="trigger"

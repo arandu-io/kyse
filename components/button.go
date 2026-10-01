@@ -117,67 +117,77 @@ func Button(kyse__props ButtonProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v1 string
 //line components/button.kyse.go:72
-		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/button.go:125
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/button.kyse.go:72", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-		}
-	}
-//line components/button.kyse.go:73
 	if kyse__d.Variant != "" {
-//line components/button.go:134
+//line components/button.go:123
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-variant=\"")
 		}
 		if kyse__err == nil {
-//line components/button.kyse.go:74
+//line components/button.kyse.go:73
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Variant))
-//line components/button.go:141
+//line components/button.go:130
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/button.kyse.go:76
+//line components/button.kyse.go:75
 	if kyse__d.Size != "" {
-//line components/button.go:149
+//line components/button.go:138
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-size=\"")
 		}
 		if kyse__err == nil {
-//line components/button.kyse.go:77
+//line components/button.kyse.go:76
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Size))
-//line components/button.go:156
+//line components/button.go:145
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/button.kyse.go:79
+//line components/button.kyse.go:78
 	if kyse__d.Disabled {
-//line components/button.go:164
+//line components/button.go:153
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdisabled\n")
 		}
 	}
-//line components/button.kyse.go:82
+//line components/button.kyse.go:81
 	if kyse__d.HxPost != "" {
-//line components/button.go:171
+//line components/button.go:160
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\thx-post=\"")
 		}
 		if kyse__err == nil {
-			var kyse__v2 string
-//line components/button.kyse.go:83
-			kyse__v2, kyse__err = kyse__view.TextURL(kyse__d.HxPost)
-//line components/button.go:179
+			var kyse__v1 string
+//line components/button.kyse.go:82
+			kyse__v1, kyse__err = kyse__view.TextURL(kyse__d.HxPost)
+//line components/button.go:168
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/button.kyse.go:83", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/button.kyse.go:82", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+//line components/button.kyse.go:84
+	if kyse__d.HxGet != "" {
+//line components/button.go:181
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\thx-get=\"")
+		}
+		if kyse__err == nil {
+			var kyse__v2 string
+//line components/button.kyse.go:85
+			kyse__v2, kyse__err = kyse__view.TextURL(kyse__d.HxGet)
+//line components/button.go:189
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/button.kyse.go:85", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 			}
@@ -186,70 +196,60 @@ func Button(kyse__props ButtonProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/button.kyse.go:85
-	if kyse__d.HxGet != "" {
-//line components/button.go:192
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\thx-get=\"")
-		}
-		if kyse__err == nil {
-			var kyse__v3 string
-//line components/button.kyse.go:86
-			kyse__v3, kyse__err = kyse__view.TextURL(kyse__d.HxGet)
-//line components/button.go:200
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/button.kyse.go:86", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
-			}
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-		}
-	}
-//line components/button.kyse.go:88
+//line components/button.kyse.go:87
 	if kyse__d.HxTarget != "" {
-//line components/button.go:213
+//line components/button.go:202
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\thx-target=\"")
 		}
 		if kyse__err == nil {
-//line components/button.kyse.go:89
+//line components/button.kyse.go:88
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxTarget))
-//line components/button.go:220
+//line components/button.go:209
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/button.kyse.go:91
+//line components/button.kyse.go:90
 	if kyse__d.HxSwap != "" {
-//line components/button.go:228
+//line components/button.go:217
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\thx-swap=\"")
 		}
 		if kyse__err == nil {
-//line components/button.kyse.go:92
+//line components/button.kyse.go:91
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxSwap))
-//line components/button.go:235
+//line components/button.go:224
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/button.kyse.go:94
+//line components/button.kyse.go:93
 	if kyse__d.HxConfirm != "" {
-//line components/button.go:243
+//line components/button.go:232
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\thx-confirm=\"")
 		}
 		if kyse__err == nil {
-//line components/button.kyse.go:95
+//line components/button.kyse.go:94
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxConfirm))
-//line components/button.go:250
+//line components/button.go:239
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v3 string
+//line components/button.kyse.go:96
+		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/button.go:249
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/button.kyse.go:96", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
 	}
 	if kyse__err == nil {

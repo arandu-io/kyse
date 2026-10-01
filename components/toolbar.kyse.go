@@ -138,7 +138,6 @@ func (p ToolbarProps) PartNames() []string {
 				href="{{ .Items[at].URL }}"
 				data-variant="ghost"
 				data-size="sm"
-				@attributes(.PartAttrs("control"))
 				@if(.Stop(at))
 					tabindex="0"
 				@endif
@@ -148,6 +147,7 @@ func (p ToolbarProps) PartNames() []string {
 				@if(.Items[at].IconOnly)
 					aria-label="{{ .Items[at].Label }}"
 				@endif
+				@attributes(.PartAttrs("control"))
 			>
 				@if(.Items[at].Icon != "")
 					{!! .Items[at].Icon !!}
@@ -162,7 +162,6 @@ func (p ToolbarProps) PartNames() []string {
 				class="{{ .PartClass("control", "btn") }}"
 				type="button"
 				data-size="sm"
-				@attributes(.PartAttrs("control"))
 				@if(.Items[at].Variant != "")
 					data-variant="{{ .Items[at].Variant }}"
 				@endif
@@ -199,6 +198,7 @@ func (p ToolbarProps) PartNames() []string {
 				@if(.Items[at].HxSwap != "")
 					hx-swap="{{ .Items[at].HxSwap }}"
 				@endif
+				@attributes(.PartAttrs("control"))
 			>
 				@if(.Items[at].Icon != "")
 					{!! .Items[at].Icon !!}

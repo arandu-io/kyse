@@ -287,75 +287,75 @@ func ResponsiveImage(kyse__props ResponsiveImageProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-		if kyse__err == nil {
-			var kyse__v3 string
 //line components/responsive-image.kyse.go:121
-			kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("image"))
-//line components/responsive-image.go:295
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/responsive-image.kyse.go:121", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
-			}
-		}
-//line components/responsive-image.kyse.go:122
 		if kyse__d.Width > 0 {
-//line components/responsive-image.go:304
+//line components/responsive-image.go:293
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\twidth=\"")
 			}
 			if kyse__err == nil {
-//line components/responsive-image.kyse.go:123
+//line components/responsive-image.kyse.go:122
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Width))
-//line components/responsive-image.go:311
+//line components/responsive-image.go:300
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/responsive-image.kyse.go:125
+//line components/responsive-image.kyse.go:124
 		if kyse__d.Height > 0 {
-//line components/responsive-image.go:319
+//line components/responsive-image.go:308
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\theight=\"")
 			}
 			if kyse__err == nil {
-//line components/responsive-image.kyse.go:126
+//line components/responsive-image.kyse.go:125
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Height))
-//line components/responsive-image.go:326
+//line components/responsive-image.go:315
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/responsive-image.kyse.go:128
+//line components/responsive-image.kyse.go:127
 		if kyse__d.SrcSet != "" {
-//line components/responsive-image.go:334
+//line components/responsive-image.go:323
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tsrcset=\"")
 			}
 			if kyse__err == nil {
-//line components/responsive-image.kyse.go:129
+//line components/responsive-image.kyse.go:128
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SrcSet))
-//line components/responsive-image.go:341
+//line components/responsive-image.go:330
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/responsive-image.kyse.go:131
+//line components/responsive-image.kyse.go:130
 		if kyse__d.Sizes != "" {
-//line components/responsive-image.go:349
+//line components/responsive-image.go:338
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tsizes=\"")
 			}
 			if kyse__err == nil {
-//line components/responsive-image.kyse.go:132
+//line components/responsive-image.kyse.go:131
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Sizes))
-//line components/responsive-image.go:356
+//line components/responsive-image.go:345
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v3 string
+//line components/responsive-image.kyse.go:133
+			kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("image"))
+//line components/responsive-image.go:355
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/responsive-image.kyse.go:133", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 			}
 		}
 		if kyse__err == nil {
@@ -582,75 +582,75 @@ func ResponsiveImage(kyse__props ResponsiveImageProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-		if kyse__err == nil {
-			var kyse__v7 string
 //line components/responsive-image.kyse.go:173
-			kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("image"))
-//line components/responsive-image.go:590
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/responsive-image.kyse.go:173", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
-			}
-		}
-//line components/responsive-image.kyse.go:174
 		if kyse__d.Width > 0 {
-//line components/responsive-image.go:599
+//line components/responsive-image.go:588
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\twidth=\"")
 			}
 			if kyse__err == nil {
-//line components/responsive-image.kyse.go:175
+//line components/responsive-image.kyse.go:174
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Width))
-//line components/responsive-image.go:606
+//line components/responsive-image.go:595
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/responsive-image.kyse.go:177
+//line components/responsive-image.kyse.go:176
 		if kyse__d.Height > 0 {
-//line components/responsive-image.go:614
+//line components/responsive-image.go:603
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\theight=\"")
 			}
 			if kyse__err == nil {
-//line components/responsive-image.kyse.go:178
+//line components/responsive-image.kyse.go:177
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Height))
-//line components/responsive-image.go:621
+//line components/responsive-image.go:610
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/responsive-image.kyse.go:180
+//line components/responsive-image.kyse.go:179
 		if kyse__d.SrcSet != "" {
-//line components/responsive-image.go:629
+//line components/responsive-image.go:618
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tsrcset=\"")
 			}
 			if kyse__err == nil {
-//line components/responsive-image.kyse.go:181
+//line components/responsive-image.kyse.go:180
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SrcSet))
-//line components/responsive-image.go:636
+//line components/responsive-image.go:625
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/responsive-image.kyse.go:183
+//line components/responsive-image.kyse.go:182
 		if kyse__d.Sizes != "" {
-//line components/responsive-image.go:644
+//line components/responsive-image.go:633
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tsizes=\"")
 			}
 			if kyse__err == nil {
-//line components/responsive-image.kyse.go:184
+//line components/responsive-image.kyse.go:183
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Sizes))
-//line components/responsive-image.go:651
+//line components/responsive-image.go:640
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v7 string
+//line components/responsive-image.kyse.go:185
+			kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("image"))
+//line components/responsive-image.go:650
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/responsive-image.kyse.go:185", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 			}
 		}
 		if kyse__err == nil {

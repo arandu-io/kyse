@@ -140,7 +140,6 @@ func (p AutocompleteProps) PartNames() []string {
 		value="{{ .Current() }}"
 		list="{{ .ListID() }}"
 		autocomplete="off"
-		@attributes(.PartAttrs("input"))
 		@if(.SearchURL != "")
 			hx-get="{{ .SearchURL }}"
 			hx-trigger="{{ .Trigger() }}"
@@ -166,6 +165,7 @@ func (p AutocompleteProps) PartNames() []string {
 		@if(.Disabled)
 			disabled
 		@endif
+		@attributes(.PartAttrs("input"))
 	>
 
 	<datalist

@@ -228,7 +228,6 @@ func (p ComboboxProps) PartNames() []string {
 				type="text"
 				role="combobox"
 				id="{{ .Name }}"
-				@attributes(.PartAttrs("input"))
 				name="{{ .Query() }}"
 				value="{{ .CurrentLabel() }}"
 				autocomplete="off"
@@ -261,6 +260,7 @@ func (p ComboboxProps) PartNames() []string {
 				@if(.Autofocus)
 					autofocus
 				@endif
+				@attributes(.PartAttrs("input"))
 			>
 
 			{!! icons.CaretDown(icons.Props{}) !!}
@@ -282,10 +282,10 @@ func (p ComboboxProps) PartNames() []string {
 					role="listbox"
 					id="{{ .ListboxID() }}"
 					aria-orientation="vertical"
-					@attributes(.PartAttrs("listbox"))
 					@if(.EmptyText != "")
 						data-empty="{{ .EmptyText }}"
 					@endif
+					@attributes(.PartAttrs("listbox"))
 				>
 					@for(at := 0; at < len(.Options); at++)
 						<div
@@ -297,13 +297,13 @@ func (p ComboboxProps) PartNames() []string {
 							id="{{ .OptionID(at) }}"
 							data-value="{{ .Options[at].Value }}"
 							data-label="{{ .Options[at].Text() }}"
-							@attributes(.PartAttrs("option"))
 							@if(.Options[at].Disabled)
 								aria-disabled="true"
 							@endif
 							@if(.Options[at].Value == .Current())
 								aria-selected="true"
 							@endif
+							@attributes(.PartAttrs("option"))
 						>{{ .Options[at].Text() }}</div>
 					@endfor
 				</div>

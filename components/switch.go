@@ -156,29 +156,29 @@ func Switch(kyse__props SwitchProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tdata-orientation=\"horizontal\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v1 string
 //line components/switch.kyse.go:116
-		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/switch.go:164
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/switch.kyse.go:116", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-		}
-	}
-//line components/switch.kyse.go:117
 	if kyse__d.Message() != "" {
-//line components/switch.go:173
+//line components/switch.go:162
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-invalid=\"true\"\n")
 		}
 	}
-//line components/switch.kyse.go:120
+//line components/switch.kyse.go:119
 	if kyse__d.Disabled {
-//line components/switch.go:180
+//line components/switch.go:169
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-disabled=\"true\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/switch.kyse.go:122
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/switch.go:178
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/switch.kyse.go:122", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
 	}
 	if kyse__err == nil {
@@ -429,66 +429,66 @@ func Switch(kyse__props SwitchProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v6 string
 //line components/switch.kyse.go:163
-		kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/switch.go:437
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/switch.kyse.go:163", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
-		}
-	}
-//line components/switch.kyse.go:164
 	if kyse__d.Value != "" {
-//line components/switch.go:446
+//line components/switch.go:435
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tvalue=\"")
 		}
 		if kyse__err == nil {
-//line components/switch.kyse.go:165
+//line components/switch.kyse.go:164
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Value))
-//line components/switch.go:453
+//line components/switch.go:442
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/switch.kyse.go:167
+//line components/switch.kyse.go:166
 	if kyse__d.Current() {
-//line components/switch.go:461
+//line components/switch.go:450
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tchecked\n")
 		}
 	}
-//line components/switch.kyse.go:170
+//line components/switch.kyse.go:169
 	if kyse__d.DescribedBy() != "" {
-//line components/switch.go:468
+//line components/switch.go:457
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/switch.kyse.go:171
+//line components/switch.kyse.go:170
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/switch.go:475
+//line components/switch.go:464
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/switch.kyse.go:173
+//line components/switch.kyse.go:172
 	if kyse__d.Message() != "" {
-//line components/switch.go:483
+//line components/switch.go:472
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/switch.kyse.go:176
+//line components/switch.kyse.go:175
 	if kyse__d.Disabled {
-//line components/switch.go:490
+//line components/switch.go:479
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdisabled\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v6 string
+//line components/switch.kyse.go:178
+		kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
+//line components/switch.go:488
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/switch.kyse.go:178", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 		}
 	}
 	if kyse__err == nil {

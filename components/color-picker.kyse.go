@@ -120,7 +120,6 @@ func (p ColorPickerProps) PartNames() []string {
 			id="{{ .Name }}"
 			name="{{ .Name }}"
 			value="{{ .Current() }}"
-			@attributes(.PartAttrs("input"))
 			@if(.ListID() != "")
 				list="{{ .ListID() }}"
 			@endif
@@ -136,6 +135,7 @@ func (p ColorPickerProps) PartNames() []string {
 			@if(.Disabled)
 				disabled
 			@endif
+			@attributes(.PartAttrs("input"))
 		>
 
 		@if(.ShowValue)

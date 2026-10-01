@@ -164,7 +164,6 @@ func (p TreeProps) PartNames() []string {
 				aria-posinset="{{ row.Position }}"
 				aria-setsize="{{ row.Size }}"
 				data-level="{{ row.Level }}"
-				@attributes(.PartAttrs("item"))
 				@if(row.Branch && row.Node.Expanded)
 					aria-expanded="true"
 				@endif
@@ -183,6 +182,7 @@ func (p TreeProps) PartNames() []string {
 				@if(!.Stop(row))
 					tabindex="-1"
 				@endif
+				@attributes(.PartAttrs("item"))
 			>
 				@if(row.Branch)
 					<span
@@ -206,9 +206,9 @@ func (p TreeProps) PartNames() []string {
 						@if(.PartClass("label") != "")
 							class="{{ .PartClass("label") }}"
 						@endif
-						@attributes(.PartAttrs("label"))
 						href="{{ row.Node.URL }}"
 						tabindex="-1"
+						@attributes(.PartAttrs("label"))
 					>{{ row.Node.Label }}</a>
 				@endif
 				@if(row.Node.URL == "")

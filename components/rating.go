@@ -151,30 +151,30 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v1 string
 //line components/rating.kyse.go:120
-		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/rating.go:159
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:120", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
-		}
-	}
-//line components/rating.kyse.go:121
 	if kyse__d.DescribedBy() != "" {
-//line components/rating.go:168
+//line components/rating.go:157
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/rating.kyse.go:122
+//line components/rating.kyse.go:121
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/rating.go:175
+//line components/rating.go:164
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v1 string
+//line components/rating.kyse.go:123
+		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
+//line components/rating.go:174
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:123", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
 	}
 	if kyse__err == nil {
@@ -309,36 +309,36 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-		if kyse__err == nil {
-			var kyse__v4 string
 //line components/rating.kyse.go:144
-			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("option"))
-//line components/rating.go:317
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:144", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
-			}
-		}
-//line components/rating.kyse.go:145
 		if kyse__d.Chosen(star) {
-//line components/rating.go:326
+//line components/rating.go:315
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tchecked\n")
 			}
 		}
-//line components/rating.kyse.go:148
+//line components/rating.kyse.go:147
 		if kyse__d.Required {
-//line components/rating.go:333
+//line components/rating.go:322
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\trequired\n")
 			}
 		}
-//line components/rating.kyse.go:151
+//line components/rating.kyse.go:150
 		if kyse__d.ReadOnly {
-//line components/rating.go:340
+//line components/rating.go:329
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdisabled\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v4 string
+//line components/rating.kyse.go:153
+			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("option"))
+//line components/rating.go:338
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:153", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 			}
 		}
 		if kyse__err == nil {

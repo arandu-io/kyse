@@ -59,11 +59,11 @@ func (p LazyLoadProps) PartNames() []string { return []string{"root", "placehold
 	role="region"
 	aria-label="{{ .Label }}"
 	aria-busy="true"
-	@attributes(.RootAttrs())
 	hx-get="{{ .URL }}"
 	hx-trigger="{{ .Trigger() }}"
 	hx-target="this"
 	hx-swap="outerHTML"
+	@attributes(.RootAttrs())
 >
 	<div
 		data-part="placeholder"

@@ -50,6 +50,6 @@ func (p SkipLinkProps) PartNames() []string { return []string{"root"} }
 <a
 	data-part="root"
 	class="{{ .RootClass("skip-link") }}"
-	@attributes(.RootAttrs())
 	href="{{ .Href() }}"
+	@attributes(.RootAttrs())
 >{{ .Text() }}</a>

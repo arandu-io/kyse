@@ -267,81 +267,81 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		var kyse__v3 string
 //line components/field.kyse.go:119
-		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/field.go:275
-		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/field.kyse.go:119", kyse__err)
-		} else {
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
-		}
-	}
-//line components/field.kyse.go:120
 	if kyse__d.Placeholder != "" {
-//line components/field.go:284
+//line components/field.go:273
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tplaceholder=\"")
 		}
 		if kyse__err == nil {
-//line components/field.kyse.go:121
+//line components/field.kyse.go:120
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Placeholder))
-//line components/field.go:291
+//line components/field.go:280
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/field.kyse.go:123
+//line components/field.kyse.go:122
 	if kyse__d.Autocomplete != "" {
-//line components/field.go:299
+//line components/field.go:288
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tautocomplete=\"")
 		}
 		if kyse__err == nil {
-//line components/field.kyse.go:124
+//line components/field.kyse.go:123
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Autocomplete))
-//line components/field.go:306
+//line components/field.go:295
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/field.kyse.go:126
+//line components/field.kyse.go:125
 	if kyse__d.DescribedBy() != "" {
-//line components/field.go:314
+//line components/field.go:303
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/field.kyse.go:127
+//line components/field.kyse.go:126
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/field.go:321
+//line components/field.go:310
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/field.kyse.go:129
+//line components/field.kyse.go:128
 	if kyse__d.Message() != "" {
-//line components/field.go:329
+//line components/field.go:318
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/field.kyse.go:132
+//line components/field.kyse.go:131
 	if kyse__d.Required {
-//line components/field.go:336
+//line components/field.go:325
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\trequired\n")
 		}
 	}
-//line components/field.kyse.go:135
+//line components/field.kyse.go:134
 	if kyse__d.Autofocus {
-//line components/field.go:343
+//line components/field.go:332
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tautofocus\n")
+		}
+	}
+	if kyse__err == nil {
+		var kyse__v3 string
+//line components/field.kyse.go:137
+		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
+//line components/field.go:341
+		if kyse__err != nil {
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/field.kyse.go:137", kyse__err)
+		} else {
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
 	}
 	if kyse__err == nil {

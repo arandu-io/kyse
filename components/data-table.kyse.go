@@ -755,10 +755,10 @@ func (p DataTableProps) PartNames() []string {
 								hx-sync="this:replace"
 								hx-indicator="#{{ .ID }}-indicator"
 							@endif
-							@attributes(.PartAttrs("search"))
 							@if(.SearchPlaceholder != "")
 								placeholder="{{ .SearchPlaceholder }}"
 							@endif
+							@attributes(.PartAttrs("search"))
 						>
 						<span
 							data-part="indicator"

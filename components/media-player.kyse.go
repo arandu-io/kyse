@@ -125,7 +125,6 @@ func (p MediaPlayerProps) PartNames() []string {
 			@endif
 			controls
 			preload="{{ .Fetch() }}"
-			@attributes(.PartAttrs("media"))
 			@if(.Label != "")
 				aria-label="{{ .Label }}"
 			@endif
@@ -138,6 +137,7 @@ func (p MediaPlayerProps) PartNames() []string {
 			@if(.Silent())
 				muted
 			@endif
+			@attributes(.PartAttrs("media"))
 		>
 			@foreach(.Sources as source)
 				<source
@@ -167,7 +167,6 @@ func (p MediaPlayerProps) PartNames() []string {
 			controls
 			playsinline
 			preload="{{ .Fetch() }}"
-			@attributes(.PartAttrs("media"))
 			@if(.PosterURL != "")
 				poster="{{ .PosterURL }}"
 			@endif
@@ -183,6 +182,7 @@ func (p MediaPlayerProps) PartNames() []string {
 			@if(.Silent())
 				muted
 			@endif
+			@attributes(.PartAttrs("media"))
 		>
 			@foreach(.Sources as source)
 				<source

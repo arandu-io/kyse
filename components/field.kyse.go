@@ -116,7 +116,6 @@ func (p FieldProps) PartNames() []string { return []string{"root", "label", "inp
 		id="{{ .Name }}"
 		name="{{ .Name }}"
 		value="{{ .Current() }}"
-		@attributes(.PartAttrs("input"))
 		@if(.Placeholder != "")
 			placeholder="{{ .Placeholder }}"
 		@endif
@@ -135,6 +134,7 @@ func (p FieldProps) PartNames() []string { return []string{"root", "label", "inp
 		@if(.Autofocus)
 			autofocus
 		@endif
+		@attributes(.PartAttrs("input"))
 	>
 	@if(.Message() != "")
 		<p
