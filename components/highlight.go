@@ -14,9 +14,11 @@ import (
 	kyse__view "github.com/arandu-io/hesape/view"
 	"html/template"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 )
 
-//line components/highlight.kyse.go:12
+//line components/highlight.kyse.go:14
 
 // HighlightProps is a line of text with the part somebody searched for marked
 // in it.
@@ -55,6 +57,17 @@ type HighlightSegment struct {
 
 // Segments is the text cut at the matches: each piece, and whether that piece
 // is one of them.
+//
+// Every cut is an offset into Text itself, at a character boundary. Without
+// CaseSensitive the two are compared character by character under Unicode
+// simple case folding -- the comparison strings.EqualFold makes -- rather than
+// by searching a lower-cased copy: lower-casing can change how many bytes a
+// character takes ("Ⱥ" is two and its lower case three), so an offset found in
+// the copy points somewhere else in the original, past its end or into the
+// middle of a character. Simple folding maps one character to one character,
+// which is also why "ß" does not match "ss".
+//
+// Matches are taken left to right and do not overlap.
 func (p HighlightProps) Segments() []HighlightSegment {
 	if p.Text == "" {
 		return nil
@@ -62,26 +75,61 @@ func (p HighlightProps) Segments() []HighlightSegment {
 	if p.Query == "" {
 		return []HighlightSegment{{Text: p.Text}}
 	}
-	haystack, needle := p.Text, p.Query
-	if !p.CaseSensitive {
-		haystack, needle = strings.ToLower(haystack), strings.ToLower(needle)
-	}
 	segments := make([]HighlightSegment, 0, 3)
+	plain := 0
 	for cursor := 0; cursor < len(p.Text); {
-		at := strings.Index(haystack[cursor:], needle)
-		if at < 0 {
-			segments = append(segments, HighlightSegment{Text: p.Text[cursor:]})
-			break
+		if end := p.matchAt(cursor); end > cursor {
+			if cursor > plain {
+				segments = append(segments, HighlightSegment{Text: p.Text[plain:cursor]})
+			}
+			segments = append(segments, HighlightSegment{Text: p.Text[cursor:end], Match: true})
+			cursor, plain = end, end
+			continue
 		}
-		start := cursor + at
-		if start > cursor {
-			segments = append(segments, HighlightSegment{Text: p.Text[cursor:start]})
-		}
-		end := start + len(needle)
-		segments = append(segments, HighlightSegment{Text: p.Text[start:end], Match: true})
-		cursor = end
+		_, width := utf8.DecodeRuneInString(p.Text[cursor:])
+		cursor += width
+	}
+	if plain < len(p.Text) {
+		segments = append(segments, HighlightSegment{Text: p.Text[plain:]})
 	}
 	return segments
+}
+
+// matchAt is where a match of Query starting at the byte offset at of Text
+// ends, or at itself when none starts there.
+func (p HighlightProps) matchAt(at int) int {
+	if p.CaseSensitive {
+		if strings.HasPrefix(p.Text[at:], p.Query) {
+			return at + len(p.Query)
+		}
+		return at
+	}
+	cursor := at
+	for _, want := range p.Query {
+		if cursor >= len(p.Text) {
+			return at
+		}
+		got, width := utf8.DecodeRuneInString(p.Text[cursor:])
+		if !sameFold(got, want) {
+			return at
+		}
+		cursor += width
+	}
+	return cursor
+}
+
+// sameFold reports whether two characters are equal under Unicode simple case
+// folding.
+func sameFold(a, b rune) bool {
+	if a == b {
+		return true
+	}
+	for r := unicode.SimpleFold(a); r != a; r = unicode.SimpleFold(r) {
+		if r == b {
+			return true
+		}
+	}
+	return false
 }
 
 // Marked is the line with the matches wrapped, assembled here rather than in
@@ -127,7 +175,7 @@ func (p HighlightProps) Marked() template.HTML {
 // PartNames are the parts this component publishes.
 func (p HighlightProps) PartNames() []string { return []string{"root", "match"} }
 
-//line components/highlight.go:131
+//line components/highlight.go:179
 
 // Highlight renders the highlight component.
 func Highlight(kyse__props HighlightProps) kyse__template.HTML {
@@ -150,20 +198,20 @@ func Highlight(kyse__props HighlightProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/highlight.kyse.go:125
+//line components/highlight.kyse.go:173
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("highlight")))
-//line components/highlight.go:156
+//line components/highlight.go:204
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/highlight.kyse.go:126
+//line components/highlight.kyse.go:174
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/highlight.go:165
+//line components/highlight.go:213
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/highlight.kyse.go:126", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/highlight.kyse.go:174", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
@@ -172,9 +220,9 @@ func Highlight(kyse__props HighlightProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, ">")
 	}
 	if kyse__err == nil {
-//line components/highlight.kyse.go:127
+//line components/highlight.kyse.go:175
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.Text(kyse__d.Marked()))
-//line components/highlight.go:178
+//line components/highlight.go:226
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
