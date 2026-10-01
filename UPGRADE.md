@@ -40,6 +40,15 @@ is built from the table's own state: the search, the order, the page and the
 chosen `Filters`. A parameter that was riding on `URL` has to become one of
 those — a facet is a `DataTableFilter` — or part of the path.
 
+### `Dialog` and `Table` write the CSRF token only into a form that posts
+
+A `Dialog` with `Method: "get"`, or a `Table` whose `BulkMethod` was `get` or a
+method a browser cannot submit (which it then sends as GET), wrote `_token`
+into that form, so the token ended up in the address, the history and the
+access log. The field is now written only when the form's method is POST —
+including PUT, PATCH and DELETE on `Dialog`, which travel as POST. Both props
+gained `SendsToken()`, which says whether it will be written.
+
 ## v0.15.2 — Dialog submissions use the browser's native transport
 
 `DialogProps.Method` may still be PUT, PATCH or DELETE, but an HTML form cannot

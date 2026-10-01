@@ -122,7 +122,8 @@ type TableProps struct {
 	// Token is the CSRF token for the bulk form. A form that changes something
 	// and carries none is refused by the framework, which is the intended
 	// outcome and a confusing one to debug -- so it is a field here rather
-	// than something to remember.
+	// than something to remember. It is written only when the form posts;
+	// see SendsToken.
 	Token string
 }
 
@@ -261,6 +262,14 @@ func (p TableProps) PostMethod() string {
 		return p.BulkMethod
 	}
 	return "post"
+}
+
+// SendsToken is whether the bulk form carries Token: only when there is one and
+// the form posts. A form submitted any other way -- GET, or a method a browser
+// cannot send and submits as GET -- puts its fields in the address, which the
+// history, the access log and every proxy between keep.
+func (p TableProps) SendsToken() bool {
+	return p.Token != "" && strings.EqualFold(p.PostMethod(), "post")
 }
 
 // RowName is what one row's checkbox is called: what the caller wrote, or the
@@ -545,7 +554,7 @@ func (p TableProps) PartNames() []string {
 					action="{{ .BulkAction }}"
 				@endif
 			>
-				@if(.Token != "")
+				@if(.SendsToken())
 					<input type="hidden" name="_token" value="{{ .Token }}">
 				@endif
 				@foreach(.BulkActions as action)
