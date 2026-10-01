@@ -40,6 +40,10 @@ func TestEveryAddressIsAnAddress(t *testing.T) {
 		ID: "invoices", URL: "/invoices?status=paid&scope=mine",
 		SearchName: "q", Query: "ada", SortKey: "total", SortDir: "desc",
 		Page: 3, Pages: 9, Total: 137, PageSize: 20,
+		Filters: []components.DataTableFilter{{
+			Key: "status", Label: "Status", Selected: []string{"paid"},
+			Options: []components.SelectOption{{Label: "Paid", Value: "paid"}},
+		}},
 		Columns: []components.TableColumn{
 			{Label: "Number", Key: "number", Sortable: true},
 			{Label: "Total", Key: "total", Sortable: true, Align: "end"},
@@ -62,13 +66,14 @@ func TestEveryAddressIsAnAddress(t *testing.T) {
 			t.Errorf("the address carries %d question marks, and a parser reads all but the first as value: %s",
 				strings.Count(address, "?"), address)
 		}
-		// The caller's own parameters are the only place a facet, a date range
-		// or a tenant scope can live, and a link that drops them drops the
-		// filter on the first click.
-		for _, kept := range []string{"status=paid", "scope=mine"} {
-			if !strings.Contains(address, kept) {
-				t.Errorf("the address dropped %q, which the caller put on URL: %s", kept, address)
-			}
+		// A facet is a Filter, and a link that drops it drops the filter on
+		// the first click.
+		if !strings.Contains(address, "status=paid") {
+			t.Errorf("the address dropped the chosen facet: %s", address)
+		}
+		// URL's own query is not the table's state, and is not carried.
+		if strings.Contains(address, "scope=mine") {
+			t.Errorf("the address carried a parameter of URL's own query: %s", address)
 		}
 	}
 }

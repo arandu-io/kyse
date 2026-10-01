@@ -55,6 +55,13 @@ type DataTableProps struct {
 	Label string
 	// URL is the endpoint, without a query string. Every control appends to
 	// it, so there is one address and one handler rather than four.
+	//
+	// A query string or fragment on it is dropped, never carried: every
+	// address and every hidden field this draws is built from the fields of
+	// this struct alone. URL is often the request's own address, and a query
+	// carried from it would put whatever parameters somebody wrote into a link
+	// on every control of the page. A parameter the list needs is one of these
+	// fields -- a Filter for a facet -- or part of the path.
 	URL string
 
 	// Caption is the sentence saying what the list is, drawn under the table
@@ -239,12 +246,14 @@ func (l DataTableLines) Sentences() map[string]any {
 //
 // # Two things it has to do that are easy to miss
 //
-// It seeds from whatever URL already carries. That is the only place a caller
-// can put a parameter this component does not model -- a status facet, a date
-// range, a tenant scope -- and rebuilding the query from four known keys would
-// drop it on the first click. Parsing also means one "?" rather than a second
-// one appended to a URL that had one, which every parser reads as one
-// parameter whose value is the rest of the query.
+// It drops whatever query URL already carries and builds the new one from this
+// struct alone. URL is often the address the request arrived on, so a query
+// seeded from it would copy any parameter somebody put in a link -- _method,
+// a role, a tenant -- onto every sort header, every page and the search form.
+// The state a list needs is its fields; a parameter that is not one of them
+// does not travel. Parsing also means one "?" rather than a second one
+// appended to a URL that had one, which every parser reads as one parameter
+// whose value is the rest of the query.
 //
 // And it writes the templated pairs by hand, after the encoding. A value of
 // "{sort}" through url.Values.Encode comes out "%7Bsort%7D", and the caller
@@ -256,7 +265,7 @@ func (p DataTableProps) Address(changes map[string]string) string {
 	if err != nil {
 		base = &url.URL{Path: p.URL}
 	}
-	values := base.Query()
+	values := url.Values{}
 
 	set := func(key, value string) {
 		if value == "" {
@@ -307,6 +316,8 @@ func (p DataTableProps) Address(changes map[string]string) string {
 	}
 
 	base.RawQuery = ""
+	base.ForceQuery = false
+	base.Fragment = ""
 	address := base.String()
 	if query == "" {
 		return address
@@ -534,39 +545,22 @@ func (p DataTableProps) QueryAction() string {
 }
 
 
-// QueryFields preserves caller-owned query parameters plus the current sort.
-// Search, page and facet fields are rendered by their visible controls instead.
+// QueryFields are the hidden fields of the query form: the order in force,
+// which has no visible control of its own there. Search, page and facet values
+// are submitted by their own controls.
+//
+// Nothing of URL's own query is carried, for the reason given on URL: a hidden
+// field copied from the request's address is a parameter somebody else chose,
+// submitted again by whoever next searches.
 func (p DataTableProps) QueryFields() []DataTableQueryField {
-	base, err := url.Parse(p.URL)
-	if err != nil {
-		base = &url.URL{}
+	if p.SortKey == "" {
+		return nil
 	}
-	values := base.Query()
-	if p.SearchName != "" {
-		values.Del(p.SearchName)
+	fields := make([]DataTableQueryField, 0, 2)
+	if p.SortDir != "" {
+		fields = append(fields, DataTableQueryField{Name: "dir", Value: p.SortDir})
 	}
-	values.Del("page")
-	values.Del("sort")
-	values.Del("dir")
-	for _, filter := range p.Filters {
-		values.Del(filter.Key)
-	}
-	if p.SortKey != "" {
-		values.Set("sort", p.SortKey)
-		values.Set("dir", p.SortDir)
-	}
-	keys := make([]string, 0, len(values))
-	for key := range values {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-	out := make([]DataTableQueryField, 0)
-	for _, key := range keys {
-		for _, value := range values[key] {
-			out = append(out, DataTableQueryField{Name: key, Value: value})
-		}
-	}
-	return out
+	return append(fields, DataTableQueryField{Name: "sort", Value: p.SortKey})
 }
 
 // ApplyText is the no-script facet submit label.

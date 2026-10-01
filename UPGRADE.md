@@ -21,6 +21,25 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## Unreleased
+
+Nothing below stops a build. Each is a change in what a component draws, and
+each closes a way the markup could be made to carry something its caller did
+not write.
+
+### `DataTable` no longer carries the query string of `URL`
+
+`DataTableProps.URL` was documented as the endpoint without a query string,
+but its query was copied onto every sort header, every page link and, as
+hidden fields, into the search form. A table drawn with the request's own
+address therefore resubmitted any parameter written into a link
+(`/users?_method=DELETE&role=admin`) from every control on the page.
+
+The query and fragment of `URL` are now dropped. Every address and hidden field
+is built from the table's own state: the search, the order, the page and the
+chosen `Filters`. A parameter that was riding on `URL` has to become one of
+those — a facet is a `DataTableFilter` — or part of the path.
+
 ## v0.15.2 — Dialog submissions use the browser's native transport
 
 `DialogProps.Method` may still be PUT, PATCH or DELETE, but an HTML form cannot
