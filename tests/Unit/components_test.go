@@ -501,8 +501,10 @@ func TestATextareaAsksThePageToo(t *testing.T) {
 // a directive named x-something, and the @ shorthand for the event form.
 //
 // The character before the name has to be one that does not continue a name, so
-// hx-get and hx-on:click are not matched -- those are HTMX, they are read by a
-// library that parses attributes rather than evaluating them, and they stay.
+// hx-get is not matched -- it is an HTMX request attribute and it stays. hx-on is
+// not matched here either, but not because it is safe: HTMX evaluates it as
+// script, the view compiler refuses it, and this pattern only looks for the
+// Alpine shapes.
 // Requiring an `=` after the @ form is what separates it from the view
 // compiler's own @if, @for and @go, which take parentheses or nothing.
 var clientDirective = regexp.MustCompile(`(?:^|[^\w:@-])(x-[a-z][\w.:-]*|@[\w.:-]+\s*=)`)
