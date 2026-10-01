@@ -75,22 +75,21 @@ space and a 500.
 
 | group | components |
 |---|---|
-| Actions | `Button` `ButtonGroup` |
-| Forms | `Field` `Input` `Label` `Textarea` `Checkbox` `RadioGroup` `Switch` `Select` `Combobox` `InputGroup` `RangeSlider` |
-| Layout | `Card` `Item` `Separator` `Sidebar` |
-| Display | `Avatar` `Badge` `Kbd` `Skeleton` `Table` `StatCard` |
+| Actions | `Button` `ButtonGroup` `SplitButton` `CopyButton` `Link` `DeleteRow` `OptimisticToggle` |
+| Forms | `Field` `Input` `Label` `Textarea` `Checkbox` `RadioGroup` `Switch` `Select` `Combobox` `Autocomplete` `InputGroup` `RangeSlider` `NumberInput` `Password` `Masked` `OneTimeCode` `DateTimePicker` `Calendar` `ColorPicker` `FileUpload` `SegmentedControl` `Rating` `EditInPlace` `Output` `ActiveSearch` |
+| Layout | `Card` `ContainerCard` `Item` `Separator` `Sidebar` `Toolbar` `Menubar` `Figure` |
+| Display | `Avatar` `Badge` `Kbd` `Skeleton` `Table` `DataTable` `StatCard` `Status` `Meter` `Highlight` `RelativeTime` `ResponsiveImage` `MediaPlayer` `Carousel` `Feed` `Tree` |
 | Feedback | `Alert` `Toast` `Progress` `Empty` `Dialog` |
-| Overlays | `Drawer` `Popover` `DropdownMenu` `Command` `Collapsible` |
-| Navigation | `Accordion` `Breadcrumb` `Tabs` `ThemeToggle` |
+| Overlays | `Drawer` `Popover` `HoverCard` `Tooltip` `DropdownMenu` `Command` `Collapsible` |
+| Navigation | `Accordion` `Breadcrumb` `Tabs` `Pagination` `SkipLink` `ThemeToggle` `LoadMore` `LazyLoad` |
 
-Thirty-seven. What is here is what has been adapted, not what is planned.
+Seventy-six, one per `components/*.kyse.go`. What is here is what has been
+adapted, not what is planned.
 
-Three that were asked for are not here, each for a reason in the tree rather
-than a preference. An alert dialog is a boolean on `Dialog`, because a component
-whose whole difference is derived from one decision is that decision. A tooltip
-is not deliverable: the stylesheet hides the bubble on keyboard focus and its
-text is generated content rather than a node, so it would serve a mouse and
-nobody else. An autosizing textarea needs a script.
+An alert dialog is not a component of its own: it is the `Alert` field on
+`Dialog`, because a component whose whole difference is derived from one
+decision is that decision. An autosizing textarea is the same, the `Autosize`
+field on `Textarea`.
 
 Two more packages travel in the same module and neither draws a page. `mailui`
 draws the messages an application sends, in tables and inline attributes,
@@ -174,10 +173,9 @@ The CLI documents itself. `aru help` lists every command, and each one explains
 what it writes and what to do with it. `aru doctor` explains what it found and
 what breaks, not which rule was violated.
 
-A guide and a website do not exist yet, and that is a decision rather than a
-gap: a guide written against an API that still moves is work done twice, and the
-second time is worse — there is wrong documentation published. The site is the
-next phase, and it will be an Arandu application.
+The guide is published at [arandu.io/docs](https://arandu.io/docs), and the
+site is itself an Arandu application. Where the guide and a doc comment
+disagree, the doc comment sits next to the code and is the one to trust.
 
 ## Contributing
 
