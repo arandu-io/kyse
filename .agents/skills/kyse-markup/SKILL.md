@@ -145,11 +145,15 @@ named function that returns `template.HTML` — another component, or an icon:
 
 A component is entitled to skip escaping because everything it interpolated was
 escaped by the view compiler when it was generated. **A value has been through
-nothing.** `{!! .Body !!}` is stored cross-site scripting the first time one of
-them comes from a person, and it runs for every reader of the page. In an
-application `aru doctor` reports the shape as `raw-output-is-not-a-component`;
-that check reads applications, not this library, so here the rule is yours to
-keep.
+nothing.** `{!! .Body !!}` with a `string` field does not compile: the view
+compiler assigns every `{!! !!}` value to a `template.HTML` before writing it,
+so the Go compiler accepts a component, an icon, a field typed as markup and a
+constant the view spells out, and stops the build at the line of the
+`.kyse.go` on a string that arrived as data. That rule holds here as much as in
+an application. Do not convert to `template.HTML` to get past it — a prop
+somebody typed, converted, is stored cross-site scripting that runs for every
+reader of the page. In an application `aru doctor` also reports the shape as
+`raw-output-is-not-a-component`.
 
 `TestAPropIsEscaped` at `tests/Unit/components_test.go:131` renders twelve
 components with `<script>alert(1)</script>` in a prop and fails if it survives.
