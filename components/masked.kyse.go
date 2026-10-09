@@ -381,6 +381,7 @@ func maskUnmask(pattern, value string) string {
 		@if(.Autofocus)
 			autofocus
 		@endif
+		@attributes(.PartAttrs("input"))
 	>
 	<input
 		data-part="raw"
@@ -391,5 +392,6 @@ func maskUnmask(pattern, value string) string {
 		@if(.Autocomplete != "")
 			autocomplete="{{ .Autocomplete }}"
 		@endif
+		@attributes(.PartAttrs("raw"))
 	>
 </div>

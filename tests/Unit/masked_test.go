@@ -151,6 +151,37 @@ func TestPartNamesReachTheHiddenInput(t *testing.T) {
 	}
 }
 
+// TestBothInputsWriteTheAttributesOfTheirParts: the visible box and the hidden
+// field are published parts, so what a caller writes for each arrives on that
+// input and on no other. Both used to take the class written for them and drop
+// the attributes without a word.
+func TestBothInputsWriteTheAttributesOfTheirParts(t *testing.T) {
+	t.Parallel()
+
+	html := string(components.Masked(components.MaskedProps{
+		Name: "postcode", Pattern: "00000-000", Value: "01310100",
+		ComponentProps: components.ComponentProps{Parts: components.Parts{
+			"input": {Attrs: components.Attrs{"data-testid": "postcode-box"}},
+			"raw":   {Attrs: components.Attrs{"data-testid": "postcode-raw"}},
+		}},
+	}))
+
+	for part, want := range map[string]string{"input": "postcode-box", "raw": "postcode-raw"} {
+		start := strings.Index(html, `data-part="`+part+`"`)
+		if start < 0 {
+			t.Fatalf("no %s part was drawn:\n%s", part, html)
+		}
+		tag := html[start:]
+		tag = tag[:strings.Index(tag, ">")]
+		if !strings.Contains(tag, `data-testid="`+want+`"`) {
+			t.Errorf("the %s part does not carry the attributes written for it:\n%s", part, html)
+		}
+		if n := strings.Count(html, `data-testid="`+want+`"`); n != 1 {
+			t.Errorf("the attributes written for %s appear %d times, want once:\n%s", part, n, html)
+		}
+	}
+}
+
 // TestBothSidesOfTheMaskAgree is the claim the whole design rests on.
 //
 // The dictionary is written twice -- once in Go, which renders the first frame,

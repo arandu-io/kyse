@@ -133,6 +133,24 @@ func TestTheComponentKeepsTheAttributesItWrites(t *testing.T) {
 			marker: `data-part="raw"`,
 			owned:  []string{`type="hidden"`, `name="email_code"`, `value="123456"`},
 		},
+		{
+			name: "Masked input",
+			html: string(components.Masked(components.MaskedProps{
+				Name: "postcode", Pattern: "00000-000", Value: "01310100",
+				ComponentProps: components.ComponentProps{Parts: components.Parts{"input": {Attrs: forged}}},
+			})),
+			marker: `data-part="input"`,
+			owned:  []string{`type="text"`, `id="postcode"`, `name="postcode_display"`, `value="01310-100"`},
+		},
+		{
+			name: "Masked raw",
+			html: string(components.Masked(components.MaskedProps{
+				Name: "postcode", Pattern: "00000-000", Value: "01310100",
+				ComponentProps: components.ComponentProps{Parts: components.Parts{"raw": {Attrs: forged}}},
+			})),
+			marker: `data-part="raw"`,
+			owned:  []string{`type="hidden"`, `name="postcode"`, `value="01310100"`},
+		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
