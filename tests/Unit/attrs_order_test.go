@@ -115,6 +115,24 @@ func TestTheComponentKeepsTheAttributesItWrites(t *testing.T) {
 			marker: `role="tab"`,
 			owned:  []string{`type="button"`, `id="settings-tab-general"`},
 		},
+		{
+			name: "OneTimeCode square",
+			html: string(components.OneTimeCode(components.OneTimeCodeProps{
+				Name: "email_code", Value: "1",
+				ComponentProps: components.ComponentProps{Parts: components.Parts{"square": {Attrs: forged}}},
+			})),
+			marker: `data-code-index="0"`,
+			owned:  []string{`type="text"`, `id="email_code"`, `value="1"`},
+		},
+		{
+			name: "OneTimeCode raw",
+			html: string(components.OneTimeCode(components.OneTimeCodeProps{
+				Name: "email_code", Value: "123456",
+				ComponentProps: components.ComponentProps{Parts: components.Parts{"raw": {Attrs: forged}}},
+			})),
+			marker: `data-part="raw"`,
+			owned:  []string{`type="hidden"`, `name="email_code"`, `value="123456"`},
+		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

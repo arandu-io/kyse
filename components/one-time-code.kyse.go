@@ -225,6 +225,7 @@ func (p OneTimeCodeProps) PartNames() []string { return []string{"root", "square
 			@if(.Autofocus && index == 0)
 				autofocus
 			@endif
+			@attributes(.PartAttrs("square"))
 		>
 	@endforeach
 	<input
@@ -233,6 +234,7 @@ func (p OneTimeCodeProps) PartNames() []string { return []string{"root", "square
 		type="hidden"
 		name="{{ .Name }}"
 		value="{{ .Current() }}"
+		@attributes(.PartAttrs("raw"))
 	>
 	{{-- Inside the group rather than after it: the root is the outermost
 	     element, and the sentence belongs to the group it explains. --}}
