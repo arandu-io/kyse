@@ -39,8 +39,8 @@ const OneTimeCodeBehavior = "one-time-code"
 //
 // It does not decide. Whether the code is the right one is the server's answer,
 // and this component is not consulted -- the same division the password and
-// mask behaviours keep. data-otp-complete says every square is filled, which is
-// a count and not a verdict.
+// mask behaviours keep. The data-code-complete the behaviour writes on the root
+// says every square is filled, which is a count and not a verdict.
 //
 // # Pasting
 //
