@@ -2,6 +2,8 @@
 
 package components
 
+import "strings"
+
 @go
 // OneTimeCodeBehavior is the name the client behaviour is registered under with
 // arandu.ui.define, and the name this component writes.
@@ -34,6 +36,16 @@ const OneTimeCodeBehavior = "one-time-code"
 // A code pasted into any square fills all of them, because that is what somebody
 // copying six digits out of a message means. A code longer than the field is cut
 // to length rather than refused.
+//
+// # When the code was refused
+//
+// The rejection Page holds for Name is drawn under the squares, marks the group
+// invalid and is named first in the group's aria-describedby, so it is
+// announced as well as shown. A refused code is the one state of this field
+// somebody cannot see for themselves, and a row of red squares with nothing
+// saying why reads as a field that is broken.
+//
+// It publishes root, square, raw and message.
 type OneTimeCodeProps struct {
 	// ComponentProps is the class, attributes and parts the caller adds.
 	ComponentProps
@@ -54,7 +66,9 @@ type OneTimeCodeProps struct {
 	// Label is the accessible name of the group. A code field with no label is
 	// announced as a row of unnamed boxes.
 	Label string
-	// DescribedBy is the id of the element that explains this field.
+	// DescribedBy is the id of an element the caller drew that explains this
+	// field. The rejection is not it: this component draws that one and names
+	// it ahead of this id.
 	DescribedBy string
 	// Alphanumeric takes letters as well as digits. The default is digits
 	// alone, and it is what sets the on-screen keyboard to a number pad.
@@ -140,6 +154,27 @@ func (p OneTimeCodeProps) Message() string {
 	return p.Page.FieldError(p.Name)
 }
 
+// MessageID is the id the rejection is drawn under. It hangs off ElementID, so
+// two fields given different IDs never answer to the same message.
+func (p OneTimeCodeProps) MessageID() string {
+	return p.ElementID() + "-error"
+}
+
+// Describers names everything that explains the group, in the order it should
+// be read: the rejection when there is one, then the element the caller pointed
+// at with DescribedBy. Empty when there is neither, so no attribute points at
+// an element that is not on the page.
+func (p OneTimeCodeProps) Describers() string {
+	var ids []string
+	if p.Message() != "" {
+		ids = append(ids, p.MessageID())
+	}
+	if p.DescribedBy != "" {
+		ids = append(ids, p.DescribedBy)
+	}
+	return strings.Join(ids, " ")
+}
+
 // RootAttrs are the outermost element's attributes, with the client bridge
 // filled in when the caller named no behaviour of their own.
 func (p OneTimeCodeProps) RootAttrs() map[string]string {
@@ -153,7 +188,7 @@ func (p OneTimeCodeProps) RootAttrs() map[string]string {
 }
 
 // PartNames are the parts this component publishes.
-func (p OneTimeCodeProps) PartNames() []string { return []string{"root", "square", "raw"} }
+func (p OneTimeCodeProps) PartNames() []string { return []string{"root", "square", "raw", "message"} }
 @endgo
 
 <div
@@ -163,8 +198,8 @@ func (p OneTimeCodeProps) PartNames() []string { return []string{"root", "square
 	@if(.Label != "")
 		aria-label="{{ .Label }}"
 	@endif
-	@if(.DescribedBy != "")
-		aria-describedby="{{ .DescribedBy }}"
+	@if(.Describers() != "")
+		aria-describedby="{{ .Describers() }}"
 	@endif
 	@if(.Message() != "")
 		aria-invalid="true"
@@ -199,4 +234,14 @@ func (p OneTimeCodeProps) PartNames() []string { return []string{"root", "square
 		name="{{ .Name }}"
 		value="{{ .Current() }}"
 	>
+	{{-- Inside the group rather than after it: the root is the outermost
+	     element, and the sentence belongs to the group it explains. --}}
+	@if(.Message() != "")
+		<p
+			data-part="message"
+			id="{{ .MessageID() }}"
+			class="{{ .PartClass("message", "text-destructive text-sm") }}"
+			@attributes(.PartAttrs("message"))
+		>{{ .Message() }}</p>
+	@endif
 </div>
