@@ -1,7 +1,7 @@
 # What this library declares about itself.
 
 name = "arandu-io/kyse"
-framework = ">= 0.21"
+framework = ">= 0.50"
 profiles = ["conventional", "performance"]
 
 [permissions]

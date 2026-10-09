@@ -30,8 +30,17 @@ var (
 func TestDialogNativeSubmissionsReachProtectedRoutes(t *testing.T) {
 	const path = "/invoices/7"
 
+	// A token is bound to the visitor it was issued to, and Issue refuses one
+	// bound to nothing: such a token would pass on every visitor's form alike.
+	// The dialog is drawn for somebody signed in, so the page it sits on was
+	// issued a token bound to their session, and the submission arrives from
+	// that same session.
+	const sessionID = "dialog-contract-session"
+	sessionIDFrom := func(*http.Request) string { return sessionID }
+
 	csrf := security.NewCSRF([]byte("0123456789abcdef0123456789abcdef"), time.Hour)
-	token, err := csrf.Issue("")
+	page := httptest.NewRequest(http.MethodGet, path, nil)
+	token, err := csrf.Issue(csrf.Binding(nil, page, sessionIDFrom(page)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +62,7 @@ func TestDialogNativeSubmissionsReachProtectedRoutes(t *testing.T) {
 				router.Delete(path, handle)
 			}
 
-			handler := frameworkmiddleware.CSRFProtect(csrf, func(*http.Request) string { return "" })(
+			handler := frameworkmiddleware.CSRFProtect(csrf, sessionIDFrom)(
 				middleware.OverrideMethod()(router),
 			)
 			markup := components.Dialog(components.DialogProps{
