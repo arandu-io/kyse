@@ -21,6 +21,19 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## v0.33.0
+
+Nothing below stops a build of this module's own symbols.
+
+### kyse requires Framework v0.55.1 and Hesape v0.52.0
+
+Requiring this version moves an application to both. Follow their upgrade
+notes between the versions you had and these: Hesape v0.52.0 removed the
+Php/Artisan/Symfony-named symbols and deprecated the SessionManager path;
+Framework v0.54.0 refuses a malformed boolean in the environment, and v0.55
+replaces `Configuration.Session` with `bootstrap.Session{Secure, Lifetime}`
+and refuses at boot a `SESSION_*` variable it does not read.
+
 ## v0.32.0
 
 Nothing below stops a build of this module's own symbols.
