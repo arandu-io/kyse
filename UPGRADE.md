@@ -21,7 +21,36 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
-## Unreleased
+## v0.32.0
+
+Nothing below stops a build of this module's own symbols.
+
+### kyse requires Framework v0.50.0 and Hesape v0.50.3
+
+Hesape v0.50.3 does not build with Framework v0.49.0 or older, so the framework
+floor moved with it. An application on an older framework follows that
+framework's v0.50.0 upgrade notes: `KeyBySession` takes the session store, and
+`CSRFProtect` binds each token to the session or to a signed guest cookie. A
+test that issued a CSRF token with `Issue("")` now gets `ErrUnboundToken`: pass
+what `CSRF.Binding` returns.
+
+### `Masked` and `OneTimeCode` write the attributes of every part
+
+The attributes written for the `input` and `raw` parts of `Masked`, and for the
+`square` and `raw` parts of `OneTimeCode`, were dropped. They are now written,
+last in the tag, like every other part's.
+
+## v0.31.0
+
+### `OneTimeCode` draws its rejection
+
+The message `Page` holds for `Name` is now drawn inside the group as the
+`message` part, under `ElementID()-error`, and named first in the group's
+`aria-describedby`. A view that drew its own sentence beside the field and
+pointed `DescribedBy` at it now shows it twice: remove the sentence and the
+`DescribedBy`.
+
+## v0.30.0
 
 Nothing below stops a build. Each is a change in what a component draws, and
 each closes a way the markup could be made to carry something its caller did
