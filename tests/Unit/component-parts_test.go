@@ -1022,6 +1022,50 @@ func TestEveryPublishedPartIsReachable(t *testing.T) {
 	}
 }
 
+// TestEveryPublishedPartWritesTheCallersAttributes is the attributes' half of
+// the promise a part makes. A part takes a class and attributes, and a tag that
+// writes PartClass and forgets PartAttrs passes every test about classes while
+// dropping, without a word, the test id or data attribute somebody wrote for it.
+//
+// The element is found by the class written for the same part, so it is every
+// element the component drew as that part -- each square of a code, each item
+// of a list -- and never the parts of another component drawn inside it.
+func TestEveryPublishedPartWritesTheCallersAttributes(t *testing.T) {
+	startTag := regexp.MustCompile(`<[a-zA-Z][^>]*>`)
+
+	for _, c := range extensible {
+		t.Run(c.name, func(t *testing.T) {
+			for _, part := range c.partNames() {
+				class := regexp.MustCompile(`class="([^"]* )?kyse-probe-` + regexp.QuoteMeta(part) + `( [^"]*)?"`)
+				attr := `data-kyse-probe="` + part + `"`
+				states := c.render(components.ComponentProps{
+					Parts: components.Parts{part: {
+						Class: "kyse-probe-" + part,
+						Attrs: components.Attrs{"data-kyse-probe": part},
+					}},
+				})
+
+				reached := 0
+				for _, got := range states {
+					for _, tag := range startTag.FindAllString(got, -1) {
+						if !class.MatchString(tag) {
+							continue
+						}
+						reached++
+						if !strings.Contains(tag, attr) {
+							t.Errorf("the part %q took the class written for it and not the attributes: %s", part, tag)
+						}
+					}
+				}
+				if reached == 0 {
+					t.Errorf("the part %q is published and no element took the class written for it:\n%s",
+						part, strings.Join(states, "\n---\n"))
+				}
+			}
+		})
+	}
+}
+
 // TestAnAttrCannotCarryAScript is what stands between a bag of attributes and
 // the policy this framework serves under.
 //
