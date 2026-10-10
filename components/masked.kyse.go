@@ -13,10 +13,10 @@ const MaskedBehavior = "mask"
 // MaskedProps is a text box that formats what somebody types, and submits what
 // a program stores.
 //
-// It draws two inputs. The visible one shows 123.456.789-00 and carries no form
-// name; the hidden one beside it carries Name and holds 12345678900, kept in
-// step on every keystroke. So the value that reaches the server is raw, and
-// nothing there has to know a mask existed.
+// It draws two inputs. Once the client behaviour runs, the visible one shows
+// 123.456.789-00 under a name of its own and the hidden one beside it carries
+// Name and holds 12345678900, kept in step on every keystroke. So the value that
+// reaches the server is raw, and nothing there has to know a mask existed.
 //
 // # Why two inputs and not one
 //
@@ -26,10 +26,17 @@ const MaskedBehavior = "mask"
 // compare against a value without it. Two inputs make the raw value the only
 // thing with a name, so forgetting is not available.
 //
-// The cost is stated rather than hidden: with scripting off, the hidden input
-// stays empty and the field arrives blank. A form that must work without
-// scripting takes Input and unmasks on the server; this component is for the
-// ordinary case, and the ordinary case has scripting.
+// # Without the script
+//
+// The hidden input is drawn disabled and the visible one carries Name, so
+// until the behaviour runs -- scripting off, the script blocked or not loaded
+// yet -- the box is an ordinary text field and the form posts what was typed in
+// it under the name the server reads. That value is as typed, punctuation
+// included when somebody typed it, which is why a server that stores the field
+// unmasks it with the same pattern: mask.Pattern.Unmask answers the same thing
+// for the raw value and for the formatted one. The behaviour enables the
+// hidden input and moves the visible one to DisplayName, and from then on the
+// raw value is the only thing with the field's name.
 //
 // # The pattern
 //
@@ -65,8 +72,9 @@ const MaskedBehavior = "mask"
 type MaskedProps struct {
 	// ComponentProps is the class, attributes and parts the caller adds.
 	ComponentProps
-	// Name is the form field name. It goes on the hidden input, because the
-	// hidden input is what submits.
+	// Name is the form field name. The visible input carries it until the
+	// behaviour runs, and the hidden input after, so exactly one of them
+	// submits it.
 	Name string
 	// ID is the id the visible input carries, so a Label can point at it.
 	// Empty uses Name.
@@ -115,11 +123,13 @@ func (p MaskedProps) ElementID() string {
 	return p.Name
 }
 
-// DisplayName is the name of the visible input.
+// DisplayName is the name the behaviour gives the visible input when it hands
+// Name to the hidden one.
 //
 // It has one, and it is not the field's: a box with no name at all is a box the
 // browser will not remember or autofill, and one carrying the field's name
-// would submit the formatted value beside the raw one.
+// beside the enabled hidden input would submit the formatted value beside the
+// raw one.
 func (p MaskedProps) DisplayName() string { return p.Name + "_display" }
 
 // Applied are the patterns this field uses, whichever way they were given.
@@ -168,11 +178,12 @@ func (p MaskedProps) Message() string {
 // filled in from the pattern when the caller named no behaviour of their own.
 //
 // The props handed over are the patterns themselves, so the behaviour formats
-// with the same declaration this component rendered with. A caller who named a
-// behaviour keeps it and owns its props.
+// with the same declaration this component rendered with, and DisplayName, the
+// name the visible input takes when the hidden one starts submitting. A caller
+// who named a behaviour keeps it and owns its props.
 func (p MaskedProps) RootAttrs() map[string]string {
 	if p.Behavior.Name == "" {
-		props := map[string]any{"pattern": p.Applied()}
+		props := map[string]any{"pattern": p.Applied(), "displayName": p.DisplayName()}
 		if p.Reverse {
 			props["reverse"] = true
 		}
@@ -187,7 +198,8 @@ func (p MaskedProps) RootAttrs() map[string]string {
 // PartNames are the parts this component publishes.
 //
 // raw is the hidden input, and it is published because a caller writing a form
-// that reads its own fields needs to reach it.
+// that reads its own fields needs to reach it. It is drawn disabled, and the
+// behaviour enables it.
 func (p MaskedProps) PartNames() []string { return []string{"root", "input", "raw"} }
 
 // maskAccepts reports what a pattern character takes, and whether it is a token.
@@ -354,7 +366,7 @@ func maskUnmask(pattern, value string) string {
 		class="{{ .PartClass("input", "input") }}"
 		type="text"
 		id="{{ .ElementID() }}"
-		name="{{ .DisplayName() }}"
+		name="{{ .Name }}"
 		value="{{ .Formatted() }}"
 		autocomplete="off"
 		@if(.Placeholder != "")
@@ -383,12 +395,15 @@ func maskUnmask(pattern, value string) string {
 		@endif
 		@attributes(.PartAttrs("input"))
 	>
+	{{-- Disabled until the behaviour runs, so a form with no script posts the
+	     visible box under the field's name and not this value beside it. --}}
 	<input
 		data-part="raw"
 		class="{{ .PartClass("raw", "") }}"
 		type="hidden"
 		name="{{ .Name }}"
 		value="{{ .Current() }}"
+		disabled
 		@if(.Autocomplete != "")
 			autocomplete="{{ .Autocomplete }}"
 		@endif

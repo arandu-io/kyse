@@ -10,9 +10,11 @@ import (
 
 // The masked field, which shows one value and submits another.
 //
-// The visible input carries the formatted value and no field name; the hidden
-// one beside it carries the name and the raw value. So what reaches the server
-// is what a program stores, and nothing there has to know a mask existed.
+// Once the behaviour runs, the visible input carries the formatted value under
+// a name of its own and the hidden one beside it carries the field's name and
+// the raw value. So what reaches the server is what a program stores, and
+// nothing there has to know a mask existed. Before it runs, the visible input is
+// the field; masked_no_script_test.go holds that half.
 
 func TestTheVisibleBoxShowsTheFormattedValueAndTheHiddenOneCarriesItRaw(t *testing.T) {
 	t.Parallel()
@@ -32,8 +34,8 @@ func TestTheVisibleBoxShowsTheFormattedValueAndTheHiddenOneCarriesItRaw(t *testi
 	if !strings.Contains(html, `name="postcode"`) {
 		t.Error("nothing carries the field name")
 	}
-	if !strings.Contains(html, `name="postcode_display"`) {
-		t.Error("the visible box has no name of its own, so no browser will remember it")
+	if !strings.Contains(html, `&#34;displayName&#34;:&#34;postcode_display&#34;`) {
+		t.Error("the behaviour is not handed a name of the box's own, so no browser will remember it")
 	}
 	if !strings.Contains(html, `type="hidden"`) {
 		t.Error("there is no hidden input, so the formatted value is what submits")

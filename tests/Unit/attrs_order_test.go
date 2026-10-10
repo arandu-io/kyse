@@ -140,7 +140,7 @@ func TestTheComponentKeepsTheAttributesItWrites(t *testing.T) {
 				ComponentProps: components.ComponentProps{Parts: components.Parts{"input": {Attrs: forged}}},
 			})),
 			marker: `data-part="input"`,
-			owned:  []string{`type="text"`, `id="postcode"`, `name="postcode_display"`, `value="01310-100"`},
+			owned:  []string{`type="text"`, `id="postcode"`, `name="postcode"`, `value="01310-100"`},
 		},
 		{
 			name: "Masked raw",
