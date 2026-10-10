@@ -122,7 +122,7 @@ func TestTheComponentKeepsTheAttributesItWrites(t *testing.T) {
 				ComponentProps: components.ComponentProps{Parts: components.Parts{"square": {Attrs: forged}}},
 			})),
 			marker: `data-code-index="0"`,
-			owned:  []string{`type="text"`, `id="email_code"`, `value="1"`},
+			owned:  []string{`type="text"`, `value="1"`},
 		},
 		{
 			name: "OneTimeCode raw",
@@ -131,7 +131,7 @@ func TestTheComponentKeepsTheAttributesItWrites(t *testing.T) {
 				ComponentProps: components.ComponentProps{Parts: components.Parts{"raw": {Attrs: forged}}},
 			})),
 			marker: `data-part="raw"`,
-			owned:  []string{`type="hidden"`, `name="email_code"`, `value="123456"`},
+			owned:  []string{`type="text"`, `id="email_code"`, `name="email_code"`, `value="123456"`},
 		},
 		{
 			name: "Masked input",

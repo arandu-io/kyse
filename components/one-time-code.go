@@ -10,11 +10,12 @@ import (
 	kyse__io "io"
 	kyse__strings "strings"
 
+	"fmt"
 	kyse__view "github.com/arandu-io/hesape/view"
 	"strings"
 )
 
-//line components/one-time-code.kyse.go:7
+//line components/one-time-code.kyse.go:10
 
 // OneTimeCodeBehavior is the name the client behaviour is registered under with
 // arandu.ui.define, and the name this component writes.
@@ -23,9 +24,21 @@ const OneTimeCodeBehavior = "one-time-code"
 // OneTimeCodeProps is the box somebody types a one-time code into: one square per
 // digit, filled left to right.
 //
-// It draws one visible input per digit and a hidden input carrying the whole
-// code, which is what submits. So the server reads one field called what the
-// caller named, and never has to join six of them.
+// It draws one text input carrying the whole code under the name the caller
+// gave, which is what submits, and one square per character beside it, hidden.
+// So the server reads one field called what the caller named, and never has to
+// join six of them.
+//
+// # Without the script
+//
+// The squares are an enhancement. The client behaviour shows them and turns the
+// text input into the hidden field they keep in step, handing it the id a Label
+// points at. Until it runs -- scripting off, the script blocked or not loaded
+// yet -- the text input is the field: labelled, asking for the code by
+// autocomplete, held to the code's length and alphabet by maxlength and
+// pattern, and posted by the form as it stands. Squares that nothing joins
+// would post nothing under the name the server reads, so they are drawn hidden
+// and only the behaviour shows them.
 //
 // # Why squares and not one box
 //
@@ -60,10 +73,11 @@ const OneTimeCodeBehavior = "one-time-code"
 type OneTimeCodeProps struct {
 	// ComponentProps is the class, attributes and parts the caller adds.
 	ComponentProps
-	// Name is the form field name, carried by the hidden input that submits.
+	// Name is the form field name, carried by the input that submits.
 	Name string
-	// ID is the id of the first square, so a Label can point at it. Empty uses
-	// Name.
+	// ID is the id a Label points at. Empty uses Name. The text input that
+	// submits carries it, and the behaviour hands it to the first square when
+	// it shows them.
 	ID string
 	// Length is how many characters the code has. Zero means six, which is what
 	// nearly every code is.
@@ -86,11 +100,13 @@ type OneTimeCodeProps struct {
 	Alphanumeric bool
 	// Disabled takes the field out of the form and out of the tab order.
 	Disabled bool
-	// Autofocus puts the cursor in the first square on load.
+	// Autofocus puts the cursor in the field on load: the text input, and the
+	// first square once the behaviour shows them.
 	Autofocus bool
 }
 
-// ElementID is the id the first square carries.
+// ElementID is the id the text input that submits carries, and the one a Label
+// points at.
 func (p OneTimeCodeProps) ElementID() string {
 	if p.ID != "" {
 		return p.ID
@@ -142,6 +158,17 @@ func (p OneTimeCodeProps) InputMode() string {
 		return "text"
 	}
 	return "numeric"
+}
+
+// Pattern is the shape the text input holds a code to without the script:
+// exactly Size characters, digits alone unless Alphanumeric. It is a count and
+// an alphabet, the same filter the behaviour applies to what is typed in a
+// square, and not a verdict on the code.
+func (p OneTimeCodeProps) Pattern() string {
+	if p.Alphanumeric {
+		return fmt.Sprintf("[0-9A-Za-z]{%d}", p.Size())
+	}
+	return fmt.Sprintf("[0-9]{%d}", p.Size())
 }
 
 // AutocompleteAt is the autofill hint for one square.
@@ -201,7 +228,7 @@ func (p OneTimeCodeProps) RootAttrs() map[string]string {
 // PartNames are the parts this component publishes.
 func (p OneTimeCodeProps) PartNames() []string { return []string{"root", "square", "raw", "message"} }
 
-//line components/one-time-code.go:205
+//line components/one-time-code.go:232
 
 // OneTimeCode renders the one-time-code component.
 func OneTimeCode(kyse__props OneTimeCodeProps) kyse__template.HTML {
@@ -224,9 +251,9 @@ func OneTimeCode(kyse__props OneTimeCodeProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/one-time-code.kyse.go:196
+//line components/one-time-code.kyse.go:225
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("otp")))
-//line components/one-time-code.go:230
+//line components/one-time-code.go:257
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -234,50 +261,50 @@ func OneTimeCode(kyse__props OneTimeCodeProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\trole=\"group\"\n")
 	}
-//line components/one-time-code.kyse.go:198
+//line components/one-time-code.kyse.go:227
 	if kyse__d.Label != "" {
-//line components/one-time-code.go:240
+//line components/one-time-code.go:267
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-label=\"")
 		}
 		if kyse__err == nil {
-//line components/one-time-code.kyse.go:199
+//line components/one-time-code.kyse.go:228
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
-//line components/one-time-code.go:247
+//line components/one-time-code.go:274
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/one-time-code.kyse.go:201
+//line components/one-time-code.kyse.go:230
 	if kyse__d.Describers() != "" {
-//line components/one-time-code.go:255
+//line components/one-time-code.go:282
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/one-time-code.kyse.go:202
+//line components/one-time-code.kyse.go:231
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Describers()))
-//line components/one-time-code.go:262
+//line components/one-time-code.go:289
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/one-time-code.kyse.go:204
+//line components/one-time-code.kyse.go:233
 	if kyse__d.Message() != "" {
-//line components/one-time-code.go:270
+//line components/one-time-code.go:297
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-invalid=\"true\"\n")
 		}
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/one-time-code.kyse.go:207
+//line components/one-time-code.kyse.go:236
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/one-time-code.go:279
+//line components/one-time-code.go:306
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/one-time-code.kyse.go:207", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/one-time-code.kyse.go:236", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
@@ -285,10 +312,10 @@ func OneTimeCode(kyse__props OneTimeCodeProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")
 	}
-//line components/one-time-code.kyse.go:209
+//line components/one-time-code.kyse.go:238
 	for _, index := range kyse__d.Squares() {
 		_ = index
-//line components/one-time-code.go:292
+//line components/one-time-code.go:319
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<input\n")
 		}
@@ -299,9 +326,9 @@ func OneTimeCode(kyse__props OneTimeCodeProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-code-index=\"")
 		}
 		if kyse__err == nil {
-//line components/one-time-code.kyse.go:212
+//line components/one-time-code.kyse.go:241
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(index))
-//line components/one-time-code.go:305
+//line components/one-time-code.go:332
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -310,9 +337,9 @@ func OneTimeCode(kyse__props OneTimeCodeProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/one-time-code.kyse.go:213
+//line components/one-time-code.kyse.go:242
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("square", "otp-square")))
-//line components/one-time-code.go:316
+//line components/one-time-code.go:343
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -320,28 +347,16 @@ func OneTimeCode(kyse__props OneTimeCodeProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\ttype=\"text\"\n")
 		}
-//line components/one-time-code.kyse.go:215
-		if index == 0 {
-//line components/one-time-code.go:326
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tid=\"")
-			}
-			if kyse__err == nil {
-//line components/one-time-code.kyse.go:216
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/one-time-code.go:333
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thidden\n")
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tinputmode=\"")
 		}
 		if kyse__err == nil {
-//line components/one-time-code.kyse.go:218
+//line components/one-time-code.kyse.go:245
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.InputMode()))
-//line components/one-time-code.go:345
+//line components/one-time-code.go:360
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -353,9 +368,9 @@ func OneTimeCode(kyse__props OneTimeCodeProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tvalue=\"")
 		}
 		if kyse__err == nil {
-//line components/one-time-code.kyse.go:220
+//line components/one-time-code.kyse.go:247
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.CharAt(index)))
-//line components/one-time-code.go:359
+//line components/one-time-code.go:374
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -364,34 +379,27 @@ func OneTimeCode(kyse__props OneTimeCodeProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tautocomplete=\"")
 		}
 		if kyse__err == nil {
-//line components/one-time-code.kyse.go:221
+//line components/one-time-code.kyse.go:248
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.AutocompleteAt(index)))
-//line components/one-time-code.go:370
+//line components/one-time-code.go:385
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-//line components/one-time-code.kyse.go:222
+//line components/one-time-code.kyse.go:249
 		if kyse__d.Disabled {
-//line components/one-time-code.go:377
+//line components/one-time-code.go:392
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdisabled\n")
 			}
 		}
-//line components/one-time-code.kyse.go:225
-		if kyse__d.Autofocus && index == 0 {
-//line components/one-time-code.go:384
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tautofocus\n")
-			}
-		}
 		if kyse__err == nil {
 			var kyse__v2 string
-//line components/one-time-code.kyse.go:228
+//line components/one-time-code.kyse.go:252
 			kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("square"))
-//line components/one-time-code.go:393
+//line components/one-time-code.go:401
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/one-time-code.kyse.go:228", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/one-time-code.kyse.go:252", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 			}
@@ -410,23 +418,34 @@ func OneTimeCode(kyse__props OneTimeCodeProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/one-time-code.kyse.go:233
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("raw", "")))
-//line components/one-time-code.go:416
+//line components/one-time-code.kyse.go:260
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("raw", "input")))
+//line components/one-time-code.go:424
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\ttype=\"hidden\"\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\ttype=\"text\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tid=\"")
+	}
+	if kyse__err == nil {
+//line components/one-time-code.kyse.go:262
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
+//line components/one-time-code.go:438
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tname=\"")
 	}
 	if kyse__err == nil {
-//line components/one-time-code.kyse.go:235
+//line components/one-time-code.kyse.go:263
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/one-time-code.go:430
+//line components/one-time-code.go:449
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -435,20 +454,70 @@ func OneTimeCode(kyse__props OneTimeCodeProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tvalue=\"")
 	}
 	if kyse__err == nil {
-//line components/one-time-code.kyse.go:236
+//line components/one-time-code.kyse.go:264
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Current()))
-//line components/one-time-code.go:441
+//line components/one-time-code.go:460
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tinputmode=\"")
+	}
+	if kyse__err == nil {
+//line components/one-time-code.kyse.go:265
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.InputMode()))
+//line components/one-time-code.go:471
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tautocomplete=\"one-time-code\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tmaxlength=\"")
+	}
+	if kyse__err == nil {
+//line components/one-time-code.kyse.go:267
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Size()))
+//line components/one-time-code.go:485
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tpattern=\"")
+	}
+	if kyse__err == nil {
+//line components/one-time-code.kyse.go:268
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Pattern()))
+//line components/one-time-code.go:496
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+	}
+//line components/one-time-code.kyse.go:269
+	if kyse__d.Disabled {
+//line components/one-time-code.go:503
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdisabled\n")
+		}
+	}
+//line components/one-time-code.kyse.go:272
+	if kyse__d.Autofocus {
+//line components/one-time-code.go:510
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tautofocus\n")
+		}
+	}
+	if kyse__err == nil {
 		var kyse__v3 string
-//line components/one-time-code.kyse.go:237
+//line components/one-time-code.kyse.go:275
 		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("raw"))
-//line components/one-time-code.go:450
+//line components/one-time-code.go:519
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/one-time-code.kyse.go:237", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/one-time-code.kyse.go:275", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
@@ -456,9 +525,9 @@ func OneTimeCode(kyse__props OneTimeCodeProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
 	}
-//line components/one-time-code.kyse.go:241
+//line components/one-time-code.kyse.go:279
 	if kyse__d.Message() != "" {
-//line components/one-time-code.go:462
+//line components/one-time-code.go:531
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<p\n")
 		}
@@ -469,9 +538,9 @@ func OneTimeCode(kyse__props OneTimeCodeProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
 		}
 		if kyse__err == nil {
-//line components/one-time-code.kyse.go:244
+//line components/one-time-code.kyse.go:282
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.MessageID()))
-//line components/one-time-code.go:475
+//line components/one-time-code.go:544
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -480,20 +549,20 @@ func OneTimeCode(kyse__props OneTimeCodeProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/one-time-code.kyse.go:245
+//line components/one-time-code.kyse.go:283
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("message", "text-destructive text-sm")))
-//line components/one-time-code.go:486
+//line components/one-time-code.go:555
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v4 string
-//line components/one-time-code.kyse.go:246
+//line components/one-time-code.kyse.go:284
 			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("message"))
-//line components/one-time-code.go:495
+//line components/one-time-code.go:564
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/one-time-code.kyse.go:246", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/one-time-code.kyse.go:284", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 			}
@@ -502,9 +571,9 @@ func OneTimeCode(kyse__props OneTimeCodeProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
 		}
 		if kyse__err == nil {
-//line components/one-time-code.kyse.go:247
+//line components/one-time-code.kyse.go:285
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message())))
-//line components/one-time-code.go:508
+//line components/one-time-code.go:577
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")

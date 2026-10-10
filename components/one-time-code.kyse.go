@@ -2,7 +2,10 @@
 
 package components
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 @go
 // OneTimeCodeBehavior is the name the client behaviour is registered under with
@@ -12,9 +15,21 @@ const OneTimeCodeBehavior = "one-time-code"
 // OneTimeCodeProps is the box somebody types a one-time code into: one square per
 // digit, filled left to right.
 //
-// It draws one visible input per digit and a hidden input carrying the whole
-// code, which is what submits. So the server reads one field called what the
-// caller named, and never has to join six of them.
+// It draws one text input carrying the whole code under the name the caller
+// gave, which is what submits, and one square per character beside it, hidden.
+// So the server reads one field called what the caller named, and never has to
+// join six of them.
+//
+// # Without the script
+//
+// The squares are an enhancement. The client behaviour shows them and turns the
+// text input into the hidden field they keep in step, handing it the id a Label
+// points at. Until it runs -- scripting off, the script blocked or not loaded
+// yet -- the text input is the field: labelled, asking for the code by
+// autocomplete, held to the code's length and alphabet by maxlength and
+// pattern, and posted by the form as it stands. Squares that nothing joins
+// would post nothing under the name the server reads, so they are drawn hidden
+// and only the behaviour shows them.
 //
 // # Why squares and not one box
 //
@@ -49,10 +64,11 @@ const OneTimeCodeBehavior = "one-time-code"
 type OneTimeCodeProps struct {
 	// ComponentProps is the class, attributes and parts the caller adds.
 	ComponentProps
-	// Name is the form field name, carried by the hidden input that submits.
+	// Name is the form field name, carried by the input that submits.
 	Name string
-	// ID is the id of the first square, so a Label can point at it. Empty uses
-	// Name.
+	// ID is the id a Label points at. Empty uses Name. The text input that
+	// submits carries it, and the behaviour hands it to the first square when
+	// it shows them.
 	ID string
 	// Length is how many characters the code has. Zero means six, which is what
 	// nearly every code is.
@@ -75,11 +91,13 @@ type OneTimeCodeProps struct {
 	Alphanumeric bool
 	// Disabled takes the field out of the form and out of the tab order.
 	Disabled bool
-	// Autofocus puts the cursor in the first square on load.
+	// Autofocus puts the cursor in the field on load: the text input, and the
+	// first square once the behaviour shows them.
 	Autofocus bool
 }
 
-// ElementID is the id the first square carries.
+// ElementID is the id the text input that submits carries, and the one a Label
+// points at.
 func (p OneTimeCodeProps) ElementID() string {
 	if p.ID != "" {
 		return p.ID
@@ -131,6 +149,17 @@ func (p OneTimeCodeProps) InputMode() string {
 		return "text"
 	}
 	return "numeric"
+}
+
+// Pattern is the shape the text input holds a code to without the script:
+// exactly Size characters, digits alone unless Alphanumeric. It is a count and
+// an alphabet, the same filter the behaviour applies to what is typed in a
+// square, and not a verdict on the code.
+func (p OneTimeCodeProps) Pattern() string {
+	if p.Alphanumeric {
+		return fmt.Sprintf("[0-9A-Za-z]{%d}", p.Size())
+	}
+	return fmt.Sprintf("[0-9]{%d}", p.Size())
 }
 
 // AutocompleteAt is the autofill hint for one square.
@@ -212,9 +241,7 @@ func (p OneTimeCodeProps) PartNames() []string { return []string{"root", "square
 			data-code-index="{{ index }}"
 			class="{{ .PartClass("square", "otp-square") }}"
 			type="text"
-			@if(index == 0)
-				id="{{ .ElementID() }}"
-			@endif
+			hidden
 			inputmode="{{ .InputMode() }}"
 			maxlength="1"
 			value="{{ .CharAt(index) }}"
@@ -222,18 +249,29 @@ func (p OneTimeCodeProps) PartNames() []string { return []string{"root", "square
 			@if(.Disabled)
 				disabled
 			@endif
-			@if(.Autofocus && index == 0)
-				autofocus
-			@endif
 			@attributes(.PartAttrs("square"))
 		>
 	@endforeach
+	{{-- The field that submits, and the one a person types into when the
+	     behaviour has not run. The behaviour makes it hidden and shows the
+	     squares; nothing about the form changes when it does. --}}
 	<input
 		data-part="raw"
-		class="{{ .PartClass("raw", "") }}"
-		type="hidden"
+		class="{{ .PartClass("raw", "input") }}"
+		type="text"
+		id="{{ .ElementID() }}"
 		name="{{ .Name }}"
 		value="{{ .Current() }}"
+		inputmode="{{ .InputMode() }}"
+		autocomplete="one-time-code"
+		maxlength="{{ .Size() }}"
+		pattern="{{ .Pattern() }}"
+		@if(.Disabled)
+			disabled
+		@endif
+		@if(.Autofocus)
+			autofocus
+		@endif
 		@attributes(.PartAttrs("raw"))
 	>
 	{{-- Inside the group rather than after it: the root is the outermost

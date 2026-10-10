@@ -1,6 +1,7 @@
 package unit
 
 import (
+	"html"
 	"regexp"
 	"strings"
 	"testing"
@@ -57,7 +58,7 @@ func TestAOneTimeCodeKeepsWhatTheCallerPointedAt(t *testing.T) {
 	if got := describedBy.FindStringSubmatch(html); got == nil || got[1] != "verify-code-error sent-to" {
 		t.Errorf("aria-describedby is %v, want the rejection and then the caller's id\n%s", got, html)
 	}
-	// The id hangs off the square's id, as it does on the other controls that
+	// The id hangs off the field's id, as it does on the other controls that
 	// take an ID, so two code fields with different ids never share a message.
 	if !strings.Contains(html, `id="verify-code-error"`) {
 		t.Errorf("the rejection is not drawn under the id the group points at:\n%s", html)
@@ -108,8 +109,8 @@ func partTags(html, part string) []string {
 	return regexp.MustCompile(`<[a-z]+\s[^>]*data-part="`+part+`"[^>]*>`).FindAllString(html, -1)
 }
 
-// TestAOneTimeCodeWritesTheAttributesOfItsParts: the squares and the hidden
-// field are published parts, so the attributes a caller writes for them arrive,
+// TestAOneTimeCodeWritesTheAttributesOfItsParts: the squares and the field that
+// submits are published parts, so the attributes a caller writes for them arrive,
 // on every square and on the field that submits.
 //
 // They used to be dropped without a word. The class written for the same part
@@ -148,5 +149,160 @@ func TestAOneTimeCodeWritesTheAttributesOfItsParts(t *testing.T) {
 	}
 	if n := strings.Count(html, `data-testid="code-raw"`); n != 1 {
 		t.Errorf("the raw attributes were written %d times, want once:\n%s", n, html)
+	}
+}
+
+// inputTag is the start tag of one input, and inputAttr one attribute in it,
+// with or without a value.
+var (
+	inputTag  = regexp.MustCompile(`<input\s[^>]*>`)
+	inputAttr = regexp.MustCompile(`([a-z][a-z0-9-]*)(?:="([^"]*)")?`)
+)
+
+// input is one drawn input, read the way a browser reads its attributes: the
+// first of two with the same name wins.
+type input map[string]string
+
+func (in input) has(name string) bool { _, ok := in[name]; return ok }
+
+// inputs reads every input start tag in html, in document order.
+func inputs(markup string) []input {
+	var out []input
+	for _, tag := range inputTag.FindAllString(markup, -1) {
+		in := input{}
+		for _, m := range inputAttr.FindAllStringSubmatch(strings.TrimPrefix(tag, "<input"), -1) {
+			if !in.has(m[1]) {
+				in[m[1]] = html.UnescapeString(m[2])
+			}
+		}
+		out = append(out, in)
+	}
+	return out
+}
+
+// postWithoutScript is what a browser with no script running sends for markup
+// once somebody has typed code into it: they type into the inputs they can see
+// -- the whole code into one box, or a character into each of several -- and
+// the form posts every named input that is not disabled, under its name and
+// with its value, in document order. Nothing joins anything.
+func postWithoutScript(markup, code string) map[string][]string {
+	drawn := inputs(markup)
+	var visible []input
+	for _, in := range drawn {
+		if in["type"] != "hidden" && !in.has("hidden") && !in.has("disabled") {
+			visible = append(visible, in)
+		}
+	}
+	if len(visible) == 1 {
+		visible[0]["value"] = code
+	} else {
+		for at, in := range visible {
+			if at < len(code) {
+				in["value"] = code[at : at+1]
+			}
+		}
+	}
+	posted := map[string][]string{}
+	for _, in := range drawn {
+		if in["name"] == "" || in.has("disabled") {
+			continue
+		}
+		posted[in["name"]] = append(posted[in["name"]], in["value"])
+	}
+	return posted
+}
+
+// TestAOneTimeCodePostsTheCodeWithoutScript: with no script running the form
+// still sends the code, whole, under the name the caller gave.
+//
+// It used to send the name with nothing after it. The squares carried no name
+// and the field that did was hidden and filled only by the behaviour, so a page
+// whose script was off, blocked or not loaded yet could not be completed: the
+// code was typed and the server read an empty field.
+func TestAOneTimeCodePostsTheCodeWithoutScript(t *testing.T) {
+	for name, props := range map[string]components.OneTimeCodeProps{
+		"digits":       {Name: "email_code", Label: "Email code"},
+		"four":         {Name: "email_code", Label: "Email code", Length: 4},
+		"alphanumeric": {Name: "email_code", Label: "Email code", Alphanumeric: true},
+		"refused":      {Name: "email_code", Label: "Email code", Value: "12", Page: page{errs: map[string]string{"email_code": "Wrong."}}},
+	} {
+		code := "483920"[:props.Size()]
+		if props.Alphanumeric {
+			code = "A7K2Q9"
+		}
+		markup := string(components.OneTimeCode(props))
+
+		posted := postWithoutScript(markup, code)
+		if got := posted["email_code"]; len(got) != 1 || got[0] != code {
+			t.Errorf("%s: without script the form posts email_code=%q, want exactly [%q]\n%s", name, got, code, markup)
+		}
+		if len(posted) != 1 {
+			t.Errorf("%s: without script the form posts %v, want the one field and nothing beside it", name, posted)
+		}
+	}
+}
+
+// TestTheFieldThatSubmitsIsTheOneWithoutScript: the input that carries the
+// name is a text field somebody can type the whole code into, labelled and
+// described to the browser the way a code field is, and the squares wait hidden
+// for the behaviour to show them.
+func TestTheFieldThatSubmitsIsTheOneWithoutScript(t *testing.T) {
+	markup := string(components.OneTimeCode(components.OneTimeCodeProps{
+		Name: "email_code", ID: "verify-code", Label: "Email code", Autofocus: true,
+	}))
+
+	var field input
+	squares := 0
+	for _, in := range inputs(markup) {
+		switch in["data-part"] {
+		case "raw":
+			field = in
+		case "square":
+			squares++
+			if !in.has("hidden") {
+				t.Errorf("square %s is drawn visible; it posts nothing, so only the behaviour may show it", in["data-code-index"])
+			}
+			for _, owned := range []string{"name", "id", "autofocus"} {
+				if in.has(owned) {
+					t.Errorf("square %s carries %s, which belongs to the field that submits", in["data-code-index"], owned)
+				}
+			}
+		}
+	}
+	if squares != 6 {
+		t.Errorf("drew %d squares, want 6 for the behaviour to show", squares)
+	}
+	want := map[string]string{
+		"type": "text", "name": "email_code", "id": "verify-code", "inputmode": "numeric",
+		"autocomplete": "one-time-code", "maxlength": "6", "pattern": "[0-9]{6}",
+	}
+	for attr, value := range want {
+		if got, ok := field[attr]; !ok || got != value {
+			t.Errorf("the field that submits has %s=%q, want %q: %v", attr, got, value, field)
+		}
+	}
+	if !field.has("autofocus") {
+		t.Errorf("Autofocus did not reach the field somebody types into without script: %v", field)
+	}
+	if n := strings.Count(markup, `id="verify-code"`); n != 1 {
+		t.Errorf("the id a Label points at is written %d times, want once:\n%s", n, markup)
+	}
+}
+
+// TestAOneTimeCodePatternIsACountAndAnAlphabet: the shape the field holds a
+// code to without script is its length and its characters, and nothing else.
+func TestAOneTimeCodePatternIsACountAndAnAlphabet(t *testing.T) {
+	for _, c := range []struct {
+		props components.OneTimeCodeProps
+		want  string
+	}{
+		{components.OneTimeCodeProps{}, "[0-9]{6}"},
+		{components.OneTimeCodeProps{Length: 8}, "[0-9]{8}"},
+		{components.OneTimeCodeProps{Alphanumeric: true}, "[0-9A-Za-z]{6}"},
+		{components.OneTimeCodeProps{Length: 4, Alphanumeric: true}, "[0-9A-Za-z]{4}"},
+	} {
+		if got := c.props.Pattern(); got != c.want {
+			t.Errorf("Pattern() of length %d alphanumeric %v is %q, want %q", c.props.Length, c.props.Alphanumeric, got, c.want)
+		}
 	}
 }
