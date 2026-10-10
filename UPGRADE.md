@@ -21,6 +21,21 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## v0.34.1
+
+Nothing below stops a build of this module's own symbols.
+
+### kyse requires Framework v0.56.0 and Hesape v0.54.0
+
+Requiring this version moves an application to both. Follow their upgrade
+notes between the versions you had and these: Framework v0.56.0 removes
+`config.Config.SessionTTL`, so `config.Load` no longer reads `SESSION_TTL`
+(the session lasts `SESSION_LIFETIME` minutes), and puts `APP_NAME` on every
+request; Hesape v0.54.0's `view.New` reads it into `Page.AppName`. A
+controller that assigned the configured name by hand can delete the
+assignment, and an application that never set `APP_NAME` now draws
+`arandu-app` where its brand was blank.
+
 ## v0.34.0
 
 Nothing below stops a build of this module's own symbols. Two components draw
