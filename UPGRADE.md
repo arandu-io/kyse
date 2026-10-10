@@ -21,6 +21,36 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## v0.34.0
+
+Nothing below stops a build of this module's own symbols. Two components draw
+different markup, and kyse requires Hesape v0.53.0, whose script mounts it.
+
+### `OneTimeCode` posts the code without script
+
+The `raw` part is a visible `type="text"` input carrying `id`, `name`,
+`inputmode`, `autocomplete="one-time-code"`, `maxlength`, `pattern` and
+`autofocus`. The squares are drawn `hidden`, without `id` or `autofocus`, and
+the `one-time-code` behaviour shows them and turns the input into the hidden
+field. A `Label` whose `For` names the field keeps working.
+
+### `Masked` posts what was typed without script
+
+The visible `input` part carries `Name`, and the `raw` part is drawn
+`disabled`. The `mask` behaviour enables it and renames the box to
+`DisplayName`, which the component hands over as `displayName`. Without script
+the value arrives as typed: validate it with `mask.Pattern.Accepts` and store
+`Unmask(value)` from the same pattern.
+
+Styles or tests that targeted `[data-part=square]#<id>`,
+`input[type=hidden][name=…]` or `name="<Name>_display"` in the drawn markup
+follow it.
+
+### kyse requires Hesape v0.53.0
+
+Requiring this version moves an application to it. Hesape v0.53.0 makes
+`mask.Pattern.Accepts` take the raw value as well as the formatted one.
+
 ## v0.33.0
 
 Nothing below stops a build of this module's own symbols.
