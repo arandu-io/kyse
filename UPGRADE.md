@@ -61,6 +61,15 @@ attribute the component did not write. A call that relied on `Attrs` to change
 a `name`, `value`, `type`, `form` or `id` sets the component's own field
 instead.
 
+
+## v0.30.1
+
+Nothing to change. A data table's search, facets, sortable headers and pages
+now take the region out of the answer (`hx-select` equal to `hx-target`), so
+an endpoint that answers the whole page swaps one list for one list instead
+of drawing the page inside the table. The same fix as v0.34.2, for the
+v0.30 line.
+
 ## v0.15.2 — Dialog submissions use the browser's native transport
 
 `DialogProps.Method` may still be PUT, PATCH or DELETE, but an HTML form cannot

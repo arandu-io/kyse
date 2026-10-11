@@ -638,6 +638,9 @@ func (p TableProps) PartNames() []string {
 									@if(.HxSwap != "")
 										hx-swap="{{ .HxSwap }}"
 									@endif
+									@if(.HxSwap == "outerHTML" && .HxTarget != "")
+										hx-select="{{ .HxTarget }}"
+									@endif
 									@attributes(.PartAttrs("sort"))
 								>{{ column.Label }}</a>
 							@endif
