@@ -21,6 +21,13 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## v0.34.2
+
+Nothing to change. A data table's search, facets, sortable headers and pages
+now take the region out of the answer (`hx-select` equal to `hx-target`), so
+an endpoint that answers the whole page swaps one list for one list instead
+of drawing the page inside the table.
+
 ## v0.34.1
 
 Nothing below stops a build of this module's own symbols.

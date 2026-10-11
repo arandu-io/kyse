@@ -752,6 +752,7 @@ func (p DataTableProps) PartNames() []string {
 								hx-include="closest form"
 								hx-target="{{ .Target() }}"
 								hx-swap="outerHTML"
+								hx-select="{{ .Target() }}"
 								hx-sync="this:replace"
 								hx-indicator="#{{ .ID }}-indicator"
 							@endif
@@ -784,6 +785,7 @@ func (p DataTableProps) PartNames() []string {
 									hx-include="closest form"
 									hx-target="{{ .Target() }}"
 									hx-swap="outerHTML"
+									hx-select="{{ .Target() }}"
 									hx-sync="closest form:replace"
 									hx-indicator="#{{ .ID }}-indicator"
 									@attributes(.PartAttrs("filter"))
