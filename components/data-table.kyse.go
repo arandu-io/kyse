@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/arandu-io/kyse/icons"
 )
 
 @go
@@ -193,6 +195,12 @@ type DataTableLines struct {
 	// Page names one numbered control: "Page {n}". The digit alone is read as
 	// a digit, which in a row of them says nothing about what it does.
 	Page string
+	// PageOf is where the reader is, beside the pager: "Page {n} of {total}".
+	PageOf string
+	// Back and Forward are the words on the pager's two buttons: "Previous"
+	// and "Next". Previous and Next above are what a screen reader calls them.
+	Back    string
+	Forward string
 	// SelectAll names the header checkbox, and Bulk the bar of actions.
 	SelectAll string
 	Bulk      string
@@ -227,6 +235,9 @@ func (l DataTableLines) Sentences() map[string]any {
 		"previous":   fallback(l.Previous, "Previous page"),
 		"next":       fallback(l.Next, "Next page"),
 		"page":       fallback(l.Page, "Page {n}"),
+		"pageOf":     fallback(l.PageOf, "Page {n} of {total}"),
+		"back":       fallback(l.Back, "Previous"),
+		"forward":    fallback(l.Forward, "Next"),
 		"ascending":  fallback(l.Ascending, "{column}, sorted ascending"),
 		"descending": fallback(l.Descending, "{column}, sorted descending"),
 		"unsorted":   fallback(l.Unsorted, "{column}, not sorted"),
@@ -670,6 +681,60 @@ func (p DataTableProps) window() (int, int, int) {
 func (p DataTableProps) Ranged() bool { return p.Complete || p.Total > 0 }
 
 // PartNames are the parts this component publishes.
+// PageOfText is where the reader is, beside the pager: "Page 2 of 7".
+func (p DataTableProps) PageOfText() string {
+	page := p.Page
+	if page < 1 {
+		page = 1
+	}
+	return strings.NewReplacer("{n}", strconv.Itoa(page), "{total}", strconv.Itoa(p.Sheets())).
+		Replace(p.Lines.Sentences()["pageOf"].(string))
+}
+
+// PageOfTemplate is the sentence the browser rewrites as the page moves.
+func (p DataTableProps) PageOfTemplate() string { return p.Lines.Sentences()["pageOf"].(string) }
+
+// PreviousPage and NextPage are the pages the two steps lead to, kept inside
+// the list.
+func (p DataTableProps) PreviousPage() int { return max(1, p.Page-1) }
+func (p DataTableProps) NextPage() int     { return min(max(1, p.Sheets()), max(1, p.Page)+1) }
+
+// PreviousText and NextText are the words on the two steps.
+func (p DataTableProps) PreviousText() string { return p.Lines.Sentences()["back"].(string) }
+func (p DataTableProps) NextText() string     { return p.Lines.Sentences()["forward"].(string) }
+
+// Selectable is whether the rows carry a checkbox, and the footer a count.
+func (p DataTableProps) Selectable() bool { return p.SelectName != "" }
+
+// SelectedText is the count of rows ticked, as the table's own count says it.
+func (p DataTableProps) SelectedText() string { return p.Grid().SelectedText() }
+
+// FacetChosen are the labels of a facet's options in force, in the order the
+// options are listed, which is what the facet's button shows.
+func (p DataTableProps) FacetChosen(filter DataTableFilter) []string {
+	out := []string{}
+	for _, option := range filter.Options {
+		if p.Chosen(filter, option) {
+			out = append(out, option.Label)
+		}
+	}
+	return out
+}
+
+// FacetSummary is what the facet's button shows of its choice: every label
+// while there are two at most, and the count past that, so a facet with five
+// choices does not push the toolbar off the screen.
+func (p DataTableProps) FacetSummary(filter DataTableFilter) []string {
+	chosen := p.FacetChosen(filter)
+	if len(chosen) > 2 {
+		return []string{strconv.Itoa(len(chosen))}
+	}
+	return chosen
+}
+
+// FacetName names one facet's menu for a screen reader: its label.
+func (p DataTableProps) FacetName(filter DataTableFilter) string { return filter.Label }
+
 func (p DataTableProps) PartNames() []string {
 	// The table's names and the pager's are published here as well, because
 	// this draws both and the parts a caller can reach are the parts on the
@@ -677,9 +742,9 @@ func (p DataTableProps) PartNames() []string {
 	names := []string{
 		"root", "toolbar", "search", "indicator", "columns", "toggle",
 		"pagination", "sizes", "showing", "footer", "filter",
+		"facet", "facet-chosen", "page-of", "previous", "next",
 	}
 	names = append(names, TableProps{}.PartNames()[1:]...)
-	names = append(names, PaginationProps{}.PartNames()[1:]...)
 
 	// Deduplicated, because this composes two components that publish some of
 	// the same names and a list that repeats one is a list nobody can trust to
@@ -771,63 +836,68 @@ func (p DataTableProps) PartNames() []string {
 					@endif
 
 					@if(.Filtered())
+						{{-- A facet is a button that opens a list of checkboxes, as
+						     shadcn's faceted filter: the label, and what is chosen
+						     beside it. The checkboxes are native and in the form, so
+						     with no script the same choice is submitted by Apply. --}}
 						@foreach(.Filters as filter)
-							<label class="data-table-facet">
-								<span class="sr-only">{{ filter.Label }}</span>
-								<select
-									data-part="filter"
-									class="{{ .PartClass("filter", "select") }}"
-									name="{{ filter.Key }}"
-									multiple
-									size="1"
-									hx-get="{{ .SearchAddress() }}"
-									hx-trigger="change"
-									hx-include="closest form"
-									hx-target="{{ .Target() }}"
-									hx-swap="outerHTML"
-									hx-select="{{ .Target() }}"
-									hx-sync="closest form:replace"
-									hx-indicator="#{{ .ID }}-indicator"
-									@attributes(.PartAttrs("filter"))
+							<details
+								data-part="facet"
+								class="{{ .PartClass("facet", "data-table-facet") }}"
+								@attributes(.PartAttrs("facet"))
+							>
+								<summary>
+									{!! icons.PlusCircle(icons.Props{}) !!}
+									<span>{{ filter.Label }}</span>
+									@if(len(.FacetSummary(filter)) > 0)
+										<span
+											data-part="facet-chosen"
+											class="{{ .PartClass("facet-chosen", "data-table-facet-chosen") }}"
+											@attributes(.PartAttrs("facet-chosen"))
+										>
+											@foreach(.FacetSummary(filter) as label)
+												<span class="badge" data-variant="secondary">{{ label }}</span>
+											@endforeach
+										</span>
+									@endif
+								</summary>
+								<div
+									class="data-table-facet-menu"
+									role="group"
+									aria-label="{{ .FacetName(filter) }}"
+									@if(!.Complete)
+										hx-get="{{ .SearchAddress() }}"
+										hx-trigger="change"
+										hx-include="closest form"
+										hx-target="{{ .Target() }}"
+										hx-swap="outerHTML"
+										hx-select="{{ .Target() }}"
+										hx-sync="closest form:replace"
+										hx-indicator="#{{ .ID }}-indicator"
+									@endif
 								>
 									@foreach(filter.Options as option)
-										<option
-											value="{{ option.Value }}"
-											@if(.Chosen(filter, option))
-												selected
-											@endif
-										>{{ option.Label }}</option>
+										<label class="data-table-facet-option">
+											<input
+												data-part="filter"
+												class="{{ .PartClass("filter", "input") }}"
+												type="checkbox"
+												name="{{ filter.Key }}"
+												value="{{ option.Value }}"
+												@if(.Chosen(filter, option))
+													checked
+												@endif
+												@attributes(.PartAttrs("filter"))
+											>
+											<span>{{ option.Label }}</span>
+										</label>
 									@endforeach
-								</select>
-							</label>
+								</div>
+							</details>
 						@endforeach
-						{!! Button(ButtonProps{Label: .ApplyText(), Type: "submit", Variant: "outline", Size: "sm"}) !!}
+						<noscript>{!! Button(ButtonProps{Label: .ApplyText(), Type: "submit", Variant: "outline", Size: "sm"}) !!}</noscript>
 					@endif
 				</form>
-			@endif
-
-			@if(.Chooses())
-				{{-- A native select: the browser draws the list, the keyboard
-				     opens it, and typing jumps within it. A menu of numbers
-				     would be all three written again. --}}
-				<label class="data-table-sizes">
-					<select
-						data-part="sizes"
-						class="{{ .PartClass("sizes", "select") }}"
-						data-page-size
-						@attributes(.PartAttrs("sizes"))
-					>
-						@foreach(.Sizes() as size)
-							<option
-								value="{{ size }}"
-								@if(size == .PageSize)
-									selected
-								@endif
-							>{{ size }}</option>
-						@endforeach
-					</select>
-					<span>{{ .PerPageText() }}</span>
-				</label>
 			@endif
 
 			@if(.Hideable())
@@ -839,7 +909,7 @@ func (p DataTableProps) PartNames() []string {
 					class="{{ .PartClass("columns", "table-columns") }}"
 					@attributes(.PartAttrs("columns"))
 				>
-					<summary>{{ .ColumnsName() }}</summary>
+					<summary>{{ .ColumnsName() }}{!! icons.CaretDown(icons.Props{}) !!}</summary>
 					<div>
 						@foreach(.Columns as column)
 							@if(column.Hideable && column.Key != "")
@@ -851,6 +921,7 @@ func (p DataTableProps) PartNames() []string {
 									@attributes(.PartAttrs("toggle"))
 								>
 									<input
+										class="input"
 										type="checkbox"
 										data-column-toggle="{{ column.Key }}"
 										@if(!column.Hidden)
@@ -873,29 +944,118 @@ func (p DataTableProps) PartNames() []string {
 	     one thing: where in the list the reader is. The range is a live region
 	     so a page change is announced -- rows changing under somebody is
 	     otherwise silent. --}}
-	@if(.Paged() || .Complete || .Searchable() || .Chooses())
+	@if(.Paged() || .Complete || .Searchable() || .Chooses() || .Selectable())
 		<div
 			data-part="footer"
 			class="{{ .PartClass("footer", "data-table-footer") }}"
 			@attributes(.PartAttrs("footer"))
 		>
-			@if(.Ranged())
-			<p
-				data-part="showing"
-				class="{{ .PartClass("showing", "data-table-showing") }}"
-				role="status"
-				aria-live="polite"
-				@attributes(.PartAttrs("showing"))
-			>{{ .Showing() }}</p>
-			@endif
+			<div class="data-table-status">
+				@if(.Selectable())
+					<p
+						data-part="count"
+						class="{{ .PartClass("count", "data-table-count") }}"
+						role="status"
+						aria-live="polite"
+						data-selected-template="{{ .SelectedLabel }}"
+						@attributes(.PartAttrs("count"))
+					>{{ .SelectedText() }}</p>
+				@endif
+				@if(.Ranged())
+					<p
+						data-part="showing"
+						class="{{ .PartClass("showing", "data-table-showing") }}"
+						role="status"
+						aria-live="polite"
+						@attributes(.PartAttrs("showing"))
+					>{{ .Showing() }}</p>
+				@endif
+			</div>
 
-			@if(.Paged())
-				<div
-					data-part="pagination"
-					class="{{ .PartClass("pagination", "data-table-pagination") }}"
-					@attributes(.PartAttrs("pagination"))
-				>{!! Pagination(.Pager()) !!}</div>
-			@endif
+			<div class="data-table-pager">
+				@if(.Chooses())
+					<label class="data-table-sizes">
+						<span>{{ .PerPageText() }}</span>
+						<select
+							data-part="sizes"
+							class="{{ .PartClass("sizes", "select") }}"
+							data-page-size
+							@attributes(.PartAttrs("sizes"))
+						>
+							@foreach(.Sizes() as size)
+								<option
+									value="{{ size }}"
+									@if(size == .PageSize)
+										selected
+									@endif
+								>{{ size }}</option>
+							@endforeach
+						</select>
+					</label>
+				@endif
+				@if(.Paged() || .Complete)
+					{{-- Where the reader is, and the two steps: a numbered row of
+					     pages is noise on a list that is read top to bottom. The
+					     links stay addresses, so with no script they load the
+					     page from the server. --}}
+					<nav
+						data-part="pagination"
+						class="{{ .PartClass("pagination", "data-table-pagination") }}"
+						aria-label="{{ .Pager().LandmarkName() }}"
+						data-page-of-template="{{ .PageOfTemplate() }}"
+						@if(!.Paged())
+							hidden
+						@endif
+						@attributes(.PartAttrs("pagination"))
+					>
+						<span
+							data-part="page-of"
+							class="{{ .PartClass("page-of", "data-table-page-of") }}"
+							@attributes(.PartAttrs("page-of"))
+						>{{ .PageOfText() }}</span>
+						<a
+							data-part="previous"
+							class="{{ .PartClass("previous", "btn") }}"
+							data-variant="outline"
+							data-size="sm"
+							href="{{ .Pager().PreviousHref() }}"
+							data-page="{{ .PreviousPage() }}"
+							aria-label="{{ .Pager().PreviousName() }}"
+							@if(!.Pager().HasPrevious())
+								aria-disabled="true"
+								tabindex="-1"
+							@endif
+							@if(!.Complete)
+								hx-get="{{ .Pager().PreviousHref() }}"
+								hx-target="{{ .Target() }}"
+								hx-swap="outerHTML"
+								hx-select="{{ .Target() }}"
+							@endif
+							@attributes(.PartAttrs("previous"))
+						>{!! icons.CaretLeft(icons.Props{}) !!}<span>{{ .PreviousText() }}</span></a>
+						<a
+							data-part="next"
+							class="{{ .PartClass("next", "btn") }}"
+							data-variant="outline"
+							data-size="sm"
+							href="{{ .Pager().NextHref() }}"
+							data-page="{{ .NextPage() }}"
+							aria-label="{{ .Pager().NextName() }}"
+							@if(!.Pager().HasNext())
+								aria-disabled="true"
+								tabindex="-1"
+							@endif
+							@if(!.Complete)
+								hx-get="{{ .Pager().NextHref() }}"
+								hx-target="{{ .Target() }}"
+								hx-swap="outerHTML"
+								hx-select="{{ .Target() }}"
+							@endif
+							@attributes(.PartAttrs("next"))
+						><span>{{ .NextText() }}</span>{!! icons.CaretRight(icons.Props{}) !!}</a>
+					</nav>
+				@endif
+			</div>
 		</div>
 	@endif
 </div>

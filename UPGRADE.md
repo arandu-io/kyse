@@ -62,6 +62,17 @@ a `name`, `value`, `type`, `form` or `id` sets the component's own field
 instead.
 
 
+
+## v0.30.2
+
+The data table drawn as shadcn/ui's, as v0.35.0 draws it, for the v0.30 line:
+facets as dashed buttons with a checkbox menu, the columns menu at the end of
+the toolbar, sortable headers with the arrows icon, and a footer with the
+selection, the range, the page size, "Page n of total" and the two steps.
+`TableRow.Facets` lets a complete list filter in the browser, and
+`DataTableLines` gains `PageOf`, `Back` and `Forward`. Copy the starter's
+`data-table.css` and `table.css`; the browser behaviour is in Hesape v0.49.1.
+
 ## v0.30.1
 
 Nothing to change. A data table's search, facets, sortable headers and pages
