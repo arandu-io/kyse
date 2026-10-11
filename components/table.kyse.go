@@ -5,6 +5,8 @@ package components
 import (
 	"strconv"
 	"strings"
+
+	"github.com/arandu-io/kyse/icons"
 )
 
 @go
@@ -198,6 +200,11 @@ type TableRow struct {
 	// Expanded because a leaf has no expanded state at all -- which is what
 	// the attribute being absent means, and is different from it being false.
 	Branch bool
+	// Facets are the row's value for each facet of the list that holds it,
+	// by the facet's Key: {"status": "open"}. A list the browser works
+	// (DataTableProps.Complete) filters by them; a list the server works
+	// never reads them, because the server already sent only what matched.
+	Facets map[string]string
 }
 
 // TableCell is one value, as text or as markup.
@@ -238,6 +245,24 @@ func (p TableProps) AlignClass(i int) string {
 }
 // Selectable is whether rows carry checkboxes.
 func (p TableProps) Selectable() bool { return p.SelectName != "" }
+
+// RowAttrs are the attributes of a row: its facet values, as the attributes
+// the browser filters by (data-facet-status="open"), and then the caller's,
+// which win on a name both write.
+func (p TableProps) RowAttrs(row TableRow) map[string]string {
+	caller := p.PartAttrs("row")
+	if len(row.Facets) == 0 {
+		return caller
+	}
+	out := make(map[string]string, len(row.Facets)+len(caller))
+	for key, value := range row.Facets {
+		out["data-facet-"+key] = value
+	}
+	for key, value := range caller {
+		out[key] = value
+	}
+	return out
+}
 
 // SelectAllName is what the header checkbox is called.
 func (p TableProps) SelectAllName() string {
@@ -496,7 +521,7 @@ func (p TableProps) PartNames() []string {
 		{{-- The count is drawn from what the server sent and kept in step by the
 		     behaviour as boxes are ticked. Both write the same sentence, from
 		     SelectedText, so the two cannot say different things. --}}
-		@if(.Selectable())
+		@if(.Selectable() && !.Composed)
 			<p
 				data-part="count"
 				class="{{ .PartClass("count", "table-count") }}"
@@ -528,6 +553,7 @@ func (p TableProps) PartNames() []string {
 								@attributes(.PartAttrs("toggle"))
 							>
 								<input
+									class="input"
 									type="checkbox"
 									data-column-toggle="{{ column.Key }}"
 									@if(!column.Hidden)
@@ -597,9 +623,7 @@ func (p TableProps) PartNames() []string {
 						>
 							<input
 								data-part="select-all"
-								@if(.PartClass("select-all") != "")
-									class="{{ .PartClass("select-all") }}"
-								@endif
+								class="{{ .PartClass("select-all", "input") }}"
 								type="checkbox"
 								data-select-all
 								aria-label="{{ .SelectAllName() }}"
@@ -642,7 +666,7 @@ func (p TableProps) PartNames() []string {
 										hx-select="{{ .HxTarget }}"
 									@endif
 									@attributes(.PartAttrs("sort"))
-								>{{ column.Label }}</a>
+								>{{ column.Label }}{!! icons.ArrowsDownUp(icons.Props{}) !!}</a>
 							@endif
 							@if(!column.Sortable || !.Sortable() || column.Key == "")
 								{{ column.Label }}
@@ -674,7 +698,7 @@ func (p TableProps) PartNames() []string {
 						@if(.Selectable() && row.Selected)
 							aria-selected="true"
 						@endif
-						@attributes(.PartAttrs("row"))
+						@attributes(.RowAttrs(row))
 					>
 						@if(.Selectable())
 							<td
@@ -684,9 +708,7 @@ func (p TableProps) PartNames() []string {
 							>
 								<input
 									data-part="select"
-									@if(.PartClass("select") != "")
-										class="{{ .PartClass("select") }}"
-									@endif
+									class="{{ .PartClass("select", "input") }}"
 									type="checkbox"
 									name="{{ .SelectName }}"
 									value="{{ row.Key }}"

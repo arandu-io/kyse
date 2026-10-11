@@ -21,6 +21,25 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## v0.35.0
+
+Nothing stops a build. The data table is drawn as shadcn/ui's:
+
+- each facet is a dashed button with what is chosen beside it and a menu of
+  checkboxes, and "Apply filters" is drawn only for a browser with no script;
+- the footer carries the selection count, the range, the page size, "Page n of
+  total" and the two steps, and the table no longer draws its own count when a
+  data table composes it;
+- a sortable header carries the arrows icon, and every checkbox the class
+  `input`.
+
+A complete list filters by its facets in the browser when each row says its
+value: `TableRow.Facets` (`{"status": "open"}`). `DataTableLines` gains
+`PageOf`, `Back` and `Forward`. The stylesheet that draws all of it is the
+starter's `resources/css/basecoat/components/data-table.css` and `table.css`;
+copy both into an application created before this release. kyse now requires
+Hesape v0.54.1, whose script works the facets and the pager.
+
 ## v0.34.2
 
 Nothing to change. A data table's search, facets, sortable headers and pages
