@@ -207,6 +207,9 @@ func (p PaginationProps) PartNames() []string {
 						@if(.HxSwap != "")
 							hx-swap="{{ .HxSwap }}"
 						@endif
+						@if(.HxSwap == "outerHTML" && .HxTarget != "")
+							hx-select="{{ .HxTarget }}"
+						@endif
 						@attributes(.PartAttrs("previous"))
 					>{{ .PreviousName() }}</a>
 				</li>
@@ -247,6 +250,9 @@ func (p PaginationProps) PartNames() []string {
 							@if(.HxSwap != "")
 								hx-swap="{{ .HxSwap }}"
 							@endif
+							@if(.HxSwap == "outerHTML" && .HxTarget != "")
+								hx-select="{{ .HxTarget }}"
+							@endif
 							@attributes(.PartAttrs("link"))
 						>{{ entry.Number }}</a>
 					@endif
@@ -275,6 +281,9 @@ func (p PaginationProps) PartNames() []string {
 						@endif
 						@if(.HxSwap != "")
 							hx-swap="{{ .HxSwap }}"
+						@endif
+						@if(.HxSwap == "outerHTML" && .HxTarget != "")
+							hx-select="{{ .HxTarget }}"
 						@endif
 						@attributes(.PartAttrs("next"))
 					>{{ .NextName() }}</a>
