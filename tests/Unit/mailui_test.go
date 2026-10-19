@@ -133,3 +133,92 @@ func TestNoRemoteImage(t *testing.T) {
 		t.Error("the brand is not in the message at all")
 	}
 }
+
+// TestTheMessageSaysItsLanguage: lang is what a screen reader picks its voice
+// by, and a message in Portuguese announced as English is read with the wrong
+// phonetics from the first word.
+func TestTheMessageSaysItsLanguage(t *testing.T) {
+	out := string(mailui.Layout(mailui.LayoutProps{Lang: "pt-BR", Heading: "Confirme seu e-mail"}))
+	if !strings.Contains(out, `<html lang="pt-BR">`) {
+		t.Errorf("the language given is not on the message:\n%s", out)
+	}
+}
+
+// TestALanguageLeftOutIsEnglish keeps every caller written before Lang existed
+// drawing what it drew.
+func TestALanguageLeftOutIsEnglish(t *testing.T) {
+	out := string(mailui.Layout(mailui.LayoutProps{Heading: "Confirm"}))
+	if !strings.Contains(out, `<html lang="en">`) {
+		t.Errorf("a message with no language is not English:\n%s", out)
+	}
+}
+
+// TestALanguageThatIsNotATagIsRefused: the value lands in an attribute, and a
+// lang that is not a tag is one no reader can use.
+func TestALanguageThatIsNotATagIsRefused(t *testing.T) {
+	for _, lang := range []string{
+		`"><script>alert(1)</script>`,
+		"pt BR",
+		"pt--BR",
+		"-pt",
+		"p",
+		"pt_BR",
+		"português",
+		"en-abcdefghi",
+	} {
+		out := string(mailui.Layout(mailui.LayoutProps{Lang: lang}))
+		if !strings.Contains(out, `<html lang="en">`) || strings.Contains(out, "<script>") {
+			t.Errorf("the language %q was not replaced by the floor:\n%s", lang, out)
+		}
+	}
+	for _, lang := range []string{"en", "pt", "pt-BR", "es-419", "zh-Hant-TW"} {
+		out := string(mailui.Layout(mailui.LayoutProps{Lang: lang}))
+		if !strings.Contains(out, `<html lang="`+lang+`">`) {
+			t.Errorf("the valid language %q was refused", lang)
+		}
+	}
+}
+
+// TestTheFallbackSaysTheSentenceItIsGiven: a message in Portuguese with an
+// English line above the address reads as two messages stitched together.
+func TestTheFallbackSaysTheSentenceItIsGiven(t *testing.T) {
+	const pt = "Se o botão não abrir, copie este endereço:"
+	out := string(mailui.FallbackWith(mailui.FallbackProps{Href: "https://x/verify?t=1&u=2", Text: pt}))
+
+	if !strings.Contains(out, "Se o botão não abrir, copie este endereço:") {
+		t.Errorf("the sentence given is not in the fallback:\n%s", out)
+	}
+	if strings.Contains(out, "If the button") {
+		t.Errorf("the English floor is still drawn beside the sentence given:\n%s", out)
+	}
+	if !strings.Contains(out, "https://x/verify?t=1&amp;u=2") {
+		t.Errorf("the address is not written out:\n%s", out)
+	}
+}
+
+// TestTheFallbackFloorIsTheEnglishItAlwaysWas: Fallback and FallbackWith with
+// no sentence draw the same bytes Fallback drew before the sentence was a
+// field.
+func TestTheFallbackFloorIsTheEnglishItAlwaysWas(t *testing.T) {
+	const href = "https://x/verify"
+	want := `<p style="margin:0;font-size:13px;line-height:1.6;color:#71717a">If the button does not open, copy this address:<br><span style="word-break:break-all">https://x/verify</span></p>`
+
+	if got := string(mailui.Fallback(href)); got != want {
+		t.Errorf("Fallback changed:\n got %s\nwant %s", got, want)
+	}
+	if got := string(mailui.FallbackWith(mailui.FallbackProps{Href: href})); got != want {
+		t.Errorf("FallbackWith with no text is not Fallback:\n got %s\nwant %s", got, want)
+	}
+	if mailui.FallbackWith(mailui.FallbackProps{Text: "Copie:"}) != "" {
+		t.Error("a fallback with no address drew a sentence introducing nothing")
+	}
+}
+
+// TestTheFallbackSentenceIsEscaped: it comes from a catalogue, and a catalogue
+// is a file somebody edits.
+func TestTheFallbackSentenceIsEscaped(t *testing.T) {
+	out := string(mailui.FallbackWith(mailui.FallbackProps{Href: "https://x", Text: `"><script>alert(1)</script>`}))
+	if strings.Contains(out, "<script>") {
+		t.Errorf("the fallback sentence was not escaped:\n%s", out)
+	}
+}

@@ -21,6 +21,14 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## v0.36.0
+
+Nothing stops a build. `mailui` can draw a message in a language other than
+English: `LayoutProps.Lang` sets the `lang` attribute (empty, or anything that
+is not a BCP 47 tag, stays `"en"`), and `FallbackWith(FallbackProps{Href,
+Text})` writes the address under a button after the sentence it is given.
+`Fallback(href)` still writes the English sentence, byte for byte.
+
 ## v0.35.0
 
 Nothing stops a build. The data table is drawn as shadcn/ui's:

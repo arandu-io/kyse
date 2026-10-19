@@ -16,6 +16,20 @@
 //	    Footer: "If you did not create this account, ignore this message.",
 //	}) !!}
 //
+// # Language
+//
+// The package composes two sentences of its own, and both are a floor in
+// English: the lang attribute on the message and the line Fallback writes above
+// the address. A message in another language sets LayoutProps.Lang and draws
+// the address with FallbackWith, passing the line from the catalogue it already
+// translates its heading and paragraphs from:
+//
+//	mailui.Layout(mailui.LayoutProps{Lang: "pt-BR", Heading: "Confirme seu e-mail", ...})
+//	mailui.FallbackWith(mailui.FallbackProps{
+//	    Href: link,
+//	    Text: "Se o botão não abrir, copie este endereço:",
+//	})
+//
 // # Why this is not the component package
 //
 // components/ draws a page: semantic classes, a stylesheet, a cascade. None of
@@ -89,6 +103,12 @@ type LayoutProps struct {
 	// subject. Left empty, it shows the first words of the body -- usually
 	// "Hello there," which tells nobody anything.
 	Preheader string
+	// Lang is the language the message is written in, as a BCP 47 tag: "en",
+	// "pt-BR". It is the lang attribute on the root element, which is what a
+	// screen reader picks its voice by and what a client's translate offer
+	// reads. Empty, or anything that is not a tag, says "en" -- the floor, and
+	// wrong for every message that is not in English.
+	Lang string
 }
 
 // Layout renders the whole message.
@@ -101,7 +121,7 @@ func Layout(p LayoutProps) template.HTML {
 	var b strings.Builder
 
 	fmt.Fprintf(&b, `<!doctype html>
-<html lang="en">
+<html lang="%s">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -109,7 +129,7 @@ func Layout(p LayoutProps) template.HTML {
 <title>%s</title>
 </head>
 <body style="margin:0;padding:24px;background:%s;font-family:%s;color:%s;-webkit-font-smoothing:antialiased">
-`, escape(p.Heading), page, font, ink)
+`, language(p.Lang), escape(p.Heading), page, font, ink)
 
 	if p.Preheader != "" {
 		// Hidden in the message and read by the inbox list. The trailing
@@ -190,20 +210,47 @@ func Button(p ButtonProps) template.HTML {
 		href, ink, escape(p.Label)))
 }
 
-// Fallback is the address under a button, written out.
+// Fallback is the address under a button, written out, introduced in English.
 //
 // It is not redundancy. A button is an <a> with a background, and a client that
 // strips the style leaves a bare word; one that blocks the link leaves nothing.
 // The URL in text is what the reader copies when either happens, and it is the
 // difference between a verification that can be completed and one that cannot.
+//
+// A message in any other language draws it with FallbackWith and its own
+// sentence.
 func Fallback(href string) template.HTML {
-	if href == "" {
+	return FallbackWith(FallbackProps{Href: href})
+}
+
+// FallbackProps is the address under a button and the sentence that
+// introduces it.
+type FallbackProps struct {
+	// Href is the address, written out as text and never as a link.
+	Href string
+	// Text is the sentence above the address: "If the button does not open,
+	// copy this address:". Empty says that English sentence -- a floor, and
+	// wrong for every message that is not in English, which passes the line
+	// from the catalogue it already translates its other strings from.
+	Text string
+}
+
+// FallbackWith is Fallback in the message's own language.
+func FallbackWith(p FallbackProps) template.HTML {
+	if p.Href == "" {
 		return ""
 	}
+	text := p.Text
+	if text == "" {
+		text = fallbackText
+	}
 	return template.HTML(fmt.Sprintf(
-		`<p style="margin:0;font-size:13px;line-height:1.6;color:%s">If the button does not open, copy this address:<br><span style="word-break:break-all">%s</span></p>`,
-		muted, escape(href)))
+		`<p style="margin:0;font-size:13px;line-height:1.6;color:%s">%s<br><span style="word-break:break-all">%s</span></p>`,
+		muted, escape(text), escape(p.Href)))
 }
+
+// fallbackText is the English floor under FallbackProps.Text.
+const fallbackText = "If the button does not open, copy this address:"
 
 // Small is the quiet line: an expiry, a note, a condition.
 func Small(text string) template.HTML {
@@ -224,6 +271,29 @@ func Divider() template.HTML {
 	return template.HTML(fmt.Sprintf(
 		`<table role="presentation" width="100%%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px"><tr><td style="border-top:1px solid %s;font-size:0;line-height:0">&nbsp;</td></tr></table>`,
 		rule))
+}
+
+// language is the lang attribute: the tag the caller gave when it is one, and
+// "en" when it is empty or is not.
+//
+// Checked rather than escaped. Escaping would keep a value from ending the
+// attribute, but a lang that is not a tag is one no reader can use, and the
+// floor is a better answer than a sentence in an attribute.
+func language(tag string) string {
+	if tag == "" || len(tag) > 35 {
+		return "en"
+	}
+	for i, part := range strings.Split(tag, "-") {
+		if part == "" || len(part) > 8 || (i == 0 && len(part) < 2) {
+			return "en"
+		}
+		for _, r := range part {
+			if !(r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9') {
+				return "en"
+			}
+		}
+	}
+	return tag
 }
 
 // escape is html/template's escaping, applied by hand.
