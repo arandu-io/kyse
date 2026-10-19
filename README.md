@@ -75,15 +75,15 @@ space and a 500.
 
 | group | components |
 |---|---|
-| Actions | `Button` `ButtonGroup` `SplitButton` `CopyButton` `Link` `DeleteRow` `OptimisticToggle` |
+| Actions | `Button` `ButtonGroup` `SplitButton` `CopyButton` `Link` `DeleteRow` `OptimisticToggle` `DialogTrigger` |
 | Forms | `Field` `Input` `Label` `Textarea` `Checkbox` `RadioGroup` `Switch` `Select` `Combobox` `Autocomplete` `InputGroup` `RangeSlider` `NumberInput` `Password` `Masked` `OneTimeCode` `DateTimePicker` `Calendar` `ColorPicker` `FileUpload` `SegmentedControl` `Rating` `EditInPlace` `Output` `ActiveSearch` |
 | Layout | `Card` `ContainerCard` `Item` `Separator` `Sidebar` `Toolbar` `Menubar` `Figure` |
 | Display | `Avatar` `Badge` `Kbd` `Skeleton` `Table` `DataTable` `StatCard` `Status` `Meter` `Highlight` `RelativeTime` `ResponsiveImage` `MediaPlayer` `Carousel` `Feed` `Tree` |
-| Feedback | `Alert` `Toast` `Progress` `Empty` `Dialog` |
+| Feedback | `Alert` `Toast` `Progress` `Empty` `Dialog` `FormDialog` |
 | Overlays | `Drawer` `Popover` `HoverCard` `Tooltip` `DropdownMenu` `Command` `Collapsible` |
 | Navigation | `Accordion` `Breadcrumb` `Tabs` `Pagination` `SkipLink` `ThemeToggle` `LoadMore` `LazyLoad` |
 
-Seventy-six, one per `components/*.kyse.go`. What is here is what has been
+Seventy-eight, one per `components/*.kyse.go`. What is here is what has been
 adapted, not what is planned.
 
 An alert dialog is not a component of its own: it is the `Alert` field on
@@ -95,6 +95,55 @@ Two more packages travel in the same module and neither draws a page. `mailui`
 draws the messages an application sends, in tables and inline attributes,
 because a stylesheet does not survive a mail client. `fonts` serves the faces a
 project vendored and writes the preload links for them.
+
+## A form in a dialog
+
+`FormDialog` is a create or edit form drawn over the list it belongs to -- "New
+discount" over the discounts -- and `DialogTrigger` opens it. The trigger is a
+link to the page that holds the same form, so a browser that never runs the
+script follows it and the form works as a page:
+
+```go
+{!! components.DialogTrigger(components.DialogTriggerProps{
+	Dialog: "new-discount",
+	Label:  "New discount",
+	Href:   "/discounts/new",
+}) !!}
+
+{!! components.FormDialog(components.FormDialogProps{
+	ID:          "new-discount",
+	Title:       "New discount",
+	Description: "Customers apply it at checkout.",
+	Action:      "/discounts",
+	Token:       .Page.CSRFToken(),
+	Page:        .Page,
+	SubmitLabel: "Create discount",
+	Body: []template.HTML{
+		components.Field(components.FieldProps{Name: "name", Label: "Name", Page: .Page}),
+		components.Field(components.FieldProps{Name: "amount", Label: "Amount", Type: "number", Page: .Page}),
+	},
+}) !!}
+```
+
+The form posts to the same action as the page does, with no fragment and no
+script. When the handler refuses it, the framework sends the person back to
+where they posted from -- the list -- with the messages and what they typed.
+The list is drawn again, each field finds its own message through `Page`, and
+the dialog opens itself: it posts its `ID` in the hidden `_dialog` field, that
+value comes back with the rest of the typed input, and the dialog whose ID it
+names is drawn open with the `form-dialog` behaviour, which Hesape's script
+turns into a modal with the cursor on the first refused field. A handler that
+sends the person back with a sentence instead of with what they typed sets
+`Open`. The behaviour needs Hesape v0.66.0 or later; without it the dialog is
+shown in place, not as a modal.
+
+Esc, Cancel and the close button close it, and focus returns to the trigger.
+Enter in a field submits the form, because Cancel and the close button belong to
+a second, empty `method="dialog"` form. `Size` is `sm`, `md` or `lg` from the
+small breakpoint up; below it the dialog takes the whole screen. A confirmation
+with something to fill in -- "Cancel subscription" with a reason -- is the same
+component with `Alert: true` and `SubmitVariant: "destructive"`; one with
+nothing to fill in is `Dialog`.
 
 ## Icons
 

@@ -21,6 +21,8 @@ import "strings"
 // It confirms rather than composes. A dialog that could hold anything would
 // have to take markup as a string, which is where escaping stops being
 // guaranteed -- and "are you sure" is what a dialog is for nine times in ten.
+// The tenth, a form over the page it belongs to, is FormDialog, which takes the
+// output of other components rather than a string.
 type DialogProps struct {
 	// ComponentProps is the class, attributes and parts the caller adds.
 	ComponentProps

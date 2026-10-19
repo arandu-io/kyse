@@ -113,6 +113,8 @@ func TestEveryComponentRenders(t *testing.T) {
 		}))},
 		{"Dialog", string(components.Dialog(components.DialogProps{ID: "d", Title: "Sure?"}))},
 		{"Drawer", string(components.Drawer(components.DrawerProps{ID: "nav", Title: "Menu"}))},
+		{"FormDialog", string(components.FormDialog(components.FormDialogProps{ID: "new", Title: "New discount", Action: "/discounts"}))},
+		{"DialogTrigger", string(components.DialogTrigger(components.DialogTriggerProps{Dialog: "new", Label: "New discount", Href: "/discounts/new"}))},
 		{"DropdownMenu", string(components.DropdownMenu(components.DropdownMenuProps{
 			Label: "Actions", Items: []components.MenuItem{{Label: "Rename"}},
 		}))},
@@ -328,6 +330,13 @@ func TestAPropIsEscaped(t *testing.T) {
 		})),
 		"ButtonGroup": string(components.ButtonGroup(components.ButtonGroupProps{
 			Label: payload, Buttons: []components.ButtonProps{{Label: payload}},
+		})),
+		"FormDialog": string(components.FormDialog(components.FormDialogProps{
+			ID: "x", Title: payload, Description: payload, SubmitLabel: payload, CancelLabel: payload,
+			CloseLabel: payload, Action: "/x", Token: payload,
+		})),
+		"DialogTrigger": string(components.DialogTrigger(components.DialogTriggerProps{
+			Dialog: payload, Label: payload, Href: "/x",
 		})),
 	} {
 		if strings.Contains(html, payload) {

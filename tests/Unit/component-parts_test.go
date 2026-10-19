@@ -192,6 +192,33 @@ var extensible = []struct {
 		components.DrawerProps{}.PartNames,
 	},
 	{
+		"FormDialog",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.FormDialog(components.FormDialogProps{
+				ComponentProps: c,
+				ID:             "new-discount",
+				Title:          "New discount",
+				Description:    "It applies at checkout.",
+				Action:         "/discounts",
+				Token:          "t",
+			}))}
+		},
+		components.FormDialogProps{}.PartNames,
+	},
+	{
+		"DialogTrigger",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.DialogTrigger(components.DialogTriggerProps{
+				ComponentProps: c,
+				Dialog:         "new-discount",
+				Label:          "New discount",
+				Href:           "/discounts/new",
+				Icon:           template.HTML("<svg></svg>"),
+			}))}
+		},
+		components.DialogTriggerProps{}.PartNames,
+	},
+	{
 		"Password",
 		func(c components.ComponentProps) []string {
 			props := components.PasswordProps{
