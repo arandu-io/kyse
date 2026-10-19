@@ -1,5 +1,9 @@
 # Release Notes
 
+## [v0.36.0](https://github.com/arandu-io/kyse/compare/v0.35.0...v0.36.0) - 2026-10-19
+
+**Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.35.0...v0.36.0
+
 ## [v0.34.1](https://github.com/arandu-io/kyse/compare/v0.34.0...v0.34.1) - 2026-10-10
 
 **Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.34.0...v0.34.1
