@@ -15,6 +15,9 @@ import "html/template"
 // script follows the link, and the form is posted and refused there like any
 // other: nothing about the dialog has to work for the form to.
 //
+// It opts out of hx-boost: a boosted link is answered by htmx before the
+// script that opens the dialog ever sees the click.
+//
 // Without Href it is a button, for a dialog that has no page behind it -- a
 // confirmation, which a page without the script cannot ask anyway.
 //
@@ -42,6 +45,11 @@ type DialogTriggerProps struct {
 func (p DialogTriggerProps) PartNames() []string { return []string{"root", "icon"} }
 @endgo
 
+{{-- hx-boost="false" because a layout that boosts its body boosts every link
+     in it, and htmx answers the click on the link itself, before the click
+     reaches the document the dialog script listens on: the page navigated to
+     the form instead of opening it. Opting the one link out is the whole fix;
+     without the script the link is an ordinary link either way. --}}
 @if(.Href != "")
 	<a
 		data-part="root"
@@ -49,6 +57,7 @@ func (p DialogTriggerProps) PartNames() []string { return []string{"root", "icon
 		class="{{ .RootClass("btn") }}"
 		data-dialog-open="{{ .Dialog }}"
 		aria-haspopup="dialog"
+		hx-boost="false"
 		@if(.Variant != "")
 			data-variant="{{ .Variant }}"
 		@endif

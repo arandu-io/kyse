@@ -26,6 +26,9 @@ import (
 // script follows the link, and the form is posted and refused there like any
 // other: nothing about the dialog has to work for the form to.
 //
+// It opts out of hx-boost: a boosted link is answered by htmx before the
+// script that opens the dialog ever sees the click.
+//
 // Without Href it is a button, for a dialog that has no page behind it -- a
 // confirmation, which a page without the script cannot ask anyway.
 //
@@ -52,7 +55,7 @@ type DialogTriggerProps struct {
 // PartNames are the parts this component publishes.
 func (p DialogTriggerProps) PartNames() []string { return []string{"root", "icon"} }
 
-//line components/dialog-trigger.go:56
+//line components/dialog-trigger.go:59
 
 // DialogTrigger renders the dialog-trigger component.
 func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
@@ -65,9 +68,9 @@ func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/dialog-trigger.kyse.go:45
+//line components/dialog-trigger.kyse.go:53
 	if kyse__d.Href != "" {
-//line components/dialog-trigger.go:71
+//line components/dialog-trigger.go:74
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t<a\n")
 		}
@@ -79,11 +82,11 @@ func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 			var kyse__v1 string
-//line components/dialog-trigger.kyse.go:48
+//line components/dialog-trigger.kyse.go:56
 			kyse__v1, kyse__err = kyse__view.TextURL(kyse__d.Href)
-//line components/dialog-trigger.go:85
+//line components/dialog-trigger.go:88
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/dialog-trigger.kyse.go:48", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/dialog-trigger.kyse.go:56", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 			}
@@ -95,9 +98,9 @@ func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/dialog-trigger.kyse.go:49
+//line components/dialog-trigger.kyse.go:57
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("btn")))
-//line components/dialog-trigger.go:101
+//line components/dialog-trigger.go:104
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -106,9 +109,9 @@ func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-dialog-open=\"")
 		}
 		if kyse__err == nil {
-//line components/dialog-trigger.kyse.go:50
+//line components/dialog-trigger.kyse.go:58
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Dialog))
-//line components/dialog-trigger.go:112
+//line components/dialog-trigger.go:115
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -116,46 +119,49 @@ func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-haspopup=\"dialog\"\n")
 		}
-//line components/dialog-trigger.kyse.go:52
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\thx-boost=\"false\"\n")
+		}
+//line components/dialog-trigger.kyse.go:61
 		if kyse__d.Variant != "" {
-//line components/dialog-trigger.go:122
+//line components/dialog-trigger.go:128
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-variant=\"")
 			}
 			if kyse__err == nil {
-//line components/dialog-trigger.kyse.go:53
+//line components/dialog-trigger.kyse.go:62
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Variant))
-//line components/dialog-trigger.go:129
+//line components/dialog-trigger.go:135
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/dialog-trigger.kyse.go:55
+//line components/dialog-trigger.kyse.go:64
 		if kyse__d.Size != "" {
-//line components/dialog-trigger.go:137
+//line components/dialog-trigger.go:143
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-size=\"")
 			}
 			if kyse__err == nil {
-//line components/dialog-trigger.kyse.go:56
+//line components/dialog-trigger.kyse.go:65
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Size))
-//line components/dialog-trigger.go:144
+//line components/dialog-trigger.go:150
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/dialog-trigger.kyse.go:58
+//line components/dialog-trigger.kyse.go:67
 		if kyse__d.IconOnly {
-//line components/dialog-trigger.go:152
+//line components/dialog-trigger.go:158
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-label=\"")
 			}
 			if kyse__err == nil {
-//line components/dialog-trigger.kyse.go:59
+//line components/dialog-trigger.kyse.go:68
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
-//line components/dialog-trigger.go:159
+//line components/dialog-trigger.go:165
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -163,11 +169,11 @@ func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 			var kyse__v2 string
-//line components/dialog-trigger.kyse.go:61
+//line components/dialog-trigger.kyse.go:70
 			kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/dialog-trigger.go:169
+//line components/dialog-trigger.go:175
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/dialog-trigger.kyse.go:61", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/dialog-trigger.kyse.go:70", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 			}
@@ -175,25 +181,25 @@ func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
 		}
-//line components/dialog-trigger.kyse.go:63
+//line components/dialog-trigger.kyse.go:72
 		if kyse__d.Icon != "" {
-//line components/dialog-trigger.go:181
+//line components/dialog-trigger.go:187
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<span\n")
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"icon\"\n")
 			}
-//line components/dialog-trigger.kyse.go:66
+//line components/dialog-trigger.kyse.go:75
 			if kyse__d.PartClass("icon") != "" {
-//line components/dialog-trigger.go:190
+//line components/dialog-trigger.go:196
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 				}
 				if kyse__err == nil {
-//line components/dialog-trigger.kyse.go:67
+//line components/dialog-trigger.kyse.go:76
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("icon")))
-//line components/dialog-trigger.go:197
+//line components/dialog-trigger.go:203
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -204,11 +210,11 @@ func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v3 string
-//line components/dialog-trigger.kyse.go:70
+//line components/dialog-trigger.kyse.go:79
 				kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("icon"))
-//line components/dialog-trigger.go:210
+//line components/dialog-trigger.go:216
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/dialog-trigger.kyse.go:70", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/dialog-trigger.kyse.go:79", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 				}
@@ -217,25 +223,25 @@ func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/dialog-trigger.kyse.go:71
+//line components/dialog-trigger.kyse.go:80
 				var kyse__v4 kyse__template.HTML = kyse__d.Icon
-//line components/dialog-trigger.go:223
+//line components/dialog-trigger.go:229
 				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v4))
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
 			}
 		}
-//line components/dialog-trigger.kyse.go:73
+//line components/dialog-trigger.kyse.go:82
 		if !kyse__d.IconOnly {
-//line components/dialog-trigger.go:232
+//line components/dialog-trigger.go:238
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t")
 			}
 			if kyse__err == nil {
-//line components/dialog-trigger.kyse.go:74
+//line components/dialog-trigger.kyse.go:83
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
-//line components/dialog-trigger.go:239
+//line components/dialog-trigger.go:245
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
@@ -258,9 +264,9 @@ func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/dialog-trigger.kyse.go:81
+//line components/dialog-trigger.kyse.go:90
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("btn")))
-//line components/dialog-trigger.go:264
+//line components/dialog-trigger.go:270
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -269,9 +275,9 @@ func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-dialog-open=\"")
 		}
 		if kyse__err == nil {
-//line components/dialog-trigger.kyse.go:82
+//line components/dialog-trigger.kyse.go:91
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Dialog))
-//line components/dialog-trigger.go:275
+//line components/dialog-trigger.go:281
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -279,46 +285,46 @@ func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-haspopup=\"dialog\"\n")
 		}
-//line components/dialog-trigger.kyse.go:84
+//line components/dialog-trigger.kyse.go:93
 		if kyse__d.Variant != "" {
-//line components/dialog-trigger.go:285
+//line components/dialog-trigger.go:291
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-variant=\"")
 			}
 			if kyse__err == nil {
-//line components/dialog-trigger.kyse.go:85
+//line components/dialog-trigger.kyse.go:94
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Variant))
-//line components/dialog-trigger.go:292
+//line components/dialog-trigger.go:298
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/dialog-trigger.kyse.go:87
+//line components/dialog-trigger.kyse.go:96
 		if kyse__d.Size != "" {
-//line components/dialog-trigger.go:300
+//line components/dialog-trigger.go:306
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-size=\"")
 			}
 			if kyse__err == nil {
-//line components/dialog-trigger.kyse.go:88
+//line components/dialog-trigger.kyse.go:97
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Size))
-//line components/dialog-trigger.go:307
+//line components/dialog-trigger.go:313
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
-//line components/dialog-trigger.kyse.go:90
+//line components/dialog-trigger.kyse.go:99
 		if kyse__d.IconOnly {
-//line components/dialog-trigger.go:315
+//line components/dialog-trigger.go:321
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-label=\"")
 			}
 			if kyse__err == nil {
-//line components/dialog-trigger.kyse.go:91
+//line components/dialog-trigger.kyse.go:100
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
-//line components/dialog-trigger.go:322
+//line components/dialog-trigger.go:328
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -326,11 +332,11 @@ func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 			var kyse__v5 string
-//line components/dialog-trigger.kyse.go:93
+//line components/dialog-trigger.kyse.go:102
 			kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/dialog-trigger.go:332
+//line components/dialog-trigger.go:338
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/dialog-trigger.kyse.go:93", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/dialog-trigger.kyse.go:102", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 			}
@@ -338,25 +344,25 @@ func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
 		}
-//line components/dialog-trigger.kyse.go:95
+//line components/dialog-trigger.kyse.go:104
 		if kyse__d.Icon != "" {
-//line components/dialog-trigger.go:344
+//line components/dialog-trigger.go:350
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<span\n")
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"icon\"\n")
 			}
-//line components/dialog-trigger.kyse.go:98
+//line components/dialog-trigger.kyse.go:107
 			if kyse__d.PartClass("icon") != "" {
-//line components/dialog-trigger.go:353
+//line components/dialog-trigger.go:359
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 				}
 				if kyse__err == nil {
-//line components/dialog-trigger.kyse.go:99
+//line components/dialog-trigger.kyse.go:108
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("icon")))
-//line components/dialog-trigger.go:360
+//line components/dialog-trigger.go:366
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -367,11 +373,11 @@ func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v6 string
-//line components/dialog-trigger.kyse.go:102
+//line components/dialog-trigger.kyse.go:111
 				kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("icon"))
-//line components/dialog-trigger.go:373
+//line components/dialog-trigger.go:379
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/dialog-trigger.kyse.go:102", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/dialog-trigger.kyse.go:111", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 				}
@@ -380,25 +386,25 @@ func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/dialog-trigger.kyse.go:103
+//line components/dialog-trigger.kyse.go:112
 				var kyse__v7 kyse__template.HTML = kyse__d.Icon
-//line components/dialog-trigger.go:386
+//line components/dialog-trigger.go:392
 				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v7))
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
 			}
 		}
-//line components/dialog-trigger.kyse.go:105
+//line components/dialog-trigger.kyse.go:114
 		if !kyse__d.IconOnly {
-//line components/dialog-trigger.go:395
+//line components/dialog-trigger.go:401
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t")
 			}
 			if kyse__err == nil {
-//line components/dialog-trigger.kyse.go:106
+//line components/dialog-trigger.kyse.go:115
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
-//line components/dialog-trigger.go:402
+//line components/dialog-trigger.go:408
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
