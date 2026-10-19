@@ -31,6 +31,11 @@ type FileUploadProps struct {
 	Page Page
 	// Name is the field name, and the id the label points at.
 	Name string
+	// ID is the id the markup carries, and the id the label, the message and
+	// the hint hang off. Empty uses Name. Two forms on one page that ask for the
+	// same Name -- two dialogs that each want a reason -- need one each, or the
+	// second label points at the first box.
+	ID string
 	// Label is the text above the area.
 	Label string
 	// Accept is what the picker offers, as extensions or MIME types:
@@ -76,7 +81,7 @@ func (p FileUploadProps) Region() string {
 	if p.ListID != "" {
 		return p.ListID
 	}
-	return p.Name + "-files"
+	return p.ElementID() + "-files"
 }
 
 // FieldName is what the control submits under. A multiple file input submits
@@ -100,10 +105,10 @@ func (p FileUploadProps) Message() string {
 // DescribedBy is the id of whatever is explaining the field.
 func (p FileUploadProps) DescribedBy() string {
 	if p.Message() != "" {
-		return p.Name + "-error"
+		return p.ElementID() + "-error"
 	}
 	if p.Hint != "" {
-		return p.Name + "-hint"
+		return p.ElementID() + "-hint"
 	}
 	return ""
 }
@@ -121,6 +126,14 @@ func (p FileUploadProps) RootAttrs() map[string]string {
 func (p FileUploadProps) PartNames() []string {
 	return []string{"root", "label", "dropzone", "input", "prompt", "list", "hint", "message"}
 }
+
+// ElementID is the id the markup carries: ID, or Name when ID is empty.
+func (p FileUploadProps) ElementID() string {
+	if p.ID != "" {
+		return p.ID
+	}
+	return p.Name
+}
 @endgo
 
 <div
@@ -131,7 +144,7 @@ func (p FileUploadProps) PartNames() []string {
 	<label
 		data-part="label"
 		class="{{ .PartClass("label", "label") }}"
-		for="{{ .Name }}"
+		for="{{ .ElementID() }}"
 		@attributes(.PartAttrs("label"))
 	>{{ .Label }}</label>
 
@@ -141,7 +154,7 @@ func (p FileUploadProps) PartNames() []string {
 	<label
 		data-part="dropzone"
 		class="{{ .PartClass("dropzone", "file-upload") }}"
-		for="{{ .Name }}"
+		for="{{ .ElementID() }}"
 		data-dropzone
 		@attributes(.PartAttrs("dropzone"))
 	>
@@ -149,7 +162,7 @@ func (p FileUploadProps) PartNames() []string {
 			data-part="input"
 			class="{{ .PartClass("input", "sr-only") }}"
 			type="file"
-			id="{{ .Name }}"
+			id="{{ .ElementID() }}"
 			name="{{ .FieldName() }}"
 			@if(.Accept != "")
 				accept="{{ .Accept }}"
@@ -204,7 +217,7 @@ func (p FileUploadProps) PartNames() []string {
 	@if(.Message() != "")
 		<p
 			data-part="message"
-			id="{{ .Name }}-error"
+			id="{{ .ElementID() }}-error"
 			class="{{ .PartClass("message", "text-destructive text-sm") }}"
 			@attributes(.PartAttrs("message"))
 		>{{ .Message() }}</p>
@@ -213,7 +226,7 @@ func (p FileUploadProps) PartNames() []string {
 		@if(.Hint != "")
 			<p
 				data-part="hint"
-				id="{{ .Name }}-hint"
+				id="{{ .ElementID() }}-hint"
 				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
 				@attributes(.PartAttrs("hint"))
 			>{{ .Hint }}</p>

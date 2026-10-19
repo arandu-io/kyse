@@ -40,6 +40,11 @@ type ComboboxProps struct {
 	// Name is the form field name, the id everything else is hung off, and
 	// what Page is asked about.
 	Name string
+	// ID is the id the markup carries, and the id the label, the message and
+	// the hint hang off. Empty uses Name. Two forms on one page that ask for the
+	// same Name -- two dialogs that each want a reason -- need one each, or the
+	// second label points at the first box.
+	ID string
 	// Label is the text above the box.
 	Label string
 	// SearchURL is where the list comes from. Empty draws nothing at all.
@@ -113,13 +118,13 @@ func (o ComboboxOption) Text() string {
 // the earlier one would answer for both. Name is already required to be unique
 // per page for what is submitted, and this is the second reason.
 func (p ComboboxProps) OptionID(at int) string {
-	return p.Name + "-option-" + strconv.Itoa(at)
+	return p.ElementID() + "-option-" + strconv.Itoa(at)
 }
 
 // ListboxID names the list, which is what the box says it controls and where
 // the server's answer is swapped in.
 func (p ComboboxProps) ListboxID() string {
-	return p.Name + "-listbox"
+	return p.ElementID() + "-listbox"
 }
 
 // ListboxTarget is the same list as a selector, for the request.
@@ -132,7 +137,7 @@ func (p ComboboxProps) Query() string {
 	if p.QueryParam != "" {
 		return p.QueryParam
 	}
-	return p.Name + "-query"
+	return p.ElementID() + "-query"
 }
 
 // Trigger is when the server is asked: after typing stops, and only when what
@@ -182,16 +187,24 @@ func (p ComboboxProps) CurrentLabel() string {
 // hint are announced rather than only shown.
 func (p ComboboxProps) DescribedBy() string {
 	if p.Message() != "" {
-		return p.Name + "-error"
+		return p.ElementID() + "-error"
 	}
 	if p.Hint != "" {
-		return p.Name + "-hint"
+		return p.ElementID() + "-hint"
 	}
 	return ""
 }
 // PartNames are the parts this component publishes.
 func (p ComboboxProps) PartNames() []string {
 	return []string{"root", "label", "group", "input", "panel", "listbox", "option", "message", "hint"}
+}
+
+// ElementID is the id the markup carries: ID, or Name when ID is empty.
+func (p ComboboxProps) ElementID() string {
+	if p.ID != "" {
+		return p.ID
+	}
+	return p.Name
 }
 @endgo
 
@@ -204,7 +217,7 @@ func (p ComboboxProps) PartNames() []string {
 		<label
 			data-part="label"
 			class="{{ .PartClass("label", "label") }}"
-			for="{{ .Name }}"
+			for="{{ .ElementID() }}"
 			@attributes(.PartAttrs("label"))
 		>{{ .Label }}</label>
 
@@ -227,7 +240,7 @@ func (p ComboboxProps) PartNames() []string {
 				@endif
 				type="text"
 				role="combobox"
-				id="{{ .Name }}"
+				id="{{ .ElementID() }}"
 				name="{{ .Query() }}"
 				value="{{ .CurrentLabel() }}"
 				autocomplete="off"
@@ -315,7 +328,7 @@ func (p ComboboxProps) PartNames() []string {
 		@if(.Message() != "")
 			<p
 				data-part="message"
-				id="{{ .Name }}-error"
+				id="{{ .ElementID() }}-error"
 				class="{{ .PartClass("message", "text-destructive text-sm") }}"
 				@attributes(.PartAttrs("message"))
 			>{{ .Message() }}</p>
@@ -324,7 +337,7 @@ func (p ComboboxProps) PartNames() []string {
 			@if(.Hint != "")
 				<p
 					data-part="hint"
-					id="{{ .Name }}-hint"
+					id="{{ .ElementID() }}-hint"
 					class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
 					@attributes(.PartAttrs("hint"))
 				>{{ .Hint }}</p>

@@ -23,6 +23,11 @@ type RadioGroupProps struct {
 	// Name is the form field name shared by every radio, which is what makes
 	// the choice exclusive, and what Page is asked about.
 	Name string
+	// ID is the id the markup carries, and the id the label, the message and
+	// the hint hang off. Empty uses Name. Two forms on one page that ask for the
+	// same Name -- two dialogs that each want a reason -- need one each, or the
+	// second label points at the first box.
+	ID string
 	// Label names the whole set. It is not a label element, because a label
 	// element names one control and this names several.
 	Label string
@@ -76,7 +81,7 @@ func (p RadioGroupProps) OptionID(value string) string {
 			return '-'
 		}
 	}, value)
-	return p.Name + "-" + folded
+	return p.ElementID() + "-" + folded
 }
 
 // Message is what validation left for this set, or empty.
@@ -100,16 +105,24 @@ func (p RadioGroupProps) Current() string {
 // hint are announced rather than only shown.
 func (p RadioGroupProps) DescribedBy() string {
 	if p.Message() != "" {
-		return p.Name + "-error"
+		return p.ElementID() + "-error"
 	}
 	if p.Hint != "" {
-		return p.Name + "-hint"
+		return p.ElementID() + "-hint"
 	}
 	return ""
 }
 // PartNames are the parts this component publishes.
 func (p RadioGroupProps) PartNames() []string {
 	return []string{"root", "label", "group", "option", "input", "option-label", "message", "hint"}
+}
+
+// ElementID is the id the markup carries: ID, or Name when ID is empty.
+func (p RadioGroupProps) ElementID() string {
+	if p.ID != "" {
+		return p.ID
+	}
+	return p.Name
 }
 @endgo
 
@@ -124,7 +137,7 @@ func (p RadioGroupProps) PartNames() []string {
 	<span
 		data-part="label"
 		class="{{ .PartClass("label", "label") }}"
-		id="{{ .Name }}-label"
+		id="{{ .ElementID() }}-label"
 		@attributes(.PartAttrs("label"))
 	>{{ .Label }}</span>
 	<div
@@ -133,7 +146,7 @@ func (p RadioGroupProps) PartNames() []string {
 			class="{{ .PartClass("group") }}"
 		@endif
 		role="radiogroup"
-		aria-labelledby="{{ .Name }}-label"
+		aria-labelledby="{{ .ElementID() }}-label"
 		@if(.DescribedBy() != "")
 			aria-describedby="{{ .DescribedBy() }}"
 		@endif
@@ -193,7 +206,7 @@ func (p RadioGroupProps) PartNames() []string {
 	@if(.Message() != "")
 		<p
 			data-part="message"
-			id="{{ .Name }}-error"
+			id="{{ .ElementID() }}-error"
 			class="{{ .PartClass("message", "text-destructive text-sm") }}"
 			@attributes(.PartAttrs("message"))
 		>{{ .Message() }}</p>
@@ -202,7 +215,7 @@ func (p RadioGroupProps) PartNames() []string {
 		@if(.Hint != "")
 			<p
 				data-part="hint"
-				id="{{ .Name }}-hint"
+				id="{{ .ElementID() }}-hint"
 				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
 				@attributes(.PartAttrs("hint"))
 			>{{ .Hint }}</p>

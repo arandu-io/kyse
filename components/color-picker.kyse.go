@@ -28,6 +28,11 @@ type ColorPickerProps struct {
 	Page Page
 	// Name is the field name, and the id the label points at.
 	Name string
+	// ID is the id the markup carries, and the id the label, the message and
+	// the hint hang off. Empty uses Name. Two forms on one page that ask for the
+	// same Name -- two dialogs that each want a reason -- need one each, or the
+	// second label points at the first box.
+	ID string
 	// Label is the text above it.
 	Label string
 	// Value is the colour, as "#1d4ed8". Empty is black, because the element
@@ -66,7 +71,7 @@ func (p ColorPickerProps) ListID() string {
 	if len(p.Swatches) == 0 {
 		return ""
 	}
-	return p.Name + "-swatches"
+	return p.ElementID() + "-swatches"
 }
 
 // Message is the rejection for this field, and empty when there is none.
@@ -80,10 +85,10 @@ func (p ColorPickerProps) Message() string {
 // DescribedBy is the id of whatever is explaining the field.
 func (p ColorPickerProps) DescribedBy() string {
 	if p.Message() != "" {
-		return p.Name + "-error"
+		return p.ElementID() + "-error"
 	}
 	if p.Hint != "" {
-		return p.Name + "-hint"
+		return p.ElementID() + "-hint"
 	}
 	return ""
 }
@@ -91,6 +96,14 @@ func (p ColorPickerProps) DescribedBy() string {
 // PartNames are the parts this component publishes.
 func (p ColorPickerProps) PartNames() []string {
 	return []string{"root", "label", "group", "input", "readout", "message", "hint"}
+}
+
+// ElementID is the id the markup carries: ID, or Name when ID is empty.
+func (p ColorPickerProps) ElementID() string {
+	if p.ID != "" {
+		return p.ID
+	}
+	return p.Name
 }
 @endgo
 
@@ -102,7 +115,7 @@ func (p ColorPickerProps) PartNames() []string {
 	<label
 		data-part="label"
 		class="{{ .PartClass("label", "label") }}"
-		for="{{ .Name }}"
+		for="{{ .ElementID() }}"
 		@attributes(.PartAttrs("label"))
 	>{{ .Label }}</label>
 
@@ -117,7 +130,7 @@ func (p ColorPickerProps) PartNames() []string {
 				class="{{ .PartClass("input") }}"
 			@endif
 			type="color"
-			id="{{ .Name }}"
+			id="{{ .ElementID() }}"
 			name="{{ .Name }}"
 			value="{{ .Current() }}"
 			@if(.ListID() != "")
@@ -142,7 +155,7 @@ func (p ColorPickerProps) PartNames() []string {
 			<output
 				data-part="readout"
 				class="{{ .PartClass("readout", "text-muted-foreground font-mono text-sm uppercase") }}"
-				for="{{ .Name }}"
+				for="{{ .ElementID() }}"
 				aria-live="polite"
 				@attributes(.PartAttrs("readout"))
 			>{{ .Current() }}</output>
@@ -160,7 +173,7 @@ func (p ColorPickerProps) PartNames() []string {
 	@if(.Message() != "")
 		<p
 			data-part="message"
-			id="{{ .Name }}-error"
+			id="{{ .ElementID() }}-error"
 			class="{{ .PartClass("message", "text-destructive text-sm") }}"
 			@attributes(.PartAttrs("message"))
 		>{{ .Message() }}</p>
@@ -169,7 +182,7 @@ func (p ColorPickerProps) PartNames() []string {
 		@if(.Hint != "")
 			<p
 				data-part="hint"
-				id="{{ .Name }}-hint"
+				id="{{ .ElementID() }}-hint"
 				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
 				@attributes(.PartAttrs("hint"))
 			>{{ .Hint }}</p>

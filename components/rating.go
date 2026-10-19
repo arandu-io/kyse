@@ -37,6 +37,11 @@ type RatingProps struct {
 	Page Page
 	// Name is the field name, and the id every option hangs off.
 	Name string
+	// ID is the id the markup carries, and the id the label, the message and
+	// the hint hang off. Empty uses Name. Two forms on one page that ask for the
+	// same Name -- two dialogs that each want a reason -- need one each, or the
+	// second label points at the first box.
+	ID string
 	// Label names the group. It is a fieldset legend and not a floating line,
 	// because five radios without one announce as five unrelated choices.
 	Label string
@@ -94,7 +99,7 @@ func (p RatingProps) OptionName(n int) string {
 
 // OptionID is the id of one option, which the label points at.
 func (p RatingProps) OptionID(n int) string {
-	return p.Name + "-" + strconv.Itoa(n)
+	return p.ElementID() + "-" + strconv.Itoa(n)
 }
 
 // Message is the rejection for this field, and empty when there is none.
@@ -108,10 +113,10 @@ func (p RatingProps) Message() string {
 // DescribedBy is the id of whatever is explaining the group.
 func (p RatingProps) DescribedBy() string {
 	if p.Message() != "" {
-		return p.Name + "-error"
+		return p.ElementID() + "-error"
 	}
 	if p.Hint != "" {
-		return p.Name + "-hint"
+		return p.ElementID() + "-hint"
 	}
 	return ""
 }
@@ -121,7 +126,15 @@ func (p RatingProps) PartNames() []string {
 	return []string{"root", "label", "group", "option", "star", "message", "hint"}
 }
 
-//line components/rating.go:125
+// ElementID is the id the markup carries: ID, or Name when ID is empty.
+func (p RatingProps) ElementID() string {
+	if p.ID != "" {
+		return p.ID
+	}
+	return p.Name
+}
+
+//line components/rating.go:138
 
 // Rating renders the rating component.
 func Rating(kyse__props RatingProps) kyse__template.HTML {
@@ -144,23 +157,23 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/rating.kyse.go:119
+//line components/rating.kyse.go:132
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("field rating")))
-//line components/rating.go:150
+//line components/rating.go:163
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-//line components/rating.kyse.go:120
+//line components/rating.kyse.go:133
 	if kyse__d.DescribedBy() != "" {
-//line components/rating.go:157
+//line components/rating.go:170
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/rating.kyse.go:121
+//line components/rating.kyse.go:134
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/rating.go:164
+//line components/rating.go:177
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -168,11 +181,11 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/rating.kyse.go:123
+//line components/rating.kyse.go:136
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/rating.go:174
+//line components/rating.go:187
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:123", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:136", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
@@ -190,20 +203,20 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/rating.kyse.go:127
+//line components/rating.kyse.go:140
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("label", "label")))
-//line components/rating.go:196
+//line components/rating.go:209
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v2 string
-//line components/rating.kyse.go:128
+//line components/rating.kyse.go:141
 		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("label"))
-//line components/rating.go:205
+//line components/rating.go:218
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:128", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:141", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
@@ -212,9 +225,9 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>")
 	}
 	if kyse__err == nil {
-//line components/rating.kyse.go:129
+//line components/rating.kyse.go:142
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
-//line components/rating.go:218
+//line components/rating.go:231
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</legend>\n")
@@ -232,20 +245,20 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/rating.kyse.go:133
+//line components/rating.kyse.go:146
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("group", "rating-stars")))
-//line components/rating.go:238
+//line components/rating.go:251
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v3 string
-//line components/rating.kyse.go:134
+//line components/rating.kyse.go:147
 		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("group"))
-//line components/rating.go:247
+//line components/rating.go:260
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:134", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:147", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
@@ -253,9 +266,9 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
 	}
-//line components/rating.kyse.go:136
+//line components/rating.kyse.go:149
 	for star := 1; star <= kyse__d.Stars(); star++ {
-//line components/rating.go:259
+//line components/rating.go:272
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<input\n")
 		}
@@ -266,9 +279,9 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/rating.kyse.go:139
+//line components/rating.kyse.go:152
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("option", "sr-only")))
-//line components/rating.go:272
+//line components/rating.go:285
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -280,9 +293,9 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tid=\"")
 		}
 		if kyse__err == nil {
-//line components/rating.kyse.go:141
+//line components/rating.kyse.go:154
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.OptionID(star)))
-//line components/rating.go:286
+//line components/rating.go:299
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -291,9 +304,9 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tname=\"")
 		}
 		if kyse__err == nil {
-//line components/rating.kyse.go:142
+//line components/rating.kyse.go:155
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/rating.go:297
+//line components/rating.go:310
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -302,41 +315,41 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tvalue=\"")
 		}
 		if kyse__err == nil {
-//line components/rating.kyse.go:143
+//line components/rating.kyse.go:156
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(star))
-//line components/rating.go:308
+//line components/rating.go:321
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-//line components/rating.kyse.go:144
+//line components/rating.kyse.go:157
 		if kyse__d.Chosen(star) {
-//line components/rating.go:315
+//line components/rating.go:328
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tchecked\n")
 			}
 		}
-//line components/rating.kyse.go:147
+//line components/rating.kyse.go:160
 		if kyse__d.Required {
-//line components/rating.go:322
+//line components/rating.go:335
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\trequired\n")
 			}
 		}
-//line components/rating.kyse.go:150
+//line components/rating.kyse.go:163
 		if kyse__d.ReadOnly {
-//line components/rating.go:329
+//line components/rating.go:342
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdisabled\n")
 			}
 		}
 		if kyse__err == nil {
 			var kyse__v4 string
-//line components/rating.kyse.go:153
+//line components/rating.kyse.go:166
 			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("option"))
-//line components/rating.go:338
+//line components/rating.go:351
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:153", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:166", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 			}
@@ -350,16 +363,16 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"star\"\n")
 		}
-//line components/rating.kyse.go:157
+//line components/rating.kyse.go:170
 		if kyse__d.PartClass("star") != "" {
-//line components/rating.go:356
+//line components/rating.go:369
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/rating.kyse.go:158
+//line components/rating.kyse.go:171
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("star")))
-//line components/rating.go:363
+//line components/rating.go:376
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -369,20 +382,20 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tfor=\"")
 		}
 		if kyse__err == nil {
-//line components/rating.kyse.go:160
+//line components/rating.kyse.go:173
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.OptionID(star)))
-//line components/rating.go:375
+//line components/rating.go:388
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v5 string
-//line components/rating.kyse.go:161
+//line components/rating.kyse.go:174
 			kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("star"))
-//line components/rating.go:384
+//line components/rating.go:397
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:161", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:174", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 			}
@@ -391,17 +404,17 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t><span class=\"sr-only\">")
 		}
 		if kyse__err == nil {
-//line components/rating.kyse.go:162
+//line components/rating.kyse.go:175
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.OptionName(star))))
-//line components/rating.go:397
+//line components/rating.go:410
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</span>")
 		}
 		if kyse__err == nil {
-//line components/rating.kyse.go:162
+//line components/rating.kyse.go:175
 			var kyse__v6 kyse__template.HTML = icons.Star(icons.Props{})
-//line components/rating.go:405
+//line components/rating.go:418
 			_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v6))
 		}
 		if kyse__err == nil {
@@ -414,9 +427,9 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/rating.kyse.go:166
+//line components/rating.kyse.go:179
 	if kyse__d.Message() != "" {
-//line components/rating.go:420
+//line components/rating.go:433
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<p\n")
 		}
@@ -427,9 +440,9 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
 		}
 		if kyse__err == nil {
-//line components/rating.kyse.go:169
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/rating.go:433
+//line components/rating.kyse.go:182
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
+//line components/rating.go:446
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "-error\"\n")
@@ -438,20 +451,20 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/rating.kyse.go:170
+//line components/rating.kyse.go:183
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("message", "text-destructive text-sm")))
-//line components/rating.go:444
+//line components/rating.go:457
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v7 string
-//line components/rating.kyse.go:171
+//line components/rating.kyse.go:184
 			kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("message"))
-//line components/rating.go:453
+//line components/rating.go:466
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:171", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:184", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 			}
@@ -460,20 +473,20 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
 		}
 		if kyse__err == nil {
-//line components/rating.kyse.go:172
+//line components/rating.kyse.go:185
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message())))
-//line components/rating.go:466
+//line components/rating.go:479
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
 		}
 	}
-//line components/rating.kyse.go:174
+//line components/rating.kyse.go:187
 	if kyse__d.Message() == "" {
-//line components/rating.go:474
-//line components/rating.kyse.go:175
+//line components/rating.go:487
+//line components/rating.kyse.go:188
 		if kyse__d.Hint != "" {
-//line components/rating.go:477
+//line components/rating.go:490
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<p\n")
 			}
@@ -484,9 +497,9 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tid=\"")
 			}
 			if kyse__err == nil {
-//line components/rating.kyse.go:178
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/rating.go:490
+//line components/rating.kyse.go:191
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
+//line components/rating.go:503
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "-hint\"\n")
@@ -495,20 +508,20 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/rating.kyse.go:179
+//line components/rating.kyse.go:192
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("hint", "text-muted-foreground text-sm")))
-//line components/rating.go:501
+//line components/rating.go:514
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 			if kyse__err == nil {
 				var kyse__v8 string
-//line components/rating.kyse.go:180
+//line components/rating.kyse.go:193
 				kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("hint"))
-//line components/rating.go:510
+//line components/rating.go:523
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:180", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/rating.kyse.go:193", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 				}
@@ -517,9 +530,9 @@ func Rating(kyse__props RatingProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/rating.kyse.go:181
+//line components/rating.kyse.go:194
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Hint)))
-//line components/rating.go:523
+//line components/rating.go:536
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")

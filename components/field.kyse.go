@@ -27,6 +27,11 @@ type FieldProps struct {
 	// Name is the form field name, the id everything else is hung off, and what
 	// Page is asked about.
 	Name string
+	// ID is the id the markup carries, and the id the label, the message and
+	// the hint hang off. Empty uses Name. Two forms on one page that ask for the
+	// same Name -- two dialogs that each want a reason -- need one each, or the
+	// second label points at the first box.
+	ID string
 	// Label is the text above the input.
 	Label string
 	// Type is the input type: "text", "email", "password", "date", "url".
@@ -87,15 +92,23 @@ func (p FieldProps) Current() string {
 // hint are announced rather than only shown.
 func (p FieldProps) DescribedBy() string {
 	if p.Message() != "" {
-		return p.Name + "-error"
+		return p.ElementID() + "-error"
 	}
 	if p.Hint != "" {
-		return p.Name + "-hint"
+		return p.ElementID() + "-hint"
 	}
 	return ""
 }
 // PartNames are the parts this component publishes.
 func (p FieldProps) PartNames() []string { return []string{"root", "label", "input", "message", "hint"} }
+
+// ElementID is the id the markup carries: ID, or Name when ID is empty.
+func (p FieldProps) ElementID() string {
+	if p.ID != "" {
+		return p.ID
+	}
+	return p.Name
+}
 @endgo
 
 <div
@@ -106,14 +119,14 @@ func (p FieldProps) PartNames() []string { return []string{"root", "label", "inp
 	<label
 		data-part="label"
 		class="{{ .PartClass("label", "label") }}"
-		for="{{ .Name }}"
+		for="{{ .ElementID() }}"
 		@attributes(.PartAttrs("label"))
 	>{{ .Label }}</label>
 	<input
 		data-part="input"
 		class="{{ .PartClass("input", "input") }}"
 		type="{{ .InputType() }}"
-		id="{{ .Name }}"
+		id="{{ .ElementID() }}"
 		name="{{ .Name }}"
 		value="{{ .Current() }}"
 		@if(.Placeholder != "")
@@ -139,7 +152,7 @@ func (p FieldProps) PartNames() []string { return []string{"root", "label", "inp
 	@if(.Message() != "")
 		<p
 			data-part="message"
-			id="{{ .Name }}-error"
+			id="{{ .ElementID() }}-error"
 			class="{{ .PartClass("message", "text-destructive text-sm") }}"
 			@attributes(.PartAttrs("message"))
 		>{{ .Message() }}</p>
@@ -148,7 +161,7 @@ func (p FieldProps) PartNames() []string { return []string{"root", "label", "inp
 		@if(.Hint != "")
 			<p
 				data-part="hint"
-				id="{{ .Name }}-hint"
+				id="{{ .ElementID() }}-hint"
 				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
 				@attributes(.PartAttrs("hint"))
 			>{{ .Hint }}</p>

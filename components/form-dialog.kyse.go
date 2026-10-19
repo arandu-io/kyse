@@ -50,6 +50,22 @@ const FormDialogField = "_dialog"
 // readable on a page where the script never ran, and the script turns it into
 // a modal and puts the cursor on the first refused field.
 //
+// # Two dialogs on one page
+//
+// A page answers the fields by name, so two dialogs that each ask for a reason
+// both draw the message of the one that was refused, and the reason typed in
+// it. The fields of a dialog are given DialogPage(page, ID) instead of the
+// page, which answers only while that dialog was the one refused, and an ID of
+// their own, so the two boxes called reason are two ids:
+//
+//	components.Field(components.FieldProps{
+//		Name: "reason", ID: "cancel-subscription-reason", Label: "Reason",
+//		Page: components.DialogPage(.Page, "cancel-subscription"),
+//	})
+//
+// A value the form carries without asking -- the subscription being cancelled
+// -- is a HiddenInput in Body, given the same DialogPage.
+//
 // # Leaving it
 //
 // Cancel and the close button submit a second, empty form whose method is

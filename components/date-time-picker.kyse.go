@@ -31,6 +31,11 @@ type DateTimePickerProps struct {
 	Page Page
 	// Name is the field name, and the id the label points at.
 	Name string
+	// ID is the id the markup carries, and the id the label, the message and
+	// the hint hang off. Empty uses Name. Two forms on one page that ask for the
+	// same Name -- two dialogs that each want a reason -- need one each, or the
+	// second label points at the first box.
+	ID string
 	// Label is the text above it.
 	Label string
 	// Kind is what is being asked for: "date", "time", "datetime", "month" or
@@ -129,10 +134,10 @@ func (p DateTimePickerProps) Message() string {
 // DescribedBy is the id of whatever is explaining the field.
 func (p DateTimePickerProps) DescribedBy() string {
 	if p.Message() != "" {
-		return p.Name + "-error"
+		return p.ElementID() + "-error"
 	}
 	if p.Hint != "" {
-		return p.Name + "-hint"
+		return p.ElementID() + "-hint"
 	}
 	return ""
 }
@@ -178,10 +183,10 @@ func (p DateTimePickerProps) OpenName() string {
 }
 
 // CalendarID and PanelID are the ids the grid and the panel hang off.
-func (p DateTimePickerProps) CalendarID() string { return p.Name + "-calendar" }
+func (p DateTimePickerProps) CalendarID() string { return p.ElementID() + "-calendar" }
 
 // PanelID is the id of the element that opens.
-func (p DateTimePickerProps) PanelID() string { return p.Name + "-calendar-panel" }
+func (p DateTimePickerProps) PanelID() string { return p.ElementID() + "-calendar-panel" }
 
 // Grid is the calendar this picker draws, built from the picker's own fields
 // so the two cannot disagree about the day, the bounds or the language.
@@ -202,7 +207,7 @@ func (p DateTimePickerProps) Grid() CalendarProps {
 		FirstDay:     p.FirstDay,
 		TodayLabel:   p.TodayLabel,
 		ClearLabel:   p.ClearLabel,
-		Target:       p.Name,
+		Target:       p.ElementID(),
 	}
 }
 
@@ -216,6 +221,14 @@ func (p DateTimePickerProps) PartNames() []string {
 		CalendarProps{}.PartNames()[1:]...,
 	)
 }
+
+// ElementID is the id the markup carries: ID, or Name when ID is empty.
+func (p DateTimePickerProps) ElementID() string {
+	if p.ID != "" {
+		return p.ID
+	}
+	return p.Name
+}
 @endgo
 
 <div
@@ -226,7 +239,7 @@ func (p DateTimePickerProps) PartNames() []string {
 	<label
 		data-part="label"
 		class="{{ .PartClass("label", "label") }}"
-		for="{{ .Name }}"
+		for="{{ .ElementID() }}"
 		@attributes(.PartAttrs("label"))
 	>{{ .Label }}</label>
 
@@ -246,7 +259,7 @@ func (p DateTimePickerProps) PartNames() []string {
 		data-part="input"
 		class="{{ .PartClass("input", "input") }}"
 		type="{{ .InputType() }}"
-		id="{{ .Name }}"
+		id="{{ .ElementID() }}"
 		name="{{ .Name }}"
 		value="{{ .Current() }}"
 		@if(.Min != "")
@@ -315,7 +328,7 @@ func (p DateTimePickerProps) PartNames() []string {
 	@if(.Message() != "")
 		<p
 			data-part="message"
-			id="{{ .Name }}-error"
+			id="{{ .ElementID() }}-error"
 			class="{{ .PartClass("message", "text-destructive text-sm") }}"
 			@attributes(.PartAttrs("message"))
 		>{{ .Message() }}</p>
@@ -324,7 +337,7 @@ func (p DateTimePickerProps) PartNames() []string {
 		@if(.Hint != "")
 			<p
 				data-part="hint"
-				id="{{ .Name }}-hint"
+				id="{{ .ElementID() }}-hint"
 				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
 				@attributes(.PartAttrs("hint"))
 			>{{ .Hint }}</p>

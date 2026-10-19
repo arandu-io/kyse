@@ -41,3 +41,55 @@ type Page interface {
 	// reverting to the stored row.
 	OldOr(name, fallback string) string
 }
+
+// DialogPage is the page as the fields of one FormDialog see it: the messages
+// and the typed values of a refused form, but only when the form refused was
+// that dialog's.
+//
+//	components.Field(components.FieldProps{
+//		Name: "reason", ID: "cancel-subscription-reason", Label: "Reason",
+//		Page: components.DialogPage(.Page, "cancel-subscription"),
+//	})
+//
+// # Why the fields need it
+//
+// A page answers by field name, and a page with three dialogs can have three
+// fields called reason. A refusal from one of them came back with a message for
+// reason, and every box called reason drew it -- in the two dialogs nobody
+// submitted as well as in the one that was refused, along with the value typed
+// into the one. The dialog that was refused is the one whose ID came back in
+// FormDialogField, so this answers for that dialog's fields and is silent for
+// every other: no message, and the value the field was given.
+//
+// A nil page answers nothing, like a nil Page given to a field directly.
+func DialogPage(page Page, dialog string) Page {
+	return dialogPage{page: page, dialog: dialog}
+}
+
+// dialogPage is a Page that answers only while its dialog was the one refused.
+type dialogPage struct {
+	page   Page
+	dialog string
+}
+
+// refused is whether the form sent back to this page was this dialog's.
+func (d dialogPage) refused() bool {
+	return d.page != nil && d.dialog != "" && d.page.OldOr(FormDialogField, "") == d.dialog
+}
+
+// FieldError is the page's message for name when this dialog was refused.
+func (d dialogPage) FieldError(name string) string {
+	if !d.refused() {
+		return ""
+	}
+	return d.page.FieldError(name)
+}
+
+// OldOr is what was typed into name when this dialog was refused, and the
+// fallback otherwise.
+func (d dialogPage) OldOr(name, fallback string) string {
+	if !d.refused() {
+		return fallback
+	}
+	return d.page.OldOr(name, fallback)
+}

@@ -31,6 +31,11 @@ type InputGroupProps struct {
 	// Name is the form field name, the id everything else is hung off, and
 	// what Page is asked about.
 	Name string
+	// ID is the id the markup carries, and the id the label, the message and
+	// the hint hang off. Empty uses Name. Two forms on one page that ask for the
+	// same Name -- two dialogs that each want a reason -- need one each, or the
+	// second label points at the first box.
+	ID string
 	// Label is the text above the group.
 	Label string
 	// Type is the input type: "text", "email", "number", "search", "url".
@@ -78,12 +83,12 @@ func (p InputGroupProps) InputType() string {
 
 // StartID names the addon before the control.
 func (p InputGroupProps) StartID() string {
-	return p.Name + "-start"
+	return p.ElementID() + "-start"
 }
 
 // EndID names the addon after the control.
 func (p InputGroupProps) EndID() string {
-	return p.Name + "-end"
+	return p.ElementID() + "-end"
 }
 
 // Message is what validation left for this input, or empty.
@@ -121,15 +126,23 @@ func (p InputGroupProps) DescribedBy() string {
 	}
 	switch {
 	case p.Message() != "":
-		ids = append(ids, p.Name+"-error")
+		ids = append(ids, p.ElementID()+"-error")
 	case p.Hint != "":
-		ids = append(ids, p.Name+"-hint")
+		ids = append(ids, p.ElementID()+"-hint")
 	}
 	return strings.Join(ids, " ")
 }
 // PartNames are the parts this component publishes.
 func (p InputGroupProps) PartNames() []string {
 	return []string{"root", "label", "group", "input", "addon", "message", "hint"}
+}
+
+// ElementID is the id the markup carries: ID, or Name when ID is empty.
+func (p InputGroupProps) ElementID() string {
+	if p.ID != "" {
+		return p.ID
+	}
+	return p.Name
 }
 @endgo
 
@@ -141,7 +154,7 @@ func (p InputGroupProps) PartNames() []string {
 	<label
 		data-part="label"
 		class="{{ .PartClass("label", "label") }}"
-		for="{{ .Name }}"
+		for="{{ .ElementID() }}"
 		@attributes(.PartAttrs("label"))
 	>{{ .Label }}</label>
 
@@ -156,7 +169,7 @@ func (p InputGroupProps) PartNames() []string {
 				class="{{ .PartClass("input") }}"
 			@endif
 			type="{{ .InputType() }}"
-			id="{{ .Name }}"
+			id="{{ .ElementID() }}"
 			name="{{ .Name }}"
 			value="{{ .Current() }}"
 			@if(.Placeholder != "")
@@ -220,7 +233,7 @@ func (p InputGroupProps) PartNames() []string {
 	@if(.Message() != "")
 		<p
 			data-part="message"
-			id="{{ .Name }}-error"
+			id="{{ .ElementID() }}-error"
 			class="{{ .PartClass("message", "text-destructive text-sm") }}"
 			@attributes(.PartAttrs("message"))
 		>{{ .Message() }}</p>
@@ -229,7 +242,7 @@ func (p InputGroupProps) PartNames() []string {
 		@if(.Hint != "")
 			<p
 				data-part="hint"
-				id="{{ .Name }}-hint"
+				id="{{ .ElementID() }}-hint"
 				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
 				@attributes(.PartAttrs("hint"))
 			>{{ .Hint }}</p>

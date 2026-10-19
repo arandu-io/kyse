@@ -23,6 +23,11 @@ type SegmentedControlProps struct {
 	Page Page
 	// Name is the field name, and the id every option hangs off.
 	Name string
+	// ID is the id the markup carries, and the id the label, the message and
+	// the hint hang off. Empty uses Name. Two forms on one page that ask for the
+	// same Name -- two dialogs that each want a reason -- need one each, or the
+	// second label points at the first box.
+	ID string
 	// Label names the group. Without it the bar announces as loose radios.
 	Label string
 	// LabelHidden keeps the name for a screen reader and draws nothing, for a
@@ -76,7 +81,7 @@ func (p SegmentedControlProps) Chosen(option SegmentedOption) bool {
 
 // OptionID is the id of one option, which its label points at.
 func (p SegmentedControlProps) OptionID(option SegmentedOption) string {
-	return p.Name + "-" + option.Value
+	return p.ElementID() + "-" + option.Value
 }
 
 // Trigger is when the request is made. A segmented control that fetched on
@@ -97,6 +102,14 @@ func (p SegmentedControlProps) Fetches() bool {
 // PartNames are the parts this component publishes.
 func (p SegmentedControlProps) PartNames() []string {
 	return []string{"root", "label", "group", "option", "segment"}
+}
+
+// ElementID is the id the markup carries: ID, or Name when ID is empty.
+func (p SegmentedControlProps) ElementID() string {
+	if p.ID != "" {
+		return p.ID
+	}
+	return p.Name
 }
 @endgo
 

@@ -90,3 +90,67 @@ func TestARefusedFormDialogComesBackOpen(t *testing.T) {
 		}
 	}
 }
+
+// twoDialogs is a subscription page with two dialogs that each ask for a
+// reason, written the way DialogPage says they are.
+func twoDialogs(page components.Page) string {
+	dialog := func(id, action string) string {
+		scoped := components.DialogPage(page, id)
+		return string(components.FormDialog(components.FormDialogProps{
+			ID: id, Title: id, Action: action, Token: "t", Page: page,
+			Body: []template.HTML{
+				components.HiddenInput(components.HiddenInputProps{Name: "subscription", Value: "sub_1", Page: scoped}),
+				components.Field(components.FieldProps{Name: "reason", ID: id + "-reason", Label: "Reason", Page: scoped}),
+			},
+		}))
+	}
+	return dialog("cancel-subscription", "/subscriptions/cancel") + dialog("pause-subscription", "/subscriptions/pause")
+}
+
+// TestOnlyTheRefusedDialogComesBackWithTheInput is the same round trip with
+// two dialogs whose fields share a name. Before the fields were scoped, the
+// message and the typed reason came back in both.
+func TestOnlyTheRefusedDialogComesBackWithTheInput(t *testing.T) {
+	flash := session.NewFlash([]byte("0123456789abcdef0123456789abcdef"), false)
+
+	markup := twoDialogs(nil)
+	if strings.Count(markup, `id="cancel-subscription-reason"`) != 1 || strings.Count(markup, `id="pause-subscription-reason"`) != 1 {
+		t.Fatalf("the two reasons do not carry an id each:\n%s", markup)
+	}
+	cancel := markup[:strings.Index(markup, `id="pause-subscription"`)]
+	values := url.Values{}
+	for _, field := range formFieldPattern.FindAllStringSubmatch(cancel, -1) {
+		values.Set(html.UnescapeString(field[1]), html.UnescapeString(field[2]))
+	}
+	values.Set("reason", "Too expensive")
+
+	post := httptest.NewRequest(http.MethodPost, "/subscriptions/cancel", strings.NewReader(values.Encode()))
+	post.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	post.Header.Set("Referer", "http://example.com/subscriptions")
+	refused := httptest.NewRecorder()
+	hhttp.Reject(refused, post, flash, validation.Errors{"reason": {"Say why in more words."}})
+
+	back := httptest.NewRequest(http.MethodGet, "/subscriptions", nil)
+	back.Header.Set("Accept", "text/html")
+	for _, cookie := range refused.Result().Cookies() {
+		back.AddCookie(cookie)
+	}
+	got, ok := flash.Read(httptest.NewRecorder(), back)
+	if !ok {
+		t.Fatal("the page the refusal landed on found nothing in the flash")
+	}
+
+	landed := twoDialogs(view.Page{Errors: got.Errors, Old: got.Old})
+	at := strings.Index(landed, `id="pause-subscription"`)
+	first, second := landed[:at], landed[at:]
+	for _, want := range []string{"Say why in more words.", `value="Too expensive"`, `data-kyse-behavior="form-dialog"`} {
+		if !strings.Contains(first, want) {
+			t.Errorf("the refused dialog came back without %q:\n%s", want, first)
+		}
+	}
+	for _, unwanted := range []string{"Say why in more words.", "Too expensive", "data-kyse-behavior", "aria-invalid"} {
+		if strings.Contains(second, unwanted) {
+			t.Errorf("the dialog nobody submitted came back with %q:\n%s", unwanted, second)
+		}
+	}
+}

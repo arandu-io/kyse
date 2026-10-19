@@ -76,14 +76,14 @@ space and a 500.
 | group | components |
 |---|---|
 | Actions | `Button` `ButtonGroup` `SplitButton` `CopyButton` `Link` `DeleteRow` `OptimisticToggle` `DialogTrigger` |
-| Forms | `Field` `Input` `Label` `Textarea` `Checkbox` `RadioGroup` `Switch` `Select` `Combobox` `Autocomplete` `InputGroup` `RangeSlider` `NumberInput` `Password` `Masked` `OneTimeCode` `DateTimePicker` `Calendar` `ColorPicker` `FileUpload` `SegmentedControl` `Rating` `EditInPlace` `Output` `ActiveSearch` |
+| Forms | `Field` `Input` `HiddenInput` `Label` `Textarea` `Checkbox` `RadioGroup` `Switch` `Select` `Combobox` `Autocomplete` `InputGroup` `RangeSlider` `NumberInput` `Password` `Masked` `OneTimeCode` `DateTimePicker` `Calendar` `ColorPicker` `FileUpload` `SegmentedControl` `Rating` `EditInPlace` `Output` `ActiveSearch` |
 | Layout | `Card` `ContainerCard` `Item` `Separator` `Sidebar` `Toolbar` `Menubar` `Figure` |
 | Display | `Avatar` `Badge` `Kbd` `Skeleton` `Table` `DataTable` `StatCard` `Status` `Meter` `Highlight` `RelativeTime` `ResponsiveImage` `MediaPlayer` `Carousel` `Feed` `Tree` |
 | Feedback | `Alert` `Toast` `Progress` `Empty` `Dialog` `FormDialog` |
 | Overlays | `Drawer` `Popover` `HoverCard` `Tooltip` `DropdownMenu` `Command` `Collapsible` |
 | Navigation | `Accordion` `Breadcrumb` `Tabs` `Pagination` `SkipLink` `ThemeToggle` `LoadMore` `LazyLoad` |
 
-Seventy-eight, one per `components/*.kyse.go`. What is here is what has been
+Seventy-nine, one per `components/*.kyse.go`. What is here is what has been
 adapted, not what is planned.
 
 An alert dialog is not a component of its own: it is the `Alert` field on
@@ -136,6 +136,15 @@ turns into a modal with the cursor on the first refused field. A handler that
 sends the person back with a sentence instead of with what they typed sets
 `Open`. The behaviour needs Hesape v0.66.0 or later; without it the dialog is
 shown in place, not as a modal.
+
+A page with more than one dialog gives each dialog's fields
+`components.DialogPage(.Page, "<dialog ID>")` instead of `.Page`, and an `ID`
+of their own (`ID: "cancel-subscription-reason"`): the page answers by field
+name, and without the scope a refusal in one dialog draws its message and its
+typed value in every field of that name. `HiddenInput` carries a value nobody
+types -- the record a dialog acts on -- and takes the same scoped page. The
+trigger link writes `hx-boost="false"`, so a layout with a boosted body does
+not navigate to the form page instead of opening the dialog.
 
 Esc, Cancel and the close button close it, and focus returns to the trigger.
 Enter in a field submits the form, because Cancel and the close button belong to

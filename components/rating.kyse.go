@@ -29,6 +29,11 @@ type RatingProps struct {
 	Page Page
 	// Name is the field name, and the id every option hangs off.
 	Name string
+	// ID is the id the markup carries, and the id the label, the message and
+	// the hint hang off. Empty uses Name. Two forms on one page that ask for the
+	// same Name -- two dialogs that each want a reason -- need one each, or the
+	// second label points at the first box.
+	ID string
 	// Label names the group. It is a fieldset legend and not a floating line,
 	// because five radios without one announce as five unrelated choices.
 	Label string
@@ -86,7 +91,7 @@ func (p RatingProps) OptionName(n int) string {
 
 // OptionID is the id of one option, which the label points at.
 func (p RatingProps) OptionID(n int) string {
-	return p.Name + "-" + strconv.Itoa(n)
+	return p.ElementID() + "-" + strconv.Itoa(n)
 }
 
 // Message is the rejection for this field, and empty when there is none.
@@ -100,10 +105,10 @@ func (p RatingProps) Message() string {
 // DescribedBy is the id of whatever is explaining the group.
 func (p RatingProps) DescribedBy() string {
 	if p.Message() != "" {
-		return p.Name + "-error"
+		return p.ElementID() + "-error"
 	}
 	if p.Hint != "" {
-		return p.Name + "-hint"
+		return p.ElementID() + "-hint"
 	}
 	return ""
 }
@@ -111,6 +116,14 @@ func (p RatingProps) DescribedBy() string {
 // PartNames are the parts this component publishes.
 func (p RatingProps) PartNames() []string {
 	return []string{"root", "label", "group", "option", "star", "message", "hint"}
+}
+
+// ElementID is the id the markup carries: ID, or Name when ID is empty.
+func (p RatingProps) ElementID() string {
+	if p.ID != "" {
+		return p.ID
+	}
+	return p.Name
 }
 @endgo
 
@@ -166,7 +179,7 @@ func (p RatingProps) PartNames() []string {
 	@if(.Message() != "")
 		<p
 			data-part="message"
-			id="{{ .Name }}-error"
+			id="{{ .ElementID() }}-error"
 			class="{{ .PartClass("message", "text-destructive text-sm") }}"
 			@attributes(.PartAttrs("message"))
 		>{{ .Message() }}</p>
@@ -175,7 +188,7 @@ func (p RatingProps) PartNames() []string {
 		@if(.Hint != "")
 			<p
 				data-part="hint"
-				id="{{ .Name }}-hint"
+				id="{{ .ElementID() }}-hint"
 				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
 				@attributes(.PartAttrs("hint"))
 			>{{ .Hint }}</p>

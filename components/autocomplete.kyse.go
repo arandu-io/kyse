@@ -30,6 +30,11 @@ type AutocompleteProps struct {
 	Page Page
 	// Name is the field name, and the id the label points at.
 	Name string
+	// ID is the id the markup carries, and the id the label, the message and
+	// the hint hang off. Empty uses Name. Two forms on one page that ask for the
+	// same Name -- two dialogs that each want a reason -- need one each, or the
+	// second label points at the first box.
+	ID string
 	// Label is the text above the box.
 	Label string
 	// Value is what is in the box when nothing was rejected.
@@ -77,7 +82,7 @@ func (p AutocompleteProps) Current() string {
 }
 
 // ListID is the id of the datalist, which the box points at with list.
-func (p AutocompleteProps) ListID() string { return p.Name + "-suggestions" }
+func (p AutocompleteProps) ListID() string { return p.ElementID() + "-suggestions" }
 
 // Trigger is when the suggestions are fetched: after typing has paused, and
 // only when what is in the box actually changed. Without the changed guard,
@@ -101,10 +106,10 @@ func (p AutocompleteProps) Message() string {
 // DescribedBy is the id of whatever is explaining the box.
 func (p AutocompleteProps) DescribedBy() string {
 	if p.Message() != "" {
-		return p.Name + "-error"
+		return p.ElementID() + "-error"
 	}
 	if p.Hint != "" {
-		return p.Name + "-hint"
+		return p.ElementID() + "-hint"
 	}
 	return ""
 }
@@ -112,6 +117,14 @@ func (p AutocompleteProps) DescribedBy() string {
 // PartNames are the parts this component publishes.
 func (p AutocompleteProps) PartNames() []string {
 	return []string{"root", "label", "input", "list", "message", "hint"}
+}
+
+// ElementID is the id the markup carries: ID, or Name when ID is empty.
+func (p AutocompleteProps) ElementID() string {
+	if p.ID != "" {
+		return p.ID
+	}
+	return p.Name
 }
 @endgo
 
@@ -123,7 +136,7 @@ func (p AutocompleteProps) PartNames() []string {
 	<label
 		data-part="label"
 		class="{{ .PartClass("label", "label") }}"
-		for="{{ .Name }}"
+		for="{{ .ElementID() }}"
 		@attributes(.PartAttrs("label"))
 	>{{ .Label }}</label>
 
@@ -135,7 +148,7 @@ func (p AutocompleteProps) PartNames() []string {
 		data-part="input"
 		class="{{ .PartClass("input", "input") }}"
 		type="text"
-		id="{{ .Name }}"
+		id="{{ .ElementID() }}"
 		name="{{ .Name }}"
 		value="{{ .Current() }}"
 		list="{{ .ListID() }}"
@@ -189,7 +202,7 @@ func (p AutocompleteProps) PartNames() []string {
 	@if(.Message() != "")
 		<p
 			data-part="message"
-			id="{{ .Name }}-error"
+			id="{{ .ElementID() }}-error"
 			class="{{ .PartClass("message", "text-destructive text-sm") }}"
 			@attributes(.PartAttrs("message"))
 		>{{ .Message() }}</p>
@@ -198,7 +211,7 @@ func (p AutocompleteProps) PartNames() []string {
 		@if(.Hint != "")
 			<p
 				data-part="hint"
-				id="{{ .Name }}-hint"
+				id="{{ .ElementID() }}-hint"
 				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
 				@attributes(.PartAttrs("hint"))
 			>{{ .Hint }}</p>

@@ -14,6 +14,11 @@ type TextareaProps struct {
 	ComponentProps
 	// Name is the form field name, and the id the label points at.
 	Name string
+	// ID is the id the markup carries, and the id the label, the message and
+	// the hint hang off. Empty uses Name. Two forms on one page that ask for the
+	// same Name -- two dialogs that each want a reason -- need one each, or the
+	// second label points at the first box.
+	ID string
 	// Label is the text above the box.
 	Label string
 	// Value is what the box starts with when nothing was rejected. What was
@@ -69,15 +74,23 @@ func (p TextareaProps) Current() string {
 // DescribedBy names the element that explains this box.
 func (p TextareaProps) DescribedBy() string {
 	if p.Message() != "" {
-		return p.Name + "-error"
+		return p.ElementID() + "-error"
 	}
 	if p.Hint != "" {
-		return p.Name + "-hint"
+		return p.ElementID() + "-hint"
 	}
 	return ""
 }
 // PartNames are the parts this component publishes.
 func (p TextareaProps) PartNames() []string { return []string{"root", "label", "input", "message", "hint"} }
+
+// ElementID is the id the markup carries: ID, or Name when ID is empty.
+func (p TextareaProps) ElementID() string {
+	if p.ID != "" {
+		return p.ID
+	}
+	return p.Name
+}
 @endgo
 
 <div
@@ -88,13 +101,13 @@ func (p TextareaProps) PartNames() []string { return []string{"root", "label", "
 	<label
 		data-part="label"
 		class="{{ .PartClass("label", "label") }}"
-		for="{{ .Name }}"
+		for="{{ .ElementID() }}"
 		@attributes(.PartAttrs("label"))
 	>{{ .Label }}</label>
 	<textarea
 		data-part="input"
 		class="{{ .PartClass("input", "textarea") }}"
-		id="{{ .Name }}"
+		id="{{ .ElementID() }}"
 		name="{{ .Name }}"
 		@if(.Autosize)
 			data-autosize="true"
@@ -119,7 +132,7 @@ func (p TextareaProps) PartNames() []string { return []string{"root", "label", "
 	@if(.Message() != "")
 		<p
 			data-part="message"
-			id="{{ .Name }}-error"
+			id="{{ .ElementID() }}-error"
 			class="{{ .PartClass("message", "text-destructive text-sm") }}"
 			@attributes(.PartAttrs("message"))
 		>{{ .Message() }}</p>
@@ -128,7 +141,7 @@ func (p TextareaProps) PartNames() []string { return []string{"root", "label", "
 		@if(.Hint != "")
 			<p
 				data-part="hint"
-				id="{{ .Name }}-hint"
+				id="{{ .ElementID() }}-hint"
 				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
 				@attributes(.PartAttrs("hint"))
 			>{{ .Hint }}</p>

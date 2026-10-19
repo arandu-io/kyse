@@ -40,6 +40,11 @@ type ColorPickerProps struct {
 	Page Page
 	// Name is the field name, and the id the label points at.
 	Name string
+	// ID is the id the markup carries, and the id the label, the message and
+	// the hint hang off. Empty uses Name. Two forms on one page that ask for the
+	// same Name -- two dialogs that each want a reason -- need one each, or the
+	// second label points at the first box.
+	ID string
 	// Label is the text above it.
 	Label string
 	// Value is the colour, as "#1d4ed8". Empty is black, because the element
@@ -78,7 +83,7 @@ func (p ColorPickerProps) ListID() string {
 	if len(p.Swatches) == 0 {
 		return ""
 	}
-	return p.Name + "-swatches"
+	return p.ElementID() + "-swatches"
 }
 
 // Message is the rejection for this field, and empty when there is none.
@@ -92,10 +97,10 @@ func (p ColorPickerProps) Message() string {
 // DescribedBy is the id of whatever is explaining the field.
 func (p ColorPickerProps) DescribedBy() string {
 	if p.Message() != "" {
-		return p.Name + "-error"
+		return p.ElementID() + "-error"
 	}
 	if p.Hint != "" {
-		return p.Name + "-hint"
+		return p.ElementID() + "-hint"
 	}
 	return ""
 }
@@ -105,7 +110,15 @@ func (p ColorPickerProps) PartNames() []string {
 	return []string{"root", "label", "group", "input", "readout", "message", "hint"}
 }
 
-//line components/color-picker.go:109
+// ElementID is the id the markup carries: ID, or Name when ID is empty.
+func (p ColorPickerProps) ElementID() string {
+	if p.ID != "" {
+		return p.ID
+	}
+	return p.Name
+}
+
+//line components/color-picker.go:122
 
 // ColorPicker renders the color-picker component.
 func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
@@ -128,20 +141,20 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/color-picker.kyse.go:99
+//line components/color-picker.kyse.go:112
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("field")))
-//line components/color-picker.go:134
+//line components/color-picker.go:147
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/color-picker.kyse.go:100
+//line components/color-picker.kyse.go:113
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/color-picker.go:143
+//line components/color-picker.go:156
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/color-picker.kyse.go:100", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/color-picker.kyse.go:113", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
@@ -159,9 +172,9 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/color-picker.kyse.go:104
+//line components/color-picker.kyse.go:117
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("label", "label")))
-//line components/color-picker.go:165
+//line components/color-picker.go:178
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -170,20 +183,20 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tfor=\"")
 	}
 	if kyse__err == nil {
-//line components/color-picker.kyse.go:105
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/color-picker.go:176
+//line components/color-picker.kyse.go:118
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
+//line components/color-picker.go:189
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v2 string
-//line components/color-picker.kyse.go:106
+//line components/color-picker.kyse.go:119
 		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("label"))
-//line components/color-picker.go:185
+//line components/color-picker.go:198
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/color-picker.kyse.go:106", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/color-picker.kyse.go:119", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
@@ -192,9 +205,9 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>")
 	}
 	if kyse__err == nil {
-//line components/color-picker.kyse.go:107
+//line components/color-picker.kyse.go:120
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
-//line components/color-picker.go:198
+//line components/color-picker.go:211
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</label>\n")
@@ -212,20 +225,20 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/color-picker.kyse.go:111
+//line components/color-picker.kyse.go:124
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("group", "color-picker")))
-//line components/color-picker.go:218
+//line components/color-picker.go:231
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v3 string
-//line components/color-picker.kyse.go:112
+//line components/color-picker.kyse.go:125
 		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("group"))
-//line components/color-picker.go:227
+//line components/color-picker.go:240
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/color-picker.kyse.go:112", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/color-picker.kyse.go:125", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
@@ -239,16 +252,16 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"input\"\n")
 	}
-//line components/color-picker.kyse.go:116
+//line components/color-picker.kyse.go:129
 	if kyse__d.PartClass("input") != "" {
-//line components/color-picker.go:245
+//line components/color-picker.go:258
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/color-picker.kyse.go:117
+//line components/color-picker.kyse.go:130
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("input")))
-//line components/color-picker.go:252
+//line components/color-picker.go:265
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -261,9 +274,9 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/color-picker.kyse.go:120
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/color-picker.go:267
+//line components/color-picker.kyse.go:133
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
+//line components/color-picker.go:280
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -272,9 +285,9 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tname=\"")
 	}
 	if kyse__err == nil {
-//line components/color-picker.kyse.go:121
+//line components/color-picker.kyse.go:134
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/color-picker.go:278
+//line components/color-picker.go:291
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -283,71 +296,71 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tvalue=\"")
 	}
 	if kyse__err == nil {
-//line components/color-picker.kyse.go:122
+//line components/color-picker.kyse.go:135
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Current()))
-//line components/color-picker.go:289
+//line components/color-picker.go:302
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-//line components/color-picker.kyse.go:123
+//line components/color-picker.kyse.go:136
 	if kyse__d.ListID() != "" {
-//line components/color-picker.go:296
+//line components/color-picker.go:309
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tlist=\"")
 		}
 		if kyse__err == nil {
-//line components/color-picker.kyse.go:124
+//line components/color-picker.kyse.go:137
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ListID()))
-//line components/color-picker.go:303
+//line components/color-picker.go:316
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/color-picker.kyse.go:126
+//line components/color-picker.kyse.go:139
 	if kyse__d.DescribedBy() != "" {
-//line components/color-picker.go:311
+//line components/color-picker.go:324
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/color-picker.kyse.go:127
+//line components/color-picker.kyse.go:140
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/color-picker.go:318
+//line components/color-picker.go:331
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/color-picker.kyse.go:129
+//line components/color-picker.kyse.go:142
 	if kyse__d.Message() != "" {
-//line components/color-picker.go:326
+//line components/color-picker.go:339
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/color-picker.kyse.go:132
+//line components/color-picker.kyse.go:145
 	if kyse__d.Required {
-//line components/color-picker.go:333
+//line components/color-picker.go:346
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\trequired\n")
 		}
 	}
-//line components/color-picker.kyse.go:135
+//line components/color-picker.kyse.go:148
 	if kyse__d.Disabled {
-//line components/color-picker.go:340
+//line components/color-picker.go:353
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdisabled\n")
 		}
 	}
 	if kyse__err == nil {
 		var kyse__v4 string
-//line components/color-picker.kyse.go:138
+//line components/color-picker.kyse.go:151
 		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/color-picker.go:349
+//line components/color-picker.go:362
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/color-picker.kyse.go:138", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/color-picker.kyse.go:151", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 		}
@@ -358,9 +371,9 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/color-picker.kyse.go:141
+//line components/color-picker.kyse.go:154
 	if kyse__d.ShowValue {
-//line components/color-picker.go:364
+//line components/color-picker.go:377
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<output\n")
 		}
@@ -371,9 +384,9 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/color-picker.kyse.go:144
+//line components/color-picker.kyse.go:157
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("readout", "text-muted-foreground font-mono text-sm uppercase")))
-//line components/color-picker.go:377
+//line components/color-picker.go:390
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -382,9 +395,9 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tfor=\"")
 		}
 		if kyse__err == nil {
-//line components/color-picker.kyse.go:145
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/color-picker.go:388
+//line components/color-picker.kyse.go:158
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
+//line components/color-picker.go:401
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -394,11 +407,11 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 			var kyse__v5 string
-//line components/color-picker.kyse.go:147
+//line components/color-picker.kyse.go:160
 			kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("readout"))
-//line components/color-picker.go:400
+//line components/color-picker.go:413
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/color-picker.kyse.go:147", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/color-picker.kyse.go:160", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 			}
@@ -407,9 +420,9 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 		}
 		if kyse__err == nil {
-//line components/color-picker.kyse.go:148
+//line components/color-picker.kyse.go:161
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Current())))
-//line components/color-picker.go:413
+//line components/color-picker.go:426
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</output>\n")
@@ -421,31 +434,31 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/color-picker.kyse.go:152
+//line components/color-picker.kyse.go:165
 	if kyse__d.ListID() != "" {
-//line components/color-picker.go:427
+//line components/color-picker.go:440
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<datalist id=\"")
 		}
 		if kyse__err == nil {
-//line components/color-picker.kyse.go:153
+//line components/color-picker.kyse.go:166
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ListID()))
-//line components/color-picker.go:434
+//line components/color-picker.go:447
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
 		}
-//line components/color-picker.kyse.go:154
+//line components/color-picker.kyse.go:167
 		for _, swatch := range kyse__d.Swatches {
 			_ = swatch
-//line components/color-picker.go:442
+//line components/color-picker.go:455
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<option value=\"")
 			}
 			if kyse__err == nil {
-//line components/color-picker.kyse.go:155
+//line components/color-picker.kyse.go:168
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(swatch))
-//line components/color-picker.go:449
+//line components/color-picker.go:462
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"></option>\n")
@@ -458,9 +471,9 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/color-picker.kyse.go:160
+//line components/color-picker.kyse.go:173
 	if kyse__d.Message() != "" {
-//line components/color-picker.go:464
+//line components/color-picker.go:477
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<p\n")
 		}
@@ -471,9 +484,9 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
 		}
 		if kyse__err == nil {
-//line components/color-picker.kyse.go:163
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/color-picker.go:477
+//line components/color-picker.kyse.go:176
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
+//line components/color-picker.go:490
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "-error\"\n")
@@ -482,20 +495,20 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/color-picker.kyse.go:164
+//line components/color-picker.kyse.go:177
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("message", "text-destructive text-sm")))
-//line components/color-picker.go:488
+//line components/color-picker.go:501
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v6 string
-//line components/color-picker.kyse.go:165
+//line components/color-picker.kyse.go:178
 			kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("message"))
-//line components/color-picker.go:497
+//line components/color-picker.go:510
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/color-picker.kyse.go:165", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/color-picker.kyse.go:178", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 			}
@@ -504,20 +517,20 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
 		}
 		if kyse__err == nil {
-//line components/color-picker.kyse.go:166
+//line components/color-picker.kyse.go:179
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message())))
-//line components/color-picker.go:510
+//line components/color-picker.go:523
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
 		}
 	}
-//line components/color-picker.kyse.go:168
+//line components/color-picker.kyse.go:181
 	if kyse__d.Message() == "" {
-//line components/color-picker.go:518
-//line components/color-picker.kyse.go:169
+//line components/color-picker.go:531
+//line components/color-picker.kyse.go:182
 		if kyse__d.Hint != "" {
-//line components/color-picker.go:521
+//line components/color-picker.go:534
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<p\n")
 			}
@@ -528,9 +541,9 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tid=\"")
 			}
 			if kyse__err == nil {
-//line components/color-picker.kyse.go:172
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/color-picker.go:534
+//line components/color-picker.kyse.go:185
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
+//line components/color-picker.go:547
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "-hint\"\n")
@@ -539,20 +552,20 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/color-picker.kyse.go:173
+//line components/color-picker.kyse.go:186
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("hint", "text-muted-foreground text-sm")))
-//line components/color-picker.go:545
+//line components/color-picker.go:558
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 			if kyse__err == nil {
 				var kyse__v7 string
-//line components/color-picker.kyse.go:174
+//line components/color-picker.kyse.go:187
 				kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("hint"))
-//line components/color-picker.go:554
+//line components/color-picker.go:567
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/color-picker.kyse.go:174", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/color-picker.kyse.go:187", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 				}
@@ -561,9 +574,9 @@ func ColorPicker(kyse__props ColorPickerProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/color-picker.kyse.go:175
+//line components/color-picker.kyse.go:188
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Hint)))
-//line components/color-picker.go:567
+//line components/color-picker.go:580
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")

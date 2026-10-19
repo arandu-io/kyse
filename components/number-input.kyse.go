@@ -35,6 +35,11 @@ type NumberInputProps struct {
 	Page Page
 	// Name is the field name, and the id the label points at.
 	Name string
+	// ID is the id the markup carries, and the id the label, the message and
+	// the hint hang off. Empty uses Name. Two forms on one page that ask for the
+	// same Name -- two dialogs that each want a reason -- need one each, or the
+	// second label points at the first box.
+	ID string
 	// Label is the text above the box.
 	Label string
 	// Value is what is shown when nothing was rejected. It is a string so that
@@ -86,10 +91,10 @@ func (p NumberInputProps) Message() string {
 // the hint, and never both -- a field draws one of them.
 func (p NumberInputProps) DescribedBy() string {
 	if p.Message() != "" {
-		return p.Name + "-error"
+		return p.ElementID() + "-error"
 	}
 	if p.Hint != "" {
-		return p.Name + "-hint"
+		return p.ElementID() + "-hint"
 	}
 	return ""
 }
@@ -137,6 +142,14 @@ func (p NumberInputProps) RootAttrs() map[string]string {
 func (p NumberInputProps) PartNames() []string {
 	return []string{"root", "label", "group", "decrement", "input", "increment", "unit", "message", "hint"}
 }
+
+// ElementID is the id the markup carries: ID, or Name when ID is empty.
+func (p NumberInputProps) ElementID() string {
+	if p.ID != "" {
+		return p.ID
+	}
+	return p.Name
+}
 @endgo
 
 <div
@@ -147,7 +160,7 @@ func (p NumberInputProps) PartNames() []string {
 	<label
 		data-part="label"
 		class="{{ .PartClass("label", "label") }}"
-		for="{{ .Name }}"
+		for="{{ .ElementID() }}"
 		@attributes(.PartAttrs("label"))
 	>{{ .Label }}</label>
 
@@ -179,7 +192,7 @@ func (p NumberInputProps) PartNames() []string {
 			@endif
 			type="number"
 			inputmode="decimal"
-			id="{{ .Name }}"
+			id="{{ .ElementID() }}"
 			name="{{ .Name }}"
 			value="{{ .Current() }}"
 			@if(.Min != "")
@@ -238,7 +251,7 @@ func (p NumberInputProps) PartNames() []string {
 	@if(.Message() != "")
 		<p
 			data-part="message"
-			id="{{ .Name }}-error"
+			id="{{ .ElementID() }}-error"
 			class="{{ .PartClass("message", "text-destructive text-sm") }}"
 			@attributes(.PartAttrs("message"))
 		>{{ .Message() }}</p>
@@ -247,7 +260,7 @@ func (p NumberInputProps) PartNames() []string {
 		@if(.Hint != "")
 			<p
 				data-part="hint"
-				id="{{ .Name }}-hint"
+				id="{{ .ElementID() }}-hint"
 				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
 				@attributes(.PartAttrs("hint"))
 			>{{ .Hint }}</p>

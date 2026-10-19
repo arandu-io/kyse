@@ -219,6 +219,15 @@ var extensible = []struct {
 		components.DialogTriggerProps{}.PartNames,
 	},
 	{
+		"HiddenInput",
+		func(c components.ComponentProps) []string {
+			return []string{string(components.HiddenInput(components.HiddenInputProps{
+				ComponentProps: c, Name: "subscription", Value: "sub_1",
+			}))}
+		},
+		components.HiddenInputProps{}.PartNames,
+	},
+	{
 		"Password",
 		func(c components.ComponentProps) []string {
 			props := components.PasswordProps{

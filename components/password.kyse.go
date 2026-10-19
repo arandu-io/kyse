@@ -70,6 +70,11 @@ type PasswordProps struct {
 	// Name is the form field name, the id everything else is hung off, and what
 	// Page is asked about.
 	Name string
+	// ID is the id the markup carries, and the id the label, the message and
+	// the hint hang off. Empty uses Name. Two forms on one page that ask for the
+	// same Name -- two dialogs that each want a reason -- need one each, or the
+	// second label points at the first box.
+	ID string
 	// Label is the text above the box.
 	Label string
 	// Policy is the rule the submitted value is checked against, and what the
@@ -290,13 +295,13 @@ func (p PasswordProps) DoneText() string {
 }
 
 // PanelID names the section that expands under the box.
-func (p PasswordProps) PanelID() string { return p.Name + "-requirements-panel" }
+func (p PasswordProps) PanelID() string { return p.ElementID() + "-requirements-panel" }
 
 // RequirementsID names the checklist, which is what the box is described by.
-func (p PasswordProps) RequirementsID() string { return p.Name + "-requirements" }
+func (p PasswordProps) RequirementsID() string { return p.ElementID() + "-requirements" }
 
 // StrengthID names the summary, which is the live region.
-func (p PasswordProps) StrengthID() string { return p.Name + "-strength" }
+func (p PasswordProps) StrengthID() string { return p.ElementID() + "-strength" }
 
 // Message is what validation left for this box, or empty.
 func (p PasswordProps) Message() string {
@@ -316,17 +321,17 @@ func (p PasswordProps) DescribedBy() string {
 	if p.Confirming {
 		switch {
 		case p.Message() != "":
-			return p.Name + "-error"
+			return p.ElementID() + "-error"
 		case p.Hint != "":
-			return p.Name + "-hint"
+			return p.ElementID() + "-hint"
 		}
 		return ""
 	}
 	switch {
 	case p.Message() != "":
-		return p.Name + "-error " + p.RequirementsID()
+		return p.ElementID() + "-error " + p.RequirementsID()
 	case p.Hint != "":
-		return p.Name + "-hint " + p.RequirementsID()
+		return p.ElementID() + "-hint " + p.RequirementsID()
 	}
 	return p.RequirementsID()
 }
@@ -364,6 +369,14 @@ func (p PasswordProps) PartNames() []string {
 		"strength", "requirements", "requirement", "done", "message", "hint",
 	}
 }
+
+// ElementID is the id the markup carries: ID, or Name when ID is empty.
+func (p PasswordProps) ElementID() string {
+	if p.ID != "" {
+		return p.ID
+	}
+	return p.Name
+}
 @endgo
 
 {{-- The box carries no value and never will. The flash keeps the message for a
@@ -393,7 +406,7 @@ func (p PasswordProps) PartNames() []string {
 	<label
 		data-part="label"
 		class="{{ .PartClass("label", "label") }}"
-		for="{{ .Name }}"
+		for="{{ .ElementID() }}"
 		@attributes(.PartAttrs("label"))
 	>{{ .Label }}</label>
 
@@ -408,7 +421,7 @@ func (p PasswordProps) PartNames() []string {
 				class="{{ .PartClass("input") }}"
 			@endif
 			type="password"
-			id="{{ .Name }}"
+			id="{{ .ElementID() }}"
 			name="{{ .Name }}"
 			autocomplete="{{ .InputAutocomplete() }}"
 			spellcheck="false"
@@ -452,7 +465,7 @@ func (p PasswordProps) PartNames() []string {
 			data-reveal-shown="{{ .ConcealText() }}"
 			aria-label="{{ .RevealText() }}"
 			aria-pressed="false"
-			aria-controls="{{ .Name }}"
+			aria-controls="{{ .ElementID() }}"
 			@attributes(.PartAttrs("reveal"))
 		><span data-reveal-icon-hidden aria-hidden="true">{!! icons.Eye(icons.Props{}) !!}</span><span data-reveal-icon-shown aria-hidden="true" hidden>{!! icons.EyeSlash(icons.Props{}) !!}</span></button>
 	</div>
@@ -540,7 +553,7 @@ func (p PasswordProps) PartNames() []string {
 	@if(.Message() != "")
 		<p
 			data-part="message"
-			id="{{ .Name }}-error"
+			id="{{ .ElementID() }}-error"
 			class="{{ .PartClass("message", "text-destructive text-sm") }}"
 			@attributes(.PartAttrs("message"))
 		>{{ .Message() }}</p>
@@ -549,7 +562,7 @@ func (p PasswordProps) PartNames() []string {
 		@if(.Hint != "")
 			<p
 				data-part="hint"
-				id="{{ .Name }}-hint"
+				id="{{ .ElementID() }}-hint"
 				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
 				@attributes(.PartAttrs("hint"))
 			>{{ .Hint }}</p>

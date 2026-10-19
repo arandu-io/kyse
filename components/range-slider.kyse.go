@@ -33,6 +33,11 @@ type RangeSliderProps struct {
 	// Name is the form field name, the id everything else is hung off, and
 	// what Page is asked about.
 	Name string
+	// ID is the id the markup carries, and the id the label, the message and
+	// the hint hang off. Empty uses Name. Two forms on one page that ask for the
+	// same Name -- two dialogs that each want a reason -- need one each, or the
+	// second label points at the first box.
+	ID string
 	// Label is the text above the track.
 	Label string
 	// Value is where the thumb starts when nothing was rejected.
@@ -156,16 +161,24 @@ func (p RangeSliderProps) FillClass() string {
 // the hint are announced rather than only shown.
 func (p RangeSliderProps) DescribedBy() string {
 	if p.Message() != "" {
-		return p.Name + "-error"
+		return p.ElementID() + "-error"
 	}
 	if p.Hint != "" {
-		return p.Name + "-hint"
+		return p.ElementID() + "-hint"
 	}
 	return ""
 }
 // PartNames are the parts this component publishes.
 func (p RangeSliderProps) PartNames() []string {
 	return []string{"root", "label", "input", "value", "message", "hint"}
+}
+
+// ElementID is the id the markup carries: ID, or Name when ID is empty.
+func (p RangeSliderProps) ElementID() string {
+	if p.ID != "" {
+		return p.ID
+	}
+	return p.Name
 }
 @endgo
 
@@ -182,7 +195,7 @@ func (p RangeSliderProps) PartNames() []string {
 	<label
 		data-part="label"
 		class="{{ .PartClass("label", "label") }}"
-		for="{{ .Name }}"
+		for="{{ .ElementID() }}"
 		@attributes(.PartAttrs("label"))
 	>{{ .Label }}</label>
 
@@ -194,7 +207,7 @@ func (p RangeSliderProps) PartNames() []string {
 		data-part="input"
 		class="{{ .PartClass("input", "input", .FillClass()) }}"
 		type="range"
-		id="{{ .Name }}"
+		id="{{ .ElementID() }}"
 		name="{{ .Name }}"
 		value="{{ .Current() }}"
 		min="{{ .Floor() }}"
@@ -219,7 +232,7 @@ func (p RangeSliderProps) PartNames() []string {
 			class="{{ .PartClass("value", "text-muted-foreground text-sm") }}"
 			@attributes(.PartAttrs("value"))
 		>
-			<output for="{{ .Name }}" data-slider-output>{{ .Current() }}</output>
+			<output for="{{ .ElementID() }}" data-slider-output>{{ .Current() }}</output>
 			@if(.Unit != "")
 				{{ .Unit }}
 			@endif
@@ -229,7 +242,7 @@ func (p RangeSliderProps) PartNames() []string {
 	@if(.Message() != "")
 		<p
 			data-part="message"
-			id="{{ .Name }}-error"
+			id="{{ .ElementID() }}-error"
 			class="{{ .PartClass("message", "text-destructive text-sm") }}"
 			@attributes(.PartAttrs("message"))
 		>{{ .Message() }}</p>
@@ -238,7 +251,7 @@ func (p RangeSliderProps) PartNames() []string {
 		@if(.Hint != "")
 			<p
 				data-part="hint"
-				id="{{ .Name }}-hint"
+				id="{{ .ElementID() }}-hint"
 				class="{{ .PartClass("hint", "text-muted-foreground text-sm") }}"
 				@attributes(.PartAttrs("hint"))
 			>{{ .Hint }}</p>

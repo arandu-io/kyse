@@ -115,6 +115,7 @@ func TestEveryComponentRenders(t *testing.T) {
 		{"Drawer", string(components.Drawer(components.DrawerProps{ID: "nav", Title: "Menu"}))},
 		{"FormDialog", string(components.FormDialog(components.FormDialogProps{ID: "new", Title: "New discount", Action: "/discounts"}))},
 		{"DialogTrigger", string(components.DialogTrigger(components.DialogTriggerProps{Dialog: "new", Label: "New discount", Href: "/discounts/new"}))},
+		{"HiddenInput", string(components.HiddenInput(components.HiddenInputProps{Name: "subscription", Value: "sub_1"}))},
 		{"DropdownMenu", string(components.DropdownMenu(components.DropdownMenuProps{
 			Label: "Actions", Items: []components.MenuItem{{Label: "Rename"}},
 		}))},
@@ -289,7 +290,10 @@ func TestEveryComponentRenders(t *testing.T) {
 			// Every component carries a Basecoat class, because that is where
 			// its appearance comes from. One that renders bare markup is one
 			// that will look unstyled in a project and correct in review.
-			if !strings.Contains(c.html, `class="`) {
+			// The exception is an input nobody sees: it has no appearance to
+			// take from anywhere, and a class written to satisfy this line
+			// would be a rule matching nothing.
+			if !strings.Contains(c.html, `class="`) && c.name != "HiddenInput" {
 				t.Errorf("rendered no class attribute:\n%s", c.html)
 			}
 		})
@@ -334,6 +338,9 @@ func TestAPropIsEscaped(t *testing.T) {
 		"FormDialog": string(components.FormDialog(components.FormDialogProps{
 			ID: "x", Title: payload, Description: payload, SubmitLabel: payload, CancelLabel: payload,
 			CloseLabel: payload, Action: "/x", Token: payload,
+		})),
+		"HiddenInput": string(components.HiddenInput(components.HiddenInputProps{
+			Name: "x", Value: payload,
 		})),
 		"DialogTrigger": string(components.DialogTrigger(components.DialogTriggerProps{
 			Dialog: payload, Label: payload, Href: "/x",
