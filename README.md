@@ -146,6 +146,12 @@ types -- the record a dialog acts on -- and takes the same scoped page. The
 trigger link writes `hx-boost="false"`, so a layout with a boosted body does
 not navigate to the form page instead of opening the dialog.
 
+A form whose answer must be a whole document -- one that shows a secret once,
+an API token or a signing key, answered `no-store` -- sets `NoBoost: true`, and
+the form carries `hx-boost="false"` inside a boosted layout. `hx-*` cannot be
+written through `Attrs`: a refused name there stops the render with a
+`*components.RefusedAttribute` that names it, instead of drawing nothing.
+
 Esc, Cancel and the close button close it, and focus returns to the trigger.
 Enter in a field submits the form, because Cancel and the close button belong to
 a second, empty `method="dialog"` form. `Size` is `sm`, `md` or `lg` from the

@@ -259,3 +259,45 @@ func TestTheDialogTriggerFallsBackToThePage(t *testing.T) {
 		t.Errorf("an icon-only trigger has no name:\n%s", iconOnly)
 	}
 }
+
+// A form whose answer shows a secret once has to be posted by the browser and
+// answered as a document, never swapped in by a boosted layout. The caller
+// cannot write hx-boost itself, so the dialog writes it on the form.
+func TestAFormDialogCanKeepItsFormOutOfABoostedLayout(t *testing.T) {
+	plain := string(components.FormDialog(discountDialog(nil)))
+	if strings.Contains(plain, "hx-boost") {
+		t.Errorf("a form dialog opted out of boosting without being asked:\n%s", plain)
+	}
+
+	props := discountDialog(nil)
+	props.NoBoost = true
+	html := string(components.FormDialog(props))
+	form := html[strings.Index(html, `<form`):strings.Index(html, `<input type="hidden"`)]
+	if !strings.Contains(form, `hx-boost="false"`) {
+		t.Errorf("NoBoost did not reach the form:\n%s", form)
+	}
+	if strings.Count(html, "hx-boost") != 1 {
+		t.Errorf("hx-boost written somewhere other than the form:\n%s", html)
+	}
+}
+
+// The case that drew an empty space where a dialog should have been: the view
+// tried to write hx-boost through Attrs. It now stops the render and says so.
+func TestAFormDialogGivenARefusedAttributeSaysSo(t *testing.T) {
+	props := discountDialog(nil)
+	props.Parts = components.Parts{"content": {Attrs: components.Attrs{"hx-boost": "false"}}}
+
+	defer func() {
+		refused, ok := recover().(*components.RefusedAttribute)
+		if !ok {
+			t.Fatal("the dialog rendered instead of refusing hx-boost")
+		}
+		if refused.Part != "content" || refused.Name != "hx-boost" {
+			t.Errorf("refused %q on %q, want hx-boost on content", refused.Name, refused.Part)
+		}
+		if !strings.Contains(refused.Error(), `"hx-boost"`) || !strings.Contains(refused.Error(), "drawn nothing") {
+			t.Errorf("the message does not say what was refused and what it cost: %s", refused.Error())
+		}
+	}()
+	components.FormDialog(props)
+}

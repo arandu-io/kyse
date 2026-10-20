@@ -118,6 +118,16 @@ type FormDialogProps struct {
 	// Multipart encodes the form as multipart/form-data, for a form with a
 	// file in it.
 	Multipart bool
+	// NoBoost keeps htmx from boosting the form inside a layout that boosts
+	// its body: the browser posts it itself and loads the answer as a whole
+	// document. It is for the form whose answer must not pass through a swap --
+	// one that shows a secret once, an API token or a signing key, answered
+	// no-store and drawn as its own page. Empty leaves the form to the layout.
+	//
+	// It is a field because the caller cannot write it: hx- attributes are
+	// refused in Attrs, for the reason they are refused everywhere a name
+	// comes from a caller.
+	NoBoost bool
 
 	// SubmitLabel is the button that sends the form. Empty means "Save".
 	SubmitLabel string
@@ -292,7 +302,7 @@ func (p FormDialogProps) PartNames() []string {
 	return []string{"root", "content", "header", "title", "description", "body", "footer", "cancel", "submit", "close"}
 }
 
-//line components/form-dialog.go:296
+//line components/form-dialog.go:306
 
 // FormDialog renders the form-dialog component.
 func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
@@ -315,9 +325,9 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/form-dialog.kyse.go:290
+//line components/form-dialog.kyse.go:300
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/form-dialog.go:321
+//line components/form-dialog.go:331
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -326,9 +336,9 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/form-dialog.kyse.go:291
+//line components/form-dialog.kyse.go:301
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass(kyse__d.Surface())))
-//line components/form-dialog.go:332
+//line components/form-dialog.go:342
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -337,16 +347,16 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\taria-labelledby=\"")
 	}
 	if kyse__err == nil {
-//line components/form-dialog.kyse.go:292
+//line components/form-dialog.kyse.go:302
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/form-dialog.go:343
+//line components/form-dialog.go:353
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "-title\"\n")
 	}
-//line components/form-dialog.kyse.go:293
+//line components/form-dialog.kyse.go:303
 	if kyse__d.Alert {
-//line components/form-dialog.go:350
+//line components/form-dialog.go:360
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\trole=\"alertdialog\"\n")
 		}
@@ -355,43 +365,43 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-size=\"")
 		}
 		if kyse__err == nil {
-//line components/form-dialog.kyse.go:296
+//line components/form-dialog.kyse.go:306
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SizeName()))
-//line components/form-dialog.go:361
+//line components/form-dialog.go:371
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/form-dialog.kyse.go:298
+//line components/form-dialog.kyse.go:308
 	if kyse__d.DescribedBy() != "" {
-//line components/form-dialog.go:369
+//line components/form-dialog.go:379
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/form-dialog.kyse.go:299
+//line components/form-dialog.kyse.go:309
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/form-dialog.go:376
+//line components/form-dialog.go:386
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/form-dialog.kyse.go:301
+//line components/form-dialog.kyse.go:311
 	if kyse__d.Opened() {
-//line components/form-dialog.go:384
+//line components/form-dialog.go:394
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\topen\n")
 		}
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/form-dialog.kyse.go:304
+//line components/form-dialog.kyse.go:314
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/form-dialog.go:393
+//line components/form-dialog.go:403
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:304", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:314", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
@@ -409,9 +419,9 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/form-dialog.kyse.go:312
+//line components/form-dialog.kyse.go:322
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.FormID()))
-//line components/form-dialog.go:415
+//line components/form-dialog.go:425
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -420,9 +430,9 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tmethod=\"")
 	}
 	if kyse__err == nil {
-//line components/form-dialog.kyse.go:313
+//line components/form-dialog.kyse.go:323
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.FormMethod()))
-//line components/form-dialog.go:426
+//line components/form-dialog.go:436
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -432,11 +442,11 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v2 string
-//line components/form-dialog.kyse.go:314
+//line components/form-dialog.kyse.go:324
 		kyse__v2, kyse__err = kyse__view.TextURL(kyse__d.Action)
-//line components/form-dialog.go:438
+//line components/form-dialog.go:448
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:314", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:324", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
@@ -444,39 +454,46 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-//line components/form-dialog.kyse.go:315
+//line components/form-dialog.kyse.go:325
 	if kyse__d.Encoding() != "" {
-//line components/form-dialog.go:450
+//line components/form-dialog.go:460
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tenctype=\"")
 		}
 		if kyse__err == nil {
-//line components/form-dialog.kyse.go:316
+//line components/form-dialog.kyse.go:326
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Encoding()))
-//line components/form-dialog.go:457
+//line components/form-dialog.go:467
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+//line components/form-dialog.kyse.go:328
+	if kyse__d.NoBoost {
+//line components/form-dialog.go:475
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-boost=\"false\"\n")
 		}
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/form-dialog.kyse.go:318
+//line components/form-dialog.kyse.go:331
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("content", kyse__d.WidthClass(), kyse__d.SheetClass())))
-//line components/form-dialog.go:469
+//line components/form-dialog.go:486
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v3 string
-//line components/form-dialog.kyse.go:319
+//line components/form-dialog.kyse.go:332
 		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("content"))
-//line components/form-dialog.go:478
+//line components/form-dialog.go:495
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:319", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:332", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
@@ -488,38 +505,38 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<input type=\"hidden\" name=\"_dialog\" value=\"")
 	}
 	if kyse__err == nil {
-//line components/form-dialog.kyse.go:321
+//line components/form-dialog.kyse.go:334
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/form-dialog.go:494
+//line components/form-dialog.go:511
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
 	}
-//line components/form-dialog.kyse.go:322
+//line components/form-dialog.kyse.go:335
 	if kyse__d.MethodOverride() != "" {
-//line components/form-dialog.go:501
+//line components/form-dialog.go:518
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<input type=\"hidden\" name=\"_method\" value=\"")
 		}
 		if kyse__err == nil {
-//line components/form-dialog.kyse.go:323
+//line components/form-dialog.kyse.go:336
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.MethodOverride()))
-//line components/form-dialog.go:508
+//line components/form-dialog.go:525
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
 		}
 	}
-//line components/form-dialog.kyse.go:325
+//line components/form-dialog.kyse.go:338
 	if kyse__d.SendsToken() {
-//line components/form-dialog.go:516
+//line components/form-dialog.go:533
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<input type=\"hidden\" name=\"_token\" value=\"")
 		}
 		if kyse__err == nil {
-//line components/form-dialog.kyse.go:326
+//line components/form-dialog.kyse.go:339
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Token))
-//line components/form-dialog.go:523
+//line components/form-dialog.go:540
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
@@ -534,16 +551,16 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"header\"\n")
 	}
-//line components/form-dialog.kyse.go:331
+//line components/form-dialog.kyse.go:344
 	if kyse__d.PartClass("header") != "" {
-//line components/form-dialog.go:540
+//line components/form-dialog.go:557
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/form-dialog.kyse.go:332
+//line components/form-dialog.kyse.go:345
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("header")))
-//line components/form-dialog.go:547
+//line components/form-dialog.go:564
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -551,11 +568,11 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v4 string
-//line components/form-dialog.kyse.go:334
+//line components/form-dialog.kyse.go:347
 		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("header"))
-//line components/form-dialog.go:557
+//line components/form-dialog.go:574
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:334", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:347", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 		}
@@ -569,16 +586,16 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"title\"\n")
 	}
-//line components/form-dialog.kyse.go:338
+//line components/form-dialog.kyse.go:351
 	if kyse__d.PartClass("title") != "" {
-//line components/form-dialog.go:575
+//line components/form-dialog.go:592
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/form-dialog.kyse.go:339
+//line components/form-dialog.kyse.go:352
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("title")))
-//line components/form-dialog.go:582
+//line components/form-dialog.go:599
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -588,20 +605,20 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/form-dialog.kyse.go:341
+//line components/form-dialog.kyse.go:354
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/form-dialog.go:594
+//line components/form-dialog.go:611
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "-title\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v5 string
-//line components/form-dialog.kyse.go:342
+//line components/form-dialog.kyse.go:355
 		kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("title"))
-//line components/form-dialog.go:603
+//line components/form-dialog.go:620
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:342", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:355", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 		}
@@ -610,32 +627,32 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 	}
 	if kyse__err == nil {
-//line components/form-dialog.kyse.go:343
+//line components/form-dialog.kyse.go:356
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Title)))
-//line components/form-dialog.go:616
+//line components/form-dialog.go:633
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</h2>\n")
 	}
-//line components/form-dialog.kyse.go:344
+//line components/form-dialog.kyse.go:357
 	if kyse__d.Description != "" {
-//line components/form-dialog.go:623
+//line components/form-dialog.go:640
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<p\n")
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-part=\"description\"\n")
 		}
-//line components/form-dialog.kyse.go:347
+//line components/form-dialog.kyse.go:360
 		if kyse__d.PartClass("description") != "" {
-//line components/form-dialog.go:632
+//line components/form-dialog.go:649
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/form-dialog.kyse.go:348
+//line components/form-dialog.kyse.go:361
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("description")))
-//line components/form-dialog.go:639
+//line components/form-dialog.go:656
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -645,20 +662,20 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tid=\"")
 		}
 		if kyse__err == nil {
-//line components/form-dialog.kyse.go:350
+//line components/form-dialog.kyse.go:363
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/form-dialog.go:651
+//line components/form-dialog.go:668
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "-description\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v6 string
-//line components/form-dialog.kyse.go:351
+//line components/form-dialog.kyse.go:364
 			kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("description"))
-//line components/form-dialog.go:660
+//line components/form-dialog.go:677
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:351", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:364", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 			}
@@ -667,9 +684,9 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>")
 		}
 		if kyse__err == nil {
-//line components/form-dialog.kyse.go:352
+//line components/form-dialog.kyse.go:365
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Description)))
-//line components/form-dialog.go:673
+//line components/form-dialog.go:690
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
@@ -691,20 +708,20 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/form-dialog.kyse.go:358
+//line components/form-dialog.kyse.go:371
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("body", "-m-1 grid min-h-0 content-start gap-4 overflow-y-auto p-1")))
-//line components/form-dialog.go:697
+//line components/form-dialog.go:714
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v7 string
-//line components/form-dialog.kyse.go:359
+//line components/form-dialog.kyse.go:372
 		kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("body"))
-//line components/form-dialog.go:706
+//line components/form-dialog.go:723
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:359", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:372", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 		}
@@ -712,17 +729,17 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>\n")
 	}
-//line components/form-dialog.kyse.go:361
+//line components/form-dialog.kyse.go:374
 	for _, block := range kyse__d.Body {
 		_ = block
-//line components/form-dialog.go:719
+//line components/form-dialog.go:736
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t")
 		}
 		if kyse__err == nil {
-//line components/form-dialog.kyse.go:362
+//line components/form-dialog.kyse.go:375
 			var kyse__v8 kyse__template.HTML = block
-//line components/form-dialog.go:726
+//line components/form-dialog.go:743
 			_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v8))
 		}
 		if kyse__err == nil {
@@ -745,20 +762,20 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/form-dialog.kyse.go:372
+//line components/form-dialog.kyse.go:385
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("footer", "flex-col sm:flex-row-reverse sm:justify-start")))
-//line components/form-dialog.go:751
+//line components/form-dialog.go:768
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v9 string
-//line components/form-dialog.kyse.go:373
+//line components/form-dialog.kyse.go:386
 		kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("footer"))
-//line components/form-dialog.go:760
+//line components/form-dialog.go:777
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:373", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:386", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
 		}
@@ -779,23 +796,23 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/form-dialog.kyse.go:378
+//line components/form-dialog.kyse.go:391
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("submit", "btn")))
-//line components/form-dialog.go:785
+//line components/form-dialog.go:802
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-//line components/form-dialog.kyse.go:379
+//line components/form-dialog.kyse.go:392
 	if kyse__d.SubmitVariant != "" {
-//line components/form-dialog.go:792
+//line components/form-dialog.go:809
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-variant=\"")
 		}
 		if kyse__err == nil {
-//line components/form-dialog.kyse.go:380
+//line components/form-dialog.kyse.go:393
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SubmitVariant))
-//line components/form-dialog.go:799
+//line components/form-dialog.go:816
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -803,11 +820,11 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v10 string
-//line components/form-dialog.kyse.go:382
+//line components/form-dialog.kyse.go:395
 		kyse__v10, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("submit"))
-//line components/form-dialog.go:809
+//line components/form-dialog.go:826
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:382", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:395", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v10)
 		}
@@ -816,9 +833,9 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 	}
 	if kyse__err == nil {
-//line components/form-dialog.kyse.go:383
+//line components/form-dialog.kyse.go:396
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Submit())))
-//line components/form-dialog.go:822
+//line components/form-dialog.go:839
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</button>\n")
@@ -836,9 +853,9 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tform=\"")
 	}
 	if kyse__err == nil {
-//line components/form-dialog.kyse.go:387
+//line components/form-dialog.kyse.go:400
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DismissID()))
-//line components/form-dialog.go:842
+//line components/form-dialog.go:859
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -847,9 +864,9 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/form-dialog.kyse.go:388
+//line components/form-dialog.kyse.go:401
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("cancel", "btn")))
-//line components/form-dialog.go:853
+//line components/form-dialog.go:870
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -857,20 +874,20 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-variant=\"outline\"\n")
 	}
-//line components/form-dialog.kyse.go:390
+//line components/form-dialog.kyse.go:403
 	if kyse__d.Alert {
-//line components/form-dialog.go:863
+//line components/form-dialog.go:880
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tautofocus\n")
 		}
 	}
 	if kyse__err == nil {
 		var kyse__v11 string
-//line components/form-dialog.kyse.go:393
+//line components/form-dialog.kyse.go:406
 		kyse__v11, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("cancel"))
-//line components/form-dialog.go:872
+//line components/form-dialog.go:889
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:393", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:406", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v11)
 		}
@@ -879,9 +896,9 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 	}
 	if kyse__err == nil {
-//line components/form-dialog.kyse.go:394
+//line components/form-dialog.kyse.go:407
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Cancel())))
-//line components/form-dialog.go:885
+//line components/form-dialog.go:902
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</button>\n")
@@ -892,9 +909,9 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/form-dialog.kyse.go:397
+//line components/form-dialog.kyse.go:410
 	if !kyse__d.Alert {
-//line components/form-dialog.go:898
+//line components/form-dialog.go:915
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<button\n")
 		}
@@ -908,23 +925,23 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tform=\"")
 		}
 		if kyse__err == nil {
-//line components/form-dialog.kyse.go:401
+//line components/form-dialog.kyse.go:414
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DismissID()))
-//line components/form-dialog.go:914
+//line components/form-dialog.go:931
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
-//line components/form-dialog.kyse.go:402
+//line components/form-dialog.kyse.go:415
 		if kyse__d.PartClass("close") != "" {
-//line components/form-dialog.go:921
+//line components/form-dialog.go:938
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/form-dialog.kyse.go:403
+//line components/form-dialog.kyse.go:416
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("close")))
-//line components/form-dialog.go:928
+//line components/form-dialog.go:945
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -934,20 +951,20 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-label=\"")
 		}
 		if kyse__err == nil {
-//line components/form-dialog.kyse.go:405
+//line components/form-dialog.kyse.go:418
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Close()))
-//line components/form-dialog.go:940
+//line components/form-dialog.go:957
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v12 string
-//line components/form-dialog.kyse.go:406
+//line components/form-dialog.kyse.go:419
 			kyse__v12, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("close"))
-//line components/form-dialog.go:949
+//line components/form-dialog.go:966
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:406", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/form-dialog.kyse.go:419", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v12)
 			}
@@ -956,9 +973,9 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 		}
 		if kyse__err == nil {
-//line components/form-dialog.kyse.go:407
+//line components/form-dialog.kyse.go:420
 			var kyse__v13 kyse__template.HTML = icons.X(icons.Props{})
-//line components/form-dialog.go:962
+//line components/form-dialog.go:979
 			_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v13))
 		}
 		if kyse__err == nil {
@@ -972,9 +989,9 @@ func FormDialog(kyse__props FormDialogProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t<form method=\"dialog\" id=\"")
 	}
 	if kyse__err == nil {
-//line components/form-dialog.kyse.go:410
+//line components/form-dialog.kyse.go:423
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DismissID()))
-//line components/form-dialog.go:978
+//line components/form-dialog.go:995
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\" hidden></form>\n")
