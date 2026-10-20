@@ -43,8 +43,8 @@ type DialogProps struct {
 	// not say what is lost is a dialog people dismiss without reading.
 	Message string
 
-	// ConfirmLabel is the button that goes through with it. Empty means
-	// "Confirm".
+	// ConfirmLabel is the button that goes through with it. Empty says
+	// kyse.dialog.confirm from the Page, or "Confirm".
 	ConfirmLabel string
 	// ConfirmVariant styles it. Use "destructive" for anything that deletes.
 	ConfirmVariant string
@@ -55,7 +55,8 @@ type DialogProps struct {
 	Action string
 	Method string
 
-	// CancelLabel is the way out. Empty means "Cancel".
+	// CancelLabel is the way out. Empty says kyse.dialog.cancel from the Page,
+	// or "Cancel".
 	CancelLabel string
 
 	// Alert draws this as an alert dialog instead: the message is announced
@@ -70,7 +71,8 @@ type DialogProps struct {
 	Alert bool
 
 	// Page is the screen's own view.Page. The confirm form posts the CSRF
-	// token it carries, so a dialog drawn from a view writes Page: .Page and
+	// token it carries, the two buttons read their words from it when their
+	// labels are empty, so a dialog drawn from a view writes Page: .Page and
 	// never copies the token by hand. Nil posts Token, or none.
 	Page Page
 	// Token is the CSRF token, for a dialog with no Page to ask. Set, it wins
@@ -102,7 +104,7 @@ func (p DialogProps) DescribedBy() string {
 // Confirm is the label of the button that goes through with it.
 func (p DialogProps) Confirm() string {
 	if p.ConfirmLabel == "" {
-		return "Confirm"
+		return say(p.Page, "dialog.confirm", "Confirm")
 	}
 	return p.ConfirmLabel
 }
@@ -110,7 +112,7 @@ func (p DialogProps) Confirm() string {
 // Cancel is the label of the way out.
 func (p DialogProps) Cancel() string {
 	if p.CancelLabel == "" {
-		return "Cancel"
+		return say(p.Page, "dialog.cancel", "Cancel")
 	}
 	return p.CancelLabel
 }

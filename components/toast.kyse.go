@@ -42,7 +42,8 @@ type ToastProps struct {
 
 	// Page is the screen's own view.Page. With Title empty the toast draws
 	// the sentence the request before this one flashed under FlashKey -- what
-	// Context.With left -- and nothing when it flashed none.
+	// Context.With left -- and nothing when it flashed none. The close button
+	// reads its word from it too, when CloseLabel is empty.
 	Page Page
 	// FlashKey is the key that sentence was flashed under. Empty means
 	// "status", the key a form that worked says what it did under.
@@ -67,7 +68,7 @@ type ToastProps struct {
 	// on any button in its footer, so the button needs nothing of its own.
 	Dismissible bool
 	// CloseLabel names that button, which is an icon and has no text of its
-	// own. Empty means "Close".
+	// own. Empty says kyse.toast.close from the Page, or "Close".
 	CloseLabel string
 }
 
@@ -91,7 +92,7 @@ func (p ToastProps) Headline() string {
 // Close is the accessible name of the close button.
 func (p ToastProps) Close() string {
 	if p.CloseLabel == "" {
-		return "Close"
+		return say(p.Page, "toast.close", "Close")
 	}
 	return p.CloseLabel
 }

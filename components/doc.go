@@ -47,4 +47,69 @@
 // The class names are semantic -- btn, field, card -- and the rules behind them
 // ship with the skeleton under resources/css/basecoat/. The same button written
 // with utility classes is 443 characters of markup; this way it is thirty.
+//
+// # What a component asks the page
+//
+// A screen hands every component the same value, its own view.Page, and each
+// component asks it only what it needs. [Page] is the two questions a field
+// asks: its message and what was typed. Three more are asked by assertion, so
+// a page answers the ones it can and the rest fall back:
+//
+//   - [TokenPage]: the CSRF token a form posts. Dialog, FormDialog, Table and
+//     DataTable ask it when their Token is empty.
+//   - [FlashPage]: what the request before this one said. Toast draws it when
+//     its Title is empty.
+//   - [TranslatorPage]: the application's catalogue and the request's locale.
+//     Pagination, Dialog, FormDialog, Toast, Table and DataTable read their
+//     own words from it when the label for them is empty, and say the English
+//     they always said when it carries no line. Pagination and DataTable take
+//     the page as PageData, because their Page is a number.
+//
+// hesape/view.Page answers the first two. A label written on the props wins
+// over all of them.
+//
+// # The words a component reads from the catalogue
+//
+// They are items of the group "kyse" in the application's catalogue, which a
+// FileLoader reads from lang/<locale>/kyse.json, nested objects flattening to
+// dotted items. A sentence keeps its placeholders, written in braces:
+//
+//	{
+//	  "pagination": {"previous": "Anterior", "page": "Página {n}"},
+//	  "dialog": {"cancel": "Cancelar"}
+//	}
+//
+// Every key, with the English drawn when the catalogue has none:
+//
+//	kyse.pagination.label         Pagination
+//	kyse.pagination.previous      Previous
+//	kyse.pagination.next          Next
+//	kyse.pagination.page          Page {n}
+//	kyse.dialog.confirm           Confirm
+//	kyse.dialog.cancel            Cancel
+//	kyse.form_dialog.submit       Save
+//	kyse.form_dialog.cancel       Cancel
+//	kyse.form_dialog.close        Close
+//	kyse.toast.close              Close
+//	kyse.table.select_all         Select all rows
+//	kyse.table.bulk               Bulk actions
+//	kyse.table.columns            Columns
+//	kyse.table.selected           {n} of {total} rows selected
+//	kyse.table.ascending          (none) -- "{column}, sorted ascending" in a data table
+//	kyse.table.descending         (none) -- "{column}, sorted descending" in a data table
+//	kyse.table.unsorted           (none) -- "{column}, not sorted" in a data table
+//	kyse.data_table.showing       {from} to {to} of {total}
+//	kyse.data_table.per_page      per page
+//	kyse.data_table.no_result     Nothing matched
+//	kyse.data_table.previous      Previous page
+//	kyse.data_table.next          Next page
+//	kyse.data_table.page          Page {n}
+//	kyse.data_table.page_of       Page {n} of {total}
+//	kyse.data_table.back          Previous
+//	kyse.data_table.forward       Next
+//	kyse.data_table.apply         Apply filters
+//	kyse.data_table.search        Search {label}
+//
+// A data table reads the sentences of the table it draws under the table's
+// keys, so a catalogue says them once for both.
 package components

@@ -52,14 +52,16 @@ type TableProps struct {
 	// the fact that something is checked -- so nothing counts selections and
 	// nothing has to be told when one is swapped away.
 	SelectName string
-	// SelectAllLabel names the header checkbox. Empty says "Select all rows",
+	// SelectAllLabel names the header checkbox. Empty says
+	// kyse.table.select_all from the Page, or "Select all rows",
 	// which is the name it needs: a checkbox in a header cell with no name is
 	// read as a checkbox in a header cell.
 	SelectAllLabel string
 	// BulkActions are the controls revealed once something is selected. They
 	// submit the checked rows, so each one is a form button and not a link.
 	BulkActions []ButtonProps
-	// BulkLabel names the bar the actions sit in. Empty says "Bulk actions".
+	// BulkLabel names the bar the actions sit in. Empty says kyse.table.bulk
+	// from the Page, or "Bulk actions".
 	BulkLabel string
 	// BulkAction is where the bar submits, and BulkMethod is how. Empty posts
 	// to the current URL, which is right when the list and its bulk operations
@@ -90,11 +92,12 @@ type TableProps struct {
 	// nowhere to go is a header that looks like a control and is not one.
 	SortURL string
 	// ColumnsLabel names the menu that switches columns off. Empty says
-	// "Columns". The menu is drawn only when some column is Hideable.
+	// kyse.table.columns from the Page, or "Columns". The menu is drawn only when some column is Hideable.
 	ColumnsLabel string
 	// SelectedLabel is the line saying how many rows are chosen, with the
 	// count written as "{n}" and the total as "{total}": "{n} of {total} rows
-	// selected". Empty draws that sentence in English.
+	// selected". Empty says kyse.table.selected from the Page, or that
+	// sentence in English.
 	SelectedLabel string
 
 	// The HTMX attributes for a sort link or a column menu, so the table can
@@ -117,12 +120,14 @@ type TableProps struct {
 	// AscendingLabel, DescendingLabel and UnsortedLabel are what a sortable
 	// header is called in each of its three states: "{column}, sorted
 	// ascending". A header that only draws an arrow is a header a screen
-	// reader reads as a link.
+	// reader reads as a link. Empty says kyse.table.ascending,
+	// kyse.table.descending and kyse.table.unsorted from the Page, or nothing.
 	AscendingLabel  string
 	DescendingLabel string
 	UnsortedLabel   string
-	// Page is the screen's own view.Page, and the bulk form posts the CSRF
-	// token it carries. A form that changes something and carries none is
+	// Page is the screen's own view.Page. The bulk form posts the CSRF token it
+	// carries, and the table reads its own words from it when their labels are
+	// empty. A form that changes something and carries none is
 	// refused by the framework, which is the intended outcome and a confusing
 	// one to debug -- so the table asks for it rather than leaving it to be
 	// remembered.
@@ -273,7 +278,7 @@ func (p TableProps) SelectAllName() string {
 	if p.SelectAllLabel != "" {
 		return p.SelectAllLabel
 	}
-	return "Select all rows"
+	return say(p.Page, "table.select_all", "Select all rows")
 }
 
 // BulkName is what the bar of actions is called.
@@ -281,7 +286,7 @@ func (p TableProps) BulkName() string {
 	if p.BulkLabel != "" {
 		return p.BulkLabel
 	}
-	return "Bulk actions"
+	return say(p.Page, "table.bulk", "Bulk actions")
 }
 
 // PostMethod is how the bulk bar submits, and it is post unless the caller
@@ -407,7 +412,7 @@ func (p TableProps) ColumnsName() string {
 	if p.ColumnsLabel != "" {
 		return p.ColumnsLabel
 	}
-	return "Columns"
+	return say(p.Page, "table.columns", "Columns")
 }
 
 // Chosen is how many rows are drawn as selected.
@@ -421,13 +426,23 @@ func (p TableProps) Chosen() int {
 	return count
 }
 
+// SelectedSentence is the count's sentence with its placeholders still in it:
+// SelectedLabel, or the page's kyse.table.selected, or empty for the English the
+// behaviour writes.
+func (p TableProps) SelectedSentence() string {
+	if p.SelectedLabel != "" {
+		return p.SelectedLabel
+	}
+	return say(p.Page, "table.selected", "")
+}
+
 // SelectedText is the line saying how many rows are chosen.
 //
 // It is drawn by the server from what the server sent, and kept in step by the
 // behaviour as boxes are ticked. Both write the same sentence, because both
 // take it from here.
 func (p TableProps) SelectedText() string {
-	sentence := p.SelectedLabel
+	sentence := p.SelectedSentence()
 	if sentence == "" {
 		sentence = "{n} of {total} rows selected"
 	}
@@ -463,7 +478,7 @@ const TableBehavior = "table"
 func (p TableProps) RootAttrs() map[string]string {
 	if p.Behavior.Name == "" && !p.Composed && (p.Selectable() || p.Hideable() || p.Navigable) {
 		p.Behavior = Behavior{Name: TableBehavior, Props: map[string]any{
-			"selected": p.SelectedLabel,
+			"selected": p.SelectedSentence(),
 		}}
 	}
 	return p.ComponentProps.RootAttrs()
@@ -485,11 +500,15 @@ func (p TableProps) Submits() bool { return p.Selectable() && len(p.BulkActions)
 // SortName is what a sortable header is called, in the state it is in.
 func (p TableProps) SortName(column TableColumn) string {
 	sentence := p.UnsortedLabel
+	key := "table.unsorted"
 	switch p.Order(column) {
 	case "ascending":
-		sentence = p.AscendingLabel
+		sentence, key = p.AscendingLabel, "table.ascending"
 	case "descending":
-		sentence = p.DescendingLabel
+		sentence, key = p.DescendingLabel, "table.descending"
+	}
+	if sentence == "" {
+		sentence = say(p.Page, key, "")
 	}
 	if sentence == "" {
 		return ""
@@ -535,7 +554,7 @@ func (p TableProps) PartNames() []string {
 				class="{{ .PartClass("count", "table-count") }}"
 				role="status"
 				aria-live="polite"
-				data-selected-template="{{ .SelectedLabel }}"
+				data-selected-template="{{ .SelectedSentence() }}"
 				@attributes(.PartAttrs("count"))
 			>{{ .SelectedText() }}</p>
 		@endif

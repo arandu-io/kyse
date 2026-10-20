@@ -1,5 +1,7 @@
 package components
 
+import "github.com/arandu-io/hesape/translation"
+
 // Page is the small part of a screen's page data that an input asks about
 // itself: the message validation left for it, and what was typed into it on the
 // attempt that was rejected.
@@ -80,6 +82,50 @@ type FlashPage interface {
 	// Flashed is the sentence left under key by the request that redirected
 	// here, or empty.
 	Flashed(key string) string
+}
+
+// TranslatorPage is a page that can say a component's own words -- "Cancel",
+// "Next page", "Close" -- in the language the page is served in.
+//
+// A component that draws a word nobody wrote asks for it here before it falls
+// back to English. The words are read from the application's own catalogue,
+// under the group "kyse": lang/pt-BR/kyse.json holding
+//
+//	{"dialog": {"cancel": "Cancelar"}, "pagination": {"next": "Próxima"}}
+//
+// answers kyse.dialog.cancel and kyse.pagination.next. The package doc lists
+// every key. A label written on the props still wins, and a key the catalogue
+// does not carry -- or a page that is not a TranslatorPage -- draws the English
+// it drew before.
+//
+// It is apart from Page for the reason TokenPage is. hesape/view.Page does not
+// implement it: a screen's own page data does, by returning the translator it
+// was wired with and the locale of the request.
+type TranslatorPage interface {
+	// Translator is the application's catalogue, or nil for none.
+	Translator() *translation.Translator
+	// Locale is the language of the request being drawn. Empty asks the
+	// translator for its own.
+	Locale() string
+}
+
+// say is a component's own word for key: the page's catalogue line for
+// kyse.<key> when it has one, and english otherwise.
+func say(page Page, key, english string) string {
+	speaker, ok := page.(TranslatorPage)
+	if !ok {
+		return english
+	}
+	translator := speaker.Translator()
+	if translator == nil {
+		return english
+	}
+	key = "kyse." + key
+	locale := speaker.Locale()
+	if !translator.Has(locale, key) {
+		return english
+	}
+	return translator.Get(locale, key, nil)
 }
 
 // tokenFor is the token a form posts: the one the caller wrote, or else the

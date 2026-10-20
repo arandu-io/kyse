@@ -57,17 +57,23 @@ type PaginationProps struct {
 	//
 	// Deprecated: set Paginator, and OnEachSide on the page.
 	Around int
-	// Label names the landmark. Empty says "Pagination", which is what
-	// separates it from the site navigation for somebody listing the
-	// landmarks.
+	// PageData is the screen's own view.Page, which is where the four words
+	// below are read from in the reader's language when they are left empty;
+	// see TranslatorPage. It is not called Page because Page is the number of
+	// the page being shown.
+	PageData Page
+	// Label names the landmark. Empty says kyse.pagination.label, or
+	// "Pagination", which is what separates it from the site navigation for
+	// somebody listing the landmarks.
 	Label string
-	// PreviousLabel and NextLabel are the two ends. Empty says "Previous" and
+	// PreviousLabel and NextLabel are the two ends. Empty says
+	// kyse.pagination.previous and kyse.pagination.next, or "Previous" and
 	// "Next".
 	PreviousLabel string
 	NextLabel     string
 	// PageLabel names one numbered control, with the number written as "{n}":
-	// "Page {n}". Empty says that in English, which is a floor and not a
-	// default worth shipping.
+	// "Page {n}". Empty says kyse.pagination.page, or that in English, which
+	// is a floor and not a default worth shipping.
 	PageLabel string
 
 	// The HTMX attributes, written on every entry, for a pager that swaps the
@@ -229,7 +235,7 @@ func (p PaginationProps) LandmarkName() string {
 	if p.Label != "" {
 		return p.Label
 	}
-	return "Pagination"
+	return say(p.PageData, "pagination.label", "Pagination")
 }
 
 // PreviousName and NextName are what the two ends read.
@@ -237,7 +243,7 @@ func (p PaginationProps) PreviousName() string {
 	if p.PreviousLabel != "" {
 		return p.PreviousLabel
 	}
-	return "Previous"
+	return say(p.PageData, "pagination.previous", "Previous")
 }
 
 // NextName is what the forward end reads.
@@ -245,7 +251,7 @@ func (p PaginationProps) NextName() string {
 	if p.NextLabel != "" {
 		return p.NextLabel
 	}
-	return "Next"
+	return say(p.PageData, "pagination.next", "Next")
 }
 
 // PageName is what one number reads to a screen reader. The digit alone is
@@ -253,7 +259,7 @@ func (p PaginationProps) NextName() string {
 func (p PaginationProps) PageName(number int) string {
 	sentence := p.PageLabel
 	if sentence == "" {
-		sentence = "Page {n}"
+		sentence = say(p.PageData, "pagination.page", "Page {n}")
 	}
 	return strings.ReplaceAll(sentence, "{n}", strconv.Itoa(number))
 }

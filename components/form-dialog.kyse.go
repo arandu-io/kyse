@@ -122,15 +122,18 @@ type FormDialogProps struct {
 	// comes from a caller.
 	NoBoost bool
 
-	// SubmitLabel is the button that sends the form. Empty means "Save".
+	// SubmitLabel is the button that sends the form. Empty says
+	// kyse.form_dialog.submit from the Page, or "Save".
 	SubmitLabel string
 	// SubmitVariant styles it. Use "destructive" for one that deletes or
 	// cancels something.
 	SubmitVariant string
-	// CancelLabel is the way out. Empty means "Cancel".
+	// CancelLabel is the way out. Empty says kyse.form_dialog.cancel from the
+	// Page, or "Cancel".
 	CancelLabel string
 	// CloseLabel names the close button in the corner, which is an icon and has
-	// no text of its own. Empty means "Close".
+	// no text of its own. Empty says kyse.form_dialog.close from the Page, or
+	// "Close".
 	CloseLabel string
 
 	// Size is how wide it gets from the small breakpoint up: "sm", "md" or
@@ -143,8 +146,9 @@ type FormDialogProps struct {
 	Alert bool
 
 	// Page is where the dialog asks whether the form that was just refused was
-	// this one, and the CSRF token its form posts when Token is empty. A nil
-	// Page never opens it by itself.
+	// this one, the CSRF token its form posts when Token is empty, and the
+	// words of its three buttons when their labels are empty. A nil Page
+	// never opens it by itself.
 	Page Page
 	// Open draws it open regardless, for a page that decides by itself -- one
 	// whose handler sends the person back with a sentence rather than with
@@ -237,7 +241,7 @@ func (p FormDialogProps) DescribedBy() string {
 // Submit is the label of the button that sends the form.
 func (p FormDialogProps) Submit() string {
 	if p.SubmitLabel == "" {
-		return "Save"
+		return say(p.Page, "form_dialog.submit", "Save")
 	}
 	return p.SubmitLabel
 }
@@ -245,7 +249,7 @@ func (p FormDialogProps) Submit() string {
 // Cancel is the label of the way out.
 func (p FormDialogProps) Cancel() string {
 	if p.CancelLabel == "" {
-		return "Cancel"
+		return say(p.Page, "form_dialog.cancel", "Cancel")
 	}
 	return p.CancelLabel
 }
@@ -253,7 +257,7 @@ func (p FormDialogProps) Cancel() string {
 // Close is the accessible name of the close button.
 func (p FormDialogProps) Close() string {
 	if p.CloseLabel == "" {
-		return "Close"
+		return say(p.Page, "form_dialog.close", "Close")
 	}
 	return p.CloseLabel
 }

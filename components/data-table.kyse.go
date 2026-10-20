@@ -121,7 +121,9 @@ type DataTableProps struct {
 	SearchName string
 	// SearchPlaceholder is the grey text in the empty box.
 	SearchPlaceholder string
-	// SearchLabel is the box's name. Empty uses Label with "Search" before it.
+	// SearchLabel is the box's name. Empty says kyse.data_table.search from
+	// PageData with Label in place of "{label}", or Label with "Search" before
+	// it.
 	SearchLabel string
 
 	// Navigable turns the table into a grid: one tab stop, and the arrow keys
@@ -178,8 +180,9 @@ type DataTableProps struct {
 	// endpoint that already knows the list.
 	BulkAction string
 	// PageData is the screen's own view.Page. The bulk form posts the CSRF
-	// token it carries, so a list drawn from a view writes PageData: .Page and
-	// never copies the token by hand. It is not called Page because Page is
+	// token it carries and every sentence left empty is read from it, so a
+	// list drawn from a view writes PageData: .Page and never copies the token
+	// or the words by hand. It is not called Page because Page is
 	// the number of the page being shown.
 	PageData Page
 	// Token is the CSRF token, for a list with no PageData to ask. Set, it
@@ -189,7 +192,8 @@ type DataTableProps struct {
 	// ColumnsLabel and SelectedLabel are the two sentences that belong to the
 	// table rather than to the list. Everything else this says is in Lines --
 	// two fields for one control is exactly the defect that puts a table into
-	// two languages.
+	// two languages. Empty says kyse.table.columns and kyse.table.selected
+	// from PageData, or the English.
 	ColumnsLabel  string
 	SelectedLabel string
 }
@@ -201,9 +205,11 @@ type DataTableProps struct {
 // four of the seven has a table that speaks two languages. Every one carries
 // its placeholders, so a language that puts the number last can.
 //
-// Empty says the English underneath. That is a floor and not a default worth
-// shipping -- a table drawn from a catalogue says these in the language the
-// page is served in, which is the only place that knows it.
+// Empty asks the page: a data table given PageData reads each sentence left
+// empty from the application's catalogue, under the key the package doc lists
+// for it, in the language the page is served in -- the only place that knows
+// it. What the catalogue does not carry says the English underneath, which is
+// a floor and not a default worth shipping.
 type DataTableLines struct {
 	// Showing is the range under the table: "{from} to {to} of {total}".
 	Showing string
@@ -238,6 +244,50 @@ type DataTableLines struct {
 	Ascending  string
 	Descending string
 	Unsorted   string
+}
+
+// lines are Lines with every sentence the caller left empty read from the
+// page's catalogue, where it carries one; see TranslatorPage. What neither said
+// stays empty, and Sentences fills the English under it. The sentences that
+// belong to the table it draws are read under the table's keys, so a catalogue
+// says them once for both.
+func (p DataTableProps) lines() DataTableLines {
+	lines := p.Lines
+	for _, line := range []struct {
+		field *string
+		key   string
+	}{
+		{&lines.Showing, "data_table.showing"},
+		{&lines.PerPage, "data_table.per_page"},
+		{&lines.NoResult, "data_table.no_result"},
+		{&lines.Previous, "data_table.previous"},
+		{&lines.Next, "data_table.next"},
+		{&lines.Page, "data_table.page"},
+		{&lines.PageOf, "data_table.page_of"},
+		{&lines.Back, "data_table.back"},
+		{&lines.Forward, "data_table.forward"},
+		{&lines.Apply, "data_table.apply"},
+		{&lines.SelectAll, "table.select_all"},
+		{&lines.Bulk, "table.bulk"},
+		{&lines.Ascending, "table.ascending"},
+		{&lines.Descending, "table.descending"},
+		{&lines.Unsorted, "table.unsorted"},
+	} {
+		if *line.field == "" {
+			*line.field = say(p.PageData, line.key, "")
+		}
+	}
+	return lines
+}
+
+// SelectedSentence is the count's sentence with its placeholders still in it:
+// SelectedLabel, or the page's kyse.table.selected, or empty for the English
+// the behaviour writes.
+func (p DataTableProps) SelectedSentence() string {
+	if p.SelectedLabel != "" {
+		return p.SelectedLabel
+	}
+	return say(p.PageData, "table.selected", "")
 }
 
 // Sentences are the lines with the English floor filled in under whatever the
@@ -419,10 +469,7 @@ func (p DataTableProps) SearchTitle() string {
 	if p.SearchLabel != "" {
 		return p.SearchLabel
 	}
-	if p.Label != "" {
-		return "Search " + p.Label
-	}
-	return "Search"
+	return strings.TrimSpace(strings.ReplaceAll(say(p.PageData, "data_table.search", "Search {label}"), "{label}", p.Label))
 }
 
 // Hideable is whether any column can be switched off, which is what decides
@@ -566,17 +613,18 @@ func (p DataTableProps) Grid() TableProps {
 		}
 	}
 
+	lines := p.lines()
 	return TableProps{
 		ComponentProps:  ComponentProps{Parts: p.Parts},
 		Composed:        true,
 		ID:              p.ID,
 		Navigable:       p.Navigable,
 		BulkMethod:      p.BulkMethod,
-		SelectAllLabel:  p.Lines.SelectAll,
-		BulkLabel:       p.Lines.Bulk,
-		AscendingLabel:  p.Lines.Ascending,
-		DescendingLabel: p.Lines.Descending,
-		UnsortedLabel:   p.Lines.Unsorted,
+		SelectAllLabel:  lines.SelectAll,
+		BulkLabel:       lines.Bulk,
+		AscendingLabel:  lines.Ascending,
+		DescendingLabel: lines.Descending,
+		UnsortedLabel:   lines.Unsorted,
 		Caption:         p.Caption,
 		Columns:         columns,
 		Rows:            rows,
@@ -622,15 +670,17 @@ func (p DataTableProps) swapKind() string {
 
 // Pager is the pagination this draws, or the zero value when there is one page.
 func (p DataTableProps) Pager() PaginationProps {
+	lines := p.lines()
 	pager := PaginationProps{
 		ComponentProps: ComponentProps{Parts: p.Parts},
 		Page:           p.at(),
 		Pages:          p.Sheets(),
 		URL:            p.PageURL(),
 		Label:          p.Label,
-		PreviousLabel:  p.Lines.Previous,
-		NextLabel:      p.Lines.Next,
-		PageLabel:      p.Lines.Page,
+		PageData:       p.PageData,
+		PreviousLabel:  lines.Previous,
+		NextLabel:      lines.Next,
+		PageLabel:      lines.Page,
 		HxTarget:       p.swapTarget(),
 		HxSwap:         p.swapKind(),
 	}
@@ -647,7 +697,7 @@ func (p DataTableProps) ColumnsName() string {
 	if p.ColumnsLabel != "" {
 		return p.ColumnsLabel
 	}
-	return "Columns"
+	return say(p.PageData, "table.columns", "Columns")
 }
 
 // DataTableQueryField is one hidden field that preserves query state across
@@ -694,10 +744,7 @@ func (p DataTableProps) QueryFields() []DataTableQueryField {
 
 // ApplyText is the no-script facet submit label.
 func (p DataTableProps) ApplyText() string {
-	if p.Lines.Apply != "" {
-		return p.Lines.Apply
-	}
-	return "Apply filters"
+	return p.lines().Sentences()["apply"].(string)
 }
 
 // SearchTrigger is when the list is refetched as somebody types: after typing
@@ -720,8 +767,8 @@ func (p DataTableProps) SearchAddress() string {
 // searching, the ordering or the paging needs a script -- they are addresses.
 func (p DataTableProps) RootAttrs() map[string]string {
 	if p.Behavior.Name == "" {
-		props := p.Lines.Sentences()
-		props["selected"] = p.SelectedLabel
+		props := p.lines().Sentences()
+		props["selected"] = p.SelectedSentence()
 		props["complete"] = p.Complete
 		props["pageSize"] = p.PageSize
 		p.Behavior = Behavior{Name: TableBehavior, Props: props}
@@ -739,20 +786,14 @@ func (p DataTableProps) Chooses() bool { return p.Complete && len(p.PageSizes) >
 
 // PerPageText is the label beside the chooser.
 func (p DataTableProps) PerPageText() string {
-	if p.Lines.PerPage != "" {
-		return p.Lines.PerPage
-	}
-	return "per page"
+	return p.lines().Sentences()["perPage"].(string)
 }
 
 // Showing is the range under the table, drawn by the server for the first
 // page and rewritten by the behaviour after that -- from the same sentence,
 // so the two cannot say it differently.
 func (p DataTableProps) Showing() string {
-	sentence := p.Lines.Showing
-	if sentence == "" {
-		sentence = "{from} to {to} of {total}"
-	}
+	sentence := p.lines().Sentences()["showing"].(string)
 	from, to, total := p.window()
 	sentence = strings.ReplaceAll(sentence, "{from}", strconv.Itoa(from))
 	sentence = strings.ReplaceAll(sentence, "{to}", strconv.Itoa(to))
@@ -822,11 +863,11 @@ func (p DataTableProps) PageOfText() string {
 		page = 1
 	}
 	return strings.NewReplacer("{n}", strconv.Itoa(page), "{total}", strconv.Itoa(p.Sheets())).
-		Replace(p.Lines.Sentences()["pageOf"].(string))
+		Replace(p.lines().Sentences()["pageOf"].(string))
 }
 
 // PageOfTemplate is the sentence the browser rewrites as the page moves.
-func (p DataTableProps) PageOfTemplate() string { return p.Lines.Sentences()["pageOf"].(string) }
+func (p DataTableProps) PageOfTemplate() string { return p.lines().Sentences()["pageOf"].(string) }
 
 // PreviousPage and NextPage are the pages the two steps lead to, kept inside
 // the list.
@@ -834,8 +875,8 @@ func (p DataTableProps) PreviousPage() int { return max(1, p.at()-1) }
 func (p DataTableProps) NextPage() int     { return min(max(1, p.Sheets()), max(1, p.at())+1) }
 
 // PreviousText and NextText are the words on the two steps.
-func (p DataTableProps) PreviousText() string { return p.Lines.Sentences()["back"].(string) }
-func (p DataTableProps) NextText() string     { return p.Lines.Sentences()["forward"].(string) }
+func (p DataTableProps) PreviousText() string { return p.lines().Sentences()["back"].(string) }
+func (p DataTableProps) NextText() string     { return p.lines().Sentences()["forward"].(string) }
 
 // Selectable is whether the rows carry a checkbox, and the footer a count.
 func (p DataTableProps) Selectable() bool { return p.SelectName != "" }
@@ -1091,7 +1132,7 @@ func (p DataTableProps) PartNames() []string {
 						class="{{ .PartClass("count", "data-table-count") }}"
 						role="status"
 						aria-live="polite"
-						data-selected-template="{{ .SelectedLabel }}"
+						data-selected-template="{{ .SelectedSentence() }}"
 						@attributes(.PartAttrs("count"))
 					>{{ .SelectedText() }}</p>
 				@endif
