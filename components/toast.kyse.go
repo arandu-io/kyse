@@ -2,6 +2,8 @@
 
 package components
 
+import "github.com/arandu-io/kyse/icons"
+
 @go
 // ToastProps is what just happened, said once and then gone.
 //
@@ -40,6 +42,22 @@ type ToastProps struct {
 	// view. Both empty draws none.
 	ActionLabel string
 	ActionURL   string
+
+	// Dismissible draws a close button in the corner, so the person can send
+	// the toast away before its timer does. The vendored script closes a toast
+	// on any button in its footer, so the button needs nothing of its own.
+	Dismissible bool
+	// CloseLabel names that button, which is an icon and has no text of its
+	// own. Empty means "Close".
+	CloseLabel string
+}
+
+// Close is the accessible name of the close button.
+func (p ToastProps) Close() string {
+	if p.CloseLabel == "" {
+		return "Close"
+	}
+	return p.CloseLabel
 }
 
 // Live is how insistently assistive technology announces it. A failure
@@ -52,7 +70,7 @@ func (p ToastProps) Live() string {
 }
 // PartNames are the parts this component publishes.
 func (p ToastProps) PartNames() []string {
-	return []string{"root", "content", "title", "message", "action"}
+	return []string{"root", "content", "title", "message", "action", "close"}
 }
 @endgo
 
@@ -94,8 +112,9 @@ func (p ToastProps) PartNames() []string {
 				@endif
 			</section>
 
-			@if(.ActionURL != "")
+			@if(.ActionURL != "" || .Dismissible)
 				<footer>
+					@if(.ActionURL != "")
 					<button
 						data-part="action"
 						class="{{ .PartClass("action", "btn") }}"
@@ -106,6 +125,19 @@ func (p ToastProps) PartNames() []string {
 						hx-swap="none"
 						@attributes(.PartAttrs("action"))
 					>{{ .ActionLabel }}</button>
+					@endif
+					@if(.Dismissible)
+						<button
+							data-part="close"
+							class="{{ .PartClass("close", "btn") }}"
+							type="button"
+							data-variant="ghost"
+							data-size="icon-sm"
+							data-toast-cancel
+							aria-label="{{ .Close() }}"
+							@attributes(.PartAttrs("close"))
+						>{!! icons.X(icons.Props{}) !!}</button>
+					@endif
 				</footer>
 			@endif
 		</div>

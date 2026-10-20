@@ -139,6 +139,7 @@ var extensible = []struct {
 				Message:        "The post is live.",
 				ActionLabel:    "Undo",
 				ActionURL:      "/undo",
+				Dismissible:    true,
 			}))}
 		},
 		components.ToastProps{}.PartNames,

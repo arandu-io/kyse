@@ -387,6 +387,29 @@ func TestAToastWithNothingToSayDrawsNothing(t *testing.T) {
 	}
 }
 
+// TestADismissibleToastHasANamedCloseButton: the close button is an icon, so
+// its name is the only thing a screen reader can say about it, and it sits in
+// the footer because that is where the vendored script listens for a click.
+func TestADismissibleToastHasANamedCloseButton(t *testing.T) {
+	plain := string(components.Toast(components.ToastProps{Title: "Saved"}))
+	if strings.Contains(plain, "data-toast-cancel") || strings.Contains(plain, "<footer>") {
+		t.Errorf("a toast that is not dismissible drew a close button:\n%s", plain)
+	}
+	got := string(components.Toast(components.ToastProps{Title: "Saved", Dismissible: true, CloseLabel: "Fechar"}))
+	for _, want := range []string{"<footer>", "data-toast-cancel", `type="button"`, `aria-label="Fechar"`, `data-part="close"`, "<svg"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("%s is missing:\n%s", want, got)
+		}
+	}
+	if def := string(components.Toast(components.ToastProps{Title: "Saved", Dismissible: true})); !strings.Contains(def, `aria-label="Close"`) {
+		t.Errorf("the close button has no default name:\n%s", def)
+	}
+	both := string(components.Toast(components.ToastProps{Title: "Saved", ActionLabel: "Undo", ActionURL: "/undo", Dismissible: true}))
+	if strings.Count(both, "<footer>") != 1 || !strings.Contains(both, "data-toast-action") || !strings.Contains(both, "data-toast-cancel") {
+		t.Errorf("an action and a close button do not share one footer:\n%s", both)
+	}
+}
+
 // TestInitialsWalkRunes: a name starting with É is one letter to a person and
 // two bytes to Go, and slicing bytes prints half a character.
 func TestInitialsWalkRunes(t *testing.T) {
