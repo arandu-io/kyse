@@ -2,7 +2,10 @@
 
 package components
 
-import "github.com/arandu-io/kyse/icons"
+import (
+	hhttp "github.com/arandu-io/hesape/http"
+	"github.com/arandu-io/kyse/icons"
+)
 
 @go
 // ToastProps is what just happened, said once and then gone.
@@ -46,7 +49,8 @@ type ToastProps struct {
 	// reads its word from it too, when CloseLabel is empty.
 	Page Page
 	// FlashKey is the key that sentence was flashed under. Empty means
-	// "status", the key a form that worked says what it did under.
+	// hhttp.StatusKey, "status", the key a form that worked says what it did
+	// under.
 	FlashKey string
 
 	// Category is "error" for a failure and empty for anything else. It picks
@@ -84,7 +88,7 @@ func (p ToastProps) Headline() string {
 	}
 	key := p.FlashKey
 	if key == "" {
-		key = "status"
+		key = hhttp.StatusKey
 	}
 	return flashes.Flashed(key)
 }

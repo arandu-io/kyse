@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	hhttp "github.com/arandu-io/hesape/http"
 	"github.com/arandu-io/hesape/view"
 	"github.com/arandu-io/kyse/components"
 )
@@ -17,7 +18,7 @@ import (
 var _ components.FlashPage = view.Page{}
 
 func TestAToastDrawsWhatThePageFlashed(t *testing.T) {
-	page := view.Page{Messages: map[string]string{"status": "Invoice saved."}}
+	page := view.Page{Messages: map[string]string{hhttp.StatusKey: "Invoice saved."}}
 	html := string(components.Toast(components.ToastProps{Page: page}))
 	if !strings.Contains(html, ">Invoice saved.</h2>") {
 		t.Errorf("the flashed status was not drawn:\n%s", html)
