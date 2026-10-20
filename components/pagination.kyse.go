@@ -19,25 +19,43 @@ import (
 // not a disabled one. Removing it from the tab order would move the keyboard
 // past the one entry that says where the reader is.
 //
-// The window of numbers is computed here, with the first and the last always
-// present and an ellipsis where numbers were left out. Ten thousand pages draw
-// as nine entries.
+// It draws the page a query returned: Paginator takes the
+// *pagination.LengthAwarePage, *pagination.Page or *pagination.CursorPage as it
+// came back, and the numbers, the window and every address are that page's.
+// A page that knows its total draws its numbers, with the first and the last
+// always present and an ellipsis where the window left numbers out; a page that
+// does not draws the two steps.
 //
 // It publishes root, list, item, link, previous, next and ellipsis.
 type PaginationProps struct {
 	// ComponentProps is the class, attributes and parts the caller adds.
 	ComponentProps
+	// Paginator is the page the query returned. Set, it is what the trail is
+	// drawn from -- the current page, the last, the window and every address
+	// -- and Page, Pages, URL and Around are not read. A page with one page
+	// draws nothing at all: a pager over a single page is chrome with no
+	// function.
+	Paginator Paginator
+
 	// Page is the page being shown, counting from one.
+	//
+	// Deprecated: set Paginator to the page the query returned. Page, Pages
+	// and URL are that page copied out into three fields.
 	Page int
-	// Pages is how many there are. Zero or one draws nothing at all: a pager
-	// over a single page is chrome with no function.
+	// Pages is how many there are. Zero or one draws nothing at all.
+	//
+	// Deprecated: set Paginator.
 	Pages int
 	// URL is the address of a page, with the number written as "{page}":
-	// "/invoices?page={page}". It is a template and not a base so that the
-	// number can sit anywhere in it, including in the path.
+	// "/invoices?page={page}".
+	//
+	// Deprecated: set Paginator, whose addresses keep the query the request
+	// arrived with.
 	URL string
 	// Around is how many numbers to keep either side of the current one. Zero
 	// keeps one, which with the first and the last is seven entries.
+	//
+	// Deprecated: set Paginator, and OnEachSide on the page.
 	Around int
 	// Label names the landmark. Empty says "Pagination", which is what
 	// separates it from the site navigation for somebody listing the
@@ -76,6 +94,9 @@ type PaginationEntry struct {
 // The first and the last are always there, because a reader who is on page 400
 // still has to be able to get to the beginning without knowing the address.
 func (p PaginationProps) Entries() []PaginationEntry {
+	if paginator := presentPaginator(p.Paginator); paginator != nil {
+		return paginatorEntries(paginator)
+	}
 	if p.Pages < 2 {
 		return nil
 	}
@@ -113,22 +134,95 @@ func (p PaginationProps) Entries() []PaginationEntry {
 	return entries
 }
 
+// paginatorEntries are the numbers a page that knows its total says to draw, in
+// the order it lists them, and none for a page that does not.
+func paginatorEntries(paginator Paginator) []PaginationEntry {
+	page, ok := counted(paginator)
+	if !ok || !page.HasPages() {
+		return nil
+	}
+	links := page.Links()
+	entries := make([]PaginationEntry, 0, len(links))
+	for _, link := range links {
+		if link.Page == 0 {
+			entries = append(entries, PaginationEntry{Ellipsis: true})
+			continue
+		}
+		entries = append(entries, PaginationEntry{Number: link.Page, Current: link.Active})
+	}
+	return entries
+}
+
+// Shows is whether there is a trail to draw: more than one page.
+func (p PaginationProps) Shows() bool {
+	if paginator := presentPaginator(p.Paginator); paginator != nil {
+		return paginator.HasPages()
+	}
+	return p.Pages > 1
+}
+
 // Href is the address of one page.
 func (p PaginationProps) Href(number int) string {
+	if page, ok := counted(p.Paginator); ok {
+		return page.URL(number)
+	}
 	return strings.ReplaceAll(p.URL, "{page}", strconv.Itoa(number))
 }
 
 // HasPrevious and HasNext say whether each end is reachable.
-func (p PaginationProps) HasPrevious() bool { return p.Page > 1 }
+func (p PaginationProps) HasPrevious() bool {
+	if paginator := presentPaginator(p.Paginator); paginator != nil {
+		return paginator.PreviousPageURL() != ""
+	}
+	return p.Page > 1
+}
 
 // HasNext is whether there is a page after this one.
-func (p PaginationProps) HasNext() bool { return p.Page < p.Pages }
+func (p PaginationProps) HasNext() bool {
+	if paginator := presentPaginator(p.Paginator); paginator != nil {
+		return paginator.NextPageURL() != ""
+	}
+	return p.Page < p.Pages
+}
 
 // PreviousHref and NextHref are the two ends' addresses.
-func (p PaginationProps) PreviousHref() string { return p.Href(p.Page - 1) }
+func (p PaginationProps) PreviousHref() string {
+	if paginator := presentPaginator(p.Paginator); paginator != nil {
+		return paginator.PreviousPageURL()
+	}
+	return p.Href(p.Page - 1)
+}
 
 // NextHref is the address of the page after this one.
-func (p PaginationProps) NextHref() string { return p.Href(p.Page + 1) }
+func (p PaginationProps) NextHref() string {
+	if paginator := presentPaginator(p.Paginator); paginator != nil {
+		return paginator.NextPageURL()
+	}
+	return p.Href(p.Page + 1)
+}
+
+// PreviousNumber and NextNumber are the pages the two ends lead to, and zero
+// for a page that has no number -- a cursor names a row, not a page.
+func (p PaginationProps) PreviousNumber() int {
+	if paginator := presentPaginator(p.Paginator); paginator != nil {
+		if page, ok := paginator.(numberedPage); ok {
+			return page.CurrentPage() - 1
+		}
+		return 0
+	}
+	return p.Page - 1
+}
+
+// NextNumber is the page the forward end leads to, or zero when it has none.
+func (p PaginationProps) NextNumber() int {
+	if paginator := presentPaginator(p.Paginator); paginator != nil {
+		if page, ok := paginator.(numberedPage); ok {
+			return page.CurrentPage() + 1
+		}
+		return 0
+	}
+	return p.Page + 1
+}
 
 // LandmarkName is what the nav is called.
 func (p PaginationProps) LandmarkName() string {
@@ -170,7 +264,7 @@ func (p PaginationProps) PartNames() []string {
 }
 @endgo
 
-@if(.Pages > 1)
+@if(.Shows())
 	<nav
 		data-part="root"
 		class="{{ .RootClass("pagination") }}"
@@ -199,7 +293,9 @@ func (p PaginationProps) PartNames() []string {
 						@endif
 						href="{{ .PreviousHref() }}"
 						rel="prev"
-						data-page="{{ .Page - 1 }}"
+						@if(.PreviousNumber() > 0)
+							data-page="{{ .PreviousNumber() }}"
+						@endif
 						@if(.HxTarget != "")
 							hx-get="{{ .PreviousHref() }}"
 							hx-target="{{ .HxTarget }}"
@@ -274,7 +370,9 @@ func (p PaginationProps) PartNames() []string {
 						@endif
 						href="{{ .NextHref() }}"
 						rel="next"
-						data-page="{{ .Page + 1 }}"
+						@if(.NextNumber() > 0)
+							data-page="{{ .NextNumber() }}"
+						@endif
 						@if(.HxTarget != "")
 							hx-get="{{ .NextHref() }}"
 							hx-target="{{ .HxTarget }}"

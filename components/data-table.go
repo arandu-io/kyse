@@ -11,6 +11,7 @@ import (
 	kyse__io "io"
 	kyse__strings "strings"
 
+	"github.com/arandu-io/hesape/pagination"
 	kyse__view "github.com/arandu-io/hesape/view"
 	"github.com/arandu-io/kyse/icons"
 	"net/url"
@@ -19,7 +20,7 @@ import (
 	"strings"
 )
 
-//line components/data-table.kyse.go:14
+//line components/data-table.kyse.go:15
 
 // DataTableProps is a list somebody works in: searched, ordered, paged, and
 // acted on in bulk.
@@ -146,8 +147,24 @@ type DataTableProps struct {
 	SortKey string
 	SortDir string
 
+	// Paginator is the page the query returned, for a windowed list: the
+	// *pagination.LengthAwarePage, *pagination.Page or *pagination.CursorPage
+	// that came back beside the rows. Set, it is where the table reads the
+	// page being shown, how many there are, how many rows the whole list has
+	// and the range this page holds, and Page, Pages and Total are not read.
+	//
+	// The addresses stay the table's own, built from its fields like every
+	// other control, with the page's parameter name -- and, for a cursor page,
+	// its signed cursor. A page that knows no total draws the two steps and
+	// neither the range nor "Page n of total", because neither can be true.
+	// A complete list has no use for one: there the rows are the list.
+	Paginator Paginator
+
 	// Page is the page being shown, counting from one, and Pages is how many
 	// there are. It travels as "page". Pages of zero or one draws no pager.
+	//
+	// Deprecated: set Paginator to the page the query returned. Page, Pages
+	// and Total are that page copied out into three fields.
 	Page  int
 	Pages int
 	// Total is how many rows the whole list has, which on a windowed list only
@@ -157,6 +174,8 @@ type DataTableProps struct {
 	// Rows is one page, and saying "1 to 20 of 20" under page three of a
 	// hundred and thirty-seven is worse than saying nothing. A complete list
 	// needs none of this, because there the rows are the list.
+	//
+	// Deprecated: set Paginator.
 	Total int
 
 	// SelectName turns on per-row selection and is the field the checkboxes
@@ -307,8 +326,8 @@ func (p DataTableProps) Address(changes map[string]string) string {
 	if p.SortKey != "" {
 		set("dir", p.SortDir)
 	}
-	if p.Page > 1 {
-		set("page", strconv.Itoa(p.Page))
+	if at := p.at(); at > 1 {
+		set(p.pageParam(), strconv.Itoa(at))
 	}
 	for _, filter := range p.Filters {
 		values.Del(filter.Key)
@@ -356,14 +375,14 @@ func (p DataTableProps) Address(changes map[string]string) string {
 // they have just reordered, where the rows are not the ones they were looking
 // at.
 func (p DataTableProps) SortURL() string {
-	return p.Address(map[string]string{"sort": "{sort}", "dir": "{dir}", "page": ""})
+	return p.Address(map[string]string{"sort": "{sort}", "dir": "{dir}", p.pageParam(): ""})
 }
 
 // PageURL is the template the pager builds from. It keeps the search, the
 // order and every facet, because a page of a filtered, sorted list is a page
 // of that list.
 func (p DataTableProps) PageURL() string {
-	return p.Address(map[string]string{"page": "{page}"})
+	return p.Address(map[string]string{p.pageParam(): "{page}"})
 }
 
 // DataTableFilter is one per-column facet, drawn beside the search.
@@ -439,11 +458,97 @@ func (p DataTableProps) Sheets() int {
 		}
 		return (len(p.Rows) + p.PageSize - 1) / p.PageSize
 	}
+	if page, ok := p.countedPage(); ok {
+		return page.LastPage()
+	}
 	return p.Pages
 }
 
 // Paged is whether there is more than one page to move between.
-func (p DataTableProps) Paged() bool { return p.Sheets() > 1 }
+func (p DataTableProps) Paged() bool {
+	if paginator := p.uncountedPage(); paginator != nil {
+		return paginator.HasPages()
+	}
+	return p.Sheets() > 1
+}
+
+// countedPage is the paginator of a windowed list when it knows its total.
+func (p DataTableProps) countedPage() (countedPage, bool) {
+	if p.Complete {
+		return nil, false
+	}
+	return counted(p.Paginator)
+}
+
+// uncountedPage is the paginator of a windowed list when it knows no total --
+// a simple page or a cursor page -- and nil otherwise.
+func (p DataTableProps) uncountedPage() Paginator {
+	paginator := presentPaginator(p.Paginator)
+	if p.Complete || paginator == nil {
+		return nil
+	}
+	if _, ok := paginator.(countedPage); ok {
+		return nil
+	}
+	return paginator
+}
+
+// at is the page being shown: the paginator's number when it has one, Page
+// otherwise.
+func (p DataTableProps) at() int {
+	if !p.Complete {
+		if page, ok := presentPaginator(p.Paginator).(numberedPage); ok {
+			return page.CurrentPage()
+		}
+	}
+	return p.Page
+}
+
+// pageParam is the query parameter the page number travels under: the
+// paginator's, so the address the table writes is the one the query reads.
+func (p DataTableProps) pageParam() string {
+	if page, ok := presentPaginator(p.Paginator).(numberedPage); ok && page.GetPageName() != "" {
+		return page.GetPageName()
+	}
+	return "page"
+}
+
+// stepAddresses are the two steps of a page that knows no total, each built
+// from the table's own state like every other control, and empty where there
+// is nowhere to go.
+func (p DataTableProps) stepAddresses(paginator Paginator) steps {
+	var out steps
+	switch page := paginator.(type) {
+	case *pagination.CursorPage:
+		cursor := func(at *pagination.Cursor) string {
+			signer := page.GetOptions().Signer
+			if at == nil || signer == nil {
+				return ""
+			}
+			token := signer.Encode(*at)
+			if token == "" {
+				return ""
+			}
+			return p.Address(map[string]string{page.GetCursorName(): token, p.pageParam(): ""})
+		}
+		out.previous = cursor(page.PreviousCursor())
+		out.next = cursor(page.NextCursor())
+	case numberedPage:
+		at := page.CurrentPage()
+		if at > 1 {
+			out.previous = p.Address(map[string]string{p.pageParam(): strconv.Itoa(at - 1)})
+		}
+		if page.HasMorePages() {
+			out.next = p.Address(map[string]string{p.pageParam(): strconv.Itoa(at + 1)})
+		}
+	default:
+		// A page of a kind this does not know the parameters of has only its
+		// own addresses to offer.
+		out.previous = paginator.PreviousPageURL()
+		out.next = paginator.NextPageURL()
+	}
+	return out
+}
 
 // Grid is the table this draws, built from this component's own fields so the
 // two cannot disagree about the order, the selection or the rows.
@@ -526,9 +631,9 @@ func (p DataTableProps) swapKind() string {
 
 // Pager is the pagination this draws, or the zero value when there is one page.
 func (p DataTableProps) Pager() PaginationProps {
-	return PaginationProps{
+	pager := PaginationProps{
 		ComponentProps: ComponentProps{Parts: p.Parts},
-		Page:           p.Page,
+		Page:           p.at(),
 		Pages:          p.Sheets(),
 		URL:            p.PageURL(),
 		Label:          p.Label,
@@ -538,6 +643,12 @@ func (p DataTableProps) Pager() PaginationProps {
 		HxTarget:       p.swapTarget(),
 		HxSwap:         p.swapKind(),
 	}
+	if paginator := p.uncountedPage(); paginator != nil {
+		// A page that knows no total has no numbers to template, and is drawn
+		// as its two steps.
+		pager.Paginator = p.stepAddresses(paginator)
+	}
+	return pager
 }
 
 // ColumnsName is what the menu of columns is called.
@@ -606,7 +717,7 @@ func (p DataTableProps) SearchTrigger() string {
 // SearchAddress is where the box submits: the endpoint with the order kept and
 // the page dropped, because a new search has no page four.
 func (p DataTableProps) SearchAddress() string {
-	return p.Address(map[string]string{p.SearchName: "", "page": ""})
+	return p.Address(map[string]string{p.SearchName: "", p.pageParam(): ""})
 }
 
 // RootAttrs are the outermost element's attributes, with the client bridge
@@ -659,6 +770,9 @@ func (p DataTableProps) Showing() string {
 // window is the range the table is showing and the size of the list it is a
 // window onto.
 func (p DataTableProps) window() (int, int, int) {
+	if page, ok := p.countedPage(); ok {
+		return page.FirstItem(), page.LastItem(), page.Total()
+	}
 	total := p.Total
 	if p.Complete {
 		total = len(p.Rows)
@@ -669,7 +783,7 @@ func (p DataTableProps) window() (int, int, int) {
 	if !p.Complete && len(p.Rows) == 0 {
 		return 0, 0, total
 	}
-	at := p.Page
+	at := p.at()
 	if at < 1 {
 		at = 1
 	}
@@ -693,12 +807,25 @@ func (p DataTableProps) window() (int, int, int) {
 // Ranged is whether the range can be stated truthfully. A windowed list that
 // was not told the total cannot, and draws nothing rather than a number that
 // is silently the page size.
-func (p DataTableProps) Ranged() bool { return p.Complete || p.Total > 0 }
+func (p DataTableProps) Ranged() bool {
+	if page, ok := p.countedPage(); ok {
+		return page.Total() > 0
+	}
+	if p.uncountedPage() != nil {
+		return false
+	}
+	return p.Complete || p.Total > 0
+}
 
 // PartNames are the parts this component publishes.
 // PageOfText is where the reader is, beside the pager: "Page 2 of 7".
+// It is empty for a page that knows no total, because "Page 3 of" with nothing
+// after it says less than nothing.
 func (p DataTableProps) PageOfText() string {
-	page := p.Page
+	if p.uncountedPage() != nil {
+		return ""
+	}
+	page := p.at()
 	if page < 1 {
 		page = 1
 	}
@@ -711,8 +838,8 @@ func (p DataTableProps) PageOfTemplate() string { return p.Lines.Sentences()["pa
 
 // PreviousPage and NextPage are the pages the two steps lead to, kept inside
 // the list.
-func (p DataTableProps) PreviousPage() int { return max(1, p.Page-1) }
-func (p DataTableProps) NextPage() int     { return min(max(1, p.Sheets()), max(1, p.Page)+1) }
+func (p DataTableProps) PreviousPage() int { return max(1, p.at()-1) }
+func (p DataTableProps) NextPage() int     { return min(max(1, p.Sheets()), max(1, p.at())+1) }
 
 // PreviousText and NextText are the words on the two steps.
 func (p DataTableProps) PreviousText() string { return p.Lines.Sentences()["back"].(string) }
@@ -776,7 +903,7 @@ func (p DataTableProps) PartNames() []string {
 	return unique
 }
 
-//line components/data-table.go:780
+//line components/data-table.go:907
 
 // DataTable renders the data-table component.
 func DataTable(kyse__props DataTableProps) kyse__template.HTML {
@@ -799,9 +926,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/data-table.kyse.go:777
+//line components/data-table.kyse.go:904
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("data-table")))
-//line components/data-table.go:805
+//line components/data-table.go:932
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -810,9 +937,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/data-table.kyse.go:778
+//line components/data-table.kyse.go:905
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/data-table.go:816
+//line components/data-table.go:943
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -820,23 +947,23 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\trole=\"region\"\n")
 	}
-//line components/data-table.kyse.go:780
+//line components/data-table.kyse.go:907
 	if kyse__d.Complete {
-//line components/data-table.go:826
+//line components/data-table.go:953
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-complete=\"true\"\n")
 		}
 	}
-//line components/data-table.kyse.go:783
+//line components/data-table.kyse.go:910
 	if kyse__d.Label != "" {
-//line components/data-table.go:833
+//line components/data-table.go:960
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-label=\"")
 		}
 		if kyse__err == nil {
-//line components/data-table.kyse.go:784
+//line components/data-table.kyse.go:911
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
-//line components/data-table.go:840
+//line components/data-table.go:967
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -844,11 +971,11 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/data-table.kyse.go:786
+//line components/data-table.kyse.go:913
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/data-table.go:850
+//line components/data-table.go:977
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:786", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:913", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
@@ -856,9 +983,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")
 	}
-//line components/data-table.kyse.go:788
+//line components/data-table.kyse.go:915
 	if kyse__d.Searchable() || kyse__d.Hideable() || kyse__d.Chooses() {
-//line components/data-table.go:862
+//line components/data-table.go:989
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<div\n")
 		}
@@ -869,20 +996,20 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/data-table.kyse.go:791
+//line components/data-table.kyse.go:918
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("toolbar", "data-table-toolbar")))
-//line components/data-table.go:875
+//line components/data-table.go:1002
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v2 string
-//line components/data-table.kyse.go:792
+//line components/data-table.kyse.go:919
 			kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("toolbar"))
-//line components/data-table.go:884
+//line components/data-table.go:1011
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:792", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:919", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 			}
@@ -890,9 +1017,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>\n")
 		}
-//line components/data-table.kyse.go:794
+//line components/data-table.kyse.go:921
 		if kyse__d.Searchable() || kyse__d.Filtered() {
-//line components/data-table.go:896
+//line components/data-table.go:1023
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<form\n")
 			}
@@ -903,9 +1030,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tid=\"")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:801
+//line components/data-table.kyse.go:928
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.QueryFormID()))
-//line components/data-table.go:909
+//line components/data-table.go:1036
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -915,11 +1042,11 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v3 string
-//line components/data-table.kyse.go:802
+//line components/data-table.kyse.go:929
 				kyse__v3, kyse__err = kyse__view.TextURL(kyse__d.QueryAction())
-//line components/data-table.go:921
+//line components/data-table.go:1048
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:802", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:929", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 				}
@@ -930,9 +1057,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tmethod=\"get\"\n")
 			}
-//line components/data-table.kyse.go:804
+//line components/data-table.kyse.go:931
 			if kyse__d.Searchable() {
-//line components/data-table.go:936
+//line components/data-table.go:1063
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\trole=\"search\"\n")
 				}
@@ -940,48 +1067,48 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>\n")
 			}
-//line components/data-table.kyse.go:808
+//line components/data-table.kyse.go:935
 			for _, field := range kyse__d.QueryFields() {
 				_ = field
-//line components/data-table.go:947
+//line components/data-table.go:1074
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<input type=\"hidden\" name=\"")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:809
+//line components/data-table.kyse.go:936
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(field.Name))
-//line components/data-table.go:954
+//line components/data-table.go:1081
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\" value=\"")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:809
+//line components/data-table.kyse.go:936
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(field.Value))
-//line components/data-table.go:962
+//line components/data-table.go:1089
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
 				}
 			}
-//line components/data-table.kyse.go:811
+//line components/data-table.kyse.go:938
 			if kyse__d.Searchable() {
-//line components/data-table.go:970
+//line components/data-table.go:1097
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<label class=\"sr-only\" for=\"")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:812
+//line components/data-table.kyse.go:939
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/data-table.go:977
+//line components/data-table.go:1104
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "-search\">")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:812
+//line components/data-table.kyse.go:939
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.SearchTitle())))
-//line components/data-table.go:985
+//line components/data-table.go:1112
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "</label>\n")
@@ -996,9 +1123,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:815
+//line components/data-table.kyse.go:942
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("search", "input")))
-//line components/data-table.go:1002
+//line components/data-table.go:1129
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1010,9 +1137,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tid=\"")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:817
+//line components/data-table.kyse.go:944
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/data-table.go:1016
+//line components/data-table.go:1143
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "-search\"\n")
@@ -1021,9 +1148,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tname=\"")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:818
+//line components/data-table.kyse.go:945
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SearchName))
-//line components/data-table.go:1027
+//line components/data-table.go:1154
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1032,9 +1159,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tvalue=\"")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:819
+//line components/data-table.kyse.go:946
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Query))
-//line components/data-table.go:1038
+//line components/data-table.go:1165
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1042,19 +1169,19 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tautocomplete=\"off\"\n")
 				}
-//line components/data-table.kyse.go:821
+//line components/data-table.kyse.go:948
 				if !kyse__d.Complete {
-//line components/data-table.go:1048
+//line components/data-table.go:1175
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-get=\"")
 					}
 					if kyse__err == nil {
 						var kyse__v4 string
-//line components/data-table.kyse.go:822
+//line components/data-table.kyse.go:949
 						kyse__v4, kyse__err = kyse__view.TextURL(kyse__d.SearchAddress())
-//line components/data-table.go:1056
+//line components/data-table.go:1183
 						if kyse__err != nil {
-							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:822", kyse__err)
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:949", kyse__err)
 						} else {
 							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 						}
@@ -1066,10 +1193,10 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-trigger=\"")
 					}
 					if kyse__err == nil {
-//line components/data-table.kyse.go:823
+//line components/data-table.kyse.go:950
 						if kyse__v5 := kyse__view.Text(kyse__d.SearchTrigger()); kyse__strings.ContainsAny(kyse__v5, "[]") {
-//line components/data-table.go:1072
-							kyse__err = kyse__errors.New("components/data-table.kyse.go:823: the value interpolated into an HTMX trigger holds a square bracket, and HTMX evaluates what a trigger holds between square brackets as a script")
+//line components/data-table.go:1199
+							kyse__err = kyse__errors.New("components/data-table.kyse.go:950: the value interpolated into an HTMX trigger holds a square bracket, and HTMX evaluates what a trigger holds between square brackets as a script")
 						} else {
 							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__v5))
 						}
@@ -1084,9 +1211,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-target=\"")
 					}
 					if kyse__err == nil {
-//line components/data-table.kyse.go:825
+//line components/data-table.kyse.go:952
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
-//line components/data-table.go:1090
+//line components/data-table.go:1217
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1098,9 +1225,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-select=\"")
 					}
 					if kyse__err == nil {
-//line components/data-table.kyse.go:827
+//line components/data-table.kyse.go:954
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
-//line components/data-table.go:1104
+//line components/data-table.go:1231
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1112,24 +1239,24 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-indicator=\"#")
 					}
 					if kyse__err == nil {
-//line components/data-table.kyse.go:829
+//line components/data-table.kyse.go:956
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/data-table.go:1118
+//line components/data-table.go:1245
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "-indicator\"\n")
 					}
 				}
-//line components/data-table.kyse.go:831
+//line components/data-table.kyse.go:958
 				if kyse__d.SearchPlaceholder != "" {
-//line components/data-table.go:1126
+//line components/data-table.go:1253
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tplaceholder=\"")
 					}
 					if kyse__err == nil {
-//line components/data-table.kyse.go:832
+//line components/data-table.kyse.go:959
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SearchPlaceholder))
-//line components/data-table.go:1133
+//line components/data-table.go:1260
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1137,11 +1264,11 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				}
 				if kyse__err == nil {
 					var kyse__v6 string
-//line components/data-table.kyse.go:834
+//line components/data-table.kyse.go:961
 					kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("search"))
-//line components/data-table.go:1143
+//line components/data-table.go:1270
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:834", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:961", kyse__err)
 					} else {
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 					}
@@ -1159,9 +1286,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:838
+//line components/data-table.kyse.go:965
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("indicator", "spinner")))
-//line components/data-table.go:1165
+//line components/data-table.go:1292
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1170,9 +1297,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tid=\"")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:839
+//line components/data-table.kyse.go:966
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/data-table.go:1176
+//line components/data-table.go:1303
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "-indicator\"\n")
@@ -1182,11 +1309,11 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				}
 				if kyse__err == nil {
 					var kyse__v7 string
-//line components/data-table.kyse.go:841
+//line components/data-table.kyse.go:968
 					kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("indicator"))
-//line components/data-table.go:1188
+//line components/data-table.go:1315
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:841", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:968", kyse__err)
 					} else {
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 					}
@@ -1198,13 +1325,13 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 			}
-//line components/data-table.kyse.go:845
+//line components/data-table.kyse.go:972
 			if kyse__d.Filtered() {
-//line components/data-table.go:1204
-//line components/data-table.kyse.go:850
+//line components/data-table.go:1331
+//line components/data-table.kyse.go:977
 				for _, filter := range kyse__d.Filters {
 					_ = filter
-//line components/data-table.go:1208
+//line components/data-table.go:1335
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<details\n")
 					}
@@ -1215,20 +1342,20 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"")
 					}
 					if kyse__err == nil {
-//line components/data-table.kyse.go:853
+//line components/data-table.kyse.go:980
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("facet", "data-table-facet")))
-//line components/data-table.go:1221
+//line components/data-table.go:1348
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 					}
 					if kyse__err == nil {
 						var kyse__v8 string
-//line components/data-table.kyse.go:854
+//line components/data-table.kyse.go:981
 						kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("facet"))
-//line components/data-table.go:1230
+//line components/data-table.go:1357
 						if kyse__err != nil {
-							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:854", kyse__err)
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:981", kyse__err)
 						} else {
 							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 						}
@@ -1243,9 +1370,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t")
 					}
 					if kyse__err == nil {
-//line components/data-table.kyse.go:857
+//line components/data-table.kyse.go:984
 						var kyse__v9 kyse__template.HTML = icons.PlusCircle(icons.Props{})
-//line components/data-table.go:1249
+//line components/data-table.go:1376
 						_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v9))
 					}
 					if kyse__err == nil {
@@ -1255,16 +1382,16 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t<span>")
 					}
 					if kyse__err == nil {
-//line components/data-table.kyse.go:858
+//line components/data-table.kyse.go:985
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(filter.Label)))
-//line components/data-table.go:1261
+//line components/data-table.go:1388
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
 					}
-//line components/data-table.kyse.go:859
+//line components/data-table.kyse.go:986
 					if len(kyse__d.FacetSummary(filter)) > 0 {
-//line components/data-table.go:1268
+//line components/data-table.go:1395
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t<span\n")
 						}
@@ -1275,20 +1402,20 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tclass=\"")
 						}
 						if kyse__err == nil {
-//line components/data-table.kyse.go:862
+//line components/data-table.kyse.go:989
 							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("facet-chosen", "data-table-facet-chosen")))
-//line components/data-table.go:1281
+//line components/data-table.go:1408
 						}
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 						}
 						if kyse__err == nil {
 							var kyse__v10 string
-//line components/data-table.kyse.go:863
+//line components/data-table.kyse.go:990
 							kyse__v10, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("facet-chosen"))
-//line components/data-table.go:1290
+//line components/data-table.go:1417
 							if kyse__err != nil {
-								kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:863", kyse__err)
+								kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:990", kyse__err)
 							} else {
 								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v10)
 							}
@@ -1296,17 +1423,17 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t>\n")
 						}
-//line components/data-table.kyse.go:865
+//line components/data-table.kyse.go:992
 						for _, label := range kyse__d.FacetSummary(filter) {
 							_ = label
-//line components/data-table.go:1303
+//line components/data-table.go:1430
 							if kyse__err == nil {
 								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t<span class=\"badge\" data-variant=\"secondary\">")
 							}
 							if kyse__err == nil {
-//line components/data-table.kyse.go:866
+//line components/data-table.kyse.go:993
 								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(label)))
-//line components/data-table.go:1310
+//line components/data-table.go:1437
 							}
 							if kyse__err == nil {
 								_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
@@ -1332,26 +1459,26 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\taria-label=\"")
 					}
 					if kyse__err == nil {
-//line components/data-table.kyse.go:874
+//line components/data-table.kyse.go:1001
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.FacetName(filter)))
-//line components/data-table.go:1338
+//line components/data-table.go:1465
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 					}
-//line components/data-table.kyse.go:875
+//line components/data-table.kyse.go:1002
 					if !kyse__d.Complete {
-//line components/data-table.go:1345
+//line components/data-table.go:1472
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-get=\"")
 						}
 						if kyse__err == nil {
 							var kyse__v11 string
-//line components/data-table.kyse.go:876
+//line components/data-table.kyse.go:1003
 							kyse__v11, kyse__err = kyse__view.TextURL(kyse__d.SearchAddress())
-//line components/data-table.go:1353
+//line components/data-table.go:1480
 							if kyse__err != nil {
-								kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:876", kyse__err)
+								kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1003", kyse__err)
 							} else {
 								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v11)
 							}
@@ -1369,9 +1496,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-target=\"")
 						}
 						if kyse__err == nil {
-//line components/data-table.kyse.go:879
+//line components/data-table.kyse.go:1006
 							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
-//line components/data-table.go:1375
+//line components/data-table.go:1502
 						}
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1383,9 +1510,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-select=\"")
 						}
 						if kyse__err == nil {
-//line components/data-table.kyse.go:881
+//line components/data-table.kyse.go:1008
 							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
-//line components/data-table.go:1389
+//line components/data-table.go:1516
 						}
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1397,9 +1524,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-indicator=\"#")
 						}
 						if kyse__err == nil {
-//line components/data-table.kyse.go:883
+//line components/data-table.kyse.go:1010
 							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/data-table.go:1403
+//line components/data-table.go:1530
 						}
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "-indicator\"\n")
@@ -1408,10 +1535,10 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t>\n")
 					}
-//line components/data-table.kyse.go:886
+//line components/data-table.kyse.go:1013
 					for _, option := range filter.Options {
 						_ = option
-//line components/data-table.go:1415
+//line components/data-table.go:1542
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t<label class=\"data-table-facet-option\">\n")
 						}
@@ -1425,9 +1552,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\tclass=\"")
 						}
 						if kyse__err == nil {
-//line components/data-table.kyse.go:890
+//line components/data-table.kyse.go:1017
 							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("filter", "input")))
-//line components/data-table.go:1431
+//line components/data-table.go:1558
 						}
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1439,9 +1566,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\tname=\"")
 						}
 						if kyse__err == nil {
-//line components/data-table.kyse.go:892
+//line components/data-table.kyse.go:1019
 							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(filter.Key))
-//line components/data-table.go:1445
+//line components/data-table.go:1572
 						}
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1450,27 +1577,27 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\tvalue=\"")
 						}
 						if kyse__err == nil {
-//line components/data-table.kyse.go:893
+//line components/data-table.kyse.go:1020
 							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(option.Value))
-//line components/data-table.go:1456
+//line components/data-table.go:1583
 						}
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 						}
-//line components/data-table.kyse.go:894
+//line components/data-table.kyse.go:1021
 						if kyse__d.Chosen(filter, option) {
-//line components/data-table.go:1463
+//line components/data-table.go:1590
 							if kyse__err == nil {
 								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\tchecked\n")
 							}
 						}
 						if kyse__err == nil {
 							var kyse__v12 string
-//line components/data-table.kyse.go:897
+//line components/data-table.kyse.go:1024
 							kyse__v12, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("filter"))
-//line components/data-table.go:1472
+//line components/data-table.go:1599
 							if kyse__err != nil {
-								kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:897", kyse__err)
+								kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1024", kyse__err)
 							} else {
 								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v12)
 							}
@@ -1482,9 +1609,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t<span>")
 						}
 						if kyse__err == nil {
-//line components/data-table.kyse.go:899
+//line components/data-table.kyse.go:1026
 							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(option.Label)))
-//line components/data-table.go:1488
+//line components/data-table.go:1615
 						}
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
@@ -1504,9 +1631,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<noscript>")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:905
+//line components/data-table.kyse.go:1032
 					var kyse__v13 kyse__template.HTML = Button(ButtonProps{Label: kyse__d.ApplyText(), Type: "submit", Variant: "outline", Size: "sm"})
-//line components/data-table.go:1510
+//line components/data-table.go:1637
 					_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v13))
 				}
 				if kyse__err == nil {
@@ -1520,9 +1647,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 		}
-//line components/data-table.kyse.go:910
+//line components/data-table.kyse.go:1037
 		if kyse__d.Hideable() {
-//line components/data-table.go:1526
+//line components/data-table.go:1653
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<details\n")
 			}
@@ -1533,20 +1660,20 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:916
+//line components/data-table.kyse.go:1043
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("columns", "table-columns")))
-//line components/data-table.go:1539
+//line components/data-table.go:1666
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 			if kyse__err == nil {
 				var kyse__v14 string
-//line components/data-table.kyse.go:917
+//line components/data-table.kyse.go:1044
 				kyse__v14, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("columns"))
-//line components/data-table.go:1548
+//line components/data-table.go:1675
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:917", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1044", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v14)
 				}
@@ -1558,14 +1685,14 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<summary>")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:919
+//line components/data-table.kyse.go:1046
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.ColumnsName())))
-//line components/data-table.go:1564
+//line components/data-table.go:1691
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:919
+//line components/data-table.kyse.go:1046
 				var kyse__v15 kyse__template.HTML = icons.CaretDown(icons.Props{})
-//line components/data-table.go:1569
+//line components/data-table.go:1696
 				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v15))
 			}
 			if kyse__err == nil {
@@ -1574,29 +1701,29 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<div>\n")
 			}
-//line components/data-table.kyse.go:921
+//line components/data-table.kyse.go:1048
 			for _, column := range kyse__d.Columns {
 				_ = column
-//line components/data-table.go:1581
-//line components/data-table.kyse.go:922
+//line components/data-table.go:1708
+//line components/data-table.kyse.go:1049
 				if column.Hideable && column.Key != "" {
-//line components/data-table.go:1584
+//line components/data-table.go:1711
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t<label\n")
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-part=\"toggle\"\n")
 					}
-//line components/data-table.kyse.go:925
+//line components/data-table.kyse.go:1052
 					if kyse__d.PartClass("toggle") != "" {
-//line components/data-table.go:1593
+//line components/data-table.go:1720
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tclass=\"")
 						}
 						if kyse__err == nil {
-//line components/data-table.kyse.go:926
+//line components/data-table.kyse.go:1053
 							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("toggle")))
-//line components/data-table.go:1600
+//line components/data-table.go:1727
 						}
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1604,11 +1731,11 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 					}
 					if kyse__err == nil {
 						var kyse__v16 string
-//line components/data-table.kyse.go:928
+//line components/data-table.kyse.go:1055
 						kyse__v16, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("toggle"))
-//line components/data-table.go:1610
+//line components/data-table.go:1737
 						if kyse__err != nil {
-							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:928", kyse__err)
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1055", kyse__err)
 						} else {
 							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v16)
 						}
@@ -1629,16 +1756,16 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tdata-column-toggle=\"")
 					}
 					if kyse__err == nil {
-//line components/data-table.kyse.go:933
+//line components/data-table.kyse.go:1060
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(column.Key))
-//line components/data-table.go:1635
+//line components/data-table.go:1762
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 					}
-//line components/data-table.kyse.go:934
+//line components/data-table.kyse.go:1061
 					if !column.Hidden {
-//line components/data-table.go:1642
+//line components/data-table.go:1769
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tchecked\n")
 						}
@@ -1650,9 +1777,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t")
 					}
 					if kyse__err == nil {
-//line components/data-table.kyse.go:938
+//line components/data-table.kyse.go:1065
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(column.Label)))
-//line components/data-table.go:1656
+//line components/data-table.go:1783
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
@@ -1680,9 +1807,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t")
 	}
 	if kyse__err == nil {
-//line components/data-table.kyse.go:948
+//line components/data-table.kyse.go:1075
 		var kyse__v17 kyse__template.HTML = Table(kyse__d.Grid())
-//line components/data-table.go:1686
+//line components/data-table.go:1813
 		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v17))
 	}
 	if kyse__err == nil {
@@ -1691,9 +1818,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/data-table.kyse.go:954
+//line components/data-table.kyse.go:1081
 	if kyse__d.Paged() || kyse__d.Complete || kyse__d.Searchable() || kyse__d.Chooses() || kyse__d.Selectable() {
-//line components/data-table.go:1697
+//line components/data-table.go:1824
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<div\n")
 		}
@@ -1704,20 +1831,20 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/data-table.kyse.go:957
+//line components/data-table.kyse.go:1084
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("footer", "data-table-footer")))
-//line components/data-table.go:1710
+//line components/data-table.go:1837
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v18 string
-//line components/data-table.kyse.go:958
+//line components/data-table.kyse.go:1085
 			kyse__v18, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("footer"))
-//line components/data-table.go:1719
+//line components/data-table.go:1846
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:958", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1085", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v18)
 			}
@@ -1728,9 +1855,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<div class=\"data-table-status\">\n")
 		}
-//line components/data-table.kyse.go:961
+//line components/data-table.kyse.go:1088
 		if kyse__d.Selectable() {
-//line components/data-table.go:1734
+//line components/data-table.go:1861
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<p\n")
 			}
@@ -1741,9 +1868,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:964
+//line components/data-table.kyse.go:1091
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("count", "data-table-count")))
-//line components/data-table.go:1747
+//line components/data-table.go:1874
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1758,20 +1885,20 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-selected-template=\"")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:967
+//line components/data-table.kyse.go:1094
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SelectedLabel))
-//line components/data-table.go:1764
+//line components/data-table.go:1891
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 			if kyse__err == nil {
 				var kyse__v19 string
-//line components/data-table.kyse.go:968
+//line components/data-table.kyse.go:1095
 				kyse__v19, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("count"))
-//line components/data-table.go:1773
+//line components/data-table.go:1900
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:968", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1095", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v19)
 				}
@@ -1780,17 +1907,17 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:969
+//line components/data-table.kyse.go:1096
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.SelectedText())))
-//line components/data-table.go:1786
+//line components/data-table.go:1913
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
 			}
 		}
-//line components/data-table.kyse.go:971
+//line components/data-table.kyse.go:1098
 		if kyse__d.Ranged() {
-//line components/data-table.go:1794
+//line components/data-table.go:1921
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<p\n")
 			}
@@ -1801,9 +1928,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:974
+//line components/data-table.kyse.go:1101
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("showing", "data-table-showing")))
-//line components/data-table.go:1807
+//line components/data-table.go:1934
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1816,11 +1943,11 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v20 string
-//line components/data-table.kyse.go:977
+//line components/data-table.kyse.go:1104
 				kyse__v20, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("showing"))
-//line components/data-table.go:1822
+//line components/data-table.go:1949
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:977", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1104", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v20)
 				}
@@ -1829,9 +1956,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:978
+//line components/data-table.kyse.go:1105
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Showing())))
-//line components/data-table.go:1835
+//line components/data-table.go:1962
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
@@ -1846,9 +1973,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<div class=\"data-table-pager\">\n")
 		}
-//line components/data-table.kyse.go:983
+//line components/data-table.kyse.go:1110
 		if kyse__d.Chooses() {
-//line components/data-table.go:1852
+//line components/data-table.go:1979
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<label class=\"data-table-sizes\">\n")
 			}
@@ -1856,9 +1983,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<span>")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:985
+//line components/data-table.kyse.go:1112
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.PerPageText())))
-//line components/data-table.go:1862
+//line components/data-table.go:1989
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
@@ -1873,9 +2000,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:988
+//line components/data-table.kyse.go:1115
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("sizes", "select")))
-//line components/data-table.go:1879
+//line components/data-table.go:2006
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1885,11 +2012,11 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v21 string
-//line components/data-table.kyse.go:990
+//line components/data-table.kyse.go:1117
 				kyse__v21, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("sizes"))
-//line components/data-table.go:1891
+//line components/data-table.go:2018
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:990", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1117", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v21)
 				}
@@ -1897,10 +2024,10 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>\n")
 			}
-//line components/data-table.kyse.go:992
+//line components/data-table.kyse.go:1119
 			for _, size := range kyse__d.Sizes() {
 				_ = size
-//line components/data-table.go:1904
+//line components/data-table.go:2031
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t<option\n")
 				}
@@ -1908,16 +2035,16 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tvalue=\"")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:994
+//line components/data-table.kyse.go:1121
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(size))
-//line components/data-table.go:1914
+//line components/data-table.go:2041
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
-//line components/data-table.kyse.go:995
+//line components/data-table.kyse.go:1122
 				if size == kyse__d.PageSize {
-//line components/data-table.go:1921
+//line components/data-table.go:2048
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tselected\n")
 					}
@@ -1926,9 +2053,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t>")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:998
+//line components/data-table.kyse.go:1125
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(size)))
-//line components/data-table.go:1932
+//line components/data-table.go:2059
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "</option>\n")
@@ -1941,9 +2068,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t</label>\n")
 			}
 		}
-//line components/data-table.kyse.go:1003
+//line components/data-table.kyse.go:1130
 		if kyse__d.Paged() || kyse__d.Complete {
-//line components/data-table.go:1947
+//line components/data-table.go:2074
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<nav\n")
 			}
@@ -1954,9 +2081,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:1010
+//line components/data-table.kyse.go:1137
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("pagination", "data-table-pagination")))
-//line components/data-table.go:1960
+//line components/data-table.go:2087
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1965,9 +2092,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\taria-label=\"")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:1011
+//line components/data-table.kyse.go:1138
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Pager().LandmarkName()))
-//line components/data-table.go:1971
+//line components/data-table.go:2098
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1976,27 +2103,27 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-page-of-template=\"")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:1012
+//line components/data-table.kyse.go:1139
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PageOfTemplate()))
-//line components/data-table.go:1982
+//line components/data-table.go:2109
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
-//line components/data-table.kyse.go:1013
+//line components/data-table.kyse.go:1140
 			if !kyse__d.Paged() {
-//line components/data-table.go:1989
+//line components/data-table.go:2116
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\thidden\n")
 				}
 			}
 			if kyse__err == nil {
 				var kyse__v22 string
-//line components/data-table.kyse.go:1016
+//line components/data-table.kyse.go:1143
 				kyse__v22, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("pagination"))
-//line components/data-table.go:1998
+//line components/data-table.go:2125
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1016", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1143", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v22)
 				}
@@ -2004,44 +2131,48 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>\n")
 			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<span\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-part=\"page-of\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1020
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("page-of", "data-table-page-of")))
-//line components/data-table.go:2020
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
-				var kyse__v23 string
-//line components/data-table.kyse.go:1021
-				kyse__v23, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("page-of"))
-//line components/data-table.go:2029
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1021", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v23)
+//line components/data-table.kyse.go:1145
+			if kyse__d.PageOfText() != "" {
+//line components/data-table.go:2137
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<span\n")
 				}
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1022
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.PageOfText())))
-//line components/data-table.go:2042
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-part=\"page-of\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1148
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("page-of", "data-table-page-of")))
+//line components/data-table.go:2150
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					var kyse__v23 string
+//line components/data-table.kyse.go:1149
+					kyse__v23, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("page-of"))
+//line components/data-table.go:2159
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1149", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v23)
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1150
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.PageOfText())))
+//line components/data-table.go:2172
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+				}
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<a\n")
@@ -2053,9 +2184,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:1025
+//line components/data-table.kyse.go:1154
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("previous", "btn")))
-//line components/data-table.go:2059
+//line components/data-table.go:2190
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -2071,11 +2202,11 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v24 string
-//line components/data-table.kyse.go:1028
+//line components/data-table.kyse.go:1157
 				kyse__v24, kyse__err = kyse__view.TextURL(kyse__d.Pager().PreviousHref())
-//line components/data-table.go:2077
+//line components/data-table.go:2208
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1028", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1157", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v24)
 				}
@@ -2087,9 +2218,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-page=\"")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:1029
+//line components/data-table.kyse.go:1158
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PreviousPage()))
-//line components/data-table.go:2093
+//line components/data-table.go:2224
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -2098,16 +2229,16 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-label=\"")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:1030
+//line components/data-table.kyse.go:1159
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Pager().PreviousName()))
-//line components/data-table.go:2104
+//line components/data-table.go:2235
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
-//line components/data-table.kyse.go:1031
+//line components/data-table.kyse.go:1160
 			if !kyse__d.Pager().HasPrevious() {
-//line components/data-table.go:2111
+//line components/data-table.go:2242
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-disabled=\"true\"\n")
 				}
@@ -2115,19 +2246,19 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\ttabindex=\"-1\"\n")
 				}
 			}
-//line components/data-table.kyse.go:1035
+//line components/data-table.kyse.go:1164
 			if !kyse__d.Complete {
-//line components/data-table.go:2121
+//line components/data-table.go:2252
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-get=\"")
 				}
 				if kyse__err == nil {
 					var kyse__v25 string
-//line components/data-table.kyse.go:1036
+//line components/data-table.kyse.go:1165
 					kyse__v25, kyse__err = kyse__view.TextURL(kyse__d.Pager().PreviousHref())
-//line components/data-table.go:2129
+//line components/data-table.go:2260
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1036", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1165", kyse__err)
 					} else {
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v25)
 					}
@@ -2139,9 +2270,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-target=\"")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:1037
+//line components/data-table.kyse.go:1166
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
-//line components/data-table.go:2145
+//line components/data-table.go:2276
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -2153,9 +2284,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-select=\"")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:1039
+//line components/data-table.kyse.go:1168
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
-//line components/data-table.go:2159
+//line components/data-table.go:2290
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -2163,11 +2294,11 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v26 string
-//line components/data-table.kyse.go:1041
+//line components/data-table.kyse.go:1170
 				kyse__v26, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("previous"))
-//line components/data-table.go:2169
+//line components/data-table.go:2300
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1041", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1170", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v26)
 				}
@@ -2176,18 +2307,18 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:1042
+//line components/data-table.kyse.go:1171
 				var kyse__v27 kyse__template.HTML = icons.CaretLeft(icons.Props{})
-//line components/data-table.go:2182
+//line components/data-table.go:2313
 				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v27))
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "<span>")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:1042
+//line components/data-table.kyse.go:1171
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.PreviousText())))
-//line components/data-table.go:2191
+//line components/data-table.go:2322
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</span></a>\n")
@@ -2202,9 +2333,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:1045
+//line components/data-table.kyse.go:1174
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("next", "btn")))
-//line components/data-table.go:2208
+//line components/data-table.go:2339
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -2220,11 +2351,11 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v28 string
-//line components/data-table.kyse.go:1048
+//line components/data-table.kyse.go:1177
 				kyse__v28, kyse__err = kyse__view.TextURL(kyse__d.Pager().NextHref())
-//line components/data-table.go:2226
+//line components/data-table.go:2357
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1048", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1177", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v28)
 				}
@@ -2236,9 +2367,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-page=\"")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:1049
+//line components/data-table.kyse.go:1178
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.NextPage()))
-//line components/data-table.go:2242
+//line components/data-table.go:2373
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -2247,16 +2378,16 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-label=\"")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:1050
+//line components/data-table.kyse.go:1179
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Pager().NextName()))
-//line components/data-table.go:2253
+//line components/data-table.go:2384
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
-//line components/data-table.kyse.go:1051
+//line components/data-table.kyse.go:1180
 			if !kyse__d.Pager().HasNext() {
-//line components/data-table.go:2260
+//line components/data-table.go:2391
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-disabled=\"true\"\n")
 				}
@@ -2264,19 +2395,19 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\ttabindex=\"-1\"\n")
 				}
 			}
-//line components/data-table.kyse.go:1055
+//line components/data-table.kyse.go:1184
 			if !kyse__d.Complete {
-//line components/data-table.go:2270
+//line components/data-table.go:2401
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-get=\"")
 				}
 				if kyse__err == nil {
 					var kyse__v29 string
-//line components/data-table.kyse.go:1056
+//line components/data-table.kyse.go:1185
 					kyse__v29, kyse__err = kyse__view.TextURL(kyse__d.Pager().NextHref())
-//line components/data-table.go:2278
+//line components/data-table.go:2409
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1056", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1185", kyse__err)
 					} else {
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v29)
 					}
@@ -2288,9 +2419,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-target=\"")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:1057
+//line components/data-table.kyse.go:1186
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
-//line components/data-table.go:2294
+//line components/data-table.go:2425
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -2302,9 +2433,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-select=\"")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:1059
+//line components/data-table.kyse.go:1188
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
-//line components/data-table.go:2308
+//line components/data-table.go:2439
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -2312,11 +2443,11 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v30 string
-//line components/data-table.kyse.go:1061
+//line components/data-table.kyse.go:1190
 				kyse__v30, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("next"))
-//line components/data-table.go:2318
+//line components/data-table.go:2449
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1061", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1190", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v30)
 				}
@@ -2325,17 +2456,17 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t><span>")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:1062
+//line components/data-table.kyse.go:1191
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.NextText())))
-//line components/data-table.go:2331
+//line components/data-table.go:2462
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:1062
+//line components/data-table.kyse.go:1191
 				var kyse__v31 kyse__template.HTML = icons.CaretRight(icons.Props{})
-//line components/data-table.go:2339
+//line components/data-table.go:2470
 				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v31))
 			}
 			if kyse__err == nil {

@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/arandu-io/hesape/pagination"
 	"github.com/arandu-io/kyse/icons"
 )
 
@@ -137,8 +138,24 @@ type DataTableProps struct {
 	SortKey string
 	SortDir string
 
+	// Paginator is the page the query returned, for a windowed list: the
+	// *pagination.LengthAwarePage, *pagination.Page or *pagination.CursorPage
+	// that came back beside the rows. Set, it is where the table reads the
+	// page being shown, how many there are, how many rows the whole list has
+	// and the range this page holds, and Page, Pages and Total are not read.
+	//
+	// The addresses stay the table's own, built from its fields like every
+	// other control, with the page's parameter name -- and, for a cursor page,
+	// its signed cursor. A page that knows no total draws the two steps and
+	// neither the range nor "Page n of total", because neither can be true.
+	// A complete list has no use for one: there the rows are the list.
+	Paginator Paginator
+
 	// Page is the page being shown, counting from one, and Pages is how many
 	// there are. It travels as "page". Pages of zero or one draws no pager.
+	//
+	// Deprecated: set Paginator to the page the query returned. Page, Pages
+	// and Total are that page copied out into three fields.
 	Page  int
 	Pages int
 	// Total is how many rows the whole list has, which on a windowed list only
@@ -148,6 +165,8 @@ type DataTableProps struct {
 	// Rows is one page, and saying "1 to 20 of 20" under page three of a
 	// hundred and thirty-seven is worse than saying nothing. A complete list
 	// needs none of this, because there the rows are the list.
+	//
+	// Deprecated: set Paginator.
 	Total int
 
 	// SelectName turns on per-row selection and is the field the checkboxes
@@ -298,8 +317,8 @@ func (p DataTableProps) Address(changes map[string]string) string {
 	if p.SortKey != "" {
 		set("dir", p.SortDir)
 	}
-	if p.Page > 1 {
-		set("page", strconv.Itoa(p.Page))
+	if at := p.at(); at > 1 {
+		set(p.pageParam(), strconv.Itoa(at))
 	}
 	for _, filter := range p.Filters {
 		values.Del(filter.Key)
@@ -347,14 +366,14 @@ func (p DataTableProps) Address(changes map[string]string) string {
 // they have just reordered, where the rows are not the ones they were looking
 // at.
 func (p DataTableProps) SortURL() string {
-	return p.Address(map[string]string{"sort": "{sort}", "dir": "{dir}", "page": ""})
+	return p.Address(map[string]string{"sort": "{sort}", "dir": "{dir}", p.pageParam(): ""})
 }
 
 // PageURL is the template the pager builds from. It keeps the search, the
 // order and every facet, because a page of a filtered, sorted list is a page
 // of that list.
 func (p DataTableProps) PageURL() string {
-	return p.Address(map[string]string{"page": "{page}"})
+	return p.Address(map[string]string{p.pageParam(): "{page}"})
 }
 
 // DataTableFilter is one per-column facet, drawn beside the search.
@@ -430,11 +449,97 @@ func (p DataTableProps) Sheets() int {
 		}
 		return (len(p.Rows) + p.PageSize - 1) / p.PageSize
 	}
+	if page, ok := p.countedPage(); ok {
+		return page.LastPage()
+	}
 	return p.Pages
 }
 
 // Paged is whether there is more than one page to move between.
-func (p DataTableProps) Paged() bool { return p.Sheets() > 1 }
+func (p DataTableProps) Paged() bool {
+	if paginator := p.uncountedPage(); paginator != nil {
+		return paginator.HasPages()
+	}
+	return p.Sheets() > 1
+}
+
+// countedPage is the paginator of a windowed list when it knows its total.
+func (p DataTableProps) countedPage() (countedPage, bool) {
+	if p.Complete {
+		return nil, false
+	}
+	return counted(p.Paginator)
+}
+
+// uncountedPage is the paginator of a windowed list when it knows no total --
+// a simple page or a cursor page -- and nil otherwise.
+func (p DataTableProps) uncountedPage() Paginator {
+	paginator := presentPaginator(p.Paginator)
+	if p.Complete || paginator == nil {
+		return nil
+	}
+	if _, ok := paginator.(countedPage); ok {
+		return nil
+	}
+	return paginator
+}
+
+// at is the page being shown: the paginator's number when it has one, Page
+// otherwise.
+func (p DataTableProps) at() int {
+	if !p.Complete {
+		if page, ok := presentPaginator(p.Paginator).(numberedPage); ok {
+			return page.CurrentPage()
+		}
+	}
+	return p.Page
+}
+
+// pageParam is the query parameter the page number travels under: the
+// paginator's, so the address the table writes is the one the query reads.
+func (p DataTableProps) pageParam() string {
+	if page, ok := presentPaginator(p.Paginator).(numberedPage); ok && page.GetPageName() != "" {
+		return page.GetPageName()
+	}
+	return "page"
+}
+
+// stepAddresses are the two steps of a page that knows no total, each built
+// from the table's own state like every other control, and empty where there
+// is nowhere to go.
+func (p DataTableProps) stepAddresses(paginator Paginator) steps {
+	var out steps
+	switch page := paginator.(type) {
+	case *pagination.CursorPage:
+		cursor := func(at *pagination.Cursor) string {
+			signer := page.GetOptions().Signer
+			if at == nil || signer == nil {
+				return ""
+			}
+			token := signer.Encode(*at)
+			if token == "" {
+				return ""
+			}
+			return p.Address(map[string]string{page.GetCursorName(): token, p.pageParam(): ""})
+		}
+		out.previous = cursor(page.PreviousCursor())
+		out.next = cursor(page.NextCursor())
+	case numberedPage:
+		at := page.CurrentPage()
+		if at > 1 {
+			out.previous = p.Address(map[string]string{p.pageParam(): strconv.Itoa(at - 1)})
+		}
+		if page.HasMorePages() {
+			out.next = p.Address(map[string]string{p.pageParam(): strconv.Itoa(at + 1)})
+		}
+	default:
+		// A page of a kind this does not know the parameters of has only its
+		// own addresses to offer.
+		out.previous = paginator.PreviousPageURL()
+		out.next = paginator.NextPageURL()
+	}
+	return out
+}
 
 // Grid is the table this draws, built from this component's own fields so the
 // two cannot disagree about the order, the selection or the rows.
@@ -517,9 +622,9 @@ func (p DataTableProps) swapKind() string {
 
 // Pager is the pagination this draws, or the zero value when there is one page.
 func (p DataTableProps) Pager() PaginationProps {
-	return PaginationProps{
+	pager := PaginationProps{
 		ComponentProps: ComponentProps{Parts: p.Parts},
-		Page:           p.Page,
+		Page:           p.at(),
 		Pages:          p.Sheets(),
 		URL:            p.PageURL(),
 		Label:          p.Label,
@@ -529,6 +634,12 @@ func (p DataTableProps) Pager() PaginationProps {
 		HxTarget:       p.swapTarget(),
 		HxSwap:         p.swapKind(),
 	}
+	if paginator := p.uncountedPage(); paginator != nil {
+		// A page that knows no total has no numbers to template, and is drawn
+		// as its two steps.
+		pager.Paginator = p.stepAddresses(paginator)
+	}
+	return pager
 }
 
 // ColumnsName is what the menu of columns is called.
@@ -598,7 +709,7 @@ func (p DataTableProps) SearchTrigger() string {
 // SearchAddress is where the box submits: the endpoint with the order kept and
 // the page dropped, because a new search has no page four.
 func (p DataTableProps) SearchAddress() string {
-	return p.Address(map[string]string{p.SearchName: "", "page": ""})
+	return p.Address(map[string]string{p.SearchName: "", p.pageParam(): ""})
 }
 
 // RootAttrs are the outermost element's attributes, with the client bridge
@@ -651,6 +762,9 @@ func (p DataTableProps) Showing() string {
 // window is the range the table is showing and the size of the list it is a
 // window onto.
 func (p DataTableProps) window() (int, int, int) {
+	if page, ok := p.countedPage(); ok {
+		return page.FirstItem(), page.LastItem(), page.Total()
+	}
 	total := p.Total
 	if p.Complete {
 		total = len(p.Rows)
@@ -661,7 +775,7 @@ func (p DataTableProps) window() (int, int, int) {
 	if !p.Complete && len(p.Rows) == 0 {
 		return 0, 0, total
 	}
-	at := p.Page
+	at := p.at()
 	if at < 1 {
 		at = 1
 	}
@@ -685,12 +799,25 @@ func (p DataTableProps) window() (int, int, int) {
 // Ranged is whether the range can be stated truthfully. A windowed list that
 // was not told the total cannot, and draws nothing rather than a number that
 // is silently the page size.
-func (p DataTableProps) Ranged() bool { return p.Complete || p.Total > 0 }
+func (p DataTableProps) Ranged() bool {
+	if page, ok := p.countedPage(); ok {
+		return page.Total() > 0
+	}
+	if p.uncountedPage() != nil {
+		return false
+	}
+	return p.Complete || p.Total > 0
+}
 
 // PartNames are the parts this component publishes.
 // PageOfText is where the reader is, beside the pager: "Page 2 of 7".
+// It is empty for a page that knows no total, because "Page 3 of" with nothing
+// after it says less than nothing.
 func (p DataTableProps) PageOfText() string {
-	page := p.Page
+	if p.uncountedPage() != nil {
+		return ""
+	}
+	page := p.at()
 	if page < 1 {
 		page = 1
 	}
@@ -703,8 +830,8 @@ func (p DataTableProps) PageOfTemplate() string { return p.Lines.Sentences()["pa
 
 // PreviousPage and NextPage are the pages the two steps lead to, kept inside
 // the list.
-func (p DataTableProps) PreviousPage() int { return max(1, p.Page-1) }
-func (p DataTableProps) NextPage() int     { return min(max(1, p.Sheets()), max(1, p.Page)+1) }
+func (p DataTableProps) PreviousPage() int { return max(1, p.at()-1) }
+func (p DataTableProps) NextPage() int     { return min(max(1, p.Sheets()), max(1, p.at())+1) }
 
 // PreviousText and NextText are the words on the two steps.
 func (p DataTableProps) PreviousText() string { return p.Lines.Sentences()["back"].(string) }
@@ -1015,11 +1142,13 @@ func (p DataTableProps) PartNames() []string {
 						@endif
 						@attributes(.PartAttrs("pagination"))
 					>
+						@if(.PageOfText() != "")
 						<span
 							data-part="page-of"
 							class="{{ .PartClass("page-of", "data-table-page-of") }}"
 							@attributes(.PartAttrs("page-of"))
 						>{{ .PageOfText() }}</span>
+						@endif
 						<a
 							data-part="previous"
 							class="{{ .PartClass("previous", "btn") }}"
