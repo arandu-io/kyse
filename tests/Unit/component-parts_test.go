@@ -1108,29 +1108,59 @@ func TestEveryPublishedPartWritesTheCallersAttributes(t *testing.T) {
 // The refusal is view.Attributes's, and this is the assertion that a component
 // actually goes through it. A component writing the bag some other way would
 // pass every other test in this package and put an onclick on the page.
+//
+// The refusal is loud: the render stops with a *RefusedAttribute naming the
+// attribute, on the root and on every part the component publishes. It used
+// to be an empty component -- a FormDialog given hx-boost in Attrs drew
+// nothing, and nothing anywhere said why.
 func TestAnAttrCannotCarryAScript(t *testing.T) {
 	for _, c := range extensible {
 		t.Run(c.name, func(t *testing.T) {
 			for _, attrs := range []components.Attrs{
 				{"onclick": "alert(1)"},
 				{"hx-on:click": "alert(1)"},
+				{"hx-boost": "false"},
 				{"x-data": "{}"},
 				{"style": "display:none"},
 				{"href": "javascript:alert(1)"},
 				{`x" onerror="alert(1)`: "1"},
 			} {
-				for _, got := range c.render(components.ComponentProps{Attrs: attrs}) {
-					for name, value := range attrs {
-						// The name and the value both: a link writes an href of
-						// its own, and that one is not the caller's.
-						if strings.Contains(got, name) && strings.Contains(got, template.HTMLEscapeString(value)) {
-							t.Errorf("the attribute %q was written:\n%s", name, got)
-						}
+				var name string
+				for written := range attrs {
+					name = written
+				}
+				for _, part := range c.partNames() {
+					props := components.ComponentProps{Parts: components.Parts{part: {Attrs: attrs}}}
+					if part == "root" {
+						props = components.ComponentProps{Attrs: attrs}
+					}
+					refused := renderRefused(func() { c.render(props) })
+					if refused == nil {
+						t.Errorf("%q on the part %q rendered instead of stopping the render", name, part)
+						continue
+					}
+					if refused.Name != name || refused.Part != part {
+						t.Errorf("%q on the part %q was refused as %q on %q", name, part, refused.Name, refused.Part)
 					}
 				}
 			}
 		})
 	}
+}
+
+// renderRefused runs a render and answers the refusal it stopped with, or nil
+// when it did not stop.
+func renderRefused(render func()) (refused *components.RefusedAttribute) {
+	defer func() {
+		if r := recover(); r != nil {
+			var ok bool
+			if refused, ok = r.(*components.RefusedAttribute); !ok {
+				panic(r)
+			}
+		}
+	}()
+	render()
+	return nil
 }
 
 // TestAnInertAttrIsWritten is the other side of the refusals: the attributes a

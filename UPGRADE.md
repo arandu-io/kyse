@@ -21,6 +21,24 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## v0.39.0
+
+Nothing stops a build, and one thing stops a render that used to come out
+empty. An attribute the view layer refuses -- `hx-*`, `on*`, `style`, an
+address, `class`, `role`, `aria-*` -- written in `Attrs` or in
+`Parts[...].Attrs` used to make the whole component render as nothing. It now
+panics with a `*components.RefusedAttribute` naming the part, the attribute and
+the reason, which a test that renders the page reports and the exception
+handler turns into an error page.
+
+| it was | it is | write instead |
+| --- | --- | --- |
+| `Attrs{"hx-boost": "false"}` on a `FormDialog` drew no dialog | a panic naming `hx-boost` on `content` | `NoBoost: true` |
+| any refused name in `Attrs` drew an empty component | a panic naming it | the component's own field for it, or nothing |
+
+A value the escapers refuse because it arrived as data -- an address whose
+scheme a browser acts on -- still draws nothing, as before.
+
 ## v0.36.0
 
 Nothing stops a build. `mailui` can draw a message in a language other than

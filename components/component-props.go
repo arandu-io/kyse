@@ -2,9 +2,11 @@ package components
 
 import (
 	"encoding/json"
+	"fmt"
 	"sort"
 	"strings"
 
+	"github.com/arandu-io/hesape/view"
 	"github.com/arandu-io/kyse"
 )
 
@@ -186,8 +188,69 @@ func (c ComponentProps) PartClass(part string, own ...string) string {
 // The result goes through view.Attributes, which is what decides whether a name
 // may be written at all; nothing here refuses one. What this decides is only
 // which part a caller was addressing.
+//
+// A name the view layer refuses -- an hx- or on- attribute, a style, an
+// address, class, role or aria- -- panics with a *RefusedAttribute; see there
+// for why it is not left to the render.
 func (c ComponentProps) PartAttrs(part string) map[string]string {
-	return c.partProps(part).Attrs
+	return checkedAttrs(part, c.partProps(part).Attrs)
+}
+
+// RefusedAttribute is what a component panics with when its caller handed it
+// an attribute the view layer will not write.
+//
+// # Why a panic and not the empty component
+//
+// The render refuses the same name, and a component that refused anything
+// returns nothing at all: the markup built up to the refusal ends inside an
+// attribute with its quote still open, and handing that back would give the
+// rest of the page to an element the browser is still reading. That is right
+// for a value that arrived as data, and it stays the answer for one -- an
+// address whose scheme a browser acts on draws nothing.
+//
+// It is wrong for a name the caller wrote. Attrs{"hx-boost": "false"} on a
+// FormDialog drew an empty space where the dialog should be, with nothing in a
+// log, a test or the console to say why: the screen looked as if the dialog had
+// never been written. A name in a view is the view's mistake, it is the same on
+// every render, and it is found the first time the page is drawn -- by a test
+// that renders it, or by the exception handler that turns the panic into an
+// error page in development. So it stops the render where the mistake is,
+// naming the part, the attribute and the reason.
+type RefusedAttribute struct {
+	// Part is the part the attribute was written for; "root" for Attrs.
+	Part string
+	// Name is the attribute.
+	Name string
+	// Err is the view layer's reason.
+	Err error
+}
+
+// Error names the part, the attribute and the reason.
+func (r *RefusedAttribute) Error() string {
+	return fmt.Sprintf("kyse: the attribute %q written for the part %q is refused, "+
+		"and the component would have drawn nothing: %v", r.Name, r.Part, r.Err)
+}
+
+// Unwrap is the view layer's reason.
+func (r *RefusedAttribute) Unwrap() error { return r.Err }
+
+// checkedAttrs answers attrs, or panics with the first name the view layer
+// refuses, in the order the render would reach them.
+func checkedAttrs(part string, attrs map[string]string) map[string]string {
+	if _, err := view.Attributes(attrs); err == nil {
+		return attrs
+	}
+	names := make([]string, 0, len(attrs))
+	for name := range attrs {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		if _, err := view.Attributes(map[string]string{name: attrs[name]}); err != nil {
+			panic(&RefusedAttribute{Part: part, Name: name, Err: err})
+		}
+	}
+	return attrs
 }
 
 // RootAttrs is everything written on the outermost element besides its class:
@@ -203,6 +266,9 @@ func (c ComponentProps) PartAttrs(part string) map[string]string {
 //
 // The component's own values win a collision. A caller who writes
 // data-kyse-behavior by hand is asking for the field beside it.
+//
+// A name the view layer refuses panics with a *RefusedAttribute, as PartAttrs
+// does.
 func (c ComponentProps) RootAttrs() map[string]string {
 	out := map[string]string{}
 	for name, value := range c.partProps("root").Attrs {
@@ -220,7 +286,7 @@ func (c ComponentProps) RootAttrs() map[string]string {
 	for _, event := range c.Events.EventNames() {
 		out["data-kyse-on-"+event] = c.Events[event]
 	}
-	return out
+	return checkedAttrs("root", out)
 }
 
 // ThemeName is the theme in force for this instance: the one it was given, or

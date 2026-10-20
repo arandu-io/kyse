@@ -10,20 +10,16 @@ import (
 // nothing. A prefix would end inside the refused attribute with its quote never
 // closed, and the browser would read the page after it as attributes of the
 // still-open element -- so the whole component is dropped, never half of it.
+//
+// That is the answer to a value that arrived as data. An attribute name the
+// caller wrote is not drawn as nothing: it stops the render with a
+// *RefusedAttribute -- see TestAnAttrCannotCarryAScript.
 func TestARefusedValueDrawsNothingRatherThanHalfAComponent(t *testing.T) {
 	cases := []struct {
 		name string
 		html string
 	}{
 		{"Link with a script address", string(components.Link(components.LinkProps{Label: "Docs", URL: "javascript:alert(1)"}))},
-		{"Input with a refused attribute", string(components.Input(components.InputProps{
-			Name:           "email",
-			ComponentProps: components.ComponentProps{Attrs: components.Attrs{"hx-post": "/profile"}},
-		}))},
-		{"Button with an event handler attribute", string(components.Button(components.ButtonProps{
-			Label:          "Save",
-			ComponentProps: components.ComponentProps{Attrs: components.Attrs{"onclick": "alert(1)"}},
-		}))},
 	}
 	for _, tc := range cases {
 		if tc.html != "" {
