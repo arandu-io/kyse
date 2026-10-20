@@ -425,8 +425,8 @@ func TestInitialsWalkRunes(t *testing.T) {
 	}
 }
 
-// page is a stand-in for framework/view.Page, so this module can be tested
-// without importing the framework it is deliberately independent of.
+// page is a stand-in for hesape/view.Page, small enough that a test says
+// exactly which message and which typed value the page holds.
 //
 // It answers the two questions components.Page asks, in the same shape view.Page
 // does: the first message for a name, and what was typed falling back to what

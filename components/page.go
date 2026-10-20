@@ -5,7 +5,7 @@ package components
 // attempt that was rejected.
 //
 // It is not a component. It is a contract, declared here so that this library
-// stays a library: framework/view.Page implements both methods, and every screen
+// stays a library: hesape/view.Page implements both methods, and every screen
 // already embeds it, so a form writes
 //
 //	{!! components.Field(components.FieldProps{
