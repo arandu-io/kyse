@@ -21,6 +21,33 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## v0.41.0
+
+Nothing stops a build, and every call that compiled draws what it drew. The
+components take what a screen already holds instead of asking a view to copy
+it out, and the ways that copied it are deprecated.
+
+| it was | it is | write instead |
+| --- | --- | --- |
+| `PaginationProps{Page: p.CurrentPage(), Pages: p.LastPage(), URL: "/x?page={page}"}` | `Paginator` takes the `*pagination.LengthAwarePage`, `*pagination.Page` or `*pagination.CursorPage` the query returned; `Page`, `Pages`, `URL` and `Around` are deprecated | `PaginationProps{Paginator: page}` |
+| `DataTableProps{Page: …, Pages: …, Total: …}` | `Paginator` as above; `Page`, `Pages` and `Total` are deprecated | `DataTableProps{Paginator: page}` |
+| `Token: .Page.CSRFToken()` on `Dialog`, `FormDialog`, `Table`, `DataTable` | the form posts the page's token when `Token` is empty | `Page: .Page` (`PageData: .Page` on `DataTable`) |
+| `ToastProps{Title: .Page.Flashed("status")}` behind an `@if` | the toast draws what the page flashed under `FlashKey` (`"status"`) when `Title` is empty, and nothing when nothing was | `ToastProps{Page: .Page}` |
+| `CancelLabel: "Cancelar"` and the other default words, on every call | read from the catalogue group `kyse` when the page is a `TranslatorPage` | one `lang/<locale>/kyse.json`; the keys are in the package doc |
+
+A pager drawn from a `Paginator` uses the page's own window (`OnEachSide`, three
+either side by default) rather than one either side, and the page's addresses,
+which keep the query the request arrived with. A data table keeps building its
+addresses from its own fields, with the page's parameter name. A page that
+knows no total -- the simple page and the cursor page -- draws the two steps and
+neither the range nor "Page n of total".
+
+`hesape/view.Page` answers `CSRFToken` and `Flashed`, so `Page: .Page` is all
+the token and the toast need. It does not carry a translator: a screen's own
+page data implements `TranslatorPage` by returning the translator it was wired
+with and the request's locale. A page that does not draws the English, as
+before.
+
 ## v0.39.0
 
 Nothing stops a build, and one thing stops a render that used to come out
