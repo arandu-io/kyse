@@ -69,9 +69,13 @@ type DialogProps struct {
 	// and within a year they would answer it differently.
 	Alert bool
 
-	// Token is the CSRF token. It is passed in rather than read from the page,
-	// because a component does not receive the page. It is written only when
-	// the form posts; see SendsToken.
+	// Page is the screen's own view.Page. The confirm form posts the CSRF
+	// token it carries, so a dialog drawn from a view writes Page: .Page and
+	// never copies the token by hand. Nil posts Token, or none.
+	Page Page
+	// Token is the CSRF token, for a dialog with no Page to ask. Set, it wins
+	// over the page's. It is written only when the form posts; see
+	// SendsToken.
 	Token string
 }
 
@@ -141,6 +145,10 @@ func (p DialogProps) MethodOverride() string {
 // address is kept by the history, the access log and every proxy between --
 // so the token is left out rather than handed to all of them.
 func (p DialogProps) SendsToken() bool { return p.FormMethod() == "post" }
+
+// FormToken is the token the confirm form posts: Token when it is set, and the
+// page's otherwise.
+func (p DialogProps) FormToken() string { return tokenFor(p.Page, p.Token) }
 
 // PartNames are the parts this component publishes.
 func (p DialogProps) PartNames() []string {
@@ -215,7 +223,7 @@ func (p DialogProps) PartNames() []string {
 					<input type="hidden" name="_method" value="{{ .MethodOverride() }}">
 				@endif
 				@if(.SendsToken())
-					<input type="hidden" name="_token" value="{{ .Token }}">
+					<input type="hidden" name="_token" value="{{ .FormToken() }}">
 				@endif
 				<button
 					data-part="confirm"

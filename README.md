@@ -115,7 +115,6 @@ script follows it and the form works as a page:
 	Title:       "New discount",
 	Description: "Customers apply it at checkout.",
 	Action:      "/discounts",
-	Token:       .Page.CSRFToken(),
 	Page:        .Page,
 	SubmitLabel: "Create discount",
 	Body: []template.HTML{
@@ -126,7 +125,7 @@ script follows it and the form works as a page:
 ```
 
 The form posts to the same action as the page does, with no fragment and no
-script. When the handler refuses it, the framework sends the person back to
+script. It posts the CSRF token `Page` carries, so no `Token` is written. When the handler refuses it, the framework sends the person back to
 where they posted from -- the list -- with the messages and what they typed.
 The list is drawn again, each field finds its own message through `Page`, and
 the dialog opens itself: it posts its `ID` in the hidden `_dialog` field, that

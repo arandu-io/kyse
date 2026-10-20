@@ -158,7 +158,13 @@ type DataTableProps struct {
 	// BulkAction is where the bar posts. Empty posts to URL, which is the
 	// endpoint that already knows the list.
 	BulkAction string
-	// Token is the CSRF token for that form.
+	// PageData is the screen's own view.Page. The bulk form posts the CSRF
+	// token it carries, so a list drawn from a view writes PageData: .Page and
+	// never copies the token by hand. It is not called Page because Page is
+	// the number of the page being shown.
+	PageData Page
+	// Token is the CSRF token, for a list with no PageData to ask. Set, it
+	// wins over the page's.
 	Token string
 
 	// ColumnsLabel and SelectedLabel are the two sentences that belong to the
@@ -478,6 +484,7 @@ func (p DataTableProps) Grid() TableProps {
 		BulkActions:    p.BulkActions,
 		BulkAction:     p.BulkAction,
 		Token:          p.Token,
+		Page:           p.PageData,
 		HxTarget:       p.swapTarget(),
 		HxSwap:         p.swapKind(),
 	}

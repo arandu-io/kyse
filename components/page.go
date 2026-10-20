@@ -42,6 +42,42 @@ type Page interface {
 	OldOr(name, fallback string) string
 }
 
+// TokenPage is a page that carries the CSRF token of the session it is drawn
+// for. hesape/view.Page implements it, as CSRFToken.
+//
+// A component that posts asks its Page for it, so a confirmation drawn from a
+// view writes Page: .Page and the form carries the token without anybody
+// copying it into a second field:
+//
+//	{!! components.Dialog(components.DialogProps{
+//		ID: "delete-invoice", Title: "Delete this invoice?",
+//		Action: "/invoices/7", Method: "delete", Page: .Page,
+//	}) !!}
+//
+// Dialog, FormDialog, Table and DataTable ask; a Token written on the props
+// still wins, for the page that has no token to offer.
+//
+// It is apart from Page because a field asks for its message and what was
+// typed, and nothing else: a page written for a test of one field is not made
+// to invent a token it has no use for.
+type TokenPage interface {
+	// CSRFToken is the token every form of this page posts, or empty when the
+	// page has none.
+	CSRFToken() string
+}
+
+// tokenFor is the token a form posts: the one the caller wrote, or else the
+// one its page carries.
+func tokenFor(page Page, given string) string {
+	if given != "" {
+		return given
+	}
+	if carrier, ok := page.(TokenPage); ok {
+		return carrier.CSRFToken()
+	}
+	return ""
+}
+
 // DialogPage is the page as the fields of one FormDialog see it: the messages
 // and the typed values of a refused form, but only when the form refused was
 // that dialog's.

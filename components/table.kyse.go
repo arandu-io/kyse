@@ -121,11 +121,15 @@ type TableProps struct {
 	AscendingLabel  string
 	DescendingLabel string
 	UnsortedLabel   string
-	// Token is the CSRF token for the bulk form. A form that changes something
-	// and carries none is refused by the framework, which is the intended
-	// outcome and a confusing one to debug -- so it is a field here rather
-	// than something to remember. It is written only when the form posts;
-	// see SendsToken.
+	// Page is the screen's own view.Page, and the bulk form posts the CSRF
+	// token it carries. A form that changes something and carries none is
+	// refused by the framework, which is the intended outcome and a confusing
+	// one to debug -- so the table asks for it rather than leaving it to be
+	// remembered.
+	Page Page
+	// Token is the CSRF token, for a table with no Page to ask. Set, it wins
+	// over the page's. It is written only when the form posts; see
+	// SendsToken.
 	Token string
 }
 
@@ -289,13 +293,17 @@ func (p TableProps) PostMethod() string {
 	return "post"
 }
 
-// SendsToken is whether the bulk form carries Token: only when there is one and
-// the form posts. A form submitted any other way -- GET, or a method a browser
+// SendsToken is whether the bulk form carries a token: only when there is one
+// and the form posts. A form submitted any other way -- GET, or a method a browser
 // cannot send and submits as GET -- puts its fields in the address, which the
 // history, the access log and every proxy between keep.
 func (p TableProps) SendsToken() bool {
-	return p.Token != "" && strings.EqualFold(p.PostMethod(), "post")
+	return p.FormToken() != "" && strings.EqualFold(p.PostMethod(), "post")
 }
+
+// FormToken is the token the bulk form posts: Token when it is set, and the
+// page's otherwise.
+func (p TableProps) FormToken() string { return tokenFor(p.Page, p.Token) }
 
 // RowName is what one row's checkbox is called: what the caller wrote, or the
 // row's key, which is at least distinct.
@@ -581,7 +589,7 @@ func (p TableProps) PartNames() []string {
 				@attributes(.PartAttrs("bulk"))
 			>
 				@if(.SendsToken())
-					<input type="hidden" name="_token" value="{{ .Token }}">
+					<input type="hidden" name="_token" value="{{ .FormToken() }}">
 				@endif
 				@foreach(.BulkActions as action)
 					{!! Button(action) !!}

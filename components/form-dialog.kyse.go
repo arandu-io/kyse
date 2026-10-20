@@ -105,7 +105,8 @@ type FormDialogProps struct {
 	// page posts to, so a refusal lands where the person came from either way.
 	Action string
 	Method string
-	// Token is the CSRF token, written only when the form posts.
+	// Token is the CSRF token, written only when the form posts. Empty posts
+	// the token Page carries, which is what a dialog drawn from a view does.
 	Token string
 	// Multipart encodes the form as multipart/form-data, for a form with a
 	// file in it.
@@ -142,7 +143,8 @@ type FormDialogProps struct {
 	Alert bool
 
 	// Page is where the dialog asks whether the form that was just refused was
-	// this one. A nil Page never opens it by itself.
+	// this one, and the CSRF token its form posts when Token is empty. A nil
+	// Page never opens it by itself.
 	Page Page
 	// Open draws it open regardless, for a page that decides by itself -- one
 	// whose handler sends the person back with a sentence rather than with
@@ -281,6 +283,10 @@ func (p FormDialogProps) MethodOverride() string {
 // because a form submitted with get puts its fields in the address.
 func (p FormDialogProps) SendsToken() bool { return p.FormMethod() == "post" }
 
+// FormToken is the token the form posts: Token when it is set, and the page's
+// otherwise.
+func (p FormDialogProps) FormToken() string { return tokenFor(p.Page, p.Token) }
+
 // Encoding is the enctype, and is empty for an ordinary form.
 func (p FormDialogProps) Encoding() string {
 	if p.Multipart {
@@ -336,7 +342,7 @@ func (p FormDialogProps) PartNames() []string {
 			<input type="hidden" name="_method" value="{{ .MethodOverride() }}">
 		@endif
 		@if(.SendsToken())
-			<input type="hidden" name="_token" value="{{ .Token }}">
+			<input type="hidden" name="_token" value="{{ .FormToken() }}">
 		@endif
 
 		<header
