@@ -66,6 +66,22 @@ type TokenPage interface {
 	CSRFToken() string
 }
 
+// FlashPage is a page that carries what the request before it said about what
+// it did. hesape/view.Page implements it, as Flashed.
+//
+// It is the page half of Context.With: an action that worked says so under a
+// key, redirects, and the page it lands on reads the sentence once. A toast
+// asks for it, so a layout draws the confirmation with one call:
+//
+//	{!! components.Toast(components.ToastProps{Page: .Page}) !!}
+//
+// It is apart from Page for the reason TokenPage is.
+type FlashPage interface {
+	// Flashed is the sentence left under key by the request that redirected
+	// here, or empty.
+	Flashed(key string) string
+}
+
 // tokenFor is the token a form posts: the one the caller wrote, or else the
 // one its page carries.
 func tokenFor(page Page, given string) string {

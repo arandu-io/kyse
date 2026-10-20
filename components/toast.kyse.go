@@ -7,13 +7,23 @@ import "github.com/arandu-io/kyse/icons"
 @go
 // ToastProps is what just happened, said once and then gone.
 //
-// It is written to be returned on its own, not only drawn inside a page. An
-// endpoint that saves something answers with this fragment and
+// It reaches the page by the road the action took.
+//
+// An action that redirects -- a form that worked, which is answered with a
+// redirect like every form -- says what it did with Context.With("status",
+// ...), and the page it lands on carries the sentence in its flash. The layout
+// draws it with one call, on every page, because a page with nothing flashed
+// draws nothing:
+//
+//	{!! components.Toast(components.ToastProps{Page: .Page}) !!}
+//
+// An endpoint that answers in place, without navigating, returns this fragment
+// instead, and
 //
 //	hx-target="#toaster" hx-swap="beforeend"
 //
-// appends it to the tray the layout already has. That is the whole flash-message
-// mechanism: no session key, no redirect carrying a string, no template deciding
+// appends it to the tray the layout already has. The two are one toast reached
+// from the two answers an action can give; neither needs a template deciding
 // whether to draw an empty box.
 //
 // The behaviour comes from the vendored script rather than from anything here.
@@ -23,11 +33,20 @@ import "github.com/arandu-io/kyse/icons"
 type ToastProps struct {
 	// ComponentProps is the class, attributes and parts the caller adds.
 	ComponentProps
-	// Title is the line. Empty draws nothing at all, so a page can include it
+	// Title is the line. Empty takes what Page flashed; with nothing flashed
+	// either it draws nothing at all, so a page can include it
 	// unconditionally.
 	Title string
 	// Message is the detail under it, and is usually not needed.
 	Message string
+
+	// Page is the screen's own view.Page. With Title empty the toast draws
+	// the sentence the request before this one flashed under FlashKey -- what
+	// Context.With left -- and nothing when it flashed none.
+	Page Page
+	// FlashKey is the key that sentence was flashed under. Empty means
+	// "status", the key a form that worked says what it did under.
+	FlashKey string
 
 	// Category is "error" for a failure and empty for anything else. It picks
 	// both the styling and the default duration -- a failure stays five seconds,
@@ -52,6 +71,23 @@ type ToastProps struct {
 	CloseLabel string
 }
 
+// Headline is the line the toast draws: Title, or else what the page flashed
+// under FlashKey. Empty draws no toast.
+func (p ToastProps) Headline() string {
+	if p.Title != "" {
+		return p.Title
+	}
+	flashes, ok := p.Page.(FlashPage)
+	if !ok {
+		return ""
+	}
+	key := p.FlashKey
+	if key == "" {
+		key = "status"
+	}
+	return flashes.Flashed(key)
+}
+
 // Close is the accessible name of the close button.
 func (p ToastProps) Close() string {
 	if p.CloseLabel == "" {
@@ -74,7 +110,7 @@ func (p ToastProps) PartNames() []string {
 }
 @endgo
 
-@if(.Title != "")
+@if(.Headline() != "")
 	<div
 		data-part="root"
 		class="{{ .RootClass("toast") }}"
@@ -100,7 +136,7 @@ func (p ToastProps) PartNames() []string {
 						class="{{ .PartClass("title") }}"
 					@endif
 					@attributes(.PartAttrs("title"))
-				>{{ .Title }}</h2>
+				>{{ .Headline() }}</h2>
 				@if(.Message != "")
 					<p
 						data-part="message"
