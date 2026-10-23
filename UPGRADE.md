@@ -21,6 +21,52 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## v0.42.0
+
+Nothing stops a build, and a `Sidebar` with no `Mode` sends the markup it sent
+before, byte for byte. The column can fold to a strip of icons on a wide screen
+instead of disappearing, so a view can stop drawing its own.
+
+| it was | it is | write instead |
+| --- | --- | --- |
+| a collapse button whose action hid the whole column on a wide screen | `SidebarProps.Mode`: `"full"` or `"slim"`, drawn by the server and written on the root as `data-sidebar-mode` | `SidebarProps{Mode: "full"}`, or `"slim"` |
+| an icon pasted into `Label`, or a hand-built list to have one | `SidebarItem.Icon`, drawn before the label and all the strip shows | `SidebarItem{Label: "Plates", URL: "/plates", Icon: icons.Car(icons.Props{})}` |
+| a tip, a separator and a narrower margin written in the project's stylesheet | the strip's look travels with the component as utilities; `--sidebar-slim-width` (3rem) sets its width | nothing |
+
+In the strip each link is named by its label (`aria-label` and the hidden
+text), the tip beside it appears on hover and on keyboard focus, a group's
+heading is drawn as a line, and the current entry keeps `aria-current`. The list
+does not scroll in the strip, so the tips are not clipped at its edge. On a
+narrow screen the column is the overlay with its labels in either mode, and
+every transition is shortened and taken away under reduced motion.
+
+Switching after the first paint is setting `data-sidebar-mode` on the root to
+the other value; nothing else has to change. The view layer's script does not
+do it yet, so a page that wants the button now registers the action itself,
+keeps its overlay toggle on a narrow screen, and puts the remembered choice back
+when the page loads:
+
+```js
+arandu.ui.action('toggle-sidebar', function (event, button) {
+    var sidebar = document.getElementById(button.dataset.target);
+    if (!sidebar) return;
+    if (window.innerWidth >= 768 && sidebar.dataset.sidebarMode) {
+        var next = sidebar.dataset.sidebarMode === 'slim' ? 'full' : 'slim';
+        sidebar.dataset.sidebarMode = next;
+        try { localStorage.setItem('sidebar:' + sidebar.id, next); } catch (e) {}
+    } else if (typeof sidebar.toggle === 'function') {
+        sidebar.toggle();
+    }
+});
+
+document.querySelectorAll('[data-sidebar-mode]').forEach(function (sidebar) {
+    try {
+        var saved = localStorage.getItem('sidebar:' + sidebar.id);
+        if (saved === 'full' || saved === 'slim') sidebar.dataset.sidebarMode = saved;
+    } catch (e) {}
+});
+```
+
 ## v0.41.0
 
 Nothing stops a build, and every call that compiled draws what it drew. The
