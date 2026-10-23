@@ -41,31 +41,20 @@ narrow screen the column is the overlay with its labels in either mode, and
 every transition is shortened and taken away under reduced motion.
 
 Switching after the first paint is setting `data-sidebar-mode` on the root to
-the other value; nothing else has to change. The view layer's script does not
-do it yet, so a page that wants the button now registers the action itself,
-keeps its overlay toggle on a narrow screen, and puts the remembered choice back
-when the page loads:
+the other value. From hesape v0.84.0 the view layer's script does it: give the
+header button `data-sidebar-toggle="<sidebar id>"`. On a wide screen it folds the
+sidebar between full and slim and remembers the choice per visitor
+(`localStorage` key `arandu.sidebar.<id>`, read and written inside try/catch, so
+a page without storage still renders the mode the server drew); on a narrow
+screen, or on a sidebar with no mode, it opens and closes the overlay as before,
+and it keeps `aria-expanded` on every button that points at the sidebar.
 
-```js
-arandu.ui.action('toggle-sidebar', function (event, button) {
-    var sidebar = document.getElementById(button.dataset.target);
-    if (!sidebar) return;
-    if (window.innerWidth >= 768 && sidebar.dataset.sidebarMode) {
-        var next = sidebar.dataset.sidebarMode === 'slim' ? 'full' : 'slim';
-        sidebar.dataset.sidebarMode = next;
-        try { localStorage.setItem('sidebar:' + sidebar.id, next); } catch (e) {}
-    } else if (typeof sidebar.toggle === 'function') {
-        sidebar.toggle();
-    }
-});
-
-document.querySelectorAll('[data-sidebar-mode]').forEach(function (sidebar) {
-    try {
-        var saved = localStorage.getItem('sidebar:' + sidebar.id);
-        if (saved === 'full' || saved === 'slim') sidebar.dataset.sidebarMode = saved;
-    } catch (e) {}
-});
+```html
+<button type="button" data-sidebar-toggle="panel-sidebar" aria-controls="panel-sidebar">Menu</button>
 ```
+
+A page that registered its own `toggle-sidebar` action for v0.42.0 deletes it
+and the restore loop, and changes the button to `data-sidebar-toggle`.
 
 ## v0.41.0
 
