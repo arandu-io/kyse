@@ -60,10 +60,10 @@
 //   - [FlashPage]: what the request before this one said. Toast draws it when
 //     its Title is empty.
 //   - [TranslatorPage]: the application's catalogue and the request's locale.
-//     Pagination, Dialog, FormDialog, Toast, Table and DataTable read their
-//     own words from it when the label for them is empty, and say the English
-//     they always said when it carries no line. Pagination and DataTable take
-//     the page as PageData, because their Page is a number.
+//     Pagination, Dialog, FormDialog, Toast, ThemeToggle, Table and DataTable
+//     read their own words from it when the label for them is empty, and say
+//     the English they always said when it carries no line. Pagination and
+//     DataTable take the page as PageData, because their Page is a number.
 //
 // hesape/view.Page answers the first two. A label written on the props wins
 // over all of them.
@@ -91,6 +91,11 @@
 //	kyse.form_dialog.cancel       Cancel
 //	kyse.form_dialog.close        Close
 //	kyse.toast.close              Close
+//	kyse.theme_toggle.label       Change the theme
+//	kyse.theme_toggle.menu        Theme
+//	kyse.theme_toggle.auto        Auto
+//	kyse.theme_toggle.light       Light
+//	kyse.theme_toggle.dark        Dark
 //	kyse.table.select_all         Select all rows
 //	kyse.table.bulk               Bulk actions
 //	kyse.table.columns            Columns

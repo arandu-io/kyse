@@ -130,6 +130,7 @@ func everyLabel(page components.Page) string {
 		string(components.Dialog(components.DialogProps{ID: "delete", Title: "Delete?", Action: "/x", Page: page})),
 		string(components.FormDialog(components.FormDialogProps{ID: "rename", Title: "Rename", Action: "/x", Page: page})),
 		string(components.Toast(components.ToastProps{Title: "Saved.", Dismissible: true, Page: page})),
+		string(components.ThemeToggle(components.ThemeToggleProps{Page: page})),
 		string(components.Table(components.TableProps{
 			ID: "plain", Columns: columns, Rows: rows, SelectName: "ids", BulkActions: bulk,
 			SortKey: "number", SortDir: "asc", SortURL: "/x?sort={sort}&dir={dir}", Page: page,
@@ -150,7 +151,7 @@ func TestEveryDocumentedKeyIsDrawnFromTheCatalogue(t *testing.T) {
 			t.Errorf("kyse.%s was not drawn from the catalogue", key)
 		}
 	}
-	for _, english := range []string{">Confirm<", ">Cancel<", ">Save<", `aria-label="Close"`, `aria-label="Pagination"`, "Select all rows", "Bulk actions"} {
+	for _, english := range []string{">Confirm<", ">Cancel<", ">Save<", `aria-label="Close"`, `aria-label="Pagination"`, "Select all rows", "Bulk actions", `aria-label="Change the theme"`, `aria-label="Theme"`, "<span>Auto</span>", "<span>Light</span>", "<span>Dark</span>"} {
 		if strings.Contains(html, english) {
 			t.Errorf("drew the English %s with a catalogue that carries it", english)
 		}

@@ -17,7 +17,7 @@ import "github.com/arandu-io/kyse/icons"
      There is no accent picker. The accent of a site is its identity, and
      offering a visitor five others is offering them five other brands.
 
-     It takes no props, and still earns its place: the markup is a button, a
+     Its words come from the page's catalogue, and it still earns its place: the markup is a button, a
      menu of three radios and the ARIA that ties them together, and repeating
      that on every layout is how two of them drift apart.
 
@@ -40,6 +40,62 @@ import "github.com/arandu-io/kyse/icons"
 type ThemeToggleProps struct {
 	// ComponentProps is the class, attributes and parts the caller adds.
 	ComponentProps
+
+	// Page is the screen's own view.Page, which is where the five words below
+	// are read from in the reader's language when they are left empty; see
+	// TranslatorPage.
+	Page Page
+	// Label names the trigger. Empty says kyse.theme_toggle.label, or
+	// "Change the theme".
+	Label string
+	// MenuLabel names the menu. Empty says kyse.theme_toggle.menu, or "Theme".
+	MenuLabel string
+	// AutoLabel, LightLabel and DarkLabel are the three options. Empty says
+	// kyse.theme_toggle.auto, kyse.theme_toggle.light and
+	// kyse.theme_toggle.dark, or "Auto", "Light" and "Dark".
+	AutoLabel  string
+	LightLabel string
+	DarkLabel  string
+}
+
+// TriggerName is what the trigger is called.
+func (p ThemeToggleProps) TriggerName() string {
+	if p.Label != "" {
+		return p.Label
+	}
+	return say(p.Page, "theme_toggle.label", "Change the theme")
+}
+
+// MenuName is what the menu is called.
+func (p ThemeToggleProps) MenuName() string {
+	if p.MenuLabel != "" {
+		return p.MenuLabel
+	}
+	return say(p.Page, "theme_toggle.menu", "Theme")
+}
+
+// AutoName is what the option that follows the device reads.
+func (p ThemeToggleProps) AutoName() string {
+	if p.AutoLabel != "" {
+		return p.AutoLabel
+	}
+	return say(p.Page, "theme_toggle.auto", "Auto")
+}
+
+// LightName is what the light option reads.
+func (p ThemeToggleProps) LightName() string {
+	if p.LightLabel != "" {
+		return p.LightLabel
+	}
+	return say(p.Page, "theme_toggle.light", "Light")
+}
+
+// DarkName is what the dark option reads.
+func (p ThemeToggleProps) DarkName() string {
+	if p.DarkLabel != "" {
+		return p.DarkLabel
+	}
+	return say(p.Page, "theme_toggle.dark", "Dark")
 }
 
 // PartNames are the parts this component publishes.
@@ -59,7 +115,7 @@ func (p ThemeToggleProps) PartNames() []string {
 		class="{{ .PartClass("trigger", "btn") }}"
 		data-variant="ghost"
 		data-size="icon"
-		aria-label="Change the theme"
+		aria-label="{{ .TriggerName() }}"
 		aria-haspopup="menu"
 		aria-expanded="false"
 		@attributes(.PartAttrs("trigger"))
@@ -87,7 +143,7 @@ func (p ThemeToggleProps) PartNames() []string {
 				class="{{ .PartClass("menu") }}"
 			@endif
 			role="menu"
-			aria-label="Theme"
+			aria-label="{{ .MenuName() }}"
 			@attributes(.PartAttrs("menu"))
 		>
 			<button
@@ -102,7 +158,7 @@ func (p ThemeToggleProps) PartNames() []string {
 				@attributes(.PartAttrs("option"))
 			>
 				<span aria-hidden="true" class="block size-4">{!! icons.Desktop(icons.Props{}) !!}</span>
-				<span>Auto</span>
+				<span>{{ .AutoName() }}</span>
 			</button>
 			<button
 				data-part="option"
@@ -116,7 +172,7 @@ func (p ThemeToggleProps) PartNames() []string {
 				@attributes(.PartAttrs("option"))
 			>
 				<span aria-hidden="true" class="block size-4">{!! icons.Sun(icons.Props{}) !!}</span>
-				<span>Light</span>
+				<span>{{ .LightName() }}</span>
 			</button>
 			<button
 				data-part="option"
@@ -130,7 +186,7 @@ func (p ThemeToggleProps) PartNames() []string {
 				@attributes(.PartAttrs("option"))
 			>
 				<span aria-hidden="true" class="block size-4">{!! icons.Moon(icons.Props{}) !!}</span>
-				<span>Dark</span>
+				<span>{{ .DarkName() }}</span>
 			</button>
 		</div>
 	</div>
