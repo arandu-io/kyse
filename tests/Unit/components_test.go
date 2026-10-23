@@ -345,6 +345,11 @@ func TestAPropIsEscaped(t *testing.T) {
 		"DialogTrigger": string(components.DialogTrigger(components.DialogTriggerProps{
 			Dialog: payload, Label: payload, Href: "/x",
 		})),
+		"Sidebar": string(components.Sidebar(components.SidebarProps{
+			Mode: "slim", Label: payload, Groups: []components.SidebarGroup{{
+				Label: payload, Items: []components.SidebarItem{{Label: payload, URL: "/x"}},
+			}},
+		})),
 	} {
 		if strings.Contains(html, payload) {
 			t.Errorf("%s wrote a script tag through unescaped:\n%s", name, html)

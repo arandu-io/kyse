@@ -1,0 +1,134 @@
+
+<aside
+	data-part="root"
+	class="sidebar [&amp;+*]:duration-200 motion-reduce:[&amp;+*]:transition-none md:data-[sidebar-mode=slim]:[&amp;:not([aria-hidden=true])+*]:ml-[var(--sidebar-slim-width,3rem)]"
+	id="main"
+	data-side="left"
+		data-sidebar-mode="slim"
+		data-initial-mobile-open="true"
+>
+	<nav
+		data-part="nav"
+			class="transition-[transform,translate,width] duration-200 motion-reduce:transition-none md:in-data-[sidebar-mode=slim]:w-[var(--sidebar-slim-width,3rem)]"
+		aria-label="Main menu"
+	>
+			<header
+				data-part="header"
+					class="md:in-data-[sidebar-mode=slim]:overflow-hidden"
+			><b>Acme</b></header>
+
+		<section class="md:in-data-[sidebar-mode=slim]:overflow-visible">
+				<div
+					data-part="group"
+					role="group"
+						aria-label="Manage"
+				>
+						<h3
+							data-part="group-label"
+								class="md:in-data-[sidebar-mode=slim]:h-0 md:in-data-[sidebar-mode=slim]:overflow-hidden md:in-data-[sidebar-mode=slim]:rounded-none md:in-data-[sidebar-mode=slim]:border-t md:in-data-[sidebar-mode=slim]:border-sidebar-border md:in-data-[sidebar-mode=slim]:p-0 md:in-data-[sidebar-mode=slim]:mb-2"
+						>Manage</h3>
+					<ul
+						data-part="list"
+					>
+							<li
+								data-part="item"
+							>
+								<a
+									data-part="link"
+										class="peer"
+									href="/"
+										aria-label="Dashboard"
+										aria-current="page"
+								>
+										<svg viewBox="0 0 256 256" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M216,120v96H152V152H104v64H40V120a8,8,0,0,1,2.34-5.66l80-80a8,8,0,0,1,11.32,0l80,80A8,8,0,0,1,216,120Z" opacity=".2"/><path d="M219.31,108.68l-80-80a16,16,0,0,0-22.62,0l-80,80A15.87,15.87,0,0,0,32,120v96a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V160h32v56a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V120A15.87,15.87,0,0,0,219.31,108.68ZM208,208H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48V120l80-80,80,80Z"/></svg>
+									<span
+											class="md:in-data-[sidebar-mode=slim]:sr-only"
+									>Dashboard</span>
+								</a>
+									<span
+										data-part="tooltip"
+										class="tooltip-content hidden md:in-data-[sidebar-mode=slim]:block top-1/2 bottom-auto left-[calc(100%+0.75rem)] -translate-y-1/2 peer-hover:opacity-100 peer-focus-visible:opacity-100"
+										aria-hidden="true"
+									>Dashboard</span>
+							</li>
+							<li
+								data-part="item"
+							>
+								<a
+									data-part="link"
+										class="peer"
+									href="/plates"
+										aria-label="Plates"
+										aria-disabled="true"
+								>
+										<svg viewBox="0 0 256 256" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M184,176h40v24a8,8,0,0,1-8,8H192a8,8,0,0,1-8-8ZM32,200a8,8,0,0,0,8,8H64a8,8,0,0,0,8-8V176H32ZM194.11,44.75A8,8,0,0,0,186.8,40H69.2a8,8,0,0,0-7.31,4.75L32,112H224Z" opacity=".2"/><path d="M240,104H229.2L201.42,41.5A16,16,0,0,0,186.8,32H69.2a16,16,0,0,0-14.62,9.5L26.8,104H16a8,8,0,0,0,0,16h8v80a16,16,0,0,0,16,16H64a16,16,0,0,0,16-16V184h96v16a16,16,0,0,0,16,16h24a16,16,0,0,0,16-16V120h8a8,8,0,0,0,0-16ZM69.2,48H186.8l24.89,56H44.31ZM64,200H40V184H64Zm128,0V184h24v16Zm24-32H40V120H216ZM56,144a8,8,0,0,1,8-8H80a8,8,0,0,1,0,16H64A8,8,0,0,1,56,144Zm112,0a8,8,0,0,1,8-8h16a8,8,0,0,1,0,16H176A8,8,0,0,1,168,144Z"/></svg>
+									<span
+											class="md:in-data-[sidebar-mode=slim]:sr-only"
+									>Plates</span>
+								</a>
+									<span
+										data-part="tooltip"
+										class="tooltip-content hidden md:in-data-[sidebar-mode=slim]:block top-1/2 bottom-auto left-[calc(100%+0.75rem)] -translate-y-1/2 peer-hover:opacity-100 peer-focus-visible:opacity-100"
+										aria-hidden="true"
+									>Plates</span>
+							</li>
+							<li
+								data-part="item"
+							>
+								<a
+									data-part="link"
+										class="peer"
+									href="/reports"
+										aria-label="reports"
+								>
+										<span class="hidden size-4 shrink-0 items-center justify-center text-xs font-semibold md:in-data-[sidebar-mode=slim]:flex" aria-hidden="true">R</span>
+									<span
+											class="md:in-data-[sidebar-mode=slim]:sr-only"
+									>reports</span>
+								</a>
+									<span
+										data-part="tooltip"
+										class="tooltip-content hidden md:in-data-[sidebar-mode=slim]:block top-1/2 bottom-auto left-[calc(100%+0.75rem)] -translate-y-1/2 peer-hover:opacity-100 peer-focus-visible:opacity-100"
+										aria-hidden="true"
+									>reports</span>
+							</li>
+					</ul>
+				</div>
+				<div
+					data-part="group"
+					role="group"
+				>
+					<ul
+						data-part="list"
+					>
+							<li
+								data-part="item"
+							>
+								<a
+									data-part="link"
+										class="peer"
+									href="/account"
+										aria-label="Account"
+								>
+										<svg viewBox="0 0 256 256" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M192,96a64,64,0,1,1-64-64A64,64,0,0,1,192,96Z" opacity=".2"/><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg>
+									<span
+											class="md:in-data-[sidebar-mode=slim]:sr-only"
+									>Account</span>
+								</a>
+									<span
+										data-part="tooltip"
+										class="tooltip-content hidden md:in-data-[sidebar-mode=slim]:block top-1/2 bottom-auto left-[calc(100%+0.75rem)] -translate-y-1/2 peer-hover:opacity-100 peer-focus-visible:opacity-100"
+										aria-hidden="true"
+									>Account</span>
+							</li>
+					</ul>
+				</div>
+		</section>
+
+			<footer
+				data-part="footer"
+					class="md:in-data-[sidebar-mode=slim]:overflow-hidden"
+			><b>v1</b></footer>
+	</nav>
+</aside>
+

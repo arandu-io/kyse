@@ -1,0 +1,72 @@
+
+<aside
+	data-part="root"
+	class="sidebar"
+	id="main"
+	data-side="left"
+>
+	<nav
+		data-part="nav"
+		aria-label="Sidebar"
+	>
+			<header
+				data-part="header"
+			><b>Acme</b></header>
+
+		<section>
+				<div
+					data-part="group"
+					role="group"
+						aria-label="Manage"
+				>
+						<h3
+							data-part="group-label"
+						>Manage</h3>
+					<ul
+						data-part="list"
+					>
+							<li
+								data-part="item"
+							>
+								<a
+									data-part="link"
+									href="/posts"
+										aria-current="page"
+								><span>Posts</span></a>
+							</li>
+							<li
+								data-part="item"
+							>
+								<a
+									data-part="link"
+									href="/u"
+										aria-disabled="true"
+								><span>Users</span></a>
+							</li>
+					</ul>
+				</div>
+				<div
+					data-part="group"
+					role="group"
+				>
+					<ul
+						data-part="list"
+					>
+							<li
+								data-part="item"
+							>
+								<a
+									data-part="link"
+									href="/"
+								><span>Home</span></a>
+							</li>
+					</ul>
+				</div>
+		</section>
+
+			<footer
+				data-part="footer"
+			><b>v1</b></footer>
+	</nav>
+</aside>
+

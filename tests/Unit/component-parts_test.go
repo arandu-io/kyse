@@ -389,7 +389,7 @@ var extensible = []struct {
 	{
 		"Sidebar",
 		func(c components.ComponentProps) []string {
-			return []string{string(components.Sidebar(components.SidebarProps{
+			props := components.SidebarProps{
 				ComponentProps: c,
 				ID:             "main",
 				Header:         template.HTML("<b>Acme</b>"),
@@ -398,7 +398,11 @@ var extensible = []struct {
 					Label: "Manage",
 					Items: []components.SidebarItem{{Label: "Posts", URL: "/posts"}},
 				}},
-			}))}
+			}
+			plain := string(components.Sidebar(props))
+			// The tip is drawn only when the column has a mode.
+			props.Mode = "slim"
+			return []string{plain, string(components.Sidebar(props))}
 		},
 		components.SidebarProps{}.PartNames,
 	},
