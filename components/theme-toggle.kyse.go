@@ -72,7 +72,10 @@ func (p ThemeToggleProps) PartNames() []string {
 		<span aria-hidden="true" class="block size-[18px]" data-theme-glyph="dark">{!! icons.Moon(icons.Props{}) !!}</span>
 	</button>
 
-	<div data-popover aria-hidden="true" class="w-40">
+	{{-- The trigger sits at the end of a header, so the menu opens towards
+	     the start: aligned to the start it hangs past the viewport even while
+	     closed and widens the page on a narrow screen. --}}
+	<div data-popover aria-hidden="true" data-align="end" class="w-40">
 		{{-- role="menu" with menuitemradio, and not a radiogroup. The two say the
 		     same thing about mutual exclusion, and only one of them is what a
 		     menu is: the script that opens this popover looks for a menu inside
