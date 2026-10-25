@@ -29,6 +29,11 @@ type ButtonProps struct {
 	Type string
 	// Disabled draws the button as unavailable and stops it answering.
 	Disabled bool
+	// Name and Value are what a submit button sends with its form, which is
+	// how one form with several actions tells the server which was pressed.
+	// Both are written only when Name carries something.
+	Name  string
+	Value string
 
 	// The HTMX attributes, written only when they carry something. An empty
 	// hx-post is an attribute HTMX acts on: it would post to the current URL.
@@ -77,6 +82,10 @@ func (p ButtonProps) PartNames() []string { return []string{"root"} }
 	@endif
 	@if(.Disabled)
 		disabled
+	@endif
+	@if(.Name != "")
+		name="{{ .Name }}"
+		value="{{ .Value }}"
 	@endif
 	@if(.HxPost != "")
 		hx-post="{{ .HxPost }}"
