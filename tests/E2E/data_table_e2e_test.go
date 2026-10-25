@@ -43,7 +43,7 @@ func menuOpen(t *testing.T, page *browser.Page, id string) bool {
 
 func requireQuery(t *testing.T, page *browser.Page, want url.Values) {
 	t.Helper()
-	got := query(t, page)
+	got := addressQuery(t, page)
 	for _, values := range got {
 		sort.Strings(values)
 	}

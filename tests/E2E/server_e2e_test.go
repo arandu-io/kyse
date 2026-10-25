@@ -482,8 +482,8 @@ func eval(t *testing.T, page *browser.Page, expression string) string {
 	return fmt.Sprint(out)
 }
 
-// query is the query string of the address the page is on.
-func query(t *testing.T, page *browser.Page) url.Values {
+// addressQuery is the query string of the address the page is on.
+func addressQuery(t *testing.T, page *browser.Page) url.Values {
 	t.Helper()
 	values, err := url.ParseQuery(strings.TrimPrefix(eval(t, page, `location.search`), "?"))
 	if err != nil {
