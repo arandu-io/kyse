@@ -111,7 +111,9 @@ type TableProps struct {
 	//
 	// Without it the bridge is written twice -- once on the wrapper and once
 	// here -- so the count runs twice per click and the live region is
-	// rewritten twice, which a screen reader reads out twice.
+	// rewritten twice, which a screen reader reads out twice. A data table draws
+	// its own table and does not use this; it is for a caller who composes a
+	// region of their own around one.
 	Composed bool
 	// ID is what the bulk form and its checkboxes hang their ids off. Empty
 	// falls back to SelectName, which two tables on one page share -- and then
@@ -214,6 +216,10 @@ type TableRow struct {
 	// (DataTableProps.Complete) filters by them; a list the server works
 	// never reads them, because the server already sent only what matched.
 	Facets map[string]string
+	// Actions are the entries of the menu at the end of the row in a data
+	// table: a button that opens a list of what can be done to this row. Empty
+	// draws no menu. A plain Table ignores them.
+	Actions []MenuItem
 }
 
 // TableCell is one value, as text or as markup.
@@ -497,21 +503,19 @@ func (p TableProps) FormID() string {
 // takes the checkbox out of every form instead of putting it in one.
 func (p TableProps) Submits() bool { return p.Selectable() && len(p.BulkActions) > 0 }
 
-// SortName is what a sortable header is called, in the state it is in.
+// SortName is what a sortable header is called, in the state it is in: the
+// sentence the caller wrote, else the page's, else the English.
 func (p TableProps) SortName(column TableColumn) string {
 	sentence := p.UnsortedLabel
-	key := "table.unsorted"
+	key, english := "table.unsorted", "{column}, not sorted"
 	switch p.Order(column) {
 	case "ascending":
-		sentence, key = p.AscendingLabel, "table.ascending"
+		sentence, key, english = p.AscendingLabel, "table.ascending", "{column}, sorted ascending"
 	case "descending":
-		sentence, key = p.DescendingLabel, "table.descending"
+		sentence, key, english = p.DescendingLabel, "table.descending", "{column}, sorted descending"
 	}
 	if sentence == "" {
-		sentence = say(p.Page, key, "")
-	}
-	if sentence == "" {
-		return ""
+		sentence = say(p.Page, key, english)
 	}
 	return strings.ReplaceAll(sentence, "{column}", column.Label)
 }
@@ -693,7 +697,16 @@ func (p TableProps) PartNames() []string {
 										hx-select="{{ .HxTarget }}"
 									@endif
 									@attributes(.PartAttrs("sort"))
-								>{{ column.Label }}{!! icons.ArrowsDownUp(icons.Props{}) !!}</a>
+								>
+										{{ column.Label }}
+										@if(.Order(column) == "ascending")
+											{!! icons.ArrowUp(icons.Props{}) !!}
+										@elseif(.Order(column) == "descending")
+											{!! icons.ArrowDown(icons.Props{}) !!}
+										@else
+											{!! icons.ArrowsDownUp(icons.Props{}) !!}
+										@endif
+									</a>
 							@endif
 							@if(!column.Sortable || !.Sortable() || column.Key == "")
 								{{ column.Label }}
