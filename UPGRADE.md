@@ -43,8 +43,52 @@ The state moved out of five fields into one:
 `Values(change)`, the canonical query after one step. `DataTableValues` is the
 plain implementation -- values written once, in a stable order, with the default
 page and size left out -- and it is what a list that holds all its rows passes. A
-listing that parses its own request implements the interface over its state. A
 nil `State` is a list in its first state.
+
+A list read from a database is not written by hand at all. Declare it once with
+`pagination.NewListing` (hesape v0.86.0), let the query builder apply it, and
+hand the result to the table: `DataTableProps.Result` takes the
+`*pagination.ListingResult` and fills the state, the page with its total, the
+count beside every facet value, the facet's own query parameter and the page
+sizes the listing allows, each of which a field written beside it still
+overrides. `components.DataTableStateFrom(state)` is the same adapter for a state
+you hold, and it answers every step with the listing state's own method, so
+the rules are the listing's: a search, a facet or an order goes back to the
+first page, a new size keeps the first row on screen, a column leaves the page
+alone, and a step the listing did not declare changes nothing. The cursor of a
+keyset page is not a part of a listing and is ignored there; a list paged by
+cursor keeps `DataTableValues`.
+
+```go
+// The service: the listing is declared once, beside the model.
+var invoiceListing = must(pagination.NewListing(pagination.ListingSpec{
+	Search:      []string{"number", "customer"},
+	Sorts:       map[string]string{"number": "number", "total": "total"},
+	DefaultSort: "number",
+	Facets:      []pagination.FacetSpec{{Key: "status", Column: "status", Values: []string{"paid", "open"}}},
+	PageSizes:   []int{10, 20, 50},
+	Hideable:    []string{"total"},
+}))
+
+func (s *Invoices) List(ctx context.Context, g auth.Grant, values url.Values) ([]query.Record, *pagination.ListingResult, error) {
+	return s.db.Table("invoices").Listing(ctx, g, invoiceListing.Parse(values), "/invoices")
+}
+
+// The controller: authorize, then ask. The tenant is the Grant's.
+rows, result, err := invoices.List(ctx, g, r.URL.Query())
+
+// The view: the result goes to the table as it came back.
+{!! components.DataTable(components.DataTableProps{
+	ID: "invoices", Label: "Invoices", URL: "/invoices", Searchable: true, FullPager: true,
+	Result:  .Result,
+	Filters: []components.DataTableFilter{{Key: "status", Label: "Status"}},
+	Columns: .Columns,
+	Rows:    .Rows,
+}) !!}
+```
+
+A `DataTableFilter` that names no `Options` lists the facet's own values, and one
+whose facet travels under another `Param` writes it on its boxes.
 
 Every address is the state's answer, so none is built from loose parameters any
 more, and these exported methods of `DataTableProps` are gone with the parameters:
@@ -88,7 +132,7 @@ markup: a project's stylesheet needs nothing of the data table beyond what
 `data-table.css` and the `.table-columns`, `.table-count` and `.table-sort`
 rules of `table.css` that Basecoat shipped for the old markup are not read by it
 and can go. The behaviour that makes the menus, the selection and the swap work
-is in the view layer's script from hesape's next minor; this release needs it.
+is in the view layer's script from hesape v0.87.0; this release requires it.
 
 ## v0.42.0
 

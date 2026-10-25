@@ -4,6 +4,8 @@ import (
 	"net/url"
 	"sort"
 	"strconv"
+
+	"github.com/arandu-io/hesape/pagination"
 )
 
 // DataTableParams are the names a listing's state travels under in an address.
@@ -303,4 +305,81 @@ func without(values []string, drop string) []string {
 		}
 	}
 	return out
+}
+
+// DataTableStateFrom is the [DataTableState] of a listing state: what
+// [pagination.Listing] read out of a request, drawn by a data table.
+//
+// It adds nothing of its own. Each step is the listing state's own method --
+// WithSort, ToggleFacet, ClearFacet, ClearFilters, WithPageSize, ToggleHidden,
+// WithPage -- and the query is its Values, so the rules a table assumes live in
+// the one place that also reads the request back: a search, a facet or a new
+// order goes back to the first page, a new size keeps the first row on screen,
+// a column leaves the page where it is, and a parameter appears once, in a
+// stable order, with the defaults left out.
+//
+// A step the listing did not declare -- a sort key, a facet value, a size, a
+// hideable column that is not in the spec -- changes nothing, as it does when it
+// arrives in a request. The cursor of a keyset page is not a part of a listing,
+// which counts its rows and pages by number, and a step that carries one is
+// ignored: a list that is paged by cursor is drawn from [DataTableValues].
+//
+// The zero ListingState belongs to no listing and is drawn as an unfiltered
+// list on its first page.
+func DataTableStateFrom(state pagination.ListingState) DataTableState {
+	return listingState{state}
+}
+
+type listingState struct{ state pagination.ListingState }
+
+func (l listingState) Params() DataTableParams {
+	listing := l.state.Listing()
+	if listing == nil {
+		return DataTableParams{}
+	}
+	names := listing.Names()
+	return DataTableParams{
+		Search: names.Search, Sort: names.Sort, Dir: names.Dir,
+		Page: names.Page, PerPage: names.PerPage, Hide: names.Hide,
+	}
+}
+
+func (l listingState) Search() string  { return l.state.Search() }
+func (l listingState) SortKey() string { return l.state.SortKey() }
+
+func (l listingState) SortDir() string {
+	if l.state.SortKey() == "" {
+		return ""
+	}
+	return string(l.state.Direction())
+}
+
+func (l listingState) Chosen(facet string) []string { return l.state.Facet(facet) }
+func (l listingState) Page() int                    { return l.state.Page() }
+func (l listingState) PageSize() int                { return l.state.PerPage() }
+func (l listingState) Hidden() []string             { return l.state.Hidden() }
+
+func (l listingState) Values(change DataTableChange) url.Values {
+	next := l.state
+	switch {
+	case change.Reset:
+		next = next.ClearFilters()
+	case change.Sort != "":
+		dir := pagination.SortAsc
+		if change.Dir == "desc" {
+			dir = pagination.SortDesc
+		}
+		next = next.WithSort(change.Sort, dir)
+	case change.Facet != "" && change.Value != "":
+		next = next.ToggleFacet(change.Facet, change.Value)
+	case change.ClearFacet != "":
+		next = next.ClearFacet(change.ClearFacet)
+	case change.PerPage > 0:
+		next = next.WithPageSize(change.PerPage)
+	case change.Hide != "":
+		next = next.ToggleHidden(change.Hide)
+	case change.Page > 0:
+		next = next.WithPage(change.Page)
+	}
+	return next.Values()
 }

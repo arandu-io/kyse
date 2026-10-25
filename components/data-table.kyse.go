@@ -31,6 +31,10 @@ import (
 // same state as fields, so a search keeps the order, the size and the hidden
 // columns, and a new search sends the reader back to the first page.
 //
+// A list read from a database passes the [pagination.ListingResult] its query
+// returned as Result and nothing else about the state: the state, the page with
+// its total, the count of every facet value and the page sizes come out of it.
+//
 // # Where the work happens
 //
 // On the server. A table ordered in the browser is ordered only within the page
@@ -87,6 +91,13 @@ type DataTableProps struct {
 	// size and the hidden columns, and the address of every step from them.
 	// Nil is a list in its first state, with the conventional parameter names.
 	State DataTableState
+	// Result is what a listing returned: [pagination.ListingResult], the state
+	// that was read, the page with its total and the count of every facet value.
+	// Set, it fills State (through [DataTableStateFrom]), Paginator, the Counts
+	// and Param of every filter and the page sizes of the listing, each of which
+	// a field written beside it still overrides. A service hands the result on
+	// and the table is drawn from it.
+	Result *pagination.ListingResult
 	// Paginator is the page the query returned: the *pagination.LengthAwarePage,
 	// *pagination.Page or *pagination.CursorPage that came back beside the rows.
 	// It is where the table reads the page being shown, how many there are and
@@ -213,10 +224,21 @@ type DataTableFilter struct {
 	Label string
 	// Options are what can be chosen.
 	Options []SelectOption
+	// Param is the query parameter the chosen values travel in, which is Key
+	// unless the facet of a listing names another. Empty means Key.
+	Param string
 	// Counts are how many rows each option matches, by option value, the way the
 	// query counted them: ignoring this facet's own choice and respecting the
 	// others. Nil draws no counts.
 	Counts map[string]int
+}
+
+// Name is the name of the filter's boxes: the parameter its values travel in.
+func (f DataTableFilter) Name() string {
+	if f.Param != "" {
+		return f.Param
+	}
+	return f.Key
 }
 
 // DataTableLines are the sentences a data table says.
@@ -364,12 +386,68 @@ type DataTableQueryField struct {
 	Value string
 }
 
-// state is State, or the first state of an unfiltered list.
+// state is State, else the state the Result was read with, else the first state
+// of an unfiltered list.
 func (p DataTableProps) state() DataTableState {
-	if p.State == nil {
-		return DataTableValues{}
+	switch {
+	case p.State != nil:
+		return p.State
+	case p.Result != nil:
+		return DataTableStateFrom(p.Result.State)
 	}
-	return p.State
+	return DataTableValues{}
+}
+
+// stateless is whether nothing says what state the list is in, which is when a
+// column's own Hidden is where it starts.
+func (p DataTableProps) stateless() bool { return p.State == nil && p.Result == nil }
+
+// paginator is Paginator, else the page of the Result.
+func (p DataTableProps) paginator() Paginator {
+	if p.Paginator == nil && p.Result != nil {
+		return p.Result.Page
+	}
+	return p.Paginator
+}
+
+// Facets are the filters as they are drawn: each with the parameter and the
+// counts the Result knows for it when the filter says none, and the values the
+// facet lists when the filter names no options.
+func (p DataTableProps) Facets() []DataTableFilter {
+	if p.Result == nil || p.Result.State.Listing() == nil {
+		return p.Filters
+	}
+	listing := p.Result.State.Listing()
+	out := make([]DataTableFilter, len(p.Filters))
+	for i, filter := range p.Filters {
+		if spec, ok := listing.Facet(filter.Key); ok {
+			if filter.Param == "" {
+				filter.Param = spec.Param
+			}
+			if len(filter.Options) == 0 {
+				for _, value := range spec.Values {
+					filter.Options = append(filter.Options, SelectOption{Label: value, Value: value})
+				}
+			}
+			if filter.Counts == nil {
+				filter.Counts = map[string]int{}
+				for _, count := range p.Result.FacetCounts(filter.Key) {
+					filter.Counts[count.Value] = count.Count
+				}
+			}
+		}
+		out[i] = filter
+	}
+	return out
+}
+
+// ListedSizes are the page sizes the chooser offers: PageSizes, else the sizes
+// the listing of the Result allows.
+func (p DataTableProps) ListedSizes() []int {
+	if len(p.PageSizes) == 0 && p.Result != nil && p.Result.State.Listing() != nil {
+		return p.Result.State.Listing().PageSizes()
+	}
+	return p.PageSizes
 }
 
 // names are the parameters the state travels under.
@@ -433,8 +511,8 @@ func (p DataTableProps) SizeHref(size int) string { return p.Href(DataTableChang
 func (p DataTableProps) QueryFields() []DataTableQueryField {
 	names := p.names()
 	owned := map[string]bool{names.Search: true, names.Page: true}
-	for _, filter := range p.Filters {
-		owned[filter.Key] = true
+	for _, filter := range p.Facets() {
+		owned[filter.Name()] = true
 	}
 	values := p.state().Values(DataTableChange{})
 	keys := make([]string, 0, len(values))
@@ -498,7 +576,7 @@ func (p DataTableProps) Active() bool {
 	if p.state().Search() != "" {
 		return true
 	}
-	for _, filter := range p.Filters {
+	for _, filter := range p.Facets() {
 		if len(p.Chosen(filter)) > 0 {
 			return true
 		}
@@ -562,10 +640,10 @@ func (p DataTableProps) Off(column TableColumn) bool {
 	if column.Key == "" || !column.Hideable {
 		return false
 	}
-	if p.State == nil {
+	if p.stateless() {
 		return column.Hidden
 	}
-	return contains(p.State.Hidden(), column.Key)
+	return contains(p.state().Hidden(), column.Key)
 }
 
 // OffAt is whether the column at position i is switched off.
@@ -732,7 +810,7 @@ func (p DataTableProps) Known() bool {
 	if p.Complete {
 		return true
 	}
-	_, ok := counted(p.Paginator)
+	_, ok := counted(p.paginator())
 	return ok
 }
 
@@ -742,7 +820,7 @@ func (p DataTableProps) Total() int {
 	if p.Complete {
 		return len(p.Rows)
 	}
-	if page, ok := counted(p.Paginator); ok {
+	if page, ok := counted(p.paginator()); ok {
 		return page.Total()
 	}
 	return 0
@@ -771,7 +849,7 @@ func (p DataTableProps) Nothing() bool {
 	if len(p.Rows) > 0 || p.Active() {
 		return false
 	}
-	if page, ok := counted(p.Paginator); ok && page.Total() > 0 {
+	if page, ok := counted(p.paginator()); ok && page.Total() > 0 {
 		return false
 	}
 	return true
@@ -871,7 +949,7 @@ func (p DataTableProps) Size() int {
 	if p.PageSize > 0 {
 		return p.PageSize
 	}
-	if page, ok := counted(p.Paginator); ok {
+	if page, ok := counted(p.paginator()); ok {
 		if sized, ok := page.(interface{ PerPage() int }); ok {
 			return sized.PerPage()
 		}
@@ -881,10 +959,10 @@ func (p DataTableProps) Size() int {
 
 // Sizes are the counts the chooser offers, with the one in force among them.
 func (p DataTableProps) Sizes() []int {
-	if len(p.PageSizes) == 0 {
+	if len(p.ListedSizes()) == 0 {
 		return nil
 	}
-	sizes := append([]int{}, p.PageSizes...)
+	sizes := append([]int{}, p.ListedSizes()...)
 	if size := p.Size(); size > 0 {
 		found := false
 		for _, one := range sizes {
@@ -901,7 +979,7 @@ func (p DataTableProps) Sizes() []int {
 // At is the page being shown.
 func (p DataTableProps) At() int {
 	if !p.Complete {
-		if page, ok := presentPaginator(p.Paginator).(numberedPage); ok {
+		if page, ok := presentPaginator(p.paginator()).(numberedPage); ok {
 			return max(1, page.CurrentPage())
 		}
 	}
@@ -917,7 +995,7 @@ func (p DataTableProps) Sheets() int {
 		}
 		return (len(p.Rows) + p.Size() - 1) / p.Size()
 	}
-	if page, ok := counted(p.Paginator); ok {
+	if page, ok := counted(p.paginator()); ok {
 		return max(1, page.LastPage())
 	}
 	return 0
@@ -934,7 +1012,7 @@ func (p DataTableProps) Paged() bool {
 // uncountedPage is the paginator of a windowed list when it knows no total --
 // a simple page or a cursor page -- and nil otherwise.
 func (p DataTableProps) uncountedPage() Paginator {
-	paginator := presentPaginator(p.Paginator)
+	paginator := presentPaginator(p.paginator())
 	if p.Complete || paginator == nil {
 		return nil
 	}
@@ -1037,7 +1115,7 @@ func (p DataTableProps) PagerName() string {
 }
 
 // Chooses is whether the rows-per-page chooser is drawn.
-func (p DataTableProps) Chooses() bool { return len(p.PageSizes) > 0 }
+func (p DataTableProps) Chooses() bool { return len(p.ListedSizes()) > 0 }
 
 // Bridge is the behaviour's props: what the browser needs and cannot read from
 // the markup.
@@ -1163,7 +1241,7 @@ func (p DataTableProps) PartNames() []string {
 				@endif
 			@endif
 
-			@foreach(.Filters as filter)
+			@foreach(.Facets() as filter)
 				{{-- A facet opens a popover of checkboxes, as shadcn's faceted
 				     filter: the title, and what is chosen beside it. The boxes are
 				     native and in the form, so ticking one is a change of the form.
@@ -1247,7 +1325,7 @@ func (p DataTableProps) PartNames() []string {
 										data-part="filter"
 										class="{{ .PartClass("filter", "peer relative block size-4 shrink-0 cursor-pointer appearance-none rounded-[4px] border border-input outline-none transition-colors after:absolute after:top-[42%] after:left-1/2 after:hidden after:h-[9px] after:w-[5px] after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-r-2 after:border-b-2 after:border-current after:content-[''] checked:border-primary checked:bg-primary checked:text-primary-foreground checked:after:block disabled:cursor-not-allowed dark:bg-input/30 dark:checked:bg-primary") }}"
 										type="checkbox"
-										name="{{ filter.Key }}"
+										name="{{ filter.Name() }}"
 										value="{{ option.Value }}"
 										@if(.OptionChosen(filter, option))
 											checked
