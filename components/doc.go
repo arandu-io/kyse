@@ -99,21 +99,35 @@
 //	kyse.table.select_all         Select all rows
 //	kyse.table.bulk               Bulk actions
 //	kyse.table.columns            Columns
-//	kyse.table.selected           {n} of {total} rows selected
-//	kyse.table.ascending          (none) -- "{column}, sorted ascending" in a data table
-//	kyse.table.descending         (none) -- "{column}, sorted descending" in a data table
-//	kyse.table.unsorted           (none) -- "{column}, not sorted" in a data table
-//	kyse.data_table.showing       {from} to {to} of {total}
-//	kyse.data_table.per_page      per page
-//	kyse.data_table.no_result     Nothing matched
-//	kyse.data_table.previous      Previous page
-//	kyse.data_table.next          Next page
-//	kyse.data_table.page          Page {n}
+//	kyse.table.selected           {n} of {total} rows selected (a data table says "{n} of {total} row(s) selected.")
+//	kyse.table.ascending          {column}, sorted ascending
+//	kyse.table.descending         {column}, sorted descending
+//	kyse.table.unsorted           {column}, not sorted
+//	kyse.data_table.filter        Filter {label}...
+//	kyse.data_table.search        Search {label}
+//	kyse.data_table.no_result     No results.
+//	kyse.data_table.rows          {total} row(s).
+//	kyse.data_table.selected_count {n} row(s) selected.
+//	kyse.data_table.rows_per_page Rows per page
 //	kyse.data_table.page_of       Page {n} of {total}
+//	kyse.data_table.first         Go to first page
+//	kyse.data_table.previous      Go to previous page
+//	kyse.data_table.next          Go to next page
+//	kyse.data_table.last          Go to last page
 //	kyse.data_table.back          Previous
 //	kyse.data_table.forward       Next
+//	kyse.data_table.select_row    Select row
 //	kyse.data_table.apply         Apply filters
-//	kyse.data_table.search        Search {label}
+//	kyse.data_table.reset         Reset
+//	kyse.data_table.clear_filters Clear filters
+//	kyse.data_table.no_facet_results No results found.
+//	kyse.data_table.facet_selected {n} selected
+//	kyse.data_table.open_menu     Open menu
+//	kyse.data_table.actions       Actions
+//	kyse.data_table.toggle_columns Toggle columns
+//	kyse.data_table.asc           Asc
+//	kyse.data_table.desc          Desc
+//	kyse.data_table.hide          Hide
 //
 // A data table reads the sentences of the table it draws under the table's
 // keys, so a catalogue says them once for both.

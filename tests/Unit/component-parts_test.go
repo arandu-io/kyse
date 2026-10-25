@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/arandu-io/hesape/pagination"
 	"github.com/arandu-io/kyse"
 	"github.com/arandu-io/kyse/components"
 )
@@ -768,46 +769,40 @@ var extensible = []struct {
 	{
 		"DataTable",
 		func(c components.ComponentProps) []string {
-			props := components.DataTableProps{
-				ComponentProps: c, ID: "invoices", Label: "Invoices", URL: "/invoices",
-				Caption:  "Invoices, most recent first",
-				Complete: true, PageSize: 1, PageSizes: []int{1, 2},
-				Lines: components.DataTableLines{
-					Showing: "{from} to {to} of {total}", PerPage: "per page",
-				},
-				SearchName: "q", Query: "ada", SortKey: "total", SortDir: "desc",
-				Filters: []components.DataTableFilter{{
-					Key: "status", Label: "Status", Selected: []string{"paid"},
-					Options: []components.SelectOption{{Label: "Paid", Value: "paid"}, {Label: "Open", Value: "open"}},
-				}},
-				Page: 1, SelectName: "ids", Token: "csrf",
-				BulkActions: []components.ButtonProps{{Label: "Archive"}},
-				Columns: []components.TableColumn{
-					{Label: "Number", Key: "number", Sortable: true, Hideable: true},
-					{Label: "Total", Key: "total", Align: "end", Sortable: true},
-				},
-				Rows: []components.TableRow{
-					{Key: "114", Label: "Select 2026-114", Cells: []components.TableCell{
-						{Text: "2026-114"}, {Text: "1.240,00", SortValue: "1240.00"}}},
-					{Key: "115", Label: "Select 2026-115", Cells: []components.TableCell{
-						{Text: "2026-115"}, {Text: "860,00", SortValue: "860.00"}}},
-					{Key: "116", Label: "Select 2026-116", Cells: []components.TableCell{
-						{Text: "2026-116"}, {Text: "2.410,00", SortValue: "2410.00"}}},
-				},
+			columns := []components.TableColumn{
+				{Label: "Number", Key: "number", Sortable: true, Hideable: true},
+				{Label: "Total", Key: "total", Align: "end", Sortable: true},
 			}
-			// The first page draws next and the last draws previous, so no
-			// single rendering shows both ends of the pager. The third is a
-			// long list, where the pager collapses its middle into an
-			// ellipsis -- which a three-page list never has.
-			first := string(components.DataTable(props))
-			props.Page = 3
-			last := string(components.DataTable(props))
-
-			long := props
-			long.Complete = false
-			long.Page = 12
-			long.Pages = 40
-			return []string{first, last, string(components.DataTable(long))}
+			rows := []components.TableRow{
+				{Key: "114", Label: "Select 2026-114", Cells: []components.TableCell{
+					{Text: "2026-114"}, {Text: "1.240,00", SortValue: "1240.00"}},
+					Actions: []components.MenuItem{{Label: "Actions", Heading: true}, {Label: "Open", URL: "/invoices/114"}}},
+				{Key: "115", Label: "Select 2026-115", Cells: []components.TableCell{
+					{Text: "2026-115"}, {Text: "860,00", SortValue: "860.00"}}},
+				{Key: "116", Label: "Select 2026-116", Cells: []components.TableCell{
+					{Text: "2026-116"}, {Text: "2.410,00", SortValue: "2410.00"}}},
+			}
+			filters := []components.DataTableFilter{{
+				Key: "status", Label: "Status",
+				Options: []components.SelectOption{{Label: "Paid", Value: "paid"}, {Label: "Open", Value: "open"}},
+				Counts:  map[string]int{"paid": 2, "open": 1},
+			}}
+			state := components.DataTableValues{Q: "ada", Sort: "total", Dir: "desc", Facets: map[string][]string{"status": {"paid"}}}
+			// The menu header and the button header are two renderings: a
+			// column is one or the other.
+			menu := components.DataTableProps{
+				ComponentProps: c, ID: "invoices", Label: "Invoices", URL: "/invoices", Caption: "Invoices, most recent first",
+				Searchable: true, HeaderMenu: true, FullPager: true, PageSizes: []int{10, 20},
+				State: state, Filters: filters, Columns: columns, Rows: rows,
+				SelectName: "ids", Token: "csrf", BulkAction: "/invoices/bulk",
+				BulkActions: []components.ButtonProps{{Label: "Archive", Type: "submit", Name: "do", Value: "archive"}},
+				Paginator:   pagination.NewLengthAwarePage(3, 137, 3, 12, pagination.Options{Path: "/invoices"}),
+			}
+			plain := menu
+			plain.HeaderMenu, plain.FullPager = false, false
+			complete := plain
+			complete.Complete, complete.PageSize, complete.Paginator = true, 2, nil
+			return []string{string(components.DataTable(menu)), string(components.DataTable(plain)), string(components.DataTable(complete))}
 		},
 		components.DataTableProps{}.PartNames,
 	},

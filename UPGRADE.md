@@ -21,6 +21,75 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## v0.45.0
+
+A build stops here, and only a list drawn with `DataTable` is touched. The data
+table is drawn as shadcn/ui's data table and works the way a server-rendered
+list has to: one value says what the list is showing, every control is an
+address that value builds, and one form makes one request. `Table`, `Button` and
+every other component keep their props, and `Button` gains `Name` and `Value`.
+
+The state moved out of five fields into one:
+
+| it was | it is | write instead |
+| --- | --- | --- |
+| `DataTableProps{SearchName: "q", Query: "ada"}` | `Searchable` draws the box; the text travels under the state's search name (`q`) | `DataTableProps{Searchable: true, State: components.DataTableValues{Q: "ada"}}` |
+| `SortKey: "total", SortDir: "desc"` | `DataTableProps.SortKey` and `SortDir` are gone; the order is the state's | `State: components.DataTableValues{Sort: "total", Dir: "desc"}` |
+| `DataTableFilter{Selected: []string{"paid"}}` | `DataTableFilter.Selected` is gone; `DataTableState.Chosen(key)` says what is chosen | `State: components.DataTableValues{Facets: map[string][]string{"status": {"paid"}}}` |
+| `Page: 3, Pages: 9, Total: 137` | `DataTableProps.Page`, `Pages` and `Total` are gone, as their deprecation said | `Paginator: page`, the `*pagination.LengthAwarePage` the query returned |
+| `PageSize: 20` on a server list | read from the state first, then `PageSize`, then the page | `State: components.DataTableValues{Size: 20, DefaultSize: 10}` |
+
+`State` is any `components.DataTableState`: `Params`, the values, and
+`Values(change)`, the canonical query after one step. `DataTableValues` is the
+plain implementation -- values written once, in a stable order, with the default
+page and size left out -- and it is what a list that holds all its rows passes. A
+listing that parses its own request implements the interface over its state. A
+nil `State` is a list in its first state.
+
+Every address is the state's answer, so none is built from loose parameters any
+more, and these exported methods of `DataTableProps` are gone with the parameters:
+`Address`, `SortURL`, `PageURL` and `SearchAddress`, which built an address from
+the fields above and accumulated a facet value on every control; `SearchTrigger`,
+`ApplyText`, `Filtered`, `FacetChosen`, `FacetSummary`, `FacetName`, `Grid`,
+`Pager`, `NextPage`, `PreviousPage`, `NextText`, `PreviousText`, `PageOfTemplate`,
+`PerPageText`, `Ranged`, `Showing` and `SelectedText`. `Chosen` now answers the
+values chosen for a facet and not whether one option is in force; `OptionChosen`
+answers the second. The replacements are `Href(DataTableChange{...})`, `Active`,
+`Chosen` and the other methods of the type.
+
+| it was | it is | write instead |
+| --- | --- | --- |
+| `BulkAction` empty posted the selection to `URL`, which answered 204 and did nothing | the bar is drawn only when `BulkAction` is set | `BulkAction: "/invoices/bulk"` |
+| every bulk button posted the same fields | `ButtonProps.Name` and `Value` are written on the button, so the server can tell which was pressed | `ButtonProps{Label: "Archive", Type: "submit", Name: "do", Value: "archive"}` |
+| the rows ticked belonged to the page shown | the browser keeps the keys ticked per table across a search, an order, a facet and a page, and the bar posts all of them | nothing |
+| a complete list's links could be boosted into a request | a complete list's links and form say `hx-boost="false"` and the behaviour takes the click | nothing |
+| a sort, a page step or a search lost the hidden columns | the hidden columns are `State.Hidden()`, travel as `hide`, and survive a swap and a reload | `TableColumn{Hideable: true}`; `TableColumn.Hidden` is where a list with no `State` starts |
+| `PageSizes` drew a chooser on a complete list only | the chooser, a menu of addresses, is drawn on both, and a new size keeps the first row on screen | `PageSizes: []int{10, 20, 50}` |
+
+`DataTableLines` loses `Showing`, `PerPage` and `Page`, and gains `Filter`,
+`Rows`, `SelectedCount`, `RowsPerPage`, `First`, `Last`, `SelectRow`, `Reset`,
+`ClearFilters`, `NoFacetResults`, `FacetSelected`, `OpenMenu`, `Actions`,
+`ToggleColumns`, `Asc`, `Desc` and `Hide`. The catalogue keys
+`kyse.data_table.showing`, `kyse.data_table.per_page` and `kyse.data_table.page`
+are no longer asked for, and the new ones are listed in the package doc. Three
+English floors changed with the reference: `kyse.data_table.no_result` is "No
+results.", `kyse.data_table.previous` and `next` are "Go to previous page" and
+"Go to next page", and a data table without a catalogue names its sortable
+headers "{column}, sorted ascending", "descending" or "not sorted" -- `Table`
+does too, and draws the arrow for the direction.
+
+The parts `indicator` and `showing` are no longer drawn. `wrapper`, `reset`,
+`facet-search`, `header-menu`, `row-menu`, `first` and `last` are new, and the
+rest keep their names and their elements.
+
+The look is the shadcn/ui data table's, written as Tailwind utilities in the
+markup: a project's stylesheet needs nothing of the data table beyond what
+`aru view:build` already compiles from this module. The rules of
+`data-table.css` and the `.table-columns`, `.table-count` and `.table-sort`
+rules of `table.css` that Basecoat shipped for the old markup are not read by it
+and can go. The behaviour that makes the menus, the selection and the swap work
+is in the view layer's script from hesape's next minor; this release needs it.
+
 ## v0.42.0
 
 Nothing stops a build, and a `Sidebar` with no `Mode` sends the markup it sent

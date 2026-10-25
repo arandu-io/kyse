@@ -1,12 +1,14 @@
 package unit
 
 import (
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
 
+	"github.com/arandu-io/hesape/pagination"
 	"github.com/arandu-io/kyse/components"
 )
 
@@ -29,31 +31,33 @@ import (
 // claim true -- it reads the directory rather than this list.
 // TestEveryAddressIsAnAddress is the gate that was missing on the day every
 // sort link and every page link of the server path pointed at the same dead
-// URL.
+// URL, and that later let a facet value multiply until it could not be unticked.
 //
-// url.Values.Encode percent-encodes a templated value, so "{sort}" came out
-// "%7Bsort%7D" and the caller looking for "{sort}" found nothing. Nothing
-// noticed: the markup was well formed, the parts were reachable, and the only
-// symptom was that clicking a header did not reorder anything.
+// Nothing noticed either time: the markup was well formed, the parts were
+// reachable, and the only symptom was that clicking did not do the right thing.
 func TestEveryAddressIsAnAddress(t *testing.T) {
 	table := components.DataTableProps{
 		ID: "invoices", URL: "/invoices?status=paid&scope=mine",
-		SearchName: "q", Query: "ada", SortKey: "total", SortDir: "desc",
-		Page: 3, Pages: 9, Total: 137, PageSize: 20,
+		Searchable: true, FullPager: true, PageSizes: []int{10, 20},
+		State: components.DataTableValues{
+			Q: "ada", Sort: "total", Dir: "desc", CurrentPage: 3, DefaultSize: 10,
+			Facets: map[string][]string{"status": {"paid", "paid"}}, Hide: []string{"number"},
+		},
+		Paginator: pagination.NewLengthAwarePage(20, 137, 20, 3, pagination.Options{Path: "/invoices"}),
 		Filters: []components.DataTableFilter{{
-			Key: "status", Label: "Status", Selected: []string{"paid"},
-			Options: []components.SelectOption{{Label: "Paid", Value: "paid"}},
+			Key: "status", Label: "Status",
+			Options: []components.SelectOption{{Label: "Paid", Value: "paid"}, {Label: "Open", Value: "open"}},
 		}},
 		Columns: []components.TableColumn{
-			{Label: "Number", Key: "number", Sortable: true},
+			{Label: "Number", Key: "number", Sortable: true, Hideable: true},
 			{Label: "Total", Key: "total", Sortable: true, Align: "end"},
 		},
 		Rows: []components.TableRow{{Cells: []components.TableCell{{Text: "2026-114"}, {Text: "1.240,00"}}}},
 	}
 	html := string(components.DataTable(table))
 
-	if strings.Contains(html, "%7B") {
-		t.Error("a templated placeholder was percent-encoded, so nothing can substitute it")
+	if strings.Contains(html, "%7B") || strings.Contains(html, "{page}") || strings.Contains(html, "{sort}") {
+		t.Error("a templated placeholder reached the page, so nothing can substitute it")
 	}
 
 	found := regexp.MustCompile(`href="([^"]+)"`).FindAllStringSubmatch(html, -1)
@@ -62,20 +66,33 @@ func TestEveryAddressIsAnAddress(t *testing.T) {
 	}
 	for _, one := range found {
 		address := strings.ReplaceAll(one[1], "&amp;", "&")
-		if strings.Count(address, "?") != 1 {
+		if strings.Count(address, "?") > 1 {
 			t.Errorf("the address carries %d question marks, and a parser reads all but the first as value: %s",
 				strings.Count(address, "?"), address)
-		}
-		// A facet is a Filter, and a link that drops it drops the filter on
-		// the first click.
-		if !strings.Contains(address, "status=paid") {
-			t.Errorf("the address dropped the chosen facet: %s", address)
 		}
 		// URL's own query is not the table's state, and is not carried.
 		if strings.Contains(address, "scope=mine") {
 			t.Errorf("the address carried a parameter of URL's own query: %s", address)
 		}
+		query, err := url.ParseQuery(queryPart(address))
+		if err != nil {
+			t.Errorf("the address does not parse: %s: %v", address, err)
+		}
+		for name, values := range query {
+			seen := map[string]bool{}
+			for _, value := range values {
+				if seen[value] {
+					t.Errorf("the address carries %s=%s twice: %s", name, value, address)
+				}
+				seen[value] = true
+			}
+		}
 	}
+}
+
+func queryPart(address string) string {
+	_, query, _ := strings.Cut(address, "?")
+	return query
 }
 
 func TestEveryComponentRenders(t *testing.T) {
@@ -232,8 +249,7 @@ func TestEveryComponentRenders(t *testing.T) {
 		}))},
 		{"DataTable", string(components.DataTable(components.DataTableProps{
 			ID: "invoices", Label: "Invoices", URL: "/invoices",
-			SearchName: "q", Page: 2, Pages: 9, SelectName: "ids",
-			BulkActions: []components.ButtonProps{{Label: "Archive"}},
+			Searchable: true, SelectName: "ids",
 			Columns: []components.TableColumn{
 				{Label: "Number", Key: "number", Sortable: true, Hideable: true},
 			},

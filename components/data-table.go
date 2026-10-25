@@ -5,7 +5,6 @@
 package components
 
 import (
-	kyse__errors "errors"
 	kyse__fmt "fmt"
 	kyse__template "html/template"
 	kyse__io "io"
@@ -22,40 +21,57 @@ import (
 
 //line components/data-table.kyse.go:15
 
-// DataTableProps is a list somebody works in: searched, ordered, paged, and
-// acted on in bulk.
+// DataTableProps is a list somebody works in: searched, filtered by facet,
+// ordered, paged, shown with the columns they want, and acted on in bulk.
 //
-// # Why it is one component and not a page somebody assembles
+// It is drawn as shadcn/ui draws a data table -- a toolbar over a bordered
+// table over a footer -- and works the way a server-rendered list has to: every
+// control is an address, the state is in the query string, and the answer is
+// this component drawn again.
 //
-// The four controls around a table are not independent. Searching has to reset
-// the page, or the reader lands on page four of two results. Ordering has to
-// keep the search, or typing a name and then sorting throws the name away.
-// Paging has to keep both. Every one of those is a bug somebody writes once
-// per list, and the reason is that the state lives in four places on the page
-// and nothing owns it.
+// # Where the state lives
 //
-// Here it lives in one struct and every link is built from all of it, so the
-// four cannot disagree. That is the whole of what this adds over drawing a
-// [Table], a [Pagination] and an [ActiveSearch] beside each other.
+// In [DataTableState], one value that says what is searched, how the list is
+// ordered, which facets are chosen, which page and how many rows, and which
+// columns are hidden. Every address the table draws is the state's own answer
+// to "what is the query after this step?", so a link can never carry a value
+// twice and a step can never forget the others. The search form carries the
+// same state as fields, so a search keeps the order, the size and the hidden
+// columns, and a new search sends the reader back to the first page.
 //
 // # Where the work happens
 //
-// On the server, and the reason is not taste. A table ordered in the browser
-// is ordered only within the page that was fetched: page two of a list sorted
-// by name holds whatever the server thought page two was, and it reads as rows
-// in the wrong order to everyone except whoever wrote it. The same is true of
-// a filter -- filtering the rows in hand hides matches that were never sent.
+// On the server. A table ordered in the browser is ordered only within the page
+// that was fetched, and a filter over the rows in hand hides matches that were
+// never sent. So the endpoint answers with this component, htmx swaps the
+// region, and the address bar says what is on screen: a filtered, sorted page
+// three can be linked to, bookmarked, reloaded and gone back to.
 //
-// So every control is an address. The endpoint answers with this component
-// redrawn, HTMX swaps the region, and the URL says what is on screen -- which
-// means a filtered, sorted page three can be linked to, bookmarked and gone
-// back to. None of that is true of a table whose state lives in a script.
+// One form owns the search and the facets, and carries the order, the page size
+// and the hidden columns as fields. It makes one request however the change
+// came: a word typed and paused on, Enter, a facet ticked. Every header, page
+// step, page size and column switch is a link to the address of its own step.
 //
-// Without JavaScript the same addresses load the page. The search is a form,
-// the headers and the pages are links, and the bulk bar is a form that posts.
+// Without JavaScript the same addresses load the page.
 //
-// It publishes root, toolbar, search, columns, toggle, table, count, bulk and
-// pagination, and the parts of the table it draws.
+// # Optional parts
+//
+// Searchable draws the search box, Filters the faceted filters with their
+// counts, HeaderMenu the Asc, Desc and Hide menu on a column header, PageSizes
+// the rows-per-page chooser, FullPager the first, previous, next and last
+// buttons with "Page X of Y", and a row's Actions the menu at the end of the
+// row. A column that is Hideable is listed in the columns menu.
+//
+// # A list that holds all its rows
+//
+// Complete says the rows are the whole list. The browser then searches, orders,
+// filters and pages them itself and the server is not asked. Every control is
+// still a link or a form, so the page works with no script.
+//
+// It publishes root, toolbar, search, reset, facet, facet-chosen, facet-search, filter,
+// columns, toggle, bulk, wrapper, table, caption, head, header-cell, sort,
+// header-menu, row, cell, select-all, select, row-menu, footer, count, sizes,
+// pagination, page-of, first, previous, next and last.
 type DataTableProps struct {
 	// ComponentProps is the class, attributes and parts the caller adds.
 	ComponentProps
@@ -66,35 +82,47 @@ type DataTableProps struct {
 	// list is, and what the search box is called.
 	Label string
 	// URL is the endpoint, without a query string. Every control appends to
-	// it, so there is one address and one handler rather than four.
+	// it, so there is one address and one handler rather than a dozen.
 	//
-	// A query string or fragment on it is dropped, never carried: every
-	// address and every hidden field this draws is built from the fields of
-	// this struct alone. URL is often the request's own address, and a query
-	// carried from it would put whatever parameters somebody wrote into a link
-	// on every control of the page. A parameter the list needs is one of these
-	// fields -- a Filter for a facet -- or part of the path.
+	// A query string or fragment on it is dropped, never carried: every address
+	// and every hidden field this draws is built from the state alone. URL is
+	// often the request's own address, and a query carried from it would put
+	// whatever parameters somebody wrote into a link on every control of the
+	// page.
 	URL string
+
+	// State is the listing's state: the search, the order, the facets, the page
+	// size and the hidden columns, and the address of every step from them.
+	// Nil is a list in its first state, with the conventional parameter names.
+	State DataTableState
+	// Paginator is the page the query returned: the *pagination.LengthAwarePage,
+	// *pagination.Page or *pagination.CursorPage that came back beside the rows.
+	// It is where the table reads the page being shown, how many there are and
+	// how many rows the whole list has. A page that knows no total draws the
+	// two steps and neither "Page X of Y" nor a total, because neither can be
+	// true. A complete list has no use for one: there the rows are the list.
+	Paginator Paginator
 
 	// Caption is the sentence saying what the list is, drawn under the table
 	// and used as its name by assistive technology. Empty draws none, and the
 	// region's own Label is then the only thing naming it.
 	Caption string
 	// Columns are the headers. A column with a Key can be ordered by and
-	// switched off; see TableColumn.
+	// switched off; see TableColumn. A column's Hidden is only where a list
+	// without a State starts: with one, State.Hidden decides.
 	Columns []TableColumn
 	// Rows are the lines of the page being shown, or the whole list when
 	// Complete says so.
 	Rows []TableRow
 	// Complete says the rows above are the whole list and not a page of it.
 	//
-	// It is a fact about the data and not a preference, and everything else
-	// follows from it. When the page holds every row, the browser can search,
-	// order and page correctly because it has everything -- and it does, so a
-	// click costs nothing and the server is not asked. When the page holds a
-	// window onto something longer, the browser cannot: ordering the rows in
-	// hand orders only those, and filtering them hides matches that were never
-	// sent. Then every control is an address and the server answers.
+	// It is a fact about the data and not a preference. When the page holds
+	// every row, the browser can search, order, filter and page correctly
+	// because it has everything -- and it does, so a click costs nothing and
+	// the server is not asked. When the page holds a window onto something
+	// longer, the browser cannot: ordering the rows in hand orders only those,
+	// and filtering them hides matches that were never sent. Then every control
+	// is an address and the server answers.
 	//
 	// Saying true about a page of a longer list is the bug this field is named
 	// to prevent: it reads as rows in the wrong order to everyone except
@@ -102,100 +130,72 @@ type DataTableProps struct {
 	//
 	// A complete list still keeps its addresses. The headers are still links
 	// and the search is still a form, so the page works with no script -- the
-	// behaviour takes the click before the link is followed. That is what
-	// makes this an enhancement rather than a second implementation.
+	// behaviour takes the click before the link is followed, and the links ask
+	// htmx to leave them alone so a boosted page does not follow them either.
 	Complete bool
-	// PageSize is how many rows a browser-paged list shows at once. Zero shows
-	// them all, which is right for anything short enough not to need a pager.
-	// It means nothing when the server is paging, because then the page it
-	// sent is the page.
+	// PageSize is how many rows a page holds when State says nothing: the size
+	// of a complete list's window, and the size the chooser starts on. Zero
+	// shows a complete list whole.
 	PageSize int
-	// PageSizes are the counts the reader can switch between. Empty draws no
-	// chooser, which is right for a list whose length nobody argues with.
-	//
-	// It is a list and not a range because the numbers are a judgement about
-	// the rows: ten of something wide, a hundred of something narrow.
+	// PageSizes are the counts the "Rows per page" chooser offers. Empty draws
+	// no chooser, which is right for a list whose length nobody argues with.
 	PageSizes []int
+	// FullPager draws the first, previous, next and last buttons with "Page X
+	// of Y" beside them, instead of the two text buttons.
+	FullPager bool
+	// HeaderMenu draws a sortable header as a button that opens a menu with Asc,
+	// Desc and Hide, instead of a button that cycles the order.
+	HeaderMenu bool
+
 	// Lines are the sentences this draws, so none of them is written in a
 	// script and all of them come from the application's own catalogue.
 	Lines DataTableLines
-	// Empty is what stands in when the list has nothing -- which on a searched
-	// list means "nothing matched" and not "nothing exists", so the message is
-	// the caller's to write.
+	// Empty is what stands in when the list has nothing at all. A list that
+	// has rows and whose search or facets matched none of them says "No
+	// results." in the table instead: nothing matched is not nothing exists.
 	Empty EmptyProps
 
-	// Query is what was searched for, and SearchName is the parameter it
-	// travels under. Empty SearchName draws no search box.
-	Query      string
-	SearchName string
-	// SearchPlaceholder is the grey text in the empty box.
+	// Searchable draws the search box. The text travels under the state's
+	// search parameter.
+	Searchable bool
+	// SearchPlaceholder is the grey text in the empty box. Empty says "Filter
+	// {label}...".
 	SearchPlaceholder string
 	// SearchLabel is the box's name. Empty says kyse.data_table.search from
 	// PageData with Label in place of "{label}", or Label with "Search" before
 	// it.
 	SearchLabel string
+	// Filters are the faceted filters, drawn beside the search. Their chosen
+	// values are State.Chosen(Key).
+	Filters []DataTableFilter
 
 	// Navigable turns the table into a grid: one tab stop, and the arrow keys
 	// moving from cell to cell. See TableProps.Navigable.
 	Navigable bool
-	// BulkMethod is how the bulk bar submits. See TableProps.BulkMethod.
-	BulkMethod string
-	// Filters are the per-column facets, drawn beside the search. Their chosen
-	// values ride on every sort and page link, which is what keeps a facet
-	// from being thrown away by the next click.
-	Filters []DataTableFilter
-	// SortKey and SortDir are the ordering in force, and travel as "sort" and
-	// "dir".
-	SortKey string
-	SortDir string
-
-	// Paginator is the page the query returned, for a windowed list: the
-	// *pagination.LengthAwarePage, *pagination.Page or *pagination.CursorPage
-	// that came back beside the rows. Set, it is where the table reads the
-	// page being shown, how many there are, how many rows the whole list has
-	// and the range this page holds, and Page, Pages and Total are not read.
-	//
-	// The addresses stay the table's own, built from its fields like every
-	// other control, with the page's parameter name -- and, for a cursor page,
-	// its signed cursor. A page that knows no total draws the two steps and
-	// neither the range nor "Page n of total", because neither can be true.
-	// A complete list has no use for one: there the rows are the list.
-	Paginator Paginator
-
-	// Page is the page being shown, counting from one, and Pages is how many
-	// there are. It travels as "page". Pages of zero or one draws no pager.
-	//
-	// Deprecated: set Paginator to the page the query returned. Page, Pages
-	// and Total are that page copied out into three fields.
-	Page  int
-	Pages int
-	// Total is how many rows the whole list has, which on a windowed list only
-	// the server knows -- it is the count it already ran to work out Pages.
-	//
-	// Without it the range under the table cannot be true, so it is not drawn:
-	// Rows is one page, and saying "1 to 20 of 20" under page three of a
-	// hundred and thirty-seven is worse than saying nothing. A complete list
-	// needs none of this, because there the rows are the list.
-	//
-	// Deprecated: set Paginator.
-	Total int
 
 	// SelectName turns on per-row selection and is the field the checkboxes
-	// submit under. BulkActions are the controls revealed once something is
-	// chosen.
-	SelectName  string
+	// submit under. The selection survives a search, a new order, a facet and a
+	// page: the browser keeps the keys ticked, and the bulk bar posts all of
+	// them.
+	SelectName string
+	// BulkActions are the buttons of the bar that appears once something is
+	// ticked. A button posts the ticked keys with its own Name and Value, so
+	// the server can tell which was pressed.
 	BulkActions []ButtonProps
-	// BulkAction is where the bar posts. Empty posts to URL, which is the
-	// endpoint that already knows the list.
+	// BulkAction is where the bar posts. Empty draws no bar: a form that posts
+	// to the list's own endpoint would be answered by a handler that does not
+	// know the verb.
 	BulkAction string
+	// BulkMethod is how the bar submits. Empty is post.
+	BulkMethod string
 	// PageData is the screen's own view.Page. The bulk form posts the CSRF
-	// token it carries and every sentence left empty is read from it, so a
-	// list drawn from a view writes PageData: .Page and never copies the token
-	// or the words by hand. It is not called Page because Page is
-	// the number of the page being shown.
+	// token it carries and every sentence left empty is read from it, so a list
+	// drawn from a view writes PageData: .Page and never copies the token or
+	// the words by hand. It is not called Page because Page is the number of
+	// the page being shown.
 	PageData Page
-	// Token is the CSRF token, for a list with no PageData to ask. Set, it
-	// wins over the page's.
+	// Token is the CSRF token, for a list with no PageData to ask. Set, it wins
+	// over the page's.
 	Token string
 
 	// ColumnsLabel and SelectedLabel are the two sentences that belong to the
@@ -207,12 +207,32 @@ type DataTableProps struct {
 	SelectedLabel string
 }
 
+// DataTableFilter is one faceted filter, drawn beside the search.
+//
+// It is typed rather than a slot of markup, because a slot would be a place to
+// put anything, and this component's whole claim is that every control's state
+// survives every other control -- which it can only promise about state it
+// knows the shape of.
+type DataTableFilter struct {
+	// Key is the parameter the chosen values travel under, and the name State
+	// knows the facet by.
+	Key string
+	// Label names the control.
+	Label string
+	// Options are what can be chosen.
+	Options []SelectOption
+	// Counts are how many rows each option matches, by option value, the way the
+	// query counted them: ignoring this facet's own choice and respecting the
+	// others. Nil draws no counts.
+	Counts map[string]int
+}
+
 // DataTableLines are the sentences a data table says.
 //
 // They are a struct and not a scatter of Label fields because they belong
 // together: a table says all of them or none, and a project that translated
-// four of the seven has a table that speaks two languages. Every one carries
-// its placeholders, so a language that puts the number last can.
+// four of the twenty-nine has a table that speaks two languages. Every one
+// carries its placeholders, so a language that puts the number last can.
 //
 // Empty asks the page: a data table given PageData reads each sentence left
 // empty from the application's catalogue, under the key the package doc lists
@@ -220,31 +240,38 @@ type DataTableProps struct {
 // it. What the catalogue does not carry says the English underneath, which is
 // a floor and not a default worth shipping.
 type DataTableLines struct {
-	// Showing is the range under the table: "{from} to {to} of {total}".
-	Showing string
-	// PerPage labels the chooser beside it: "per page".
-	PerPage string
-	// NoResult is what the body says when the search matched nothing. It is
-	// not the same sentence as an empty list: the table has rows, and none of
-	// them is the answer.
+	// Filter is the placeholder of the search box: "Filter {label}...".
+	Filter string
+	// NoResult is what the body says when a search or a facet matched nothing:
+	// "No results.". It is not the same sentence as an empty list: the list has
+	// rows, and none of them is the answer.
 	NoResult string
-	// Previous and Next name the two ends of the pager for a screen reader.
-	// They are names and not text, because the controls are arrows.
-	Previous string
-	Next     string
-	// Page names one numbered control: "Page {n}". The digit alone is read as
-	// a digit, which in a row of them says nothing about what it does.
-	Page string
+	// Rows is the footer of a list with no selection: "{total} row(s).".
+	Rows string
+	// SelectedCount is the footer of a selectable list whose total is unknown:
+	// "{n} row(s) selected.".
+	SelectedCount string
+	// RowsPerPage labels the size chooser: "Rows per page".
+	RowsPerPage string
 	// PageOf is where the reader is, beside the pager: "Page {n} of {total}".
 	PageOf string
-	// Back and Forward are the words on the pager's two buttons: "Previous"
-	// and "Next". Previous and Next above are what a screen reader calls them.
+	// First, Previous, Next and Last name the four steps of the full pager for
+	// a screen reader. They are names and not text, because the controls are
+	// arrows.
+	First    string
+	Previous string
+	Next     string
+	Last     string
+	// Back and Forward are the words on the two buttons of the plain pager:
+	// "Previous" and "Next".
 	Back    string
 	Forward string
-	// SelectAll names the header checkbox, and Bulk the bar of actions.
+	// SelectAll names the header checkbox, SelectRow a row's checkbox when the
+	// row has no Label of its own, and Bulk the bar of actions.
 	SelectAll string
+	SelectRow string
 	Bulk      string
-	// Apply names the submit control that makes server-side facets work when
+	// Apply names the submit control that makes the facets work when
 	// JavaScript is unavailable. Empty uses "Apply filters".
 	Apply string
 	// Ascending, Descending and Unsorted are what a sortable header is called
@@ -253,225 +280,194 @@ type DataTableLines struct {
 	Ascending  string
 	Descending string
 	Unsorted   string
+	// Reset clears the search and every facet. ClearFilters clears one facet.
+	Reset        string
+	ClearFilters string
+	// NoFacetResults is what a facet's own search says when nothing matched:
+	// "No results found.". FacetSelected is the badge that stands for many
+	// chosen values: "{n} selected".
+	NoFacetResults string
+	FacetSelected  string
+	// OpenMenu names the button of a row's menu for a screen reader, Actions
+	// the empty header over it, and ToggleColumns the columns menu.
+	OpenMenu      string
+	Actions       string
+	ToggleColumns string
+	// Asc, Desc and Hide are the three entries of a header menu.
+	Asc  string
+	Desc string
+	Hide string
 }
 
-// lines are Lines with every sentence the caller left empty read from the
-// page's catalogue, where it carries one; see TranslatorPage. What neither said
-// stays empty, and Sentences fills the English under it. The sentences that
-// belong to the table it draws are read under the table's keys, so a catalogue
-// says them once for both.
-func (p DataTableProps) lines() DataTableLines {
-	lines := p.Lines
+// Filled is the lines with every sentence the caller left empty read from the
+// catalogue of the page, and what neither said filled with the English.
+//
+// Filling them here rather than in the script is the whole point: the script
+// composes no sentence, so there is one place a translation lands and it is a
+// file the application already has.
+func (lines DataTableLines) Filled(page Page) DataTableLines {
 	for _, line := range []struct {
-		field *string
-		key   string
+		field   *string
+		key     string
+		english string
 	}{
-		{&lines.Showing, "data_table.showing"},
-		{&lines.PerPage, "data_table.per_page"},
-		{&lines.NoResult, "data_table.no_result"},
-		{&lines.Previous, "data_table.previous"},
-		{&lines.Next, "data_table.next"},
-		{&lines.Page, "data_table.page"},
-		{&lines.PageOf, "data_table.page_of"},
-		{&lines.Back, "data_table.back"},
-		{&lines.Forward, "data_table.forward"},
-		{&lines.Apply, "data_table.apply"},
-		{&lines.SelectAll, "table.select_all"},
-		{&lines.Bulk, "table.bulk"},
-		{&lines.Ascending, "table.ascending"},
-		{&lines.Descending, "table.descending"},
-		{&lines.Unsorted, "table.unsorted"},
+		{&lines.Filter, "data_table.filter", "Filter {label}..."},
+		{&lines.NoResult, "data_table.no_result", "No results."},
+		{&lines.Rows, "data_table.rows", "{total} row(s)."},
+		{&lines.SelectedCount, "data_table.selected_count", "{n} row(s) selected."},
+		{&lines.RowsPerPage, "data_table.rows_per_page", "Rows per page"},
+		{&lines.PageOf, "data_table.page_of", "Page {n} of {total}"},
+		{&lines.First, "data_table.first", "Go to first page"},
+		{&lines.Previous, "data_table.previous", "Go to previous page"},
+		{&lines.Next, "data_table.next", "Go to next page"},
+		{&lines.Last, "data_table.last", "Go to last page"},
+		{&lines.Back, "data_table.back", "Previous"},
+		{&lines.Forward, "data_table.forward", "Next"},
+		{&lines.SelectAll, "table.select_all", "Select all rows"},
+		{&lines.SelectRow, "data_table.select_row", "Select row"},
+		{&lines.Bulk, "table.bulk", "Bulk actions"},
+		{&lines.Apply, "data_table.apply", "Apply filters"},
+		{&lines.Ascending, "table.ascending", "{column}, sorted ascending"},
+		{&lines.Descending, "table.descending", "{column}, sorted descending"},
+		{&lines.Unsorted, "table.unsorted", "{column}, not sorted"},
+		{&lines.Reset, "data_table.reset", "Reset"},
+		{&lines.ClearFilters, "data_table.clear_filters", "Clear filters"},
+		{&lines.NoFacetResults, "data_table.no_facet_results", "No results found."},
+		{&lines.FacetSelected, "data_table.facet_selected", "{n} selected"},
+		{&lines.OpenMenu, "data_table.open_menu", "Open menu"},
+		{&lines.Actions, "data_table.actions", "Actions"},
+		{&lines.ToggleColumns, "data_table.toggle_columns", "Toggle columns"},
+		{&lines.Asc, "data_table.asc", "Asc"},
+		{&lines.Desc, "data_table.desc", "Desc"},
+		{&lines.Hide, "data_table.hide", "Hide"},
 	} {
 		if *line.field == "" {
-			*line.field = say(p.PageData, line.key, "")
+			*line.field = say(page, line.key, line.english)
 		}
 	}
 	return lines
 }
 
-// SelectedSentence is the count's sentence with its placeholders still in it:
-// SelectedLabel, or the page's kyse.table.selected, or empty for the English
-// the behaviour writes.
-func (p DataTableProps) SelectedSentence() string {
-	if p.SelectedLabel != "" {
-		return p.SelectedLabel
-	}
-	return say(p.PageData, "table.selected", "")
-}
-
-// Sentences are the lines with the English floor filled in under whatever the
-// caller left empty.
-//
-// Filling them here rather than in the script is the whole point: the script
-// composes no sentence, so there is one place a translation lands and it is a
-// file the application already has.
+// Sentences are the sentences the browser rewrites or reads, by name, for the
+// behaviour's props.
 func (l DataTableLines) Sentences() map[string]any {
-	fallback := func(given, floor string) string {
-		if given != "" {
-			return given
-		}
-		return floor
-	}
 	return map[string]any{
-		"showing":    fallback(l.Showing, "{from} to {to} of {total}"),
-		"perPage":    fallback(l.PerPage, "per page"),
-		"noResult":   fallback(l.NoResult, "Nothing matched"),
-		"previous":   fallback(l.Previous, "Previous page"),
-		"next":       fallback(l.Next, "Next page"),
-		"page":       fallback(l.Page, "Page {n}"),
-		"pageOf":     fallback(l.PageOf, "Page {n} of {total}"),
-		"back":       fallback(l.Back, "Previous"),
-		"forward":    fallback(l.Forward, "Next"),
-		"ascending":  fallback(l.Ascending, "{column}, sorted ascending"),
-		"descending": fallback(l.Descending, "{column}, sorted descending"),
-		"unsorted":   fallback(l.Unsorted, "{column}, not sorted"),
-		"selectAll":  fallback(l.SelectAll, "Select all rows"),
-		"bulk":       fallback(l.Bulk, "Bulk actions"),
-		"apply":      fallback(l.Apply, "Apply filters"),
+		"pageOf":        l.PageOf,
+		"selectedCount": l.SelectedCount,
+		"rows":          l.Rows,
+		"ascending":     l.Ascending,
+		"descending":    l.Descending,
+		"unsorted":      l.Unsorted,
+		"facetSelected": l.FacetSelected,
 	}
 }
 
-// Address is URL with a query string built from everything except what the
-// caller is changing.
-//
-// Every control goes through here, which is what stops the four from throwing
-// each other away: a sort link carries the search, a page link carries both,
-// and a new search drops the page rather than keeping a number that no longer
-// points anywhere.
-//
-// # Two things it has to do that are easy to miss
-//
-// It drops whatever query URL already carries and builds the new one from this
-// struct alone. URL is often the address the request arrived on, so a query
-// seeded from it would copy any parameter somebody put in a link -- _method,
-// a role, a tenant -- onto every sort header, every page and the search form.
-// The state a list needs is its fields; a parameter that is not one of them
-// does not travel. Parsing also means one "?" rather than a second one
-// appended to a URL that had one, which every parser reads as one parameter
-// whose value is the rest of the query.
-//
-// And it writes the templated pairs by hand, after the encoding. A value of
-// "{sort}" through url.Values.Encode comes out "%7Bsort%7D", and the caller
-// looking for "{sort}" then finds nothing -- every header and every page
-// pointing at one dead address. That was the bug this comment exists to keep
-// from coming back.
-func (p DataTableProps) Address(changes map[string]string) string {
+// lines is Lines filled for this table's page.
+func (p DataTableProps) lines() DataTableLines { return p.Lines.Filled(p.PageData) }
+
+// DataTableQueryField is one hidden field of the query form: a part of the
+// state no visible control of the form owns.
+type DataTableQueryField struct {
+	Name  string
+	Value string
+}
+
+// state is State, or the first state of an unfiltered list.
+func (p DataTableProps) state() DataTableState {
+	if p.State == nil {
+		return DataTableValues{}
+	}
+	return p.State
+}
+
+// names are the parameters the state travels under.
+func (p DataTableProps) names() DataTableParams { return p.state().Params().Filled() }
+
+// Action is URL without its query or fragment: the path every address starts
+// from, and the action of the form.
+func (p DataTableProps) Action() string {
 	base, err := url.Parse(p.URL)
 	if err != nil {
 		base = &url.URL{Path: p.URL}
 	}
-	values := url.Values{}
-
-	set := func(key, value string) {
-		if value == "" {
-			values.Del(key)
-			return
-		}
-		values.Set(key, value)
-	}
-	if p.SearchName != "" {
-		set(p.SearchName, p.Query)
-	}
-	set("sort", p.SortKey)
-	if p.SortKey != "" {
-		set("dir", p.SortDir)
-	}
-	if at := p.at(); at > 1 {
-		set(p.pageParam(), strconv.Itoa(at))
-	}
-	for _, filter := range p.Filters {
-		values.Del(filter.Key)
-		for _, chosen := range filter.Selected {
-			values.Add(filter.Key, chosen)
-		}
-	}
-
-	// A templated value is held out of the encoder and appended verbatim.
-	templated := make([][2]string, 0, len(changes))
-	for key, value := range changes {
-		if value == "" {
-			values.Del(key)
-			continue
-		}
-		if strings.HasPrefix(value, "{") && strings.HasSuffix(value, "}") {
-			values.Del(key)
-			templated = append(templated, [2]string{key, value})
-			continue
-		}
-		values.Set(key, value)
-	}
-	sort.Slice(templated, func(a, b int) bool { return templated[a][0] < templated[b][0] })
-
-	query := values.Encode()
-	for _, pair := range templated {
-		if query != "" {
-			query += "&"
-		}
-		query += pair[0] + "=" + pair[1]
-	}
-
 	base.RawQuery = ""
 	base.ForceQuery = false
 	base.Fragment = ""
-	address := base.String()
+	return base.String()
+}
+
+// Href is the address of the list after one step, built from the state's own
+// canonical query and nothing else.
+func (p DataTableProps) Href(change DataTableChange) string {
+	query := p.state().Values(change).Encode()
 	if query == "" {
-		return address
+		return p.Action()
 	}
-	return address + "?" + query
+	return p.Action() + "?" + query
 }
 
-// SortURL is the template the table builds its header links from. The page is
-// dropped: an order that kept it would land somebody on page four of a list
-// they have just reordered, where the rows are not the ones they were looking
-// at.
-func (p DataTableProps) SortURL() string {
-	return p.Address(map[string]string{"sort": "{sort}", "dir": "{dir}", p.pageParam(): ""})
-}
-
-// PageURL is the template the pager builds from. It keeps the search, the
-// order and every facet, because a page of a filtered, sorted list is a page
-// of that list.
-func (p DataTableProps) PageURL() string {
-	return p.Address(map[string]string{p.pageParam(): "{page}"})
-}
-
-// DataTableFilter is one per-column facet, drawn beside the search.
-//
-// It is typed rather than a slot of markup, because a slot would be a place to
-// put anything, and this component's whole claim is that every control's state
-// survives every other control -- which it can only promise about state it
-// knows the shape of.
-type DataTableFilter struct {
-	// Key is the parameter the chosen values travel under.
-	Key string
-	// Label names the control.
-	Label string
-	// Options are what can be chosen.
-	Options []SelectOption
-	// Selected are the values in force, which every link then carries.
-	Selected []string
-}
-
-// Filtered is whether any facet is drawn.
-func (p DataTableProps) Filtered() bool { return len(p.Filters) > 0 }
-
-// Chosen is whether one option of a facet is in force.
-func (p DataTableProps) Chosen(filter DataTableFilter, option SelectOption) bool {
-	for _, value := range filter.Selected {
-		if value == option.Value {
-			return true
-		}
-	}
-	return false
-}
+// SelfHref is the address of the list as it is now, which the behaviour writes
+// into the address bar after a swap so the bar is canonical whatever the form
+// serialised.
+func (p DataTableProps) SelfHref() string { return p.Href(DataTableChange{}) }
 
 // Target is what every control swaps: this region, by id.
 func (p DataTableProps) Target() string { return "#" + p.ID }
 
-// Searchable is whether a search box is drawn.
-func (p DataTableProps) Searchable() bool { return p.SearchName != "" }
+// QueryFormID is the one form the search and the facets submit through.
+// SearchID, SizesID and BulkID are the ids of the controls that name or sit
+// apart from it.
+func (p DataTableProps) QueryFormID() string { return p.ID + "-query" }
+func (p DataTableProps) SearchID() string    { return p.ID + "-search" }
+func (p DataTableProps) SizesID() string     { return p.ID + "-sizes" }
+func (p DataTableProps) BulkID() string      { return p.ID + "-bulk" }
 
-// SearchName_ is what the search box is called. Empty uses the region's own
+// QueryAction is the action of the query form.
+func (p DataTableProps) QueryAction() string { return p.Action() }
+
+// Query is the text searched for.
+func (p DataTableProps) Query() string { return p.state().Search() }
+
+// SearchName is the parameter the search travels under.
+func (p DataTableProps) SearchName() string { return p.names().Search }
+
+// SizeHref is the address that sets how many rows a page holds.
+func (p DataTableProps) SizeHref(size int) string { return p.Href(DataTableChange{PerPage: size}) }
+
+// QueryFields are the hidden fields of the query form: every part of the state
+// that no control of the form owns, once each: the order, the page size and the
+// hidden columns. The search box owns the search, the facet checkboxes their
+// facets, and the page is dropped on purpose -- a new search has no page four.
+func (p DataTableProps) QueryFields() []DataTableQueryField {
+	names := p.names()
+	owned := map[string]bool{names.Search: true, names.Page: true}
+	for _, filter := range p.Filters {
+		owned[filter.Key] = true
+	}
+	values := p.state().Values(DataTableChange{})
+	keys := make([]string, 0, len(values))
+	for key := range values {
+		if !owned[key] {
+			keys = append(keys, key)
+		}
+	}
+	sort.Strings(keys)
+
+	var fields []DataTableQueryField
+	seen := map[DataTableQueryField]bool{}
+	for _, key := range keys {
+		for _, value := range values[key] {
+			field := DataTableQueryField{Name: key, Value: value}
+			if !seen[field] {
+				seen[field] = true
+				fields = append(fields, field)
+			}
+		}
+	}
+	return fields
+}
+
+// SearchTitle is what the search box is called. Empty uses the region's own
 // name, because a box labelled only "Search" on a page with two lists names
 // neither.
 func (p DataTableProps) SearchTitle() string {
@@ -480,6 +476,73 @@ func (p DataTableProps) SearchTitle() string {
 	}
 	return strings.TrimSpace(strings.ReplaceAll(say(p.PageData, "data_table.search", "Search {label}"), "{label}", p.Label))
 }
+
+// Placeholder is the grey text in the empty search box.
+func (p DataTableProps) Placeholder() string {
+	if p.SearchPlaceholder != "" {
+		return p.SearchPlaceholder
+	}
+	label := strings.ToLower(p.Label)
+	sentence := strings.ReplaceAll(p.lines().Filter, "{label}", label)
+	return strings.TrimSpace(strings.ReplaceAll(sentence, "  ", " "))
+}
+
+// Faceted is whether any facet is drawn.
+func (p DataTableProps) Faceted() bool { return len(p.Filters) > 0 }
+
+// Chosen are the values chosen for one facet.
+func (p DataTableProps) Chosen(filter DataTableFilter) []string {
+	return p.state().Chosen(filter.Key)
+}
+
+// OptionChosen is whether one option of a facet is in force.
+func (p DataTableProps) OptionChosen(filter DataTableFilter, option SelectOption) bool {
+	return contains(p.Chosen(filter), option.Value)
+}
+
+// Active is whether the search or any facet narrows the list, which is when
+// Reset is drawn and when an empty page means "nothing matched".
+func (p DataTableProps) Active() bool {
+	if p.state().Search() != "" {
+		return true
+	}
+	for _, filter := range p.Filters {
+		if len(p.Chosen(filter)) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// FacetBadges is how many badges the facet button shows: one per chosen value
+// while there are two at most.
+func (p DataTableProps) FacetBadges(filter DataTableFilter) bool { return len(p.Chosen(filter)) <= 2 }
+
+// FacetCounted is whether the facet draws the number of rows beside each option.
+func (p DataTableProps) FacetCounted(filter DataTableFilter) bool { return filter.Counts != nil }
+
+// FacetCount is the number beside one option.
+func (p DataTableProps) FacetCount(filter DataTableFilter, option SelectOption) string {
+	return strconv.Itoa(filter.Counts[option.Value])
+}
+
+// FacetSelectedText is the badge standing for the chosen values of a facet.
+func (p DataTableProps) FacetSelectedText(filter DataTableFilter) string {
+	return strings.ReplaceAll(p.lines().FacetSelected, "{n}", strconv.Itoa(len(p.Chosen(filter))))
+}
+
+// FacetHref is the address that switches one value of a facet on or off.
+func (p DataTableProps) FacetHref(filter DataTableFilter, option SelectOption) string {
+	return p.Href(DataTableChange{Facet: filter.Key, Value: option.Value})
+}
+
+// ClearFacetHref is the address that drops every value of one facet.
+func (p DataTableProps) ClearFacetHref(filter DataTableFilter) string {
+	return p.Href(DataTableChange{ClearFacet: filter.Key})
+}
+
+// ResetHref is the address that drops the search and every facet.
+func (p DataTableProps) ResetHref() string { return p.Href(DataTableChange{Reset: true}) }
 
 // Hideable is whether any column can be switched off, which is what decides
 // whether the columns menu is drawn.
@@ -492,39 +555,388 @@ func (p DataTableProps) Hideable() bool {
 	return false
 }
 
-// Sheets is how many pages there are.
-//
-// A complete list counts its own: the server sent every row, so how many
-// pages that makes is arithmetic and not something a caller should have to
-// pass in beside the rows it already passed. A windowed list is told, because
-// only the server knows how much it did not send.
+// ColumnsName is what the menu of columns is called.
+func (p DataTableProps) ColumnsName() string {
+	if p.ColumnsLabel != "" {
+		return p.ColumnsLabel
+	}
+	return say(p.PageData, "table.columns", "Columns")
+}
+
+// Off is whether a column is switched off: by the state when there is one, and
+// by the column's own Hidden when there is none. A column that cannot be
+// switched off is never off.
+func (p DataTableProps) Off(column TableColumn) bool {
+	if column.Key == "" || !column.Hideable {
+		return false
+	}
+	if p.State == nil {
+		return column.Hidden
+	}
+	return contains(p.State.Hidden(), column.Key)
+}
+
+// OffAt is whether the column at position i is switched off.
+func (p DataTableProps) OffAt(i int) bool { return i < len(p.Columns) && p.Off(p.Columns[i]) }
+
+// ColumnKey is the key of the column at position i, empty where a row carries
+// more cells than the table has columns.
+func (p DataTableProps) ColumnKey(i int) string {
+	if i < len(p.Columns) {
+		return p.Columns[i].Key
+	}
+	return ""
+}
+
+// AlignClass is the alignment of the column at position i, and the default
+// where a row carries more cells than the table has columns.
+func (p DataTableProps) AlignClass(i int) string {
+	if i < len(p.Columns) {
+		return p.Columns[i].AlignClass()
+	}
+	return TableColumn{}.AlignClass()
+}
+
+// ColumnHref is the address that switches one column off when it is shown and
+// back on when it is hidden.
+func (p DataTableProps) ColumnHref(column TableColumn) string {
+	return p.Href(DataTableChange{Hide: column.Key})
+}
+
+// HideHref is the address that switches a column off.
+func (p DataTableProps) HideHref(column TableColumn) string { return p.ColumnHref(column) }
+
+// Sorted is the direction the list is ordered in by this column, and empty
+// when it is not ordered by it.
+func (p DataTableProps) Sorted(column TableColumn) string {
+	if column.Key == "" || column.Key != p.state().SortKey() {
+		return ""
+	}
+	if p.state().SortDir() == "desc" {
+		return "desc"
+	}
+	return "asc"
+}
+
+// Sortable is whether the header of a column is a control that orders by it.
+func (p DataTableProps) Sortable(column TableColumn) bool { return column.Sortable && column.Key != "" }
+
+// Order is what aria-sort says for one column: the direction when it is the
+// one in force, and "none" on every other sortable column. A column that cannot
+// be sorted carries nothing.
+func (p DataTableProps) Order(column TableColumn) string {
+	if !p.Sortable(column) {
+		return ""
+	}
+	switch p.Sorted(column) {
+	case "asc":
+		return "ascending"
+	case "desc":
+		return "descending"
+	}
+	return "none"
+}
+
+// NextSort is the direction a click on this header asks for. The cycle is
+// ascending, descending, ascending: an ordered list never goes back to no
+// order, as the reference it follows does not.
+func (p DataTableProps) NextSort(column TableColumn) string {
+	if p.Sorted(column) == "asc" {
+		return "desc"
+	}
+	return "asc"
+}
+
+// SortHref is where one header points: the next step of its cycle.
+func (p DataTableProps) SortHref(column TableColumn) string {
+	return p.Href(DataTableChange{Sort: column.Key, Dir: p.NextSort(column)})
+}
+
+// AscHref and DescHref are the addresses of the two entries of a header menu.
+func (p DataTableProps) AscHref(column TableColumn) string {
+	return p.Href(DataTableChange{Sort: column.Key, Dir: "asc"})
+}
+func (p DataTableProps) DescHref(column TableColumn) string {
+	return p.Href(DataTableChange{Sort: column.Key, Dir: "desc"})
+}
+
+// SortName is what a sortable header is called, in the state it is in.
+func (p DataTableProps) SortName(column TableColumn) string {
+	lines := p.lines()
+	sentence := lines.Unsorted
+	switch p.Sorted(column) {
+	case "asc":
+		sentence = lines.Ascending
+	case "desc":
+		sentence = lines.Descending
+	}
+	return strings.ReplaceAll(sentence, "{column}", column.Label)
+}
+
+// Selectable is whether the rows carry a checkbox, and the footer a count.
+func (p DataTableProps) Selectable() bool { return p.SelectName != "" }
+
+// Bulky is whether a bar of bulk actions is drawn: there are actions, there is
+// somewhere to post them, and there is a selection to post.
+func (p DataTableProps) Bulky() bool {
+	return p.Selectable() && len(p.BulkActions) > 0 && p.BulkAction != ""
+}
+
+// PostMethod is how the bulk bar submits, and it is post unless the caller says
+// otherwise -- a bulk operation changes something.
+func (p DataTableProps) PostMethod() string {
+	if p.BulkMethod != "" {
+		return p.BulkMethod
+	}
+	return "post"
+}
+
+// SendsToken is whether the bulk form carries a token: only when there is one
+// and the form posts. A form submitted any other way puts its fields in the
+// address, which the history, the access log and every proxy between keep.
+func (p DataTableProps) SendsToken() bool {
+	return p.FormToken() != "" && strings.EqualFold(p.PostMethod(), "post")
+}
+
+// FormToken is the token the bulk form posts: Token when it is set, and the
+// page's otherwise.
+func (p DataTableProps) FormToken() string { return tokenFor(p.PageData, p.Token) }
+
+// BulkName is what the bar of actions is called.
+func (p DataTableProps) BulkName() string { return p.lines().Bulk }
+
+// Ticked is how many rows are drawn as selected.
+func (p DataTableProps) Ticked() int {
+	count := 0
+	for _, row := range p.Rows {
+		if row.Selected {
+			count++
+		}
+	}
+	return count
+}
+
+// RowName is what one row's checkbox is called: what the caller wrote, or the
+// sentence for a row.
+func (p DataTableProps) RowName(row TableRow) string {
+	if row.Label != "" {
+		return row.Label
+	}
+	return p.lines().SelectRow
+}
+
+// SelectedSentence is the count's sentence with its placeholders still in it:
+// SelectedLabel, or the page's kyse.table.selected, or the English.
+func (p DataTableProps) SelectedSentence() string {
+	if p.SelectedLabel != "" {
+		return p.SelectedLabel
+	}
+	return say(p.PageData, "table.selected", "{n} of {total} row(s) selected.")
+}
+
+// Known is whether the size of the whole list is known: always for a complete
+// list, and for a windowed one when its page counts.
+func (p DataTableProps) Known() bool {
+	if p.Complete {
+		return true
+	}
+	_, ok := counted(p.Paginator)
+	return ok
+}
+
+// Total is how many rows the whole list has, narrowed by the search and the
+// facets: the count the query ran. Zero when it is not known.
+func (p DataTableProps) Total() int {
+	if p.Complete {
+		return len(p.Rows)
+	}
+	if page, ok := counted(p.Paginator); ok {
+		return page.Total()
+	}
+	return 0
+}
+
+// FooterText is the sentence on the left of the footer: how many rows are
+// selected of the whole list, or how many rows there are.
+func (p DataTableProps) FooterText() string {
+	total := strconv.Itoa(p.Total())
+	if !p.Selectable() {
+		if !p.Known() {
+			return ""
+		}
+		return strings.ReplaceAll(p.lines().Rows, "{total}", total)
+	}
+	if !p.Known() {
+		return strings.ReplaceAll(p.lines().SelectedCount, "{n}", strconv.Itoa(p.Ticked()))
+	}
+	return strings.NewReplacer("{n}", strconv.Itoa(p.Ticked()), "{total}", total).Replace(p.SelectedSentence())
+}
+
+// Nothing is whether the list has nothing at all, which is the caller's Empty
+// to say. A list that has no rows on this page, or none that match, is not
+// nothing: it says "No results." in the table.
+func (p DataTableProps) Nothing() bool {
+	if len(p.Rows) > 0 || p.Active() {
+		return false
+	}
+	if page, ok := counted(p.Paginator); ok && page.Total() > 0 {
+		return false
+	}
+	return true
+}
+
+// Span is how many columns a full-width row spans.
+func (p DataTableProps) Span() int {
+	span := len(p.Columns)
+	if p.Selectable() {
+		span++
+	}
+	if p.Acting() {
+		span++
+	}
+	return span
+}
+
+// Acting is whether any row carries a menu of actions.
+func (p DataTableProps) Acting() bool {
+	for _, row := range p.Rows {
+		if len(row.Actions) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// Role is what the table announces as: a grid when it is navigated cell by
+// cell, a treegrid when those rows nest, and nothing at all otherwise.
+func (p DataTableProps) Role() string {
+	if !p.Navigable {
+		return ""
+	}
+	for _, row := range p.Rows {
+		if row.Level > 0 {
+			return "treegrid"
+		}
+	}
+	return "grid"
+}
+
+// RowAttrs are the attributes of a row: its facet values, as the attributes
+// the browser filters a complete list by, and then the caller's, which win on a
+// name both write.
+func (p DataTableProps) RowAttrs(row TableRow) map[string]string {
+	caller := p.PartAttrs("row")
+	if len(row.Facets) == 0 {
+		return caller
+	}
+	out := make(map[string]string, len(row.Facets)+len(caller))
+	for key, value := range row.Facets {
+		out["data-facet-"+key] = value
+	}
+	for key, value := range caller {
+		out[key] = value
+	}
+	return out
+}
+
+// dataTableLine is one line of the body as it is drawn: the row, whether it
+// lies outside the window of a complete list, and the id of its menu.
+type dataTableLine struct {
+	TableRow
+	// Outside marks a row of a complete list that is not on the page being
+	// shown, so the first paint is already the page and a page with no script
+	// does not contradict its own footer.
+	Outside bool
+	// MenuID is the id of the row's menu, which is what lets it stay open when
+	// the region is swapped.
+	MenuID string
+}
+
+// Body is the rows as they are drawn.
+func (p DataTableProps) Body() []dataTableLine {
+	lines := make([]dataTableLine, len(p.Rows))
+	first := (p.At()-1)*p.Size() + 1
+	for at, row := range p.Rows {
+		line := dataTableLine{TableRow: row, Outside: row.Hidden}
+		if p.Complete && p.Size() > 0 {
+			line.Outside = row.Hidden || at+1 < first || at+1 >= first+p.Size()
+		}
+		line.MenuID = p.ID + "-row-" + strconv.Itoa(at)
+		if row.Key != "" {
+			line.MenuID = p.ID + "-row-" + row.Key
+		}
+		lines[at] = line
+	}
+	return lines
+}
+
+// Size is how many rows a page holds: the state's, else PageSize, else the
+// page the query returned.
+func (p DataTableProps) Size() int {
+	if size := p.state().PageSize(); size > 0 {
+		return size
+	}
+	if p.PageSize > 0 {
+		return p.PageSize
+	}
+	if page, ok := counted(p.Paginator); ok {
+		if sized, ok := page.(interface{ PerPage() int }); ok {
+			return sized.PerPage()
+		}
+	}
+	return 0
+}
+
+// Sizes are the counts the chooser offers, with the one in force among them.
+func (p DataTableProps) Sizes() []int {
+	if len(p.PageSizes) == 0 {
+		return nil
+	}
+	sizes := append([]int{}, p.PageSizes...)
+	if size := p.Size(); size > 0 {
+		found := false
+		for _, one := range sizes {
+			found = found || one == size
+		}
+		if !found {
+			sizes = append(sizes, size)
+			sort.Ints(sizes)
+		}
+	}
+	return sizes
+}
+
+// At is the page being shown.
+func (p DataTableProps) At() int {
+	if !p.Complete {
+		if page, ok := presentPaginator(p.Paginator).(numberedPage); ok {
+			return max(1, page.CurrentPage())
+		}
+	}
+	return max(1, p.state().Page())
+}
+
+// Sheets is how many pages there are. A complete list counts its own: the
+// server sent every row, so how many pages that makes is arithmetic.
 func (p DataTableProps) Sheets() int {
-	if p.Complete && p.PageSize > 0 {
-		if len(p.Rows) == 0 {
+	if p.Complete {
+		if p.Size() == 0 || len(p.Rows) == 0 {
 			return 1
 		}
-		return (len(p.Rows) + p.PageSize - 1) / p.PageSize
+		return (len(p.Rows) + p.Size() - 1) / p.Size()
 	}
-	if page, ok := p.countedPage(); ok {
-		return page.LastPage()
+	if page, ok := counted(p.Paginator); ok {
+		return max(1, page.LastPage())
 	}
-	return p.Pages
+	return 0
 }
 
 // Paged is whether there is more than one page to move between.
 func (p DataTableProps) Paged() bool {
-	if paginator := p.uncountedPage(); paginator != nil {
-		return paginator.HasPages()
+	if page := p.uncountedPage(); page != nil {
+		return page.HasPages()
 	}
 	return p.Sheets() > 1
-}
-
-// countedPage is the paginator of a windowed list when it knows its total.
-func (p DataTableProps) countedPage() (countedPage, bool) {
-	if p.Complete {
-		return nil, false
-	}
-	return counted(p.Paginator)
 }
 
 // uncountedPage is the paginator of a windowed list when it knows no total --
@@ -540,32 +952,51 @@ func (p DataTableProps) uncountedPage() Paginator {
 	return paginator
 }
 
-// at is the page being shown: the paginator's number when it has one, Page
-// otherwise.
-func (p DataTableProps) at() int {
-	if !p.Complete {
-		if page, ok := presentPaginator(p.Paginator).(numberedPage); ok {
-			return page.CurrentPage()
-		}
-	}
-	return p.Page
+// Stepped is whether the pager is drawn: there is more than one page, or the
+// list is complete and the browser may filter it down to one and back.
+func (p DataTableProps) Stepped() bool { return p.Paged() || p.Complete }
+
+// PageHref is the address of a page, kept inside the list.
+func (p DataTableProps) PageHref(page int) string {
+	return p.Href(DataTableChange{Page: max(1, min(page, max(1, p.Sheets())))})
 }
 
-// pageParam is the query parameter the page number travels under: the
-// paginator's, so the address the table writes is the one the query reads.
-func (p DataTableProps) pageParam() string {
-	if page, ok := presentPaginator(p.Paginator).(numberedPage); ok && page.GetPageName() != "" {
-		return page.GetPageName()
+// HasPrevious and HasNext say whether a step exists.
+func (p DataTableProps) HasPrevious() bool {
+	if page := p.uncountedPage(); page != nil {
+		return p.steps().previous != ""
 	}
-	return "page"
+	return p.At() > 1
+}
+func (p DataTableProps) HasNext() bool {
+	if page := p.uncountedPage(); page != nil {
+		return p.steps().next != ""
+	}
+	return p.At() < p.Sheets()
 }
 
-// stepAddresses are the two steps of a page that knows no total, each built
-// from the table's own state like every other control, and empty where there
-// is nowhere to go.
-func (p DataTableProps) stepAddresses(paginator Paginator) steps {
+// FirstHref, PreviousHref, NextHref and LastHref are the four steps.
+func (p DataTableProps) FirstHref() string { return p.PageHref(1) }
+func (p DataTableProps) LastHref() string  { return p.PageHref(p.Sheets()) }
+func (p DataTableProps) PreviousHref() string {
+	if p.uncountedPage() != nil {
+		return p.steps().previous
+	}
+	return p.PageHref(p.At() - 1)
+}
+func (p DataTableProps) NextHref() string {
+	if p.uncountedPage() != nil {
+		return p.steps().next
+	}
+	return p.PageHref(p.At() + 1)
+}
+
+// steps are the two steps of a page that knows no total, each built from the
+// table's own state like every other control, and empty where there is nowhere
+// to go.
+func (p DataTableProps) steps() steps {
 	var out steps
-	switch page := paginator.(type) {
+	switch page := p.uncountedPage().(type) {
 	case *pagination.CursorPage:
 		cursor := func(at *pagination.Cursor) string {
 			signer := page.GetOptions().Signer
@@ -576,375 +1007,82 @@ func (p DataTableProps) stepAddresses(paginator Paginator) steps {
 			if token == "" {
 				return ""
 			}
-			return p.Address(map[string]string{page.GetCursorName(): token, p.pageParam(): ""})
+			return p.Href(DataTableChange{CursorName: page.GetCursorName(), Cursor: token})
 		}
 		out.previous = cursor(page.PreviousCursor())
 		out.next = cursor(page.NextCursor())
 	case numberedPage:
 		at := page.CurrentPage()
 		if at > 1 {
-			out.previous = p.Address(map[string]string{p.pageParam(): strconv.Itoa(at - 1)})
+			out.previous = p.Href(DataTableChange{Page: at - 1})
 		}
 		if page.HasMorePages() {
-			out.next = p.Address(map[string]string{p.pageParam(): strconv.Itoa(at + 1)})
+			out.next = p.Href(DataTableChange{Page: at + 1})
 		}
+	case nil:
 	default:
 		// A page of a kind this does not know the parameters of has only its
 		// own addresses to offer.
-		out.previous = paginator.PreviousPageURL()
-		out.next = paginator.NextPageURL()
+		out.previous = page.PreviousPageURL()
+		out.next = page.NextPageURL()
 	}
 	return out
 }
 
-// Grid is the table this draws, built from this component's own fields so the
-// two cannot disagree about the order, the selection or the rows.
-//
-// The count and the columns menu are turned off there and drawn here instead:
-// they belong in the toolbar with the search, not stacked above the headers.
-func (p DataTableProps) Grid() TableProps {
-	columns := make([]TableColumn, 0, len(p.Columns))
-	for _, column := range p.Columns {
-		// Hideable is cleared so the table draws no menu of its own. The
-		// column keeps its Key and its Hidden, which is what the toggle here
-		// reaches and what the cells are marked with.
-		column.Hideable = false
-		columns = append(columns, column)
-	}
-	rows := p.Rows
-	if p.Complete && p.PageSize > 0 {
-		// The window is marked here so the first paint is already the page.
-		from, to, _ := p.window()
-		rows = make([]TableRow, 0, len(p.Rows))
-		for at, row := range p.Rows {
-			row.Hidden = at+1 < from || at+1 > to
-			rows = append(rows, row)
-		}
-	}
-
-	lines := p.lines()
-	return TableProps{
-		ComponentProps:  ComponentProps{Parts: p.Parts},
-		Composed:        true,
-		ID:              p.ID,
-		Navigable:       p.Navigable,
-		BulkMethod:      p.BulkMethod,
-		SelectAllLabel:  lines.SelectAll,
-		BulkLabel:       lines.Bulk,
-		AscendingLabel:  lines.Ascending,
-		DescendingLabel: lines.Descending,
-		UnsortedLabel:   lines.Unsorted,
-		Caption:         p.Caption,
-		Columns:         columns,
-		Rows:            rows,
-		Empty:           p.Empty,
-		SortKey:         p.SortKey,
-		SortDir:         p.SortDir,
-		SortURL:         p.SortURL(),
-		SelectName:      p.SelectName,
-		SelectedLabel:   p.SelectedLabel,
-		BulkActions:     p.BulkActions,
-		BulkAction:      p.BulkAction,
-		Token:           p.Token,
-		Page:            p.PageData,
-		HxTarget:        p.swapTarget(),
-		HxSwap:          p.swapKind(),
-	}
-}
-
-// swapTarget and swapKind are empty on a complete list, and that is the whole
-// of what keeps one gesture from running two engines.
-//
-// preventDefault does not cancel HTMX: its listener sits on the link itself,
-// so a header that carries hx-get fires a request the browser was told not to
-// follow, and the outerHTML swap then hands back the server's region -- wiping
-// the page, the size, the filter, the hidden columns and the selection the
-// browser had just worked out. href, action and method stay either way, so the
-// path with no script is unchanged.
-func (p DataTableProps) swapTarget() string {
-	if p.Complete {
+// PageOfText is where the reader is, beside the pager: "Page 2 of 7". It is
+// empty for a page that knows no total, because "Page 3 of" with nothing after
+// it says less than nothing.
+func (p DataTableProps) PageOfText() string {
+	if !p.Known() {
 		return ""
 	}
-	return p.Target()
+	return strings.NewReplacer("{n}", strconv.Itoa(p.At()), "{total}", strconv.Itoa(p.Sheets())).Replace(p.lines().PageOf)
 }
 
-// swapKind is how the region is replaced, and nothing when the browser is the
-// one working the rows.
-func (p DataTableProps) swapKind() string {
-	if p.Complete {
-		return ""
-	}
-	return "outerHTML"
+// PagerName is what the pager landmark is called.
+func (p DataTableProps) PagerName() string {
+	return PaginationProps{Label: p.Label, PageData: p.PageData}.LandmarkName()
 }
 
-// Pager is the pagination this draws, or the zero value when there is one page.
-func (p DataTableProps) Pager() PaginationProps {
-	lines := p.lines()
-	pager := PaginationProps{
-		ComponentProps: ComponentProps{Parts: p.Parts},
-		Page:           p.at(),
-		Pages:          p.Sheets(),
-		URL:            p.PageURL(),
-		Label:          p.Label,
-		PageData:       p.PageData,
-		PreviousLabel:  lines.Previous,
-		NextLabel:      lines.Next,
-		PageLabel:      lines.Page,
-		HxTarget:       p.swapTarget(),
-		HxSwap:         p.swapKind(),
-	}
-	if paginator := p.uncountedPage(); paginator != nil {
-		// A page that knows no total has no numbers to template, and is drawn
-		// as its two steps.
-		pager.Paginator = p.stepAddresses(paginator)
-	}
-	return pager
-}
+// Chooses is whether the rows-per-page chooser is drawn.
+func (p DataTableProps) Chooses() bool { return len(p.PageSizes) > 0 }
 
-// ColumnsName is what the menu of columns is called.
-func (p DataTableProps) ColumnsName() string {
-	if p.ColumnsLabel != "" {
-		return p.ColumnsLabel
-	}
-	return say(p.PageData, "table.columns", "Columns")
-}
-
-// DataTableQueryField is one hidden field that preserves query state across
-// a native GET form submission.
-type DataTableQueryField struct {
-	Name  string
-	Value string
-}
-
-// QueryFormID is the one form search and facets submit through.
-func (p DataTableProps) QueryFormID() string { return p.ID + "-query" }
-
-// QueryAction is URL without its query. The state that belongs to the
-// DataTable is submitted as named fields so a native GET form cannot discard it.
-func (p DataTableProps) QueryAction() string {
-	base, err := url.Parse(p.URL)
-	if err != nil {
-		return p.URL
-	}
-	base.RawQuery = ""
-	base.ForceQuery = false
-	base.Fragment = ""
-	return base.String()
-}
-
-// QueryFields are the hidden fields of the query form: the order in force,
-// which has no visible control of its own there. Search, page and facet values
-// are submitted by their own controls.
-//
-// Nothing of URL's own query is carried, for the reason given on URL: a hidden
-// field copied from the request's address is a parameter somebody else chose,
-// submitted again by whoever next searches.
-func (p DataTableProps) QueryFields() []DataTableQueryField {
-	if p.SortKey == "" {
-		return nil
-	}
-	fields := make([]DataTableQueryField, 0, 2)
-	if p.SortDir != "" {
-		fields = append(fields, DataTableQueryField{Name: "dir", Value: p.SortDir})
-	}
-	return append(fields, DataTableQueryField{Name: "sort", Value: p.SortKey})
-}
-
-// ApplyText is the no-script facet submit label.
-func (p DataTableProps) ApplyText() string {
-	return p.lines().Sentences()["apply"].(string)
-}
-
-// SearchTrigger is when the list is refetched as somebody types: after typing
-// has paused, and only when what is in the box actually changed.
-func (p DataTableProps) SearchTrigger() string {
-	return "input changed delay:300ms, search"
-}
-
-// SearchAddress is where the box submits: the endpoint with the order kept and
-// the page dropped, because a new search has no page four.
-func (p DataTableProps) SearchAddress() string {
-	return p.Address(map[string]string{p.SearchName: "", p.pageParam(): ""})
+// Bridge is the behaviour's props: what the browser needs and cannot read from
+// the markup.
+func (p DataTableProps) Bridge() map[string]any {
+	props := p.lines().Sentences()
+	props["selected"] = p.SelectedSentence()
+	props["complete"] = p.Complete
+	props["pageSize"] = p.Size()
+	props["selectName"] = p.SelectName
+	return props
 }
 
 // RootAttrs are the outermost element's attributes, with the client bridge
-// filled in when the caller named no behaviour of their own.
-//
-// It is the table's behaviour, because what needs mounting is the table's:
-// the count, the column toggles and the roving cell. Nothing about the
-// searching, the ordering or the paging needs a script -- they are addresses.
+// filled in when the caller named no behaviour of their own, and the facts the
+// browser reads off the region.
 func (p DataTableProps) RootAttrs() map[string]string {
 	if p.Behavior.Name == "" {
-		props := p.lines().Sentences()
-		props["selected"] = p.SelectedSentence()
-		props["complete"] = p.Complete
-		props["pageSize"] = p.PageSize
-		p.Behavior = Behavior{Name: TableBehavior, Props: props}
+		p.Behavior = Behavior{Name: TableBehavior, Props: p.Bridge()}
 	}
-	return p.ComponentProps.RootAttrs()
-}
-
-// Sizes are the counts the chooser offers.
-func (p DataTableProps) Sizes() []int { return p.PageSizes }
-
-// Chooses is whether the chooser is drawn: only on a complete list, because
-// only there can the count change without asking the server. A windowed list
-// is paged by the endpoint, and the size is the endpoint's to decide.
-func (p DataTableProps) Chooses() bool { return p.Complete && len(p.PageSizes) > 0 }
-
-// PerPageText is the label beside the chooser.
-func (p DataTableProps) PerPageText() string {
-	return p.lines().Sentences()["perPage"].(string)
-}
-
-// Showing is the range under the table, drawn by the server for the first
-// page and rewritten by the behaviour after that -- from the same sentence,
-// so the two cannot say it differently.
-func (p DataTableProps) Showing() string {
-	sentence := p.lines().Sentences()["showing"].(string)
-	from, to, total := p.window()
-	sentence = strings.ReplaceAll(sentence, "{from}", strconv.Itoa(from))
-	sentence = strings.ReplaceAll(sentence, "{to}", strconv.Itoa(to))
-	return strings.ReplaceAll(sentence, "{total}", strconv.Itoa(total))
-}
-
-// window is the range the table is showing and the size of the list it is a
-// window onto.
-func (p DataTableProps) window() (int, int, int) {
-	if page, ok := p.countedPage(); ok {
-		return page.FirstItem(), page.LastItem(), page.Total()
-	}
-	total := p.Total
-	if p.Complete {
-		total = len(p.Rows)
-	}
-	if total == 0 {
-		return 0, 0, 0
-	}
-	if !p.Complete && len(p.Rows) == 0 {
-		return 0, 0, total
-	}
-	at := p.at()
-	if at < 1 {
-		at = 1
-	}
-	if p.PageSize > 0 {
-		from := (at-1)*p.PageSize + 1
-		to := from + p.PageSize - 1
-		if to > total {
-			to = total
-		}
-		return from, to, total
-	}
-	if p.Complete {
-		return 1, total, total
-	}
-	// A windowed list with no page size still knows where it is from the rows
-	// it was handed.
-	from := (at-1)*len(p.Rows) + 1
-	return from, from + len(p.Rows) - 1, total
-}
-
-// Ranged is whether the range can be stated truthfully. A windowed list that
-// was not told the total cannot, and draws nothing rather than a number that
-// is silently the page size.
-func (p DataTableProps) Ranged() bool {
-	if page, ok := p.countedPage(); ok {
-		return page.Total() > 0
-	}
-	if p.uncountedPage() != nil {
-		return false
-	}
-	return p.Complete || p.Total > 0
+	attrs := p.ComponentProps.RootAttrs()
+	attrs["data-total"] = strconv.Itoa(p.Total())
+	attrs["data-url"] = p.SelfHref()
+	return attrs
 }
 
 // PartNames are the parts this component publishes.
-// PageOfText is where the reader is, beside the pager: "Page 2 of 7".
-// It is empty for a page that knows no total, because "Page 3 of" with nothing
-// after it says less than nothing.
-func (p DataTableProps) PageOfText() string {
-	if p.uncountedPage() != nil {
-		return ""
-	}
-	page := p.at()
-	if page < 1 {
-		page = 1
-	}
-	return strings.NewReplacer("{n}", strconv.Itoa(page), "{total}", strconv.Itoa(p.Sheets())).
-		Replace(p.lines().Sentences()["pageOf"].(string))
-}
-
-// PageOfTemplate is the sentence the browser rewrites as the page moves.
-func (p DataTableProps) PageOfTemplate() string { return p.lines().Sentences()["pageOf"].(string) }
-
-// PreviousPage and NextPage are the pages the two steps lead to, kept inside
-// the list.
-func (p DataTableProps) PreviousPage() int { return max(1, p.at()-1) }
-func (p DataTableProps) NextPage() int     { return min(max(1, p.Sheets()), max(1, p.at())+1) }
-
-// PreviousText and NextText are the words on the two steps.
-func (p DataTableProps) PreviousText() string { return p.lines().Sentences()["back"].(string) }
-func (p DataTableProps) NextText() string     { return p.lines().Sentences()["forward"].(string) }
-
-// Selectable is whether the rows carry a checkbox, and the footer a count.
-func (p DataTableProps) Selectable() bool { return p.SelectName != "" }
-
-// SelectedText is the count of rows ticked, as the table's own count says it.
-func (p DataTableProps) SelectedText() string { return p.Grid().SelectedText() }
-
-// FacetChosen are the labels of a facet's options in force, in the order the
-// options are listed, which is what the facet's button shows.
-func (p DataTableProps) FacetChosen(filter DataTableFilter) []string {
-	out := []string{}
-	for _, option := range filter.Options {
-		if p.Chosen(filter, option) {
-			out = append(out, option.Label)
-		}
-	}
-	return out
-}
-
-// FacetSummary is what the facet's button shows of its choice: every label
-// while there are two at most, and the count past that, so a facet with five
-// choices does not push the toolbar off the screen.
-func (p DataTableProps) FacetSummary(filter DataTableFilter) []string {
-	chosen := p.FacetChosen(filter)
-	if len(chosen) > 2 {
-		return []string{strconv.Itoa(len(chosen))}
-	}
-	return chosen
-}
-
-// FacetName names one facet's menu for a screen reader: its label.
-func (p DataTableProps) FacetName(filter DataTableFilter) string { return filter.Label }
-
 func (p DataTableProps) PartNames() []string {
-	// The table's names and the pager's are published here as well, because
-	// this draws both and the parts a caller can reach are the parts on the
-	// page -- not the parts this file happens to write itself.
-	names := []string{
-		"root", "toolbar", "search", "indicator", "columns", "toggle",
-		"pagination", "sizes", "showing", "footer", "filter",
-		"facet", "facet-chosen", "page-of", "previous", "next",
+	return []string{
+		"root", "toolbar", "search", "reset", "facet", "facet-chosen", "facet-search", "filter",
+		"columns", "toggle", "bulk", "wrapper", "table", "caption", "head",
+		"header-cell", "sort", "header-menu", "row", "cell", "select-all",
+		"select", "row-menu", "footer", "count", "sizes", "pagination", "page-of",
+		"first", "previous", "next", "last",
 	}
-	names = append(names, TableProps{}.PartNames()[1:]...)
-
-	// Deduplicated, because this composes two components that publish some of
-	// the same names and a list that repeats one is a list nobody can trust to
-	// be the set.
-	seen := map[string]bool{}
-	unique := names[:0]
-	for _, name := range names {
-		if seen[name] {
-			continue
-		}
-		seen[name] = true
-		unique = append(unique, name)
-	}
-	return unique
 }
 
-//line components/data-table.go:948
+//line components/data-table.go:1086
 
 // DataTable renders the data-table component.
 func DataTable(kyse__props DataTableProps) kyse__template.HTML {
@@ -967,9 +1105,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/data-table.kyse.go:945
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("data-table")))
-//line components/data-table.go:973
+//line components/data-table.kyse.go:1083
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("group/dt w-full")))
+//line components/data-table.go:1111
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -978,9 +1116,9 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/data-table.kyse.go:946
+//line components/data-table.kyse.go:1084
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/data-table.go:984
+//line components/data-table.go:1122
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -988,23 +1126,30 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\trole=\"region\"\n")
 	}
-//line components/data-table.kyse.go:948
+//line components/data-table.kyse.go:1086
 	if kyse__d.Complete {
-//line components/data-table.go:994
+//line components/data-table.go:1132
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-complete=\"true\"\n")
 		}
 	}
-//line components/data-table.kyse.go:951
+//line components/data-table.kyse.go:1089
+	if kyse__d.Navigable {
+//line components/data-table.go:1139
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-navigable=\"true\"\n")
+		}
+	}
+//line components/data-table.kyse.go:1092
 	if kyse__d.Label != "" {
-//line components/data-table.go:1001
+//line components/data-table.go:1146
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-label=\"")
 		}
 		if kyse__err == nil {
-//line components/data-table.kyse.go:952
+//line components/data-table.kyse.go:1093
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
-//line components/data-table.go:1008
+//line components/data-table.go:1153
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1012,11 +1157,11 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/data-table.kyse.go:954
+//line components/data-table.kyse.go:1095
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/data-table.go:1018
+//line components/data-table.go:1163
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:954", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1095", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
@@ -1024,237 +1169,4570 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")
 	}
-//line components/data-table.kyse.go:956
-	if kyse__d.Searchable() || kyse__d.Hideable() || kyse__d.Chooses() {
-//line components/data-table.go:1030
+//line components/data-table.kyse.go:1097
+	if kyse__d.Nothing() {
+//line components/data-table.go:1175
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<div\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"toolbar\"\n")
+//line components/data-table.kyse.go:1098
+			var kyse__v2 kyse__template.HTML = Empty(kyse__d.Empty)
+//line components/data-table.go:1182
+			_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v2))
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+		}
+	} else {
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t<div\n")
 		}
 		if kyse__err == nil {
-//line components/data-table.kyse.go:959
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("toolbar", "data-table-toolbar")))
-//line components/data-table.go:1043
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-part=\"toolbar\"\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/data-table.kyse.go:1102
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("toolbar", "flex items-start gap-2 py-4")))
+//line components/data-table.go:1201
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			var kyse__v2 string
-//line components/data-table.kyse.go:960
-			kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("toolbar"))
-//line components/data-table.go:1052
+			var kyse__v3 string
+//line components/data-table.kyse.go:1103
+			kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("toolbar"))
+//line components/data-table.go:1210
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:960", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1103", kyse__err)
 			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<form\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
+		}
+		if kyse__err == nil {
+//line components/data-table.kyse.go:1110
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.QueryFormID()))
+//line components/data-table.go:1229
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"flex min-w-0 flex-1 flex-wrap items-center gap-2\"\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taction=\"")
+		}
+		if kyse__err == nil {
+			var kyse__v4 string
+//line components/data-table.kyse.go:1112
+			kyse__v4, kyse__err = kyse__view.TextURL(kyse__d.QueryAction())
+//line components/data-table.go:1244
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1112", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tmethod=\"get\"\n")
+		}
+//line components/data-table.kyse.go:1114
+		if kyse__d.Searchable {
+//line components/data-table.go:1259
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\trole=\"search\"\n")
+			}
+		}
+//line components/data-table.kyse.go:1117
+		if kyse__d.Complete {
+//line components/data-table.go:1266
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-boost=\"false\"\n")
+			}
+		}
+//line components/data-table.kyse.go:1120
+		if !kyse__d.Complete {
+//line components/data-table.go:1273
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-get=\"")
+			}
+			if kyse__err == nil {
+				var kyse__v5 string
+//line components/data-table.kyse.go:1121
+				kyse__v5, kyse__err = kyse__view.TextURL(kyse__d.QueryAction())
+//line components/data-table.go:1281
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1121", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-trigger=\"submit, change\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-target=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1123
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:1300
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-swap=\"outerHTML\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-select=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1125
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:1314
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-push-url=\"true\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-sync=\"closest [data-part=root]:replace\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-indicator=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1128
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:1331
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>\n")
 		}
-//line components/data-table.kyse.go:962
-		if kyse__d.Searchable() || kyse__d.Filtered() {
-//line components/data-table.go:1064
+//line components/data-table.kyse.go:1131
+		for _, field := range kyse__d.QueryFields() {
+			_ = field
+//line components/data-table.go:1343
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<form\n")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<input type=\"hidden\" name=\"")
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"data-table-controls\"\n")
+//line components/data-table.kyse.go:1132
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(field.Name))
+//line components/data-table.go:1350
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\" value=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1132
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(field.Value))
+//line components/data-table.go:1358
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
+			}
+		}
+//line components/data-table.kyse.go:1134
+		if kyse__d.Searchable {
+//line components/data-table.go:1366
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<label class=\"sr-only\" for=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1135
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SearchID()))
+//line components/data-table.go:1373
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\">")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1135
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.SearchTitle())))
+//line components/data-table.go:1381
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</label>\n")
+			}
+//line components/data-table.kyse.go:1136
+			if kyse__d.Faceted() {
+//line components/data-table.go:1388
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<input\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-part=\"search\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1139
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("search", "h-8 w-[150px] lg:w-[250px] rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30")))
+//line components/data-table.go:1401
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\ttype=\"text\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\trole=\"searchbox\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tid=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1142
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SearchID()))
+//line components/data-table.go:1418
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tname=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1143
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SearchName()))
+//line components/data-table.go:1429
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tvalue=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1144
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Query()))
+//line components/data-table.go:1440
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tautocomplete=\"off\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tplaceholder=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1146
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Placeholder()))
+//line components/data-table.go:1454
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					var kyse__v6 string
+//line components/data-table.kyse.go:1147
+					kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("search"))
+//line components/data-table.go:1463
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1147", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>\n")
+				}
+			}
+//line components/data-table.kyse.go:1150
+			if !kyse__d.Faceted() {
+//line components/data-table.go:1476
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<input\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-part=\"search\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1153
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("search", "h-8 w-full min-w-0 max-w-sm rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30")))
+//line components/data-table.go:1489
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\ttype=\"text\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\trole=\"searchbox\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tid=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1156
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SearchID()))
+//line components/data-table.go:1506
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tname=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1157
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SearchName()))
+//line components/data-table.go:1517
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tvalue=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1158
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Query()))
+//line components/data-table.go:1528
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tautocomplete=\"off\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tplaceholder=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1160
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Placeholder()))
+//line components/data-table.go:1542
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					var kyse__v7 string
+//line components/data-table.kyse.go:1161
+					kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("search"))
+//line components/data-table.go:1551
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1161", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>\n")
+				}
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+		}
+//line components/data-table.kyse.go:1166
+		for _, filter := range kyse__d.Filters {
+			_ = filter
+//line components/data-table.go:1569
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<details\n")
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tid=\"")
 			}
 			if kyse__err == nil {
-//line components/data-table.kyse.go:969
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.QueryFormID()))
-//line components/data-table.go:1077
+//line components/data-table.kyse.go:1173
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
+//line components/data-table.go:1579
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "-facet-")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1173
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(filter.Key))
+//line components/data-table.go:1587
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taction=\"")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-part=\"facet\"\n")
 			}
 			if kyse__err == nil {
-				var kyse__v3 string
-//line components/data-table.kyse.go:970
-				kyse__v3, kyse__err = kyse__view.TextURL(kyse__d.QueryAction())
-//line components/data-table.go:1089
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-menu\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1176
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("facet", "group/menu relative")))
+//line components/data-table.go:1604
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				var kyse__v8 string
+//line components/data-table.kyse.go:1177
+				kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("facet"))
+//line components/data-table.go:1613
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:970", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1177", kyse__err)
 				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
-				}
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tmethod=\"get\"\n")
-			}
-//line components/data-table.kyse.go:972
-			if kyse__d.Searchable() {
-//line components/data-table.go:1104
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\trole=\"search\"\n")
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 				}
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>\n")
 			}
-//line components/data-table.kyse.go:976
-			for _, field := range kyse__d.QueryFields() {
-				_ = field
-//line components/data-table.go:1115
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<summary class=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1179
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("inline-flex cursor-pointer list-none [&::-webkit-details-marker]:hidden group/button shrink-0 items-center justify-center rounded-lg border border-dashed border-border bg-background bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none h-8 gap-1.5 px-2.5 hover:bg-muted hover:text-foreground group-open/menu:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:border-input dark:bg-input/30 dark:hover:bg-input/50"))
+//line components/data-table.go:1629
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1180
+				var kyse__v9 kyse__template.HTML = icons.PlusCircle(icons.Props{})
+//line components/data-table.go:1640
+				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v9))
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<span>")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1181
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(filter.Label)))
+//line components/data-table.go:1652
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<span\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1183
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("mx-2 h-4 w-px shrink-0 bg-border"))
+//line components/data-table.go:1666
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\trole=\"separator\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-orientation=\"vertical\"\n")
+			}
+//line components/data-table.kyse.go:1186
+			if len(kyse__d.Chosen(filter)) == 0 {
+//line components/data-table.go:1679
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<input type=\"hidden\" name=\"")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thidden\n")
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t></span>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<span\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-part=\"facet-chosen\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1192
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("facet-chosen", "inline-flex items-center gap-1")))
+//line components/data-table.go:1699
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+//line components/data-table.kyse.go:1193
+			if len(kyse__d.Chosen(filter)) == 0 {
+//line components/data-table.go:1706
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thidden\n")
+				}
+			}
+			if kyse__err == nil {
+				var kyse__v10 string
+//line components/data-table.kyse.go:1196
+				kyse__v10, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("facet-chosen"))
+//line components/data-table.go:1715
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1196", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v10)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<span\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-facet-count\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"rounded-sm bg-secondary px-1 text-xs font-normal text-secondary-foreground lg:hidden\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t>")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1201
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(len(kyse__d.Chosen(filter)))))
+//line components/data-table.go:1740
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<span class=\"hidden gap-1 lg:flex\">\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t<span\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-facet-many\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tclass=\"rounded-sm bg-secondary px-1 text-xs font-normal text-secondary-foreground\"\n")
+			}
+//line components/data-table.kyse.go:1206
+			if kyse__d.FacetBadges(filter) {
+//line components/data-table.go:1759
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thidden\n")
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t>")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1209
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.FacetSelectedText(filter))))
+//line components/data-table.go:1770
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+			}
+//line components/data-table.kyse.go:1210
+			for _, option := range filter.Options {
+				_ = option
+//line components/data-table.go:1778
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t<span\n")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:977
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(field.Name))
-//line components/data-table.go:1122
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tdata-facet-badge=\"")
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\" value=\"")
+//line components/data-table.kyse.go:1212
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(option.Value))
+//line components/data-table.go:1788
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:977
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(field.Value))
-//line components/data-table.go:1130
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tclass=\"rounded-sm bg-secondary px-1 text-xs font-normal text-secondary-foreground\"\n")
+				}
+//line components/data-table.kyse.go:1214
+				if !kyse__d.FacetBadges(filter) || !kyse__d.OptionChosen(filter, option) {
+//line components/data-table.go:1798
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thidden\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t>")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1217
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(option.Label)))
+//line components/data-table.go:1809
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t</span>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t</span>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t</summary>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<div\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-menu-panel\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-align=\"start\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1225
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("fixed z-50 w-[200px] overflow-hidden rounded-lg bg-popover p-0 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none"))
+//line components/data-table.go:1839
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<div class=\"flex h-9 items-center gap-2 border-b px-3\">\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<span class=\"shrink-0 opacity-50 [&_svg]:size-4\" aria-hidden=\"true\">")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1228
+				var kyse__v11 kyse__template.HTML = icons.MagnifyingGlass(icons.Props{})
+//line components/data-table.go:1856
+				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v11))
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<input\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-part=\"facet-search\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1231
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("facet-search", "flex h-9 w-full min-w-0 bg-transparent py-3 text-sm outline-hidden placeholder:text-muted-foreground")))
+//line components/data-table.go:1874
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\ttype=\"text\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tautocomplete=\"off\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tplaceholder=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1234
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(filter.Label))
+//line components/data-table.go:1891
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-label=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1235
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(filter.Label))
+//line components/data-table.go:1902
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				var kyse__v12 string
+//line components/data-table.kyse.go:1236
+				kyse__v12, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("facet-search"))
+//line components/data-table.go:1911
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1236", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v12)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t</div>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<div class=\"max-h-[300px] overflow-x-hidden overflow-y-auto p-1\" role=\"group\" aria-label=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1239
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(filter.Label))
+//line components/data-table.go:1930
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
+			}
+//line components/data-table.kyse.go:1240
+			for _, option := range filter.Options {
+				_ = option
+//line components/data-table.go:1938
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t<label\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-facet-item\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-text=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1243
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(option.Label))
+//line components/data-table.go:1951
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tclass=\"relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm select-none hover:bg-accent hover:text-accent-foreground has-focus-visible:bg-accent has-focus-visible:text-accent-foreground has-disabled:opacity-50\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t<input\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tdata-part=\"filter\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1248
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("filter", "peer relative block size-4 shrink-0 cursor-pointer appearance-none rounded-[4px] border border-input outline-none transition-colors after:absolute after:top-[42%] after:left-1/2 after:hidden after:h-[9px] after:w-[5px] after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-r-2 after:border-b-2 after:border-current after:content-[''] checked:border-primary checked:bg-primary checked:text-primary-foreground checked:after:block disabled:cursor-not-allowed dark:bg-input/30 dark:checked:bg-primary")))
+//line components/data-table.go:1974
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\ttype=\"checkbox\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tname=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1250
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(filter.Key))
+//line components/data-table.go:1988
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tvalue=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1251
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(option.Value))
+//line components/data-table.go:1999
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+//line components/data-table.kyse.go:1252
+				if kyse__d.OptionChosen(filter, option) {
+//line components/data-table.go:2006
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tchecked\n")
+					}
+				}
+//line components/data-table.kyse.go:1255
+				if option.Disabled {
+//line components/data-table.go:2013
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tdisabled\n")
+					}
+				}
+				if kyse__err == nil {
+					var kyse__v13 string
+//line components/data-table.kyse.go:1258
+					kyse__v13, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("filter"))
+//line components/data-table.go:2022
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1258", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v13)
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t<span class=\"min-w-0 flex-1 truncate\">")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1260
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(option.Label)))
+//line components/data-table.go:2038
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+				}
+//line components/data-table.kyse.go:1261
+				if kyse__d.FacetCounted(filter) {
+//line components/data-table.go:2045
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t<span class=\"ml-auto flex size-4 items-center justify-center font-mono text-xs text-muted-foreground\">")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1262
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.FacetCount(filter, option))))
+//line components/data-table.go:2052
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t</label>\n")
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<div data-facet-empty hidden class=\"py-6 text-center text-sm\">")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1266
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.lines().NoFacetResults)))
+//line components/data-table.go:2068
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</div>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t</div>\n")
+			}
+//line components/data-table.kyse.go:1268
+			if len(kyse__d.Chosen(filter)) > 0 {
+//line components/data-table.go:2078
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<div class=\"border-t p-1\" data-facet-clear>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t<a\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tclass=\"flex cursor-pointer items-center justify-center rounded-sm px-2 py-1.5 text-center text-sm select-none hover:bg-accent hover:text-accent-foreground\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thref=\"")
+				}
+				if kyse__err == nil {
+					var kyse__v14 string
+//line components/data-table.kyse.go:1272
+					kyse__v14, kyse__err = kyse__view.TextURL(kyse__d.ClearFacetHref(filter))
+//line components/data-table.go:2095
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1272", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v14)
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+//line components/data-table.kyse.go:1273
+				if kyse__d.Complete {
+//line components/data-table.go:2107
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-boost=\"false\"\n")
+					}
+				}
+//line components/data-table.kyse.go:1276
+				if !kyse__d.Complete {
+//line components/data-table.go:2114
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-get=\"")
+					}
+					if kyse__err == nil {
+						var kyse__v15 string
+//line components/data-table.kyse.go:1277
+						kyse__v15, kyse__err = kyse__view.TextURL(kyse__d.ClearFacetHref(filter))
+//line components/data-table.go:2122
+						if kyse__err != nil {
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1277", kyse__err)
+						} else {
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v15)
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-target=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1278
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:2138
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-swap=\"outerHTML\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-select=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1280
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:2152
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-push-url=\"true\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-sync=\"closest [data-part=root]:replace\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-indicator=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1283
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:2169
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-facet-clear-link\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t>")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1286
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.lines().ClearFilters)))
+//line components/data-table.go:2184
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</a>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t</div>\n")
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t</div>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t</details>\n")
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+		}
+//line components/data-table.kyse.go:1293
+		if kyse__d.Active() && (kyse__d.Searchable || kyse__d.Faceted()) {
+//line components/data-table.go:2205
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<a\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-part=\"reset\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1296
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("reset", "inline-flex group/button shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none h-8 gap-1.5 px-2.5 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:hover:bg-muted/50")))
+//line components/data-table.go:2218
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\thref=\"")
+			}
+			if kyse__err == nil {
+				var kyse__v16 string
+//line components/data-table.kyse.go:1297
+				kyse__v16, kyse__err = kyse__view.TextURL(kyse__d.ResetHref())
+//line components/data-table.go:2230
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1297", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v16)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+//line components/data-table.kyse.go:1298
+			if kyse__d.Complete {
+//line components/data-table.go:2242
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thx-boost=\"false\"\n")
+				}
+			}
+//line components/data-table.kyse.go:1301
+			if !kyse__d.Complete {
+//line components/data-table.go:2249
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thx-get=\"")
+				}
+				if kyse__err == nil {
+					var kyse__v17 string
+//line components/data-table.kyse.go:1302
+					kyse__v17, kyse__err = kyse__view.TextURL(kyse__d.ResetHref())
+//line components/data-table.go:2257
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1302", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v17)
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thx-target=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1303
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:2273
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thx-swap=\"outerHTML\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thx-select=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1305
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:2287
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thx-push-url=\"true\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thx-sync=\"closest [data-part=root]:replace\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thx-indicator=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1308
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:2304
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+			}
+			if kyse__err == nil {
+				var kyse__v18 string
+//line components/data-table.kyse.go:1310
+				kyse__v18, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("reset"))
+//line components/data-table.go:2314
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1310", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v18)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1311
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.lines().Reset)))
+//line components/data-table.go:2327
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1311
+				var kyse__v19 kyse__template.HTML = icons.X(icons.Props{})
+//line components/data-table.go:2332
+				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v19))
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</a>\n")
+			}
+		}
+//line components/data-table.kyse.go:1313
+		if kyse__d.Searchable || kyse__d.Faceted() {
+//line components/data-table.go:2341
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<noscript><button type=\"submit\" class=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1314
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("inline-flex group/button shrink-0 items-center justify-center rounded-lg border border-border bg-background text-sm font-medium h-7 px-2.5"))
+//line components/data-table.go:2348
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\">")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1314
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.lines().Apply)))
+//line components/data-table.go:2356
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</button></noscript>\n")
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t</form>\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+		}
+//line components/data-table.kyse.go:1318
+		if kyse__d.Hideable() {
+//line components/data-table.go:2370
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<details\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tid=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1324
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
+//line components/data-table.go:2380
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "-columns\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"columns\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-menu\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1327
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("columns", "group/menu relative ms-auto")))
+//line components/data-table.go:2397
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				var kyse__v20 string
+//line components/data-table.kyse.go:1328
+				kyse__v20, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("columns"))
+//line components/data-table.go:2406
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1328", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v20)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<summary class=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1330
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("inline-flex cursor-pointer list-none [&::-webkit-details-marker]:hidden group/button shrink-0 items-center justify-center rounded-lg border border-border bg-background bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none h-8 gap-1.5 px-2.5 hover:bg-muted hover:text-foreground group-open/menu:bg-muted group-open/menu:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:border-input dark:bg-input/30 dark:hover:bg-input/50"))
+//line components/data-table.go:2422
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\">")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1330
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.ColumnsName())))
+//line components/data-table.go:2430
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1330
+				var kyse__v21 kyse__template.HTML = icons.CaretDown(icons.Props{})
+//line components/data-table.go:2435
+				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v21))
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</summary>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<div\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-menu-panel\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-align=\"end\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\trole=\"menu\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-label=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1335
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.lines().ToggleColumns))
+//line components/data-table.go:2459
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1336
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("fixed z-50 w-44 min-w-32 overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none"))
+//line components/data-table.go:2470
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>\n")
+			}
+//line components/data-table.kyse.go:1338
+			for _, column := range kyse__d.Columns {
+				_ = column
+//line components/data-table.go:2481
+//line components/data-table.kyse.go:1339
+				if column.Hideable && column.Key != "" {
+//line components/data-table.go:2484
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<a\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-part=\"toggle\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-column-toggle=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1342
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(column.Key))
+//line components/data-table.go:2497
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1343
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("toggle", "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pe-8 ps-1.5 text-sm capitalize outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground")))
+//line components/data-table.go:2508
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\trole=\"menuitemcheckbox\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-checked=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1345
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(!kyse__d.Off(column)))
+//line components/data-table.go:2522
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thref=\"")
+					}
+					if kyse__err == nil {
+						var kyse__v22 string
+//line components/data-table.kyse.go:1346
+						kyse__v22, kyse__err = kyse__view.TextURL(kyse__d.ColumnHref(column))
+//line components/data-table.go:2534
+						if kyse__err != nil {
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1346", kyse__err)
+						} else {
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v22)
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+//line components/data-table.kyse.go:1347
+					if kyse__d.Complete {
+//line components/data-table.go:2546
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-boost=\"false\"\n")
+						}
+					}
+//line components/data-table.kyse.go:1350
+					if !kyse__d.Complete {
+//line components/data-table.go:2553
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-get=\"")
+						}
+						if kyse__err == nil {
+							var kyse__v23 string
+//line components/data-table.kyse.go:1351
+							kyse__v23, kyse__err = kyse__view.TextURL(kyse__d.ColumnHref(column))
+//line components/data-table.go:2561
+							if kyse__err != nil {
+								kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1351", kyse__err)
+							} else {
+								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v23)
+							}
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-target=\"")
+						}
+						if kyse__err == nil {
+//line components/data-table.kyse.go:1352
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:2577
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-swap=\"outerHTML\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-select=\"")
+						}
+						if kyse__err == nil {
+//line components/data-table.kyse.go:1354
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:2591
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-push-url=\"true\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-sync=\"closest [data-part=root]:replace\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-indicator=\"")
+						}
+						if kyse__err == nil {
+//line components/data-table.kyse.go:1357
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:2608
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+						}
+					}
+					if kyse__err == nil {
+						var kyse__v24 string
+//line components/data-table.kyse.go:1359
+						kyse__v24, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("toggle"))
+//line components/data-table.go:2618
+						if kyse__err != nil {
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1359", kyse__err)
+						} else {
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v24)
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t>\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1361
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(column.Label)))
+//line components/data-table.go:2634
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t<span\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tclass=\"pointer-events-none absolute end-2 flex items-center justify-center [&_svg]:size-4 [&_path[opacity]]:hidden\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-indicator\n")
+					}
+//line components/data-table.kyse.go:1365
+					if kyse__d.Off(column) {
+//line components/data-table.go:2650
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thidden\n")
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t>")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1368
+						var kyse__v25 kyse__template.HTML = icons.Check(icons.Props{})
+//line components/data-table.go:2661
+						_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v25))
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t</a>\n")
+					}
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t</div>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t</details>\n")
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t</div>\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+		}
+//line components/data-table.kyse.go:1377
+		if kyse__d.Bulky() {
+//line components/data-table.go:2687
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<form\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1382
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.BulkID()))
+//line components/data-table.go:2697
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"bulk\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1384
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("bulk", "mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-accent px-3 py-2 text-accent-foreground")))
+//line components/data-table.go:2711
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tmethod=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1385
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PostMethod()))
+//line components/data-table.go:2722
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taction=\"")
+			}
+			if kyse__err == nil {
+				var kyse__v26 string
+//line components/data-table.kyse.go:1386
+				kyse__v26, kyse__err = kyse__view.TextURL(kyse__d.BulkAction)
+//line components/data-table.go:2734
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1386", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v26)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-label=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1387
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.BulkName()))
+//line components/data-table.go:2750
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+//line components/data-table.kyse.go:1388
+			if kyse__d.Ticked() == 0 {
+//line components/data-table.go:2757
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thidden\n")
+				}
+			}
+//line components/data-table.kyse.go:1391
+			if kyse__d.Complete {
+//line components/data-table.go:2764
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-boost=\"false\"\n")
+				}
+			}
+			if kyse__err == nil {
+				var kyse__v27 string
+//line components/data-table.kyse.go:1394
+				kyse__v27, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("bulk"))
+//line components/data-table.go:2773
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1394", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v27)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>\n")
+			}
+//line components/data-table.kyse.go:1396
+			if kyse__d.SendsToken() {
+//line components/data-table.go:2785
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<input type=\"hidden\" name=\"_token\" value=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1397
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.FormToken()))
+//line components/data-table.go:2792
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
 				}
 			}
-//line components/data-table.kyse.go:979
-			if kyse__d.Searchable() {
-//line components/data-table.go:1138
+//line components/data-table.kyse.go:1399
+			for _, action := range kyse__d.BulkActions {
+				_ = action
+//line components/data-table.go:2801
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<label class=\"sr-only\" for=\"")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:980
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/data-table.go:1145
+//line components/data-table.kyse.go:1400
+					var kyse__v28 kyse__template.HTML = Button(action)
+//line components/data-table.go:2808
+					_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v28))
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "-search\">")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t</form>\n")
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t<div\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-part=\"wrapper\"\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/data-table.kyse.go:1407
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("wrapper", "overflow-hidden rounded-md border transition-opacity group-[.htmx-request]/dt:opacity-60")))
+//line components/data-table.go:2834
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+		if kyse__err == nil {
+			var kyse__v29 string
+//line components/data-table.kyse.go:1408
+			kyse__v29, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("wrapper"))
+//line components/data-table.go:2843
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1408", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v29)
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<div class=\"relative w-full overflow-x-auto\">\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<table\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"table\"\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/data-table.kyse.go:1413
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("table", "w-full caption-bottom text-sm")))
+//line components/data-table.go:2868
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+//line components/data-table.kyse.go:1414
+		if kyse__d.Role() != "" {
+//line components/data-table.go:2875
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\trole=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1415
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Role()))
+//line components/data-table.go:2882
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+		}
+		if kyse__err == nil {
+			var kyse__v30 string
+//line components/data-table.kyse.go:1417
+			kyse__v30, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("table"))
+//line components/data-table.go:2892
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1417", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v30)
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>\n")
+		}
+//line components/data-table.kyse.go:1419
+		if kyse__d.Caption != "" {
+//line components/data-table.go:2904
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<caption\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-part=\"caption\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1422
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("caption", "mt-4 text-sm text-muted-foreground")))
+//line components/data-table.go:2917
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				var kyse__v31 string
+//line components/data-table.kyse.go:1423
+				kyse__v31, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("caption"))
+//line components/data-table.go:2926
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1423", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v31)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1424
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Caption)))
+//line components/data-table.go:2939
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</caption>\n")
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<thead\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-part=\"head\"\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/data-table.kyse.go:1428
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("head", "[&_tr]:border-b")))
+//line components/data-table.go:2957
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+		if kyse__err == nil {
+			var kyse__v32 string
+//line components/data-table.kyse.go:1429
+			kyse__v32, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("head"))
+//line components/data-table.go:2966
+			if kyse__err != nil {
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1429", kyse__err)
+			} else {
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v32)
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<tr class=\"")
+		}
+		if kyse__err == nil {
+//line components/data-table.kyse.go:1431
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("border-b transition-colors hover:bg-muted/50 has-[details[open]]:bg-muted/50 data-[state=selected]:bg-muted"))
+//line components/data-table.go:2982
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
+		}
+//line components/data-table.kyse.go:1432
+		if kyse__d.Selectable() {
+//line components/data-table.go:2989
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<th\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-part=\"header-cell\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tscope=\"col\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1436
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("header-cell", "h-10 px-2 text-start align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0 w-0")))
+//line components/data-table.go:3005
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-select\n")
+			}
+			if kyse__err == nil {
+				var kyse__v33 string
+//line components/data-table.kyse.go:1438
+				kyse__v33, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("header-cell"))
+//line components/data-table.go:3017
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1438", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v33)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t<input\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-part=\"select-all\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-select-all\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1443
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("select-all", "peer relative block size-4 shrink-0 cursor-pointer appearance-none rounded-[4px] border border-input outline-none transition-colors after:absolute after:top-[42%] after:left-1/2 after:hidden after:h-[9px] after:w-[5px] after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-r-2 after:border-b-2 after:border-current after:content-[''] checked:border-primary checked:bg-primary checked:text-primary-foreground checked:after:block indeterminate:after:block focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30 dark:checked:bg-primary")))
+//line components/data-table.go:3042
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\ttype=\"checkbox\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\taria-label=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1445
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.lines().SelectAll))
+//line components/data-table.go:3056
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				var kyse__v34 string
+//line components/data-table.kyse.go:1446
+				kyse__v34, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("select-all"))
+//line components/data-table.go:3065
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1446", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v34)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t</th>\n")
+			}
+		}
+//line components/data-table.kyse.go:1450
+		for _, column := range kyse__d.Columns {
+			_ = column
+//line components/data-table.go:3082
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<th\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-part=\"header-cell\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tscope=\"col\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1454
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("header-cell", "h-10 px-2 align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0", column.AlignClass())))
+//line components/data-table.go:3098
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+//line components/data-table.kyse.go:1455
+			if column.Key != "" {
+//line components/data-table.go:3105
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-column=\"")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:980
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.SearchTitle())))
-//line components/data-table.go:1153
+//line components/data-table.kyse.go:1456
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(column.Key))
+//line components/data-table.go:3112
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "</label>\n")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+			}
+//line components/data-table.kyse.go:1458
+			if kyse__d.Off(column) {
+//line components/data-table.go:3120
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thidden\n")
+				}
+			}
+//line components/data-table.kyse.go:1461
+			if kyse__d.Order(column) != "" {
+//line components/data-table.go:3127
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\taria-sort=\"")
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<input\n")
+//line components/data-table.kyse.go:1462
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Order(column)))
+//line components/data-table.go:3134
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-part=\"search\"\n")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+			}
+			if kyse__err == nil {
+				var kyse__v35 string
+//line components/data-table.kyse.go:1464
+				kyse__v35, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("header-cell"))
+//line components/data-table.go:3144
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1464", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v35)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t>\n")
+			}
+//line components/data-table.kyse.go:1466
+			if kyse__d.Sortable(column) && !kyse__d.HeaderMenu {
+//line components/data-table.go:3156
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t<a\n")
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tdata-part=\"sort\"\n")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:983
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("search", "input")))
-//line components/data-table.go:1170
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1469
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("sort", "inline-flex group/button shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none h-8 gap-1.5 px-2.5 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:hover:bg-muted/50")))
+//line components/data-table.go:3169
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\ttype=\"search\"\n")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thref=\"")
+				}
+				if kyse__err == nil {
+					var kyse__v36 string
+//line components/data-table.kyse.go:1470
+					kyse__v36, kyse__err = kyse__view.TextURL(kyse__d.SortHref(column))
+//line components/data-table.go:3181
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1470", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v36)
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\taria-label=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1471
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SortName(column)))
+//line components/data-table.go:3197
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tdata-sort-key=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1472
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(column.Key))
+//line components/data-table.go:3208
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+//line components/data-table.kyse.go:1473
+				if kyse__d.Complete {
+//line components/data-table.go:3215
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thx-boost=\"false\"\n")
+					}
+				}
+//line components/data-table.kyse.go:1476
+				if !kyse__d.Complete {
+//line components/data-table.go:3222
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thx-get=\"")
+					}
+					if kyse__err == nil {
+						var kyse__v37 string
+//line components/data-table.kyse.go:1477
+						kyse__v37, kyse__err = kyse__view.TextURL(kyse__d.SortHref(column))
+//line components/data-table.go:3230
+						if kyse__err != nil {
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1477", kyse__err)
+						} else {
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v37)
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thx-target=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1478
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:3246
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thx-swap=\"outerHTML\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thx-select=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1480
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:3260
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thx-push-url=\"true\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thx-sync=\"closest [data-part=root]:replace\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thx-indicator=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1483
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:3277
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+				if kyse__err == nil {
+					var kyse__v38 string
+//line components/data-table.kyse.go:1485
+					kyse__v38, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("sort"))
+//line components/data-table.go:3287
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1485", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v38)
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1487
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(column.Label)))
+//line components/data-table.go:3303
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t<span\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tdata-sort-icon=\"none\"\n")
+				}
+//line components/data-table.kyse.go:1490
+				if kyse__d.Sorted(column) != "" {
+//line components/data-table.go:3316
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\thidden\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t>")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1493
+					var kyse__v39 kyse__template.HTML = icons.ArrowsDownUp(icons.Props{})
+//line components/data-table.go:3327
+					_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v39))
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t<span\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tdata-sort-icon=\"asc\"\n")
+				}
+//line components/data-table.kyse.go:1496
+				if kyse__d.Sorted(column) != "asc" {
+//line components/data-table.go:3341
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\thidden\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t>")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1499
+					var kyse__v40 kyse__template.HTML = icons.ArrowUp(icons.Props{})
+//line components/data-table.go:3352
+					_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v40))
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t<span\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tdata-sort-icon=\"desc\"\n")
+				}
+//line components/data-table.kyse.go:1502
+				if kyse__d.Sorted(column) != "desc" {
+//line components/data-table.go:3366
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\thidden\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t>")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1505
+					var kyse__v41 kyse__template.HTML = icons.ArrowDown(icons.Props{})
+//line components/data-table.go:3377
+					_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v41))
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t</a>\n")
+				}
+			}
+//line components/data-table.kyse.go:1508
+			if kyse__d.Sortable(column) && kyse__d.HeaderMenu {
+//line components/data-table.go:3389
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t<div class=\"flex items-center gap-2\">\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t<details\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tid=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1511
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
+//line components/data-table.go:3402
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "-head-")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1511
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(column.Key))
+//line components/data-table.go:3410
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tdata-part=\"header-menu\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tdata-menu\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tdata-closes\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1515
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("header-menu", "group/menu relative")))
+//line components/data-table.go:3430
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					var kyse__v42 string
+//line components/data-table.kyse.go:1516
+					kyse__v42, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("header-menu"))
+//line components/data-table.go:3439
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1516", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v42)
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t<summary\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1519
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("-ms-3 inline-flex cursor-pointer list-none [&::-webkit-details-marker]:hidden group/button shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none h-8 gap-1 px-3 hover:bg-muted hover:text-foreground group-open/menu:bg-accent focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:hover:bg-muted/50"))
+//line components/data-table.go:3458
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\taria-label=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1520
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SortName(column)))
+//line components/data-table.go:3469
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t<span>")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1522
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(column.Label)))
+//line components/data-table.go:3483
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t<span\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\tdata-sort-icon=\"none\"\n")
+				}
+//line components/data-table.kyse.go:1525
+				if kyse__d.Sorted(column) != "" {
+//line components/data-table.go:3496
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thidden\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t>")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1528
+					var kyse__v43 kyse__template.HTML = icons.CaretUpDown(icons.Props{})
+//line components/data-table.go:3507
+					_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v43))
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t<span\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\tdata-sort-icon=\"asc\"\n")
+				}
+//line components/data-table.kyse.go:1531
+				if kyse__d.Sorted(column) != "asc" {
+//line components/data-table.go:3521
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thidden\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t>")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1534
+					var kyse__v44 kyse__template.HTML = icons.ArrowUp(icons.Props{})
+//line components/data-table.go:3532
+					_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v44))
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t<span\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\tdata-sort-icon=\"desc\"\n")
+				}
+//line components/data-table.kyse.go:1537
+				if kyse__d.Sorted(column) != "desc" {
+//line components/data-table.go:3546
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thidden\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t>")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1540
+					var kyse__v45 kyse__template.HTML = icons.ArrowDown(icons.Props{})
+//line components/data-table.go:3557
+					_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v45))
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t</summary>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t<div\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\tdata-menu-panel\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\tdata-align=\"start\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\trole=\"menu\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1546
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("fixed z-50 min-w-32 overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none"))
+//line components/data-table.go:3584
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t<a\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\trole=\"menuitem\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\tdata-sort-key=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1550
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(column.Key))
+//line components/data-table.go:3604
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\tdata-dir=\"asc\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1552
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("relative flex w-full cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"))
+//line components/data-table.go:3618
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\thref=\"")
+				}
+				if kyse__err == nil {
+					var kyse__v46 string
+//line components/data-table.kyse.go:1553
+					kyse__v46, kyse__err = kyse__view.TextURL(kyse__d.AscHref(column))
+//line components/data-table.go:3630
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1553", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v46)
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+//line components/data-table.kyse.go:1554
+				if kyse__d.Complete {
+//line components/data-table.go:3642
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-boost=\"false\"\n")
+					}
+				}
+//line components/data-table.kyse.go:1557
+				if !kyse__d.Complete {
+//line components/data-table.go:3649
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-get=\"")
+					}
+					if kyse__err == nil {
+						var kyse__v47 string
+//line components/data-table.kyse.go:1558
+						kyse__v47, kyse__err = kyse__view.TextURL(kyse__d.AscHref(column))
+//line components/data-table.go:3657
+						if kyse__err != nil {
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1558", kyse__err)
+						} else {
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v47)
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-target=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1559
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:3673
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-swap=\"outerHTML\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-select=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1561
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:3687
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-push-url=\"true\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-sync=\"closest [data-part=root]:replace\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-indicator=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1564
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:3704
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t>")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1566
+					var kyse__v48 kyse__template.HTML = icons.ArrowUp(icons.Props{})
+//line components/data-table.go:3716
+					_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v48))
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1566
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.lines().Asc)))
+//line components/data-table.go:3722
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</a>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t<a\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\trole=\"menuitem\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\tdata-sort-key=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1569
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(column.Key))
+//line components/data-table.go:3739
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\tdata-dir=\"desc\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1571
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("relative flex w-full cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"))
+//line components/data-table.go:3753
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\thref=\"")
+				}
+				if kyse__err == nil {
+					var kyse__v49 string
+//line components/data-table.kyse.go:1572
+					kyse__v49, kyse__err = kyse__view.TextURL(kyse__d.DescHref(column))
+//line components/data-table.go:3765
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1572", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v49)
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+//line components/data-table.kyse.go:1573
+				if kyse__d.Complete {
+//line components/data-table.go:3777
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-boost=\"false\"\n")
+					}
+				}
+//line components/data-table.kyse.go:1576
+				if !kyse__d.Complete {
+//line components/data-table.go:3784
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-get=\"")
+					}
+					if kyse__err == nil {
+						var kyse__v50 string
+//line components/data-table.kyse.go:1577
+						kyse__v50, kyse__err = kyse__view.TextURL(kyse__d.DescHref(column))
+//line components/data-table.go:3792
+						if kyse__err != nil {
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1577", kyse__err)
+						} else {
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v50)
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-target=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1578
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:3808
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-swap=\"outerHTML\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-select=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1580
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:3822
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-push-url=\"true\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-sync=\"closest [data-part=root]:replace\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-indicator=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1583
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:3839
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t>")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1585
+					var kyse__v51 kyse__template.HTML = icons.ArrowDown(icons.Props{})
+//line components/data-table.go:3851
+					_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v51))
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1585
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.lines().Desc)))
+//line components/data-table.go:3857
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</a>\n")
+				}
+//line components/data-table.kyse.go:1586
+				if column.Hideable {
+//line components/data-table.go:3864
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"-mx-1 my-1 h-px bg-border\" role=\"separator\"></div>\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t<a\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\trole=\"menuitem\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\tdata-column-hide=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1590
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(column.Key))
+//line components/data-table.go:3880
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\tclass=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1591
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("relative flex w-full cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"))
+//line components/data-table.go:3891
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\thref=\"")
+					}
+					if kyse__err == nil {
+						var kyse__v52 string
+//line components/data-table.kyse.go:1592
+						kyse__v52, kyse__err = kyse__view.TextURL(kyse__d.HideHref(column))
+//line components/data-table.go:3903
+						if kyse__err != nil {
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1592", kyse__err)
+						} else {
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v52)
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+//line components/data-table.kyse.go:1593
+					if kyse__d.Complete {
+//line components/data-table.go:3915
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-boost=\"false\"\n")
+						}
+					}
+//line components/data-table.kyse.go:1596
+					if !kyse__d.Complete {
+//line components/data-table.go:3922
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-get=\"")
+						}
+						if kyse__err == nil {
+							var kyse__v53 string
+//line components/data-table.kyse.go:1597
+							kyse__v53, kyse__err = kyse__view.TextURL(kyse__d.HideHref(column))
+//line components/data-table.go:3930
+							if kyse__err != nil {
+								kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1597", kyse__err)
+							} else {
+								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v53)
+							}
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-target=\"")
+						}
+						if kyse__err == nil {
+//line components/data-table.kyse.go:1598
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:3946
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-swap=\"outerHTML\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-select=\"")
+						}
+						if kyse__err == nil {
+//line components/data-table.kyse.go:1600
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:3960
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-push-url=\"true\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-sync=\"closest [data-part=root]:replace\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-indicator=\"")
+						}
+						if kyse__err == nil {
+//line components/data-table.kyse.go:1603
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:3977
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t>")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1605
+						var kyse__v54 kyse__template.HTML = icons.EyeSlash(icons.Props{})
+//line components/data-table.go:3989
+						_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v54))
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1605
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.lines().Hide)))
+//line components/data-table.go:3995
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "</a>\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t</div>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t</details>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t</div>\n")
+				}
+			}
+//line components/data-table.kyse.go:1611
+			if !kyse__d.Sortable(column) {
+//line components/data-table.go:4013
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1612
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(column.Label)))
+//line components/data-table.go:4020
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t</th>\n")
+			}
+		}
+//line components/data-table.kyse.go:1616
+		if kyse__d.Acting() {
+//line components/data-table.go:4032
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<th\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1618
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("h-10 px-2 text-start align-middle font-medium whitespace-nowrap text-foreground"))
+//line components/data-table.go:4042
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tscope=\"col\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t><span class=\"sr-only\">")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1620
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.lines().Actions)))
+//line components/data-table.go:4056
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</span></th>\n")
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t</tr>\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t</thead>\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<tbody class=\"[&_tr:last-child]:border-0\">\n")
+		}
+//line components/data-table.kyse.go:1625
+		for _, row := range kyse__d.Body() {
+			_ = row
+//line components/data-table.go:4074
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<tr\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-part=\"row\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1628
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("row", "border-b transition-colors hover:bg-muted/50 has-[details[open]]:bg-muted/50 data-[state=selected]:bg-muted")))
+//line components/data-table.go:4087
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+//line components/data-table.kyse.go:1629
+			if row.Selected {
+//line components/data-table.go:4094
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-state=\"selected\"\n")
+				}
+			}
+//line components/data-table.kyse.go:1632
+			if row.Outside {
+//line components/data-table.go:4101
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thidden\n")
+				}
+			}
+//line components/data-table.kyse.go:1635
+			if row.Key != "" {
+//line components/data-table.go:4108
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-key=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1636
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(row.Key))
+//line components/data-table.go:4115
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+			}
+//line components/data-table.kyse.go:1638
+			if row.Level > 0 {
+//line components/data-table.go:4123
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-level=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1639
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(row.Level))
+//line components/data-table.go:4130
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-level=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1640
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(row.Level))
+//line components/data-table.go:4141
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+			}
+//line components/data-table.kyse.go:1642
+			if row.Branch && row.Expanded {
+//line components/data-table.go:4149
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-expanded=\"true\"\n")
+				}
+			}
+//line components/data-table.kyse.go:1645
+			if row.Branch && !row.Expanded {
+//line components/data-table.go:4156
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-expanded=\"false\"\n")
+				}
+			}
+			if kyse__err == nil {
+				var kyse__v55 string
+//line components/data-table.kyse.go:1648
+				kyse__v55, kyse__err = kyse__view.Attributes(kyse__d.RowAttrs(row.TableRow))
+//line components/data-table.go:4165
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1648", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v55)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>\n")
+			}
+//line components/data-table.kyse.go:1650
+			if kyse__d.Selectable() {
+//line components/data-table.go:4177
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t<td\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-part=\"cell\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1653
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("cell", "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0")))
+//line components/data-table.go:4190
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-select\n")
+				}
+				if kyse__err == nil {
+					var kyse__v56 string
+//line components/data-table.kyse.go:1655
+					kyse__v56, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("cell"))
+//line components/data-table.go:4202
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1655", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v56)
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t<input\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tdata-part=\"select\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1659
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("select", "peer relative block size-4 shrink-0 cursor-pointer appearance-none rounded-[4px] border border-input outline-none transition-colors after:absolute after:top-[42%] after:left-1/2 after:hidden after:h-[9px] after:w-[5px] after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-r-2 after:border-b-2 after:border-current after:content-[''] checked:border-primary checked:bg-primary checked:text-primary-foreground checked:after:block focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30 dark:checked:bg-primary")))
+//line components/data-table.go:4224
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\ttype=\"checkbox\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tvalue=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1661
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(row.Key))
+//line components/data-table.go:4238
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+//line components/data-table.kyse.go:1662
+				if kyse__d.Bulky() {
+//line components/data-table.go:4245
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tname=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1663
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SelectName))
+//line components/data-table.go:4252
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tform=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1664
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.BulkID()))
+//line components/data-table.go:4263
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\taria-label=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1666
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RowName(row.TableRow)))
+//line components/data-table.go:4275
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+//line components/data-table.kyse.go:1667
+				if row.Selected {
+//line components/data-table.go:4282
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tchecked\n")
+					}
+				}
+				if kyse__err == nil {
+					var kyse__v57 string
+//line components/data-table.kyse.go:1670
+					kyse__v57, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("select"))
+//line components/data-table.go:4291
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1670", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v57)
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t</td>\n")
+				}
+			}
+//line components/data-table.kyse.go:1674
+			for i := 0; i < len(row.Cells); i++ {
+//line components/data-table.go:4307
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t<td\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-part=\"cell\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1677
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("cell", "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0", kyse__d.AlignClass(i))))
+//line components/data-table.go:4320
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+//line components/data-table.kyse.go:1678
+				if kyse__d.ColumnKey(i) != "" {
+//line components/data-table.go:4327
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tdata-column=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1679
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ColumnKey(i)))
+//line components/data-table.go:4334
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+//line components/data-table.kyse.go:1681
+				if kyse__d.OffAt(i) {
+//line components/data-table.go:4342
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thidden\n")
+					}
+				}
+//line components/data-table.kyse.go:1684
+				if row.Cells[i].SortValue != "" {
+//line components/data-table.go:4349
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tdata-sort-value=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1685
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(row.Cells[i].SortValue))
+//line components/data-table.go:4356
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+				if kyse__err == nil {
+					var kyse__v58 string
+//line components/data-table.kyse.go:1687
+					kyse__v58, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("cell"))
+//line components/data-table.go:4366
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1687", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v58)
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t>\n")
+				}
+//line components/data-table.kyse.go:1689
+				if row.Cells[i].HTML != "" {
+//line components/data-table.go:4378
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1690
+						var kyse__v59 kyse__template.HTML = row.Cells[i].HTML
+//line components/data-table.go:4385
+						_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v59))
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+					}
+				}
+//line components/data-table.kyse.go:1692
+				if row.Cells[i].HTML == "" {
+//line components/data-table.go:4394
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1693
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(row.Cells[i].Text)))
+//line components/data-table.go:4401
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t</td>\n")
+				}
+			}
+//line components/data-table.kyse.go:1697
+			if kyse__d.Acting() {
+//line components/data-table.go:4413
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t<td class=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1698
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("p-2 align-middle whitespace-nowrap"))
+//line components/data-table.go:4420
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
+				}
+//line components/data-table.kyse.go:1699
+				if len(row.Actions) > 0 {
+//line components/data-table.go:4427
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t<details\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tid=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1701
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(row.MenuID))
+//line components/data-table.go:4437
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tdata-part=\"row-menu\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tdata-menu\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tdata-closes\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tclass=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1705
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("row-menu", "group/menu relative")))
+//line components/data-table.go:4457
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						var kyse__v60 string
+//line components/data-table.kyse.go:1706
+						kyse__v60, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("row-menu"))
+//line components/data-table.go:4466
+						if kyse__err != nil {
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1706", kyse__err)
+						} else {
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v60)
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t>\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t<summary class=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1708
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("inline-flex cursor-pointer list-none [&::-webkit-details-marker]:hidden group/button shrink-0 items-center justify-center rounded-[min(var(--radius-md),10px)] border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none size-6 hover:bg-muted hover:text-foreground group-open/menu:bg-muted group-open/menu:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:hover:bg-muted/50"))
+//line components/data-table.go:4482
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t<span class=\"sr-only\">")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1709
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.lines().OpenMenu)))
+//line components/data-table.go:4493
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1710
+						var kyse__v61 kyse__template.HTML = icons.DotsThree(icons.Props{})
+//line components/data-table.go:4504
+						_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v61))
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t</summary>\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t<div\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\tdata-menu-panel\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\tdata-align=\"end\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\trole=\"menu\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\tclass=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1716
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("fixed z-50 w-44 min-w-32 overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none"))
+//line components/data-table.go:4531
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t>\n")
+					}
+//line components/data-table.kyse.go:1718
+					for n := 0; n < len(row.Actions); n++ {
+//line components/data-table.go:4541
+//line components/data-table.kyse.go:1719
+						if row.Actions[n].Separator {
+//line components/data-table.go:4544
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"-mx-1 my-1 h-px bg-border\" role=\"separator\"></div>\n")
+							}
+//line components/data-table.kyse.go:1721
+						} else if row.Actions[n].Heading {
+//line components/data-table.go:4550
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"px-1.5 py-1 text-xs font-medium text-muted-foreground\" role=\"heading\" aria-level=\"3\">")
+							}
+							if kyse__err == nil {
+//line components/data-table.kyse.go:1722
+								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(row.Actions[n].Label)))
+//line components/data-table.go:4557
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "</div>\n")
+							}
+//line components/data-table.kyse.go:1723
+						} else if row.Actions[n].URL != "" {
+//line components/data-table.go:4564
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<a\n")
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\trole=\"menuitem\"\n")
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tclass=\"")
+							}
+							if kyse__err == nil {
+//line components/data-table.kyse.go:1726
+								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("relative flex w-full cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"))
+//line components/data-table.go:4577
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\thref=\"")
+							}
+							if kyse__err == nil {
+								var kyse__v62 string
+//line components/data-table.kyse.go:1727
+								kyse__v62, kyse__err = kyse__view.TextURL(row.Actions[n].URL)
+//line components/data-table.go:4589
+								if kyse__err != nil {
+									kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1727", kyse__err)
+								} else {
+									_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v62)
+								}
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+							}
+//line components/data-table.kyse.go:1728
+							if row.Actions[n].Variant != "" {
+//line components/data-table.go:4601
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tdata-variant=\"")
+								}
+								if kyse__err == nil {
+//line components/data-table.kyse.go:1729
+									_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(row.Actions[n].Variant))
+//line components/data-table.go:4608
+								}
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+								}
+							}
+//line components/data-table.kyse.go:1731
+							if row.Actions[n].Disabled {
+//line components/data-table.go:4616
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\taria-disabled=\"true\"\n")
+								}
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t>\n")
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t")
+							}
+							if kyse__err == nil {
+//line components/data-table.kyse.go:1735
+								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(row.Actions[n].Label)))
+//line components/data-table.go:4630
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+							}
+//line components/data-table.kyse.go:1736
+							if row.Actions[n].Shortcut != "" {
+//line components/data-table.go:4637
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<span class=\"ml-auto text-xs tracking-widest text-muted-foreground\">")
+								}
+								if kyse__err == nil {
+//line components/data-table.kyse.go:1737
+									_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(row.Actions[n].Shortcut)))
+//line components/data-table.go:4644
+								}
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+								}
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t</a>\n")
+							}
+						} else {
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<button\n")
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\ttype=\"button\"\n")
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\trole=\"menuitem\"\n")
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tclass=\"")
+							}
+							if kyse__err == nil {
+//line components/data-table.kyse.go:1744
+								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("relative flex w-full cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"))
+//line components/data-table.go:4669
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+							}
+//line components/data-table.kyse.go:1745
+							if row.Actions[n].Variant != "" {
+//line components/data-table.go:4676
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tdata-variant=\"")
+								}
+								if kyse__err == nil {
+//line components/data-table.kyse.go:1746
+									_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(row.Actions[n].Variant))
+//line components/data-table.go:4683
+								}
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+								}
+							}
+//line components/data-table.kyse.go:1748
+							if row.Actions[n].Disabled {
+//line components/data-table.go:4691
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\taria-disabled=\"true\"\n")
+								}
+							}
+//line components/data-table.kyse.go:1751
+							if row.Actions[n].HxPost != "" {
+//line components/data-table.go:4698
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-post=\"")
+								}
+								if kyse__err == nil {
+									var kyse__v63 string
+//line components/data-table.kyse.go:1752
+									kyse__v63, kyse__err = kyse__view.TextURL(row.Actions[n].HxPost)
+//line components/data-table.go:4706
+									if kyse__err != nil {
+										kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1752", kyse__err)
+									} else {
+										_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v63)
+									}
+								}
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+								}
+							}
+//line components/data-table.kyse.go:1754
+							if row.Actions[n].HxGet != "" {
+//line components/data-table.go:4719
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-get=\"")
+								}
+								if kyse__err == nil {
+									var kyse__v64 string
+//line components/data-table.kyse.go:1755
+									kyse__v64, kyse__err = kyse__view.TextURL(row.Actions[n].HxGet)
+//line components/data-table.go:4727
+									if kyse__err != nil {
+										kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1755", kyse__err)
+									} else {
+										_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v64)
+									}
+								}
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+								}
+							}
+//line components/data-table.kyse.go:1757
+							if row.Actions[n].HxTarget != "" {
+//line components/data-table.go:4740
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-target=\"")
+								}
+								if kyse__err == nil {
+//line components/data-table.kyse.go:1758
+									_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(row.Actions[n].HxTarget))
+//line components/data-table.go:4747
+								}
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+								}
+							}
+//line components/data-table.kyse.go:1760
+							if row.Actions[n].HxConfirm != "" {
+//line components/data-table.go:4755
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\thx-confirm=\"")
+								}
+								if kyse__err == nil {
+//line components/data-table.kyse.go:1761
+									_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(row.Actions[n].HxConfirm))
+//line components/data-table.go:4762
+								}
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+								}
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t>\n")
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t")
+							}
+							if kyse__err == nil {
+//line components/data-table.kyse.go:1764
+								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(row.Actions[n].Label)))
+//line components/data-table.go:4777
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+							}
+//line components/data-table.kyse.go:1765
+							if row.Actions[n].Shortcut != "" {
+//line components/data-table.go:4784
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<span class=\"ml-auto text-xs tracking-widest text-muted-foreground\">")
+								}
+								if kyse__err == nil {
+//line components/data-table.kyse.go:1766
+									_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(row.Actions[n].Shortcut)))
+//line components/data-table.go:4791
+								}
+								if kyse__err == nil {
+									_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+								}
+							}
+							if kyse__err == nil {
+								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t</button>\n")
+							}
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t</div>\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t</details>\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t</td>\n")
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t</tr>\n")
+			}
+		}
+//line components/data-table.kyse.go:1778
+		if len(kyse__d.Rows) == 0 {
+//line components/data-table.go:4819
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<tr class=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1779
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("border-b transition-colors hover:bg-muted/50"))
+//line components/data-table.go:4826
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<td colspan=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1780
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Span()))
+//line components/data-table.go:4837
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\" class=\"h-24 p-2 text-center\">")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1780
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.lines().NoResult)))
+//line components/data-table.go:4845
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</td>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t</tr>\n")
+			}
+		}
+//line components/data-table.kyse.go:1783
+		if kyse__d.Complete && len(kyse__d.Rows) > 0 {
+//line components/data-table.go:4856
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<tr data-empty-row hidden class=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1788
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("border-b transition-colors hover:bg-muted/50"))
+//line components/data-table.go:4863
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\">\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<td colspan=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1789
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Span()))
+//line components/data-table.go:4874
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\" class=\"h-24 p-2 text-center\">")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1789
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.lines().NoResult)))
+//line components/data-table.go:4882
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</td>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t</tr>\n")
+			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t</tbody>\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t</table>\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t</div>\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t</div>\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+		}
+//line components/data-table.kyse.go:1800
+		if kyse__d.FooterText() != "" || kyse__d.Stepped() || kyse__d.Chooses() {
+//line components/data-table.go:4908
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<div\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"footer\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1803
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("footer", "flex flex-wrap items-center justify-end gap-x-2 gap-y-2 py-4")))
+//line components/data-table.go:4921
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				var kyse__v65 string
+//line components/data-table.kyse.go:1804
+				kyse__v65, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("footer"))
+//line components/data-table.go:4930
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1804", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v65)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<div\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"count\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1808
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("count", "min-w-[10rem] flex-1 text-sm text-muted-foreground")))
+//line components/data-table.go:4952
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\trole=\"status\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-live=\"polite\"\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-selected-template=\"")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1811
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SelectedSentence()))
+//line components/data-table.go:4969
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			}
+			if kyse__err == nil {
+				var kyse__v66 string
+//line components/data-table.kyse.go:1812
+				kyse__v66, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("count"))
+//line components/data-table.go:4978
+				if kyse__err != nil {
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1812", kyse__err)
+				} else {
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v66)
+				}
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
+			}
+			if kyse__err == nil {
+//line components/data-table.kyse.go:1813
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.FooterText())))
+//line components/data-table.go:4991
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "</div>\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+			}
+			if kyse__err == nil {
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<div class=\"flex flex-wrap items-center gap-x-6 gap-y-2 lg:gap-x-8\">\n")
+			}
+//line components/data-table.kyse.go:1816
+			if kyse__d.Chooses() {
+//line components/data-table.go:5004
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<div class=\"flex items-center space-x-2\">\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<p id=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1821
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SizesID()))
+//line components/data-table.go:5014
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "-label\" class=\"text-sm font-medium\">")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1821
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.lines().RowsPerPage)))
+//line components/data-table.go:5022
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<details\n")
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tid=\"")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:985
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/data-table.go:1184
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "-search\"\n")
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tname=\"")
-				}
-				if kyse__err == nil {
-//line components/data-table.kyse.go:986
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SearchName))
-//line components/data-table.go:1195
+//line components/data-table.kyse.go:1823
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SizesID()))
+//line components/data-table.go:5036
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tvalue=\"")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-part=\"sizes\"\n")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:987
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Query))
-//line components/data-table.go:1206
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-menu\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-closes\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1827
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("sizes", "group/menu relative")))
+//line components/data-table.go:5056
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tautocomplete=\"off\"\n")
+					var kyse__v67 string
+//line components/data-table.kyse.go:1828
+					kyse__v67, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("sizes"))
+//line components/data-table.go:5065
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1828", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v67)
+					}
 				}
-//line components/data-table.kyse.go:989
-				if !kyse__d.Complete {
-//line components/data-table.go:1216
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<summary\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1831
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("inline-flex cursor-pointer list-none [&::-webkit-details-marker]:hidden h-8 w-[70px] items-center justify-between gap-1 rounded-md border border-input bg-transparent px-2 py-1 text-sm whitespace-nowrap shadow-xs outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 group-open/menu:bg-muted [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg]:opacity-50 dark:bg-input/30"))
+//line components/data-table.go:5084
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-labelledby=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1832
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SizesID()))
+//line components/data-table.go:5095
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "-label ")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1832
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SizesID()))
+//line components/data-table.go:5103
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "-value\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t<span id=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1834
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SizesID()))
+//line components/data-table.go:5117
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "-value\" data-size-value>")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1834
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Size())))
+//line components/data-table.go:5125
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1835
+					var kyse__v68 kyse__template.HTML = icons.CaretUpDown(icons.Props{})
+//line components/data-table.go:5136
+					_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v68))
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t</summary>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<div\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-menu-panel\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-align=\"start\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\trole=\"menu\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1841
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("fixed z-50 min-w-[70px] overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none"))
+//line components/data-table.go:5163
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t>\n")
+				}
+//line components/data-table.kyse.go:1843
+				for _, size := range kyse__d.Sizes() {
+					_ = size
+//line components/data-table.go:5174
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t<a\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\trole=\"menuitemradio\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\taria-checked=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1846
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(size == kyse__d.Size()))
+//line components/data-table.go:5187
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tdata-size=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1847
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(size))
+//line components/data-table.go:5198
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tclass=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1848
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr("relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pe-8 ps-1.5 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"))
+//line components/data-table.go:5209
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thref=\"")
+					}
+					if kyse__err == nil {
+						var kyse__v69 string
+//line components/data-table.kyse.go:1849
+						kyse__v69, kyse__err = kyse__view.TextURL(kyse__d.SizeHref(size))
+//line components/data-table.go:5221
+						if kyse__err != nil {
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1849", kyse__err)
+						} else {
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v69)
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+//line components/data-table.kyse.go:1850
+					if kyse__d.Complete {
+//line components/data-table.go:5233
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thx-boost=\"false\"\n")
+						}
+					}
+//line components/data-table.kyse.go:1853
+					if !kyse__d.Complete {
+//line components/data-table.go:5240
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thx-get=\"")
+						}
+						if kyse__err == nil {
+							var kyse__v70 string
+//line components/data-table.kyse.go:1854
+							kyse__v70, kyse__err = kyse__view.TextURL(kyse__d.SizeHref(size))
+//line components/data-table.go:5248
+							if kyse__err != nil {
+								kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1854", kyse__err)
+							} else {
+								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v70)
+							}
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thx-target=\"")
+						}
+						if kyse__err == nil {
+//line components/data-table.kyse.go:1855
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:5264
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thx-swap=\"outerHTML\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thx-select=\"")
+						}
+						if kyse__err == nil {
+//line components/data-table.kyse.go:1857
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:5278
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thx-push-url=\"true\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thx-sync=\"closest [data-part=root]:replace\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thx-indicator=\"")
+						}
+						if kyse__err == nil {
+//line components/data-table.kyse.go:1860
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:5295
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t>\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1863
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(size)))
+//line components/data-table.go:5310
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t<span\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tclass=\"pointer-events-none absolute end-2 flex items-center justify-center [&_svg]:size-4 [&_path[opacity]]:hidden\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tdata-indicator\n")
+					}
+//line components/data-table.kyse.go:1867
+					if size != kyse__d.Size() {
+//line components/data-table.go:5326
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\thidden\n")
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t>")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1870
+						var kyse__v71 kyse__template.HTML = icons.Check(icons.Props{})
+//line components/data-table.go:5337
+						_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v71))
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t</a>\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t</div>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t</details>\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t</div>\n")
+				}
+			}
+//line components/data-table.kyse.go:1877
+			if kyse__d.Stepped() {
+//line components/data-table.go:5359
+//line components/data-table.kyse.go:1878
+				if kyse__d.FullPager && kyse__d.PageOfText() != "" {
+//line components/data-table.go:5362
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<div\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-part=\"page-of\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1881
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("page-of", "flex w-[100px] items-center justify-center text-sm font-medium")))
+//line components/data-table.go:5375
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-page-of-template=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1882
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.lines().PageOf))
+//line components/data-table.go:5386
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						var kyse__v72 string
+//line components/data-table.kyse.go:1883
+						kyse__v72, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("page-of"))
+//line components/data-table.go:5395
+						if kyse__err != nil {
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1883", kyse__err)
+						} else {
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v72)
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1884
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.PageOfText())))
+//line components/data-table.go:5408
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "</div>\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<nav\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-part=\"pagination\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1888
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("pagination", "flex items-center space-x-2")))
+//line components/data-table.go:5426
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\taria-label=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1889
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PagerName()))
+//line components/data-table.go:5437
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+//line components/data-table.kyse.go:1890
+				if !kyse__d.Paged() && !kyse__d.Complete {
+//line components/data-table.go:5444
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\thidden\n")
+					}
+				}
+				if kyse__err == nil {
+					var kyse__v73 string
+//line components/data-table.kyse.go:1893
+					kyse__v73, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("pagination"))
+//line components/data-table.go:5453
+					if kyse__err != nil {
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1893", kyse__err)
+					} else {
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v73)
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>\n")
+				}
+//line components/data-table.kyse.go:1895
+				if kyse__d.FullPager && kyse__d.Known() {
+//line components/data-table.go:5465
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<a\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-part=\"first\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-step=\"first\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1899
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("first", "hidden lg:flex group/button shrink-0 items-center justify-center rounded-lg border border-border bg-background bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none size-8 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:border-input dark:bg-input/30 dark:hover:bg-input/50")))
+//line components/data-table.go:5481
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-label=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1900
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.lines().First))
+//line components/data-table.go:5492
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+//line components/data-table.kyse.go:1901
+					if kyse__d.HasPrevious() || kyse__d.Complete {
+//line components/data-table.go:5499
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thref=\"")
+						}
+						if kyse__err == nil {
+							var kyse__v74 string
+//line components/data-table.kyse.go:1902
+							kyse__v74, kyse__err = kyse__view.TextURL(kyse__d.FirstHref())
+//line components/data-table.go:5507
+							if kyse__err != nil {
+								kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1902", kyse__err)
+							} else {
+								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v74)
+							}
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+						}
+					}
+//line components/data-table.kyse.go:1904
+					if !kyse__d.HasPrevious() {
+//line components/data-table.go:5520
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\taria-disabled=\"true\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\ttabindex=\"-1\"\n")
+						}
+					}
+//line components/data-table.kyse.go:1908
+					if kyse__d.Complete {
+//line components/data-table.go:5530
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-boost=\"false\"\n")
+						}
+					}
+//line components/data-table.kyse.go:1911
+					if !kyse__d.Complete && kyse__d.HasPrevious() {
+//line components/data-table.go:5537
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-get=\"")
+						}
+						if kyse__err == nil {
+							var kyse__v75 string
+//line components/data-table.kyse.go:1912
+							kyse__v75, kyse__err = kyse__view.TextURL(kyse__d.FirstHref())
+//line components/data-table.go:5545
+							if kyse__err != nil {
+								kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1912", kyse__err)
+							} else {
+								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v75)
+							}
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-target=\"")
+						}
+						if kyse__err == nil {
+//line components/data-table.kyse.go:1913
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:5561
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-swap=\"outerHTML\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-select=\"")
+						}
+						if kyse__err == nil {
+//line components/data-table.kyse.go:1915
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:5575
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-push-url=\"true\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-sync=\"closest [data-part=root]:replace\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-indicator=\"")
+						}
+						if kyse__err == nil {
+//line components/data-table.kyse.go:1918
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:5592
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+						}
+					}
+					if kyse__err == nil {
+						var kyse__v76 string
+//line components/data-table.kyse.go:1920
+						kyse__v76, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("first"))
+//line components/data-table.go:5602
+						if kyse__err != nil {
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1920", kyse__err)
+						} else {
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v76)
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t>")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1921
+						var kyse__v77 kyse__template.HTML = icons.CaretDoubleLeft(icons.Props{})
+//line components/data-table.go:5615
+						_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v77))
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "</a>\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<a\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-part=\"previous\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-step=\"previous\"\n")
+				}
+//line components/data-table.kyse.go:1926
+				if kyse__d.FullPager {
+//line components/data-table.go:5633
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1927
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("previous", "inline-flex group/button shrink-0 items-center justify-center rounded-lg border border-border bg-background bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none size-8 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:border-input dark:bg-input/30 dark:hover:bg-input/50")))
+//line components/data-table.go:5640
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+//line components/data-table.kyse.go:1929
+				if !kyse__d.FullPager {
+//line components/data-table.go:5648
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1930
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("previous", "inline-flex group/button shrink-0 items-center justify-center rounded-[min(var(--radius-md),12px)] border border-border bg-background bg-clip-padding text-[0.8rem] font-medium whitespace-nowrap transition-all outline-none select-none h-7 gap-1 px-2.5 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5 dark:border-input dark:bg-input/30 dark:hover:bg-input/50")))
+//line components/data-table.go:5655
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-label=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1932
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.lines().Previous))
+//line components/data-table.go:5667
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+				}
+//line components/data-table.kyse.go:1933
+				if kyse__d.HasPrevious() || kyse__d.Complete {
+//line components/data-table.go:5674
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thref=\"")
+					}
+					if kyse__err == nil {
+						var kyse__v78 string
+//line components/data-table.kyse.go:1934
+						kyse__v78, kyse__err = kyse__view.TextURL(kyse__d.PreviousHref())
+//line components/data-table.go:5682
+						if kyse__err != nil {
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1934", kyse__err)
+						} else {
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v78)
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+//line components/data-table.kyse.go:1936
+				if !kyse__d.HasPrevious() {
+//line components/data-table.go:5695
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-disabled=\"true\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\ttabindex=\"-1\"\n")
+					}
+				}
+//line components/data-table.kyse.go:1940
+				if kyse__d.Complete {
+//line components/data-table.go:5705
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-boost=\"false\"\n")
+					}
+				}
+//line components/data-table.kyse.go:1943
+				if !kyse__d.Complete && kyse__d.HasPrevious() {
+//line components/data-table.go:5712
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-get=\"")
 					}
 					if kyse__err == nil {
-						var kyse__v4 string
-//line components/data-table.kyse.go:990
-						kyse__v4, kyse__err = kyse__view.TextURL(kyse__d.SearchAddress())
-//line components/data-table.go:1224
+						var kyse__v79 string
+//line components/data-table.kyse.go:1944
+						kyse__v79, kyse__err = kyse__view.TextURL(kyse__d.PreviousHref())
+//line components/data-table.go:5720
 						if kyse__err != nil {
-							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:990", kyse__err)
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1944", kyse__err)
 						} else {
-							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v79)
 						}
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-trigger=\"")
-					}
-					if kyse__err == nil {
-//line components/data-table.kyse.go:991
-						if kyse__v5 := kyse__view.Text(kyse__d.SearchTrigger()); kyse__strings.ContainsAny(kyse__v5, "[]") {
-//line components/data-table.go:1240
-							kyse__err = kyse__errors.New("components/data-table.kyse.go:991: the value interpolated into an HTMX trigger holds a square bracket, and HTMX evaluates what a trigger holds between square brackets as a script")
-						} else {
-							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__v5))
-						}
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-include=\"closest form\"\n")
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-target=\"")
 					}
 					if kyse__err == nil {
-//line components/data-table.kyse.go:993
+//line components/data-table.kyse.go:1945
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
-//line components/data-table.go:1258
+//line components/data-table.go:5736
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1266,1262 +5744,447 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-select=\"")
 					}
 					if kyse__err == nil {
-//line components/data-table.kyse.go:995
+//line components/data-table.kyse.go:1947
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
-//line components/data-table.go:1272
+//line components/data-table.go:5750
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 					}
 					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-sync=\"this:replace\"\n")
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-push-url=\"true\"\n")
 					}
 					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-indicator=\"#")
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-sync=\"closest [data-part=root]:replace\"\n")
 					}
 					if kyse__err == nil {
-//line components/data-table.kyse.go:997
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/data-table.go:1286
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-indicator=\"")
 					}
 					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "-indicator\"\n")
-					}
-				}
-//line components/data-table.kyse.go:999
-				if kyse__d.SearchPlaceholder != "" {
-//line components/data-table.go:1294
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tplaceholder=\"")
-					}
-					if kyse__err == nil {
-//line components/data-table.kyse.go:1000
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SearchPlaceholder))
-//line components/data-table.go:1301
+//line components/data-table.kyse.go:1950
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:5767
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 					}
 				}
 				if kyse__err == nil {
-					var kyse__v6 string
-//line components/data-table.kyse.go:1002
-					kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("search"))
-//line components/data-table.go:1311
+					var kyse__v80 string
+//line components/data-table.kyse.go:1952
+					kyse__v80, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("previous"))
+//line components/data-table.go:5777
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1002", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1952", kyse__err)
 					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v80)
 					}
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>\n")
 				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<span\n")
+//line components/data-table.kyse.go:1954
+				if kyse__d.FullPager {
+//line components/data-table.go:5789
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1955
+						var kyse__v81 kyse__template.HTML = icons.CaretLeft(icons.Props{})
+//line components/data-table.go:5796
+						_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v81))
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+					}
+				}
+//line components/data-table.kyse.go:1957
+				if !kyse__d.FullPager {
+//line components/data-table.go:5805
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1958
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.lines().Back)))
+//line components/data-table.go:5812
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+					}
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-part=\"indicator\"\n")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t</a>\n")
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<a\n")
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:1006
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("indicator", "spinner")))
-//line components/data-table.go:1333
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-part=\"next\"\n")
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-step=\"next\"\n")
+				}
+//line components/data-table.kyse.go:1964
+				if kyse__d.FullPager {
+//line components/data-table.go:5832
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1965
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("next", "inline-flex group/button shrink-0 items-center justify-center rounded-lg border border-border bg-background bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none size-8 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:border-input dark:bg-input/30 dark:hover:bg-input/50")))
+//line components/data-table.go:5839
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+//line components/data-table.kyse.go:1967
+				if !kyse__d.FullPager {
+//line components/data-table.go:5847
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1968
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("next", "inline-flex group/button shrink-0 items-center justify-center rounded-[min(var(--radius-md),12px)] border border-border bg-background bg-clip-padding text-[0.8rem] font-medium whitespace-nowrap transition-all outline-none select-none h-7 gap-1 px-2.5 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5 dark:border-input dark:bg-input/30 dark:hover:bg-input/50")))
+//line components/data-table.go:5854
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-label=\"")
+				}
+				if kyse__err == nil {
+//line components/data-table.kyse.go:1970
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.lines().Next))
+//line components/data-table.go:5866
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tid=\"")
+//line components/data-table.kyse.go:1971
+				if kyse__d.HasNext() || kyse__d.Complete {
+//line components/data-table.go:5873
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thref=\"")
+					}
+					if kyse__err == nil {
+						var kyse__v82 string
+//line components/data-table.kyse.go:1972
+						kyse__v82, kyse__err = kyse__view.TextURL(kyse__d.NextHref())
+//line components/data-table.go:5881
+						if kyse__err != nil {
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1972", kyse__err)
+						} else {
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v82)
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+				}
+//line components/data-table.kyse.go:1974
+				if !kyse__d.HasNext() {
+//line components/data-table.go:5894
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-disabled=\"true\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\ttabindex=\"-1\"\n")
+					}
+				}
+//line components/data-table.kyse.go:1978
+				if kyse__d.Complete {
+//line components/data-table.go:5904
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-boost=\"false\"\n")
+					}
+				}
+//line components/data-table.kyse.go:1981
+				if !kyse__d.Complete && kyse__d.HasNext() {
+//line components/data-table.go:5911
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-get=\"")
+					}
+					if kyse__err == nil {
+						var kyse__v83 string
+//line components/data-table.kyse.go:1982
+						kyse__v83, kyse__err = kyse__view.TextURL(kyse__d.NextHref())
+//line components/data-table.go:5919
+						if kyse__err != nil {
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1982", kyse__err)
+						} else {
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v83)
+						}
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-target=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1983
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:5935
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-swap=\"outerHTML\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-select=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1985
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:5949
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-push-url=\"true\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-sync=\"closest [data-part=root]:replace\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-indicator=\"")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1988
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:5966
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+					}
 				}
 				if kyse__err == nil {
-//line components/data-table.kyse.go:1007
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/data-table.go:1344
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "-indicator\"\n")
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-hidden=\"true\"\n")
-				}
-				if kyse__err == nil {
-					var kyse__v7 string
-//line components/data-table.kyse.go:1009
-					kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("indicator"))
-//line components/data-table.go:1356
+					var kyse__v84 string
+//line components/data-table.kyse.go:1990
+					kyse__v84, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("next"))
+//line components/data-table.go:5976
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1009", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1990", kyse__err)
 					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v84)
 					}
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t></span>\n")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>\n")
 				}
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
-			}
-//line components/data-table.kyse.go:1013
-			if kyse__d.Filtered() {
-//line components/data-table.go:1372
-//line components/data-table.kyse.go:1018
-				for _, filter := range kyse__d.Filters {
-					_ = filter
-//line components/data-table.go:1376
+//line components/data-table.kyse.go:1992
+				if kyse__d.FullPager {
+//line components/data-table.go:5988
 					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<details\n")
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t")
 					}
 					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-part=\"facet\"\n")
+//line components/data-table.kyse.go:1993
+						var kyse__v85 kyse__template.HTML = icons.CaretRight(icons.Props{})
+//line components/data-table.go:5995
+						_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v85))
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+					}
+				}
+//line components/data-table.kyse.go:1995
+				if !kyse__d.FullPager {
+//line components/data-table.go:6004
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t")
+					}
+					if kyse__err == nil {
+//line components/data-table.kyse.go:1996
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.lines().Forward)))
+//line components/data-table.go:6011
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
+					}
+				}
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t</a>\n")
+				}
+//line components/data-table.kyse.go:1999
+				if kyse__d.FullPager && kyse__d.Known() {
+//line components/data-table.go:6022
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<a\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-part=\"last\"\n")
+					}
+					if kyse__err == nil {
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-step=\"last\"\n")
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tclass=\"")
 					}
 					if kyse__err == nil {
-//line components/data-table.kyse.go:1021
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("facet", "data-table-facet")))
-//line components/data-table.go:1389
+//line components/data-table.kyse.go:2003
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("last", "hidden lg:flex group/button shrink-0 items-center justify-center rounded-lg border border-border bg-background bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none size-8 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:border-input dark:bg-input/30 dark:hover:bg-input/50")))
+//line components/data-table.go:6038
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 					}
 					if kyse__err == nil {
-						var kyse__v8 string
-//line components/data-table.kyse.go:1022
-						kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("facet"))
-//line components/data-table.go:1398
-						if kyse__err != nil {
-							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1022", kyse__err)
-						} else {
-							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
-						}
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-label=\"")
 					}
 					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t>\n")
+//line components/data-table.kyse.go:2004
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.lines().Last))
+//line components/data-table.go:6049
 					}
 					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t<summary>\n")
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t")
-					}
-					if kyse__err == nil {
-//line components/data-table.kyse.go:1025
-						var kyse__v9 kyse__template.HTML = icons.PlusCircle(icons.Props{})
-//line components/data-table.go:1417
-						_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v9))
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t<span>")
-					}
-					if kyse__err == nil {
-//line components/data-table.kyse.go:1026
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(filter.Label)))
-//line components/data-table.go:1429
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
-					}
-//line components/data-table.kyse.go:1027
-					if len(kyse__d.FacetSummary(filter)) > 0 {
-//line components/data-table.go:1436
+//line components/data-table.kyse.go:2005
+					if kyse__d.HasNext() || kyse__d.Complete {
+//line components/data-table.go:6056
 						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t<span\n")
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thref=\"")
 						}
 						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tdata-part=\"facet-chosen\"\n")
-						}
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tclass=\"")
-						}
-						if kyse__err == nil {
-//line components/data-table.kyse.go:1030
-							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("facet-chosen", "data-table-facet-chosen")))
-//line components/data-table.go:1449
+							var kyse__v86 string
+//line components/data-table.kyse.go:2006
+							kyse__v86, kyse__err = kyse__view.TextURL(kyse__d.LastHref())
+//line components/data-table.go:6064
+							if kyse__err != nil {
+								kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:2006", kyse__err)
+							} else {
+								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v86)
+							}
 						}
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 						}
+					}
+//line components/data-table.kyse.go:2008
+					if !kyse__d.HasNext() {
+//line components/data-table.go:6077
 						if kyse__err == nil {
-							var kyse__v10 string
-//line components/data-table.kyse.go:1031
-							kyse__v10, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("facet-chosen"))
-//line components/data-table.go:1458
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\taria-disabled=\"true\"\n")
+						}
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\ttabindex=\"-1\"\n")
+						}
+					}
+//line components/data-table.kyse.go:2012
+					if kyse__d.Complete {
+//line components/data-table.go:6087
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-boost=\"false\"\n")
+						}
+					}
+//line components/data-table.kyse.go:2015
+					if !kyse__d.Complete && kyse__d.HasNext() {
+//line components/data-table.go:6094
+						if kyse__err == nil {
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-get=\"")
+						}
+						if kyse__err == nil {
+							var kyse__v87 string
+//line components/data-table.kyse.go:2016
+							kyse__v87, kyse__err = kyse__view.TextURL(kyse__d.LastHref())
+//line components/data-table.go:6102
 							if kyse__err != nil {
-								kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1031", kyse__err)
+								kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:2016", kyse__err)
 							} else {
-								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v10)
-							}
-						}
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t>\n")
-						}
-//line components/data-table.kyse.go:1033
-						for _, label := range kyse__d.FacetSummary(filter) {
-							_ = label
-//line components/data-table.go:1471
-							if kyse__err == nil {
-								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t<span class=\"badge\" data-variant=\"secondary\">")
-							}
-							if kyse__err == nil {
-//line components/data-table.kyse.go:1034
-								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(label)))
-//line components/data-table.go:1478
-							}
-							if kyse__err == nil {
-								_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
-							}
-						}
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t</span>\n")
-						}
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t</summary>\n")
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t<div\n")
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tclass=\"data-table-facet-menu\"\n")
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\trole=\"group\"\n")
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\taria-label=\"")
-					}
-					if kyse__err == nil {
-//line components/data-table.kyse.go:1042
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.FacetName(filter)))
-//line components/data-table.go:1506
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-					}
-//line components/data-table.kyse.go:1043
-					if !kyse__d.Complete {
-//line components/data-table.go:1513
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-get=\"")
-						}
-						if kyse__err == nil {
-							var kyse__v11 string
-//line components/data-table.kyse.go:1044
-							kyse__v11, kyse__err = kyse__view.TextURL(kyse__d.SearchAddress())
-//line components/data-table.go:1521
-							if kyse__err != nil {
-								kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1044", kyse__err)
-							} else {
-								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v11)
+								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v87)
 							}
 						}
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 						}
 						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-trigger=\"change\"\n")
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-target=\"")
 						}
 						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-include=\"closest form\"\n")
-						}
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-target=\"")
-						}
-						if kyse__err == nil {
-//line components/data-table.kyse.go:1047
+//line components/data-table.kyse.go:2017
 							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
-//line components/data-table.go:1543
+//line components/data-table.go:6118
 						}
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 						}
 						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-swap=\"outerHTML\"\n")
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-swap=\"outerHTML\"\n")
 						}
 						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-select=\"")
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-select=\"")
 						}
 						if kyse__err == nil {
-//line components/data-table.kyse.go:1049
+//line components/data-table.kyse.go:2019
 							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
-//line components/data-table.go:1557
+//line components/data-table.go:6132
 						}
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 						}
 						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-sync=\"closest form:replace\"\n")
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-push-url=\"true\"\n")
 						}
 						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-indicator=\"#")
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-sync=\"closest [data-part=root]:replace\"\n")
 						}
 						if kyse__err == nil {
-//line components/data-table.kyse.go:1051
-							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/data-table.go:1571
+							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\thx-indicator=\"")
 						}
 						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "-indicator\"\n")
-						}
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t>\n")
-					}
-//line components/data-table.kyse.go:1054
-					for _, option := range filter.Options {
-						_ = option
-//line components/data-table.go:1583
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t<label class=\"data-table-facet-option\">\n")
-						}
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t<input\n")
-						}
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\tdata-part=\"filter\"\n")
-						}
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\tclass=\"")
-						}
-						if kyse__err == nil {
-//line components/data-table.kyse.go:1058
-							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("filter", "input")))
-//line components/data-table.go:1599
-						}
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-						}
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\ttype=\"checkbox\"\n")
-						}
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\tname=\"")
-						}
-						if kyse__err == nil {
-//line components/data-table.kyse.go:1060
-							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(filter.Key))
-//line components/data-table.go:1613
-						}
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-						}
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\tvalue=\"")
-						}
-						if kyse__err == nil {
-//line components/data-table.kyse.go:1061
-							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(option.Value))
-//line components/data-table.go:1624
-						}
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-						}
-//line components/data-table.kyse.go:1062
-						if kyse__d.Chosen(filter, option) {
-//line components/data-table.go:1631
-							if kyse__err == nil {
-								_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\tchecked\n")
-							}
-						}
-						if kyse__err == nil {
-							var kyse__v12 string
-//line components/data-table.kyse.go:1065
-							kyse__v12, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("filter"))
-//line components/data-table.go:1640
-							if kyse__err != nil {
-								kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1065", kyse__err)
-							} else {
-								_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v12)
-							}
-						}
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t>\n")
-						}
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t<span>")
-						}
-						if kyse__err == nil {
-//line components/data-table.kyse.go:1067
-							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(option.Label)))
-//line components/data-table.go:1656
-						}
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
-						}
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t</label>\n")
-						}
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t</div>\n")
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t</details>\n")
-					}
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<noscript>")
-				}
-				if kyse__err == nil {
-//line components/data-table.kyse.go:1073
-					var kyse__v13 kyse__template.HTML = Button(ButtonProps{Label: kyse__d.ApplyText(), Type: "submit", Variant: "outline", Size: "sm"})
-//line components/data-table.go:1678
-					_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v13))
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "</noscript>\n")
-				}
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t</form>\n")
-			}
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
-		}
-//line components/data-table.kyse.go:1078
-		if kyse__d.Hideable() {
-//line components/data-table.go:1694
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<details\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-part=\"columns\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1084
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("columns", "table-columns")))
-//line components/data-table.go:1707
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
-				var kyse__v14 string
-//line components/data-table.kyse.go:1085
-				kyse__v14, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("columns"))
-//line components/data-table.go:1716
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1085", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v14)
-				}
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<summary>")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1087
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.ColumnsName())))
-//line components/data-table.go:1732
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1087
-				var kyse__v15 kyse__template.HTML = icons.CaretDown(icons.Props{})
-//line components/data-table.go:1737
-				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v15))
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "</summary>\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<div>\n")
-			}
-//line components/data-table.kyse.go:1089
-			for _, column := range kyse__d.Columns {
-				_ = column
-//line components/data-table.go:1749
-//line components/data-table.kyse.go:1090
-				if column.Hideable && column.Key != "" {
-//line components/data-table.go:1752
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t<label\n")
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tdata-part=\"toggle\"\n")
-					}
-//line components/data-table.kyse.go:1093
-					if kyse__d.PartClass("toggle") != "" {
-//line components/data-table.go:1761
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tclass=\"")
-						}
-						if kyse__err == nil {
-//line components/data-table.kyse.go:1094
-							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("toggle")))
-//line components/data-table.go:1768
+//line components/data-table.kyse.go:2022
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
+//line components/data-table.go:6149
 						}
 						if kyse__err == nil {
 							_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 						}
 					}
 					if kyse__err == nil {
-						var kyse__v16 string
-//line components/data-table.kyse.go:1096
-						kyse__v16, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("toggle"))
-//line components/data-table.go:1778
+						var kyse__v88 string
+//line components/data-table.kyse.go:2024
+						kyse__v88, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("last"))
+//line components/data-table.go:6159
 						if kyse__err != nil {
-							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1096", kyse__err)
+							kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:2024", kyse__err)
 						} else {
-							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v16)
+							_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v88)
 						}
 					}
 					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t>\n")
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t>")
 					}
 					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t<input\n")
+//line components/data-table.kyse.go:2025
+						var kyse__v89 kyse__template.HTML = icons.CaretDoubleRight(icons.Props{})
+//line components/data-table.go:6172
+						_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v89))
 					}
 					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tclass=\"input\"\n")
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\ttype=\"checkbox\"\n")
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tdata-column-toggle=\"")
-					}
-					if kyse__err == nil {
-//line components/data-table.kyse.go:1101
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(column.Key))
-//line components/data-table.go:1803
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-					}
-//line components/data-table.kyse.go:1102
-					if !column.Hidden {
-//line components/data-table.go:1810
-						if kyse__err == nil {
-							_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tchecked\n")
-						}
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t>\n")
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t")
-					}
-					if kyse__err == nil {
-//line components/data-table.kyse.go:1106
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(column.Label)))
-//line components/data-table.go:1824
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
-					}
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t</label>\n")
-					}
-				}
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t</div>\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t</details>\n")
-			}
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t</div>\n")
-		}
-	}
-	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
-	}
-	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t")
-	}
-	if kyse__err == nil {
-//line components/data-table.kyse.go:1116
-		var kyse__v17 kyse__template.HTML = Table(kyse__d.Grid())
-//line components/data-table.go:1854
-		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v17))
-	}
-	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
-	}
-	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
-	}
-//line components/data-table.kyse.go:1122
-	if kyse__d.Paged() || kyse__d.Complete || kyse__d.Searchable() || kyse__d.Chooses() || kyse__d.Selectable() {
-//line components/data-table.go:1865
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<div\n")
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"footer\"\n")
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
-		}
-		if kyse__err == nil {
-//line components/data-table.kyse.go:1125
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("footer", "data-table-footer")))
-//line components/data-table.go:1878
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-		}
-		if kyse__err == nil {
-			var kyse__v18 string
-//line components/data-table.kyse.go:1126
-			kyse__v18, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("footer"))
-//line components/data-table.go:1887
-			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1126", kyse__err)
-			} else {
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v18)
-			}
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>\n")
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<div class=\"data-table-status\">\n")
-		}
-//line components/data-table.kyse.go:1129
-		if kyse__d.Selectable() {
-//line components/data-table.go:1902
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<p\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-part=\"count\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1132
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("count", "data-table-count")))
-//line components/data-table.go:1915
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\trole=\"status\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\taria-live=\"polite\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-selected-template=\"")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1135
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SelectedSentence()))
-//line components/data-table.go:1932
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
-				var kyse__v19 string
-//line components/data-table.kyse.go:1136
-				kyse__v19, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("count"))
-//line components/data-table.go:1941
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1136", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v19)
-				}
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1137
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.SelectedText())))
-//line components/data-table.go:1954
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
-			}
-		}
-//line components/data-table.kyse.go:1139
-		if kyse__d.Ranged() {
-//line components/data-table.go:1962
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<p\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-part=\"showing\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1142
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("showing", "data-table-showing")))
-//line components/data-table.go:1975
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\trole=\"status\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\taria-live=\"polite\"\n")
-			}
-			if kyse__err == nil {
-				var kyse__v20 string
-//line components/data-table.kyse.go:1145
-				kyse__v20, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("showing"))
-//line components/data-table.go:1990
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1145", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v20)
-				}
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1146
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Showing())))
-//line components/data-table.go:2003
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
-			}
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t</div>\n")
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<div class=\"data-table-pager\">\n")
-		}
-//line components/data-table.kyse.go:1151
-		if kyse__d.Chooses() {
-//line components/data-table.go:2020
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<label class=\"data-table-sizes\">\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<span>")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1153
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.PerPageText())))
-//line components/data-table.go:2030
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<select\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-part=\"sizes\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1156
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("sizes", "select")))
-//line components/data-table.go:2047
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-page-size\n")
-			}
-			if kyse__err == nil {
-				var kyse__v21 string
-//line components/data-table.kyse.go:1158
-				kyse__v21, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("sizes"))
-//line components/data-table.go:2059
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1158", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v21)
-				}
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>\n")
-			}
-//line components/data-table.kyse.go:1160
-			for _, size := range kyse__d.Sizes() {
-				_ = size
-//line components/data-table.go:2072
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t<option\n")
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\tvalue=\"")
-				}
-				if kyse__err == nil {
-//line components/data-table.kyse.go:1162
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(size))
-//line components/data-table.go:2082
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-				}
-//line components/data-table.kyse.go:1163
-				if size == kyse__d.PageSize {
-//line components/data-table.go:2089
-					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tselected\n")
+						_, kyse__err = kyse__io.WriteString(kyse__w, "</a>\n")
 					}
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t>")
-				}
-				if kyse__err == nil {
-//line components/data-table.kyse.go:1166
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(size)))
-//line components/data-table.go:2100
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "</option>\n")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t</nav>\n")
 				}
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t</select>\n")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t</div>\n")
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t</label>\n")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t</div>\n")
 			}
-		}
-//line components/data-table.kyse.go:1171
-		if kyse__d.Paged() || kyse__d.Complete {
-//line components/data-table.go:2115
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<nav\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-part=\"pagination\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1178
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("pagination", "data-table-pagination")))
-//line components/data-table.go:2128
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\taria-label=\"")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1179
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Pager().LandmarkName()))
-//line components/data-table.go:2139
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-page-of-template=\"")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1180
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PageOfTemplate()))
-//line components/data-table.go:2150
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-//line components/data-table.kyse.go:1181
-			if !kyse__d.Paged() {
-//line components/data-table.go:2157
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\thidden\n")
-				}
-			}
-			if kyse__err == nil {
-				var kyse__v22 string
-//line components/data-table.kyse.go:1184
-				kyse__v22, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("pagination"))
-//line components/data-table.go:2166
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1184", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v22)
-				}
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>\n")
-			}
-//line components/data-table.kyse.go:1186
-			if kyse__d.PageOfText() != "" {
-//line components/data-table.go:2178
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<span\n")
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-part=\"page-of\"\n")
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
-				}
-				if kyse__err == nil {
-//line components/data-table.kyse.go:1189
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("page-of", "data-table-page-of")))
-//line components/data-table.go:2191
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-				}
-				if kyse__err == nil {
-					var kyse__v23 string
-//line components/data-table.kyse.go:1190
-					kyse__v23, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("page-of"))
-//line components/data-table.go:2200
-					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1190", kyse__err)
-					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v23)
-					}
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>")
-				}
-				if kyse__err == nil {
-//line components/data-table.kyse.go:1191
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.PageOfText())))
-//line components/data-table.go:2213
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
-				}
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<a\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-part=\"previous\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1195
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("previous", "btn")))
-//line components/data-table.go:2231
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-variant=\"outline\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-size=\"sm\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\thref=\"")
-			}
-			if kyse__err == nil {
-				var kyse__v24 string
-//line components/data-table.kyse.go:1198
-				kyse__v24, kyse__err = kyse__view.TextURL(kyse__d.Pager().PreviousHref())
-//line components/data-table.go:2249
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1198", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v24)
-				}
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-page=\"")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1199
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PreviousPage()))
-//line components/data-table.go:2265
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-label=\"")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1200
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Pager().PreviousName()))
-//line components/data-table.go:2276
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-//line components/data-table.kyse.go:1201
-			if !kyse__d.Pager().HasPrevious() {
-//line components/data-table.go:2283
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-disabled=\"true\"\n")
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\ttabindex=\"-1\"\n")
-				}
-			}
-//line components/data-table.kyse.go:1205
-			if !kyse__d.Complete {
-//line components/data-table.go:2293
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-get=\"")
-				}
-				if kyse__err == nil {
-					var kyse__v25 string
-//line components/data-table.kyse.go:1206
-					kyse__v25, kyse__err = kyse__view.TextURL(kyse__d.Pager().PreviousHref())
-//line components/data-table.go:2301
-					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1206", kyse__err)
-					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v25)
-					}
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-target=\"")
-				}
-				if kyse__err == nil {
-//line components/data-table.kyse.go:1207
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
-//line components/data-table.go:2317
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-swap=\"outerHTML\"\n")
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-select=\"")
-				}
-				if kyse__err == nil {
-//line components/data-table.kyse.go:1209
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
-//line components/data-table.go:2331
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-				}
-			}
-			if kyse__err == nil {
-				var kyse__v26 string
-//line components/data-table.kyse.go:1211
-				kyse__v26, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("previous"))
-//line components/data-table.go:2341
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1211", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v26)
-				}
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1212
-				var kyse__v27 kyse__template.HTML = icons.CaretLeft(icons.Props{})
-//line components/data-table.go:2354
-				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v27))
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "<span>")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1212
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.PreviousText())))
-//line components/data-table.go:2363
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "</span></a>\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<a\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-part=\"next\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1215
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("next", "btn")))
-//line components/data-table.go:2380
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-variant=\"outline\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-size=\"sm\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\thref=\"")
-			}
-			if kyse__err == nil {
-				var kyse__v28 string
-//line components/data-table.kyse.go:1218
-				kyse__v28, kyse__err = kyse__view.TextURL(kyse__d.Pager().NextHref())
-//line components/data-table.go:2398
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1218", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v28)
-				}
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-page=\"")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1219
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.NextPage()))
-//line components/data-table.go:2414
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-label=\"")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1220
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Pager().NextName()))
-//line components/data-table.go:2425
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-//line components/data-table.kyse.go:1221
-			if !kyse__d.Pager().HasNext() {
-//line components/data-table.go:2432
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-disabled=\"true\"\n")
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\ttabindex=\"-1\"\n")
-				}
-			}
-//line components/data-table.kyse.go:1225
-			if !kyse__d.Complete {
-//line components/data-table.go:2442
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-get=\"")
-				}
-				if kyse__err == nil {
-					var kyse__v29 string
-//line components/data-table.kyse.go:1226
-					kyse__v29, kyse__err = kyse__view.TextURL(kyse__d.Pager().NextHref())
-//line components/data-table.go:2450
-					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1226", kyse__err)
-					} else {
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v29)
-					}
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-target=\"")
-				}
-				if kyse__err == nil {
-//line components/data-table.kyse.go:1227
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
-//line components/data-table.go:2466
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-swap=\"outerHTML\"\n")
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\thx-select=\"")
-				}
-				if kyse__err == nil {
-//line components/data-table.kyse.go:1229
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Target()))
-//line components/data-table.go:2480
-				}
-				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-				}
-			}
-			if kyse__err == nil {
-				var kyse__v30 string
-//line components/data-table.kyse.go:1231
-				kyse__v30, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("next"))
-//line components/data-table.go:2490
-				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/data-table.kyse.go:1231", kyse__err)
-				} else {
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v30)
-				}
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t><span>")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1232
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.NextText())))
-//line components/data-table.go:2503
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>")
-			}
-			if kyse__err == nil {
-//line components/data-table.kyse.go:1232
-				var kyse__v31 kyse__template.HTML = icons.CaretRight(icons.Props{})
-//line components/data-table.go:2511
-				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v31))
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "</a>\n")
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t</nav>\n")
-			}
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t</div>\n")
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t</div>\n")
 		}
 	}
 	if kyse__err == nil {

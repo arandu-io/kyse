@@ -32,7 +32,7 @@ func tokenForms(page components.Page, token string) map[string]string {
 			ID: "invoices", SelectName: "ids", BulkActions: bulk, Columns: columns, Rows: rows, Page: page, Token: token,
 		})),
 		"DataTable": string(components.DataTable(components.DataTableProps{
-			ID: "invoices", URL: "/invoices", SelectName: "ids", BulkActions: bulk, Columns: columns, Rows: rows,
+			ID: "invoices", URL: "/invoices", SelectName: "ids", BulkActions: bulk, BulkAction: "/invoices/bulk", Columns: columns, Rows: rows,
 			PageData: page, Token: token,
 		})),
 	}

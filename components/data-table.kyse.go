@@ -13,40 +13,57 @@ import (
 )
 
 @go
-// DataTableProps is a list somebody works in: searched, ordered, paged, and
-// acted on in bulk.
+// DataTableProps is a list somebody works in: searched, filtered by facet,
+// ordered, paged, shown with the columns they want, and acted on in bulk.
 //
-// # Why it is one component and not a page somebody assembles
+// It is drawn as shadcn/ui draws a data table -- a toolbar over a bordered
+// table over a footer -- and works the way a server-rendered list has to: every
+// control is an address, the state is in the query string, and the answer is
+// this component drawn again.
 //
-// The four controls around a table are not independent. Searching has to reset
-// the page, or the reader lands on page four of two results. Ordering has to
-// keep the search, or typing a name and then sorting throws the name away.
-// Paging has to keep both. Every one of those is a bug somebody writes once
-// per list, and the reason is that the state lives in four places on the page
-// and nothing owns it.
+// # Where the state lives
 //
-// Here it lives in one struct and every link is built from all of it, so the
-// four cannot disagree. That is the whole of what this adds over drawing a
-// [Table], a [Pagination] and an [ActiveSearch] beside each other.
+// In [DataTableState], one value that says what is searched, how the list is
+// ordered, which facets are chosen, which page and how many rows, and which
+// columns are hidden. Every address the table draws is the state's own answer
+// to "what is the query after this step?", so a link can never carry a value
+// twice and a step can never forget the others. The search form carries the
+// same state as fields, so a search keeps the order, the size and the hidden
+// columns, and a new search sends the reader back to the first page.
 //
 // # Where the work happens
 //
-// On the server, and the reason is not taste. A table ordered in the browser
-// is ordered only within the page that was fetched: page two of a list sorted
-// by name holds whatever the server thought page two was, and it reads as rows
-// in the wrong order to everyone except whoever wrote it. The same is true of
-// a filter -- filtering the rows in hand hides matches that were never sent.
+// On the server. A table ordered in the browser is ordered only within the page
+// that was fetched, and a filter over the rows in hand hides matches that were
+// never sent. So the endpoint answers with this component, htmx swaps the
+// region, and the address bar says what is on screen: a filtered, sorted page
+// three can be linked to, bookmarked, reloaded and gone back to.
 //
-// So every control is an address. The endpoint answers with this component
-// redrawn, HTMX swaps the region, and the URL says what is on screen -- which
-// means a filtered, sorted page three can be linked to, bookmarked and gone
-// back to. None of that is true of a table whose state lives in a script.
+// One form owns the search and the facets, and carries the order, the page size
+// and the hidden columns as fields. It makes one request however the change
+// came: a word typed and paused on, Enter, a facet ticked. Every header, page
+// step, page size and column switch is a link to the address of its own step.
 //
-// Without JavaScript the same addresses load the page. The search is a form,
-// the headers and the pages are links, and the bulk bar is a form that posts.
+// Without JavaScript the same addresses load the page.
 //
-// It publishes root, toolbar, search, columns, toggle, table, count, bulk and
-// pagination, and the parts of the table it draws.
+// # Optional parts
+//
+// Searchable draws the search box, Filters the faceted filters with their
+// counts, HeaderMenu the Asc, Desc and Hide menu on a column header, PageSizes
+// the rows-per-page chooser, FullPager the first, previous, next and last
+// buttons with "Page X of Y", and a row's Actions the menu at the end of the
+// row. A column that is Hideable is listed in the columns menu.
+//
+// # A list that holds all its rows
+//
+// Complete says the rows are the whole list. The browser then searches, orders,
+// filters and pages them itself and the server is not asked. Every control is
+// still a link or a form, so the page works with no script.
+//
+// It publishes root, toolbar, search, reset, facet, facet-chosen, facet-search, filter,
+// columns, toggle, bulk, wrapper, table, caption, head, header-cell, sort,
+// header-menu, row, cell, select-all, select, row-menu, footer, count, sizes,
+// pagination, page-of, first, previous, next and last.
 type DataTableProps struct {
 	// ComponentProps is the class, attributes and parts the caller adds.
 	ComponentProps
@@ -57,35 +74,47 @@ type DataTableProps struct {
 	// list is, and what the search box is called.
 	Label string
 	// URL is the endpoint, without a query string. Every control appends to
-	// it, so there is one address and one handler rather than four.
+	// it, so there is one address and one handler rather than a dozen.
 	//
-	// A query string or fragment on it is dropped, never carried: every
-	// address and every hidden field this draws is built from the fields of
-	// this struct alone. URL is often the request's own address, and a query
-	// carried from it would put whatever parameters somebody wrote into a link
-	// on every control of the page. A parameter the list needs is one of these
-	// fields -- a Filter for a facet -- or part of the path.
+	// A query string or fragment on it is dropped, never carried: every address
+	// and every hidden field this draws is built from the state alone. URL is
+	// often the request's own address, and a query carried from it would put
+	// whatever parameters somebody wrote into a link on every control of the
+	// page.
 	URL string
+
+	// State is the listing's state: the search, the order, the facets, the page
+	// size and the hidden columns, and the address of every step from them.
+	// Nil is a list in its first state, with the conventional parameter names.
+	State DataTableState
+	// Paginator is the page the query returned: the *pagination.LengthAwarePage,
+	// *pagination.Page or *pagination.CursorPage that came back beside the rows.
+	// It is where the table reads the page being shown, how many there are and
+	// how many rows the whole list has. A page that knows no total draws the
+	// two steps and neither "Page X of Y" nor a total, because neither can be
+	// true. A complete list has no use for one: there the rows are the list.
+	Paginator Paginator
 
 	// Caption is the sentence saying what the list is, drawn under the table
 	// and used as its name by assistive technology. Empty draws none, and the
 	// region's own Label is then the only thing naming it.
 	Caption string
 	// Columns are the headers. A column with a Key can be ordered by and
-	// switched off; see TableColumn.
+	// switched off; see TableColumn. A column's Hidden is only where a list
+	// without a State starts: with one, State.Hidden decides.
 	Columns []TableColumn
 	// Rows are the lines of the page being shown, or the whole list when
 	// Complete says so.
 	Rows []TableRow
 	// Complete says the rows above are the whole list and not a page of it.
 	//
-	// It is a fact about the data and not a preference, and everything else
-	// follows from it. When the page holds every row, the browser can search,
-	// order and page correctly because it has everything -- and it does, so a
-	// click costs nothing and the server is not asked. When the page holds a
-	// window onto something longer, the browser cannot: ordering the rows in
-	// hand orders only those, and filtering them hides matches that were never
-	// sent. Then every control is an address and the server answers.
+	// It is a fact about the data and not a preference. When the page holds
+	// every row, the browser can search, order, filter and page correctly
+	// because it has everything -- and it does, so a click costs nothing and
+	// the server is not asked. When the page holds a window onto something
+	// longer, the browser cannot: ordering the rows in hand orders only those,
+	// and filtering them hides matches that were never sent. Then every control
+	// is an address and the server answers.
 	//
 	// Saying true about a page of a longer list is the bug this field is named
 	// to prevent: it reads as rows in the wrong order to everyone except
@@ -93,100 +122,72 @@ type DataTableProps struct {
 	//
 	// A complete list still keeps its addresses. The headers are still links
 	// and the search is still a form, so the page works with no script -- the
-	// behaviour takes the click before the link is followed. That is what
-	// makes this an enhancement rather than a second implementation.
+	// behaviour takes the click before the link is followed, and the links ask
+	// htmx to leave them alone so a boosted page does not follow them either.
 	Complete bool
-	// PageSize is how many rows a browser-paged list shows at once. Zero shows
-	// them all, which is right for anything short enough not to need a pager.
-	// It means nothing when the server is paging, because then the page it
-	// sent is the page.
+	// PageSize is how many rows a page holds when State says nothing: the size
+	// of a complete list's window, and the size the chooser starts on. Zero
+	// shows a complete list whole.
 	PageSize int
-	// PageSizes are the counts the reader can switch between. Empty draws no
-	// chooser, which is right for a list whose length nobody argues with.
-	//
-	// It is a list and not a range because the numbers are a judgement about
-	// the rows: ten of something wide, a hundred of something narrow.
+	// PageSizes are the counts the "Rows per page" chooser offers. Empty draws
+	// no chooser, which is right for a list whose length nobody argues with.
 	PageSizes []int
+	// FullPager draws the first, previous, next and last buttons with "Page X
+	// of Y" beside them, instead of the two text buttons.
+	FullPager bool
+	// HeaderMenu draws a sortable header as a button that opens a menu with Asc,
+	// Desc and Hide, instead of a button that cycles the order.
+	HeaderMenu bool
+
 	// Lines are the sentences this draws, so none of them is written in a
 	// script and all of them come from the application's own catalogue.
 	Lines DataTableLines
-	// Empty is what stands in when the list has nothing -- which on a searched
-	// list means "nothing matched" and not "nothing exists", so the message is
-	// the caller's to write.
+	// Empty is what stands in when the list has nothing at all. A list that
+	// has rows and whose search or facets matched none of them says "No
+	// results." in the table instead: nothing matched is not nothing exists.
 	Empty EmptyProps
 
-	// Query is what was searched for, and SearchName is the parameter it
-	// travels under. Empty SearchName draws no search box.
-	Query      string
-	SearchName string
-	// SearchPlaceholder is the grey text in the empty box.
+	// Searchable draws the search box. The text travels under the state's
+	// search parameter.
+	Searchable bool
+	// SearchPlaceholder is the grey text in the empty box. Empty says "Filter
+	// {label}...".
 	SearchPlaceholder string
 	// SearchLabel is the box's name. Empty says kyse.data_table.search from
 	// PageData with Label in place of "{label}", or Label with "Search" before
 	// it.
 	SearchLabel string
+	// Filters are the faceted filters, drawn beside the search. Their chosen
+	// values are State.Chosen(Key).
+	Filters []DataTableFilter
 
 	// Navigable turns the table into a grid: one tab stop, and the arrow keys
 	// moving from cell to cell. See TableProps.Navigable.
 	Navigable bool
-	// BulkMethod is how the bulk bar submits. See TableProps.BulkMethod.
-	BulkMethod string
-	// Filters are the per-column facets, drawn beside the search. Their chosen
-	// values ride on every sort and page link, which is what keeps a facet
-	// from being thrown away by the next click.
-	Filters []DataTableFilter
-	// SortKey and SortDir are the ordering in force, and travel as "sort" and
-	// "dir".
-	SortKey string
-	SortDir string
-
-	// Paginator is the page the query returned, for a windowed list: the
-	// *pagination.LengthAwarePage, *pagination.Page or *pagination.CursorPage
-	// that came back beside the rows. Set, it is where the table reads the
-	// page being shown, how many there are, how many rows the whole list has
-	// and the range this page holds, and Page, Pages and Total are not read.
-	//
-	// The addresses stay the table's own, built from its fields like every
-	// other control, with the page's parameter name -- and, for a cursor page,
-	// its signed cursor. A page that knows no total draws the two steps and
-	// neither the range nor "Page n of total", because neither can be true.
-	// A complete list has no use for one: there the rows are the list.
-	Paginator Paginator
-
-	// Page is the page being shown, counting from one, and Pages is how many
-	// there are. It travels as "page". Pages of zero or one draws no pager.
-	//
-	// Deprecated: set Paginator to the page the query returned. Page, Pages
-	// and Total are that page copied out into three fields.
-	Page  int
-	Pages int
-	// Total is how many rows the whole list has, which on a windowed list only
-	// the server knows -- it is the count it already ran to work out Pages.
-	//
-	// Without it the range under the table cannot be true, so it is not drawn:
-	// Rows is one page, and saying "1 to 20 of 20" under page three of a
-	// hundred and thirty-seven is worse than saying nothing. A complete list
-	// needs none of this, because there the rows are the list.
-	//
-	// Deprecated: set Paginator.
-	Total int
 
 	// SelectName turns on per-row selection and is the field the checkboxes
-	// submit under. BulkActions are the controls revealed once something is
-	// chosen.
-	SelectName  string
+	// submit under. The selection survives a search, a new order, a facet and a
+	// page: the browser keeps the keys ticked, and the bulk bar posts all of
+	// them.
+	SelectName string
+	// BulkActions are the buttons of the bar that appears once something is
+	// ticked. A button posts the ticked keys with its own Name and Value, so
+	// the server can tell which was pressed.
 	BulkActions []ButtonProps
-	// BulkAction is where the bar posts. Empty posts to URL, which is the
-	// endpoint that already knows the list.
+	// BulkAction is where the bar posts. Empty draws no bar: a form that posts
+	// to the list's own endpoint would be answered by a handler that does not
+	// know the verb.
 	BulkAction string
+	// BulkMethod is how the bar submits. Empty is post.
+	BulkMethod string
 	// PageData is the screen's own view.Page. The bulk form posts the CSRF
-	// token it carries and every sentence left empty is read from it, so a
-	// list drawn from a view writes PageData: .Page and never copies the token
-	// or the words by hand. It is not called Page because Page is
-	// the number of the page being shown.
+	// token it carries and every sentence left empty is read from it, so a list
+	// drawn from a view writes PageData: .Page and never copies the token or
+	// the words by hand. It is not called Page because Page is the number of
+	// the page being shown.
 	PageData Page
-	// Token is the CSRF token, for a list with no PageData to ask. Set, it
-	// wins over the page's.
+	// Token is the CSRF token, for a list with no PageData to ask. Set, it wins
+	// over the page's.
 	Token string
 
 	// ColumnsLabel and SelectedLabel are the two sentences that belong to the
@@ -198,12 +199,32 @@ type DataTableProps struct {
 	SelectedLabel string
 }
 
+// DataTableFilter is one faceted filter, drawn beside the search.
+//
+// It is typed rather than a slot of markup, because a slot would be a place to
+// put anything, and this component's whole claim is that every control's state
+// survives every other control -- which it can only promise about state it
+// knows the shape of.
+type DataTableFilter struct {
+	// Key is the parameter the chosen values travel under, and the name State
+	// knows the facet by.
+	Key string
+	// Label names the control.
+	Label string
+	// Options are what can be chosen.
+	Options []SelectOption
+	// Counts are how many rows each option matches, by option value, the way the
+	// query counted them: ignoring this facet's own choice and respecting the
+	// others. Nil draws no counts.
+	Counts map[string]int
+}
+
 // DataTableLines are the sentences a data table says.
 //
 // They are a struct and not a scatter of Label fields because they belong
 // together: a table says all of them or none, and a project that translated
-// four of the seven has a table that speaks two languages. Every one carries
-// its placeholders, so a language that puts the number last can.
+// four of the twenty-nine has a table that speaks two languages. Every one
+// carries its placeholders, so a language that puts the number last can.
 //
 // Empty asks the page: a data table given PageData reads each sentence left
 // empty from the application's catalogue, under the key the package doc lists
@@ -211,31 +232,38 @@ type DataTableProps struct {
 // it. What the catalogue does not carry says the English underneath, which is
 // a floor and not a default worth shipping.
 type DataTableLines struct {
-	// Showing is the range under the table: "{from} to {to} of {total}".
-	Showing string
-	// PerPage labels the chooser beside it: "per page".
-	PerPage string
-	// NoResult is what the body says when the search matched nothing. It is
-	// not the same sentence as an empty list: the table has rows, and none of
-	// them is the answer.
+	// Filter is the placeholder of the search box: "Filter {label}...".
+	Filter string
+	// NoResult is what the body says when a search or a facet matched nothing:
+	// "No results.". It is not the same sentence as an empty list: the list has
+	// rows, and none of them is the answer.
 	NoResult string
-	// Previous and Next name the two ends of the pager for a screen reader.
-	// They are names and not text, because the controls are arrows.
-	Previous string
-	Next     string
-	// Page names one numbered control: "Page {n}". The digit alone is read as
-	// a digit, which in a row of them says nothing about what it does.
-	Page string
+	// Rows is the footer of a list with no selection: "{total} row(s).".
+	Rows string
+	// SelectedCount is the footer of a selectable list whose total is unknown:
+	// "{n} row(s) selected.".
+	SelectedCount string
+	// RowsPerPage labels the size chooser: "Rows per page".
+	RowsPerPage string
 	// PageOf is where the reader is, beside the pager: "Page {n} of {total}".
 	PageOf string
-	// Back and Forward are the words on the pager's two buttons: "Previous"
-	// and "Next". Previous and Next above are what a screen reader calls them.
+	// First, Previous, Next and Last name the four steps of the full pager for
+	// a screen reader. They are names and not text, because the controls are
+	// arrows.
+	First    string
+	Previous string
+	Next     string
+	Last     string
+	// Back and Forward are the words on the two buttons of the plain pager:
+	// "Previous" and "Next".
 	Back    string
 	Forward string
-	// SelectAll names the header checkbox, and Bulk the bar of actions.
+	// SelectAll names the header checkbox, SelectRow a row's checkbox when the
+	// row has no Label of its own, and Bulk the bar of actions.
 	SelectAll string
+	SelectRow string
 	Bulk      string
-	// Apply names the submit control that makes server-side facets work when
+	// Apply names the submit control that makes the facets work when
 	// JavaScript is unavailable. Empty uses "Apply filters".
 	Apply string
 	// Ascending, Descending and Unsorted are what a sortable header is called
@@ -244,225 +272,194 @@ type DataTableLines struct {
 	Ascending  string
 	Descending string
 	Unsorted   string
+	// Reset clears the search and every facet. ClearFilters clears one facet.
+	Reset        string
+	ClearFilters string
+	// NoFacetResults is what a facet's own search says when nothing matched:
+	// "No results found.". FacetSelected is the badge that stands for many
+	// chosen values: "{n} selected".
+	NoFacetResults string
+	FacetSelected  string
+	// OpenMenu names the button of a row's menu for a screen reader, Actions
+	// the empty header over it, and ToggleColumns the columns menu.
+	OpenMenu      string
+	Actions       string
+	ToggleColumns string
+	// Asc, Desc and Hide are the three entries of a header menu.
+	Asc  string
+	Desc string
+	Hide string
 }
 
-// lines are Lines with every sentence the caller left empty read from the
-// page's catalogue, where it carries one; see TranslatorPage. What neither said
-// stays empty, and Sentences fills the English under it. The sentences that
-// belong to the table it draws are read under the table's keys, so a catalogue
-// says them once for both.
-func (p DataTableProps) lines() DataTableLines {
-	lines := p.Lines
+// Filled is the lines with every sentence the caller left empty read from the
+// catalogue of the page, and what neither said filled with the English.
+//
+// Filling them here rather than in the script is the whole point: the script
+// composes no sentence, so there is one place a translation lands and it is a
+// file the application already has.
+func (lines DataTableLines) Filled(page Page) DataTableLines {
 	for _, line := range []struct {
-		field *string
-		key   string
+		field   *string
+		key     string
+		english string
 	}{
-		{&lines.Showing, "data_table.showing"},
-		{&lines.PerPage, "data_table.per_page"},
-		{&lines.NoResult, "data_table.no_result"},
-		{&lines.Previous, "data_table.previous"},
-		{&lines.Next, "data_table.next"},
-		{&lines.Page, "data_table.page"},
-		{&lines.PageOf, "data_table.page_of"},
-		{&lines.Back, "data_table.back"},
-		{&lines.Forward, "data_table.forward"},
-		{&lines.Apply, "data_table.apply"},
-		{&lines.SelectAll, "table.select_all"},
-		{&lines.Bulk, "table.bulk"},
-		{&lines.Ascending, "table.ascending"},
-		{&lines.Descending, "table.descending"},
-		{&lines.Unsorted, "table.unsorted"},
+		{&lines.Filter, "data_table.filter", "Filter {label}..."},
+		{&lines.NoResult, "data_table.no_result", "No results."},
+		{&lines.Rows, "data_table.rows", "{total} row(s)."},
+		{&lines.SelectedCount, "data_table.selected_count", "{n} row(s) selected."},
+		{&lines.RowsPerPage, "data_table.rows_per_page", "Rows per page"},
+		{&lines.PageOf, "data_table.page_of", "Page {n} of {total}"},
+		{&lines.First, "data_table.first", "Go to first page"},
+		{&lines.Previous, "data_table.previous", "Go to previous page"},
+		{&lines.Next, "data_table.next", "Go to next page"},
+		{&lines.Last, "data_table.last", "Go to last page"},
+		{&lines.Back, "data_table.back", "Previous"},
+		{&lines.Forward, "data_table.forward", "Next"},
+		{&lines.SelectAll, "table.select_all", "Select all rows"},
+		{&lines.SelectRow, "data_table.select_row", "Select row"},
+		{&lines.Bulk, "table.bulk", "Bulk actions"},
+		{&lines.Apply, "data_table.apply", "Apply filters"},
+		{&lines.Ascending, "table.ascending", "{column}, sorted ascending"},
+		{&lines.Descending, "table.descending", "{column}, sorted descending"},
+		{&lines.Unsorted, "table.unsorted", "{column}, not sorted"},
+		{&lines.Reset, "data_table.reset", "Reset"},
+		{&lines.ClearFilters, "data_table.clear_filters", "Clear filters"},
+		{&lines.NoFacetResults, "data_table.no_facet_results", "No results found."},
+		{&lines.FacetSelected, "data_table.facet_selected", "{n} selected"},
+		{&lines.OpenMenu, "data_table.open_menu", "Open menu"},
+		{&lines.Actions, "data_table.actions", "Actions"},
+		{&lines.ToggleColumns, "data_table.toggle_columns", "Toggle columns"},
+		{&lines.Asc, "data_table.asc", "Asc"},
+		{&lines.Desc, "data_table.desc", "Desc"},
+		{&lines.Hide, "data_table.hide", "Hide"},
 	} {
 		if *line.field == "" {
-			*line.field = say(p.PageData, line.key, "")
+			*line.field = say(page, line.key, line.english)
 		}
 	}
 	return lines
 }
 
-// SelectedSentence is the count's sentence with its placeholders still in it:
-// SelectedLabel, or the page's kyse.table.selected, or empty for the English
-// the behaviour writes.
-func (p DataTableProps) SelectedSentence() string {
-	if p.SelectedLabel != "" {
-		return p.SelectedLabel
-	}
-	return say(p.PageData, "table.selected", "")
-}
-
-// Sentences are the lines with the English floor filled in under whatever the
-// caller left empty.
-//
-// Filling them here rather than in the script is the whole point: the script
-// composes no sentence, so there is one place a translation lands and it is a
-// file the application already has.
+// Sentences are the sentences the browser rewrites or reads, by name, for the
+// behaviour's props.
 func (l DataTableLines) Sentences() map[string]any {
-	fallback := func(given, floor string) string {
-		if given != "" {
-			return given
-		}
-		return floor
-	}
 	return map[string]any{
-		"showing":    fallback(l.Showing, "{from} to {to} of {total}"),
-		"perPage":    fallback(l.PerPage, "per page"),
-		"noResult":   fallback(l.NoResult, "Nothing matched"),
-		"previous":   fallback(l.Previous, "Previous page"),
-		"next":       fallback(l.Next, "Next page"),
-		"page":       fallback(l.Page, "Page {n}"),
-		"pageOf":     fallback(l.PageOf, "Page {n} of {total}"),
-		"back":       fallback(l.Back, "Previous"),
-		"forward":    fallback(l.Forward, "Next"),
-		"ascending":  fallback(l.Ascending, "{column}, sorted ascending"),
-		"descending": fallback(l.Descending, "{column}, sorted descending"),
-		"unsorted":   fallback(l.Unsorted, "{column}, not sorted"),
-		"selectAll":  fallback(l.SelectAll, "Select all rows"),
-		"bulk":       fallback(l.Bulk, "Bulk actions"),
-		"apply":      fallback(l.Apply, "Apply filters"),
+		"pageOf":        l.PageOf,
+		"selectedCount": l.SelectedCount,
+		"rows":          l.Rows,
+		"ascending":     l.Ascending,
+		"descending":    l.Descending,
+		"unsorted":      l.Unsorted,
+		"facetSelected": l.FacetSelected,
 	}
 }
 
-// Address is URL with a query string built from everything except what the
-// caller is changing.
-//
-// Every control goes through here, which is what stops the four from throwing
-// each other away: a sort link carries the search, a page link carries both,
-// and a new search drops the page rather than keeping a number that no longer
-// points anywhere.
-//
-// # Two things it has to do that are easy to miss
-//
-// It drops whatever query URL already carries and builds the new one from this
-// struct alone. URL is often the address the request arrived on, so a query
-// seeded from it would copy any parameter somebody put in a link -- _method,
-// a role, a tenant -- onto every sort header, every page and the search form.
-// The state a list needs is its fields; a parameter that is not one of them
-// does not travel. Parsing also means one "?" rather than a second one
-// appended to a URL that had one, which every parser reads as one parameter
-// whose value is the rest of the query.
-//
-// And it writes the templated pairs by hand, after the encoding. A value of
-// "{sort}" through url.Values.Encode comes out "%7Bsort%7D", and the caller
-// looking for "{sort}" then finds nothing -- every header and every page
-// pointing at one dead address. That was the bug this comment exists to keep
-// from coming back.
-func (p DataTableProps) Address(changes map[string]string) string {
+// lines is Lines filled for this table's page.
+func (p DataTableProps) lines() DataTableLines { return p.Lines.Filled(p.PageData) }
+
+// DataTableQueryField is one hidden field of the query form: a part of the
+// state no visible control of the form owns.
+type DataTableQueryField struct {
+	Name  string
+	Value string
+}
+
+// state is State, or the first state of an unfiltered list.
+func (p DataTableProps) state() DataTableState {
+	if p.State == nil {
+		return DataTableValues{}
+	}
+	return p.State
+}
+
+// names are the parameters the state travels under.
+func (p DataTableProps) names() DataTableParams { return p.state().Params().Filled() }
+
+// Action is URL without its query or fragment: the path every address starts
+// from, and the action of the form.
+func (p DataTableProps) Action() string {
 	base, err := url.Parse(p.URL)
 	if err != nil {
 		base = &url.URL{Path: p.URL}
 	}
-	values := url.Values{}
-
-	set := func(key, value string) {
-		if value == "" {
-			values.Del(key)
-			return
-		}
-		values.Set(key, value)
-	}
-	if p.SearchName != "" {
-		set(p.SearchName, p.Query)
-	}
-	set("sort", p.SortKey)
-	if p.SortKey != "" {
-		set("dir", p.SortDir)
-	}
-	if at := p.at(); at > 1 {
-		set(p.pageParam(), strconv.Itoa(at))
-	}
-	for _, filter := range p.Filters {
-		values.Del(filter.Key)
-		for _, chosen := range filter.Selected {
-			values.Add(filter.Key, chosen)
-		}
-	}
-
-	// A templated value is held out of the encoder and appended verbatim.
-	templated := make([][2]string, 0, len(changes))
-	for key, value := range changes {
-		if value == "" {
-			values.Del(key)
-			continue
-		}
-		if strings.HasPrefix(value, "{") && strings.HasSuffix(value, "}") {
-			values.Del(key)
-			templated = append(templated, [2]string{key, value})
-			continue
-		}
-		values.Set(key, value)
-	}
-	sort.Slice(templated, func(a, b int) bool { return templated[a][0] < templated[b][0] })
-
-	query := values.Encode()
-	for _, pair := range templated {
-		if query != "" {
-			query += "&"
-		}
-		query += pair[0] + "=" + pair[1]
-	}
-
 	base.RawQuery = ""
 	base.ForceQuery = false
 	base.Fragment = ""
-	address := base.String()
+	return base.String()
+}
+
+// Href is the address of the list after one step, built from the state's own
+// canonical query and nothing else.
+func (p DataTableProps) Href(change DataTableChange) string {
+	query := p.state().Values(change).Encode()
 	if query == "" {
-		return address
+		return p.Action()
 	}
-	return address + "?" + query
+	return p.Action() + "?" + query
 }
 
-// SortURL is the template the table builds its header links from. The page is
-// dropped: an order that kept it would land somebody on page four of a list
-// they have just reordered, where the rows are not the ones they were looking
-// at.
-func (p DataTableProps) SortURL() string {
-	return p.Address(map[string]string{"sort": "{sort}", "dir": "{dir}", p.pageParam(): ""})
-}
-
-// PageURL is the template the pager builds from. It keeps the search, the
-// order and every facet, because a page of a filtered, sorted list is a page
-// of that list.
-func (p DataTableProps) PageURL() string {
-	return p.Address(map[string]string{p.pageParam(): "{page}"})
-}
-
-// DataTableFilter is one per-column facet, drawn beside the search.
-//
-// It is typed rather than a slot of markup, because a slot would be a place to
-// put anything, and this component's whole claim is that every control's state
-// survives every other control -- which it can only promise about state it
-// knows the shape of.
-type DataTableFilter struct {
-	// Key is the parameter the chosen values travel under.
-	Key string
-	// Label names the control.
-	Label string
-	// Options are what can be chosen.
-	Options []SelectOption
-	// Selected are the values in force, which every link then carries.
-	Selected []string
-}
-
-// Filtered is whether any facet is drawn.
-func (p DataTableProps) Filtered() bool { return len(p.Filters) > 0 }
-
-// Chosen is whether one option of a facet is in force.
-func (p DataTableProps) Chosen(filter DataTableFilter, option SelectOption) bool {
-	for _, value := range filter.Selected {
-		if value == option.Value {
-			return true
-		}
-	}
-	return false
-}
+// SelfHref is the address of the list as it is now, which the behaviour writes
+// into the address bar after a swap so the bar is canonical whatever the form
+// serialised.
+func (p DataTableProps) SelfHref() string { return p.Href(DataTableChange{}) }
 
 // Target is what every control swaps: this region, by id.
 func (p DataTableProps) Target() string { return "#" + p.ID }
 
-// Searchable is whether a search box is drawn.
-func (p DataTableProps) Searchable() bool { return p.SearchName != "" }
+// QueryFormID is the one form the search and the facets submit through.
+// SearchID, SizesID and BulkID are the ids of the controls that name or sit
+// apart from it.
+func (p DataTableProps) QueryFormID() string { return p.ID + "-query" }
+func (p DataTableProps) SearchID() string    { return p.ID + "-search" }
+func (p DataTableProps) SizesID() string     { return p.ID + "-sizes" }
+func (p DataTableProps) BulkID() string      { return p.ID + "-bulk" }
 
-// SearchName_ is what the search box is called. Empty uses the region's own
+// QueryAction is the action of the query form.
+func (p DataTableProps) QueryAction() string { return p.Action() }
+
+// Query is the text searched for.
+func (p DataTableProps) Query() string { return p.state().Search() }
+
+// SearchName is the parameter the search travels under.
+func (p DataTableProps) SearchName() string { return p.names().Search }
+
+// SizeHref is the address that sets how many rows a page holds.
+func (p DataTableProps) SizeHref(size int) string { return p.Href(DataTableChange{PerPage: size}) }
+
+// QueryFields are the hidden fields of the query form: every part of the state
+// that no control of the form owns, once each: the order, the page size and the
+// hidden columns. The search box owns the search, the facet checkboxes their
+// facets, and the page is dropped on purpose -- a new search has no page four.
+func (p DataTableProps) QueryFields() []DataTableQueryField {
+	names := p.names()
+	owned := map[string]bool{names.Search: true, names.Page: true}
+	for _, filter := range p.Filters {
+		owned[filter.Key] = true
+	}
+	values := p.state().Values(DataTableChange{})
+	keys := make([]string, 0, len(values))
+	for key := range values {
+		if !owned[key] {
+			keys = append(keys, key)
+		}
+	}
+	sort.Strings(keys)
+
+	var fields []DataTableQueryField
+	seen := map[DataTableQueryField]bool{}
+	for _, key := range keys {
+		for _, value := range values[key] {
+			field := DataTableQueryField{Name: key, Value: value}
+			if !seen[field] {
+				seen[field] = true
+				fields = append(fields, field)
+			}
+		}
+	}
+	return fields
+}
+
+// SearchTitle is what the search box is called. Empty uses the region's own
 // name, because a box labelled only "Search" on a page with two lists names
 // neither.
 func (p DataTableProps) SearchTitle() string {
@@ -471,6 +468,73 @@ func (p DataTableProps) SearchTitle() string {
 	}
 	return strings.TrimSpace(strings.ReplaceAll(say(p.PageData, "data_table.search", "Search {label}"), "{label}", p.Label))
 }
+
+// Placeholder is the grey text in the empty search box.
+func (p DataTableProps) Placeholder() string {
+	if p.SearchPlaceholder != "" {
+		return p.SearchPlaceholder
+	}
+	label := strings.ToLower(p.Label)
+	sentence := strings.ReplaceAll(p.lines().Filter, "{label}", label)
+	return strings.TrimSpace(strings.ReplaceAll(sentence, "  ", " "))
+}
+
+// Faceted is whether any facet is drawn.
+func (p DataTableProps) Faceted() bool { return len(p.Filters) > 0 }
+
+// Chosen are the values chosen for one facet.
+func (p DataTableProps) Chosen(filter DataTableFilter) []string {
+	return p.state().Chosen(filter.Key)
+}
+
+// OptionChosen is whether one option of a facet is in force.
+func (p DataTableProps) OptionChosen(filter DataTableFilter, option SelectOption) bool {
+	return contains(p.Chosen(filter), option.Value)
+}
+
+// Active is whether the search or any facet narrows the list, which is when
+// Reset is drawn and when an empty page means "nothing matched".
+func (p DataTableProps) Active() bool {
+	if p.state().Search() != "" {
+		return true
+	}
+	for _, filter := range p.Filters {
+		if len(p.Chosen(filter)) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// FacetBadges is how many badges the facet button shows: one per chosen value
+// while there are two at most.
+func (p DataTableProps) FacetBadges(filter DataTableFilter) bool { return len(p.Chosen(filter)) <= 2 }
+
+// FacetCounted is whether the facet draws the number of rows beside each option.
+func (p DataTableProps) FacetCounted(filter DataTableFilter) bool { return filter.Counts != nil }
+
+// FacetCount is the number beside one option.
+func (p DataTableProps) FacetCount(filter DataTableFilter, option SelectOption) string {
+	return strconv.Itoa(filter.Counts[option.Value])
+}
+
+// FacetSelectedText is the badge standing for the chosen values of a facet.
+func (p DataTableProps) FacetSelectedText(filter DataTableFilter) string {
+	return strings.ReplaceAll(p.lines().FacetSelected, "{n}", strconv.Itoa(len(p.Chosen(filter))))
+}
+
+// FacetHref is the address that switches one value of a facet on or off.
+func (p DataTableProps) FacetHref(filter DataTableFilter, option SelectOption) string {
+	return p.Href(DataTableChange{Facet: filter.Key, Value: option.Value})
+}
+
+// ClearFacetHref is the address that drops every value of one facet.
+func (p DataTableProps) ClearFacetHref(filter DataTableFilter) string {
+	return p.Href(DataTableChange{ClearFacet: filter.Key})
+}
+
+// ResetHref is the address that drops the search and every facet.
+func (p DataTableProps) ResetHref() string { return p.Href(DataTableChange{Reset: true}) }
 
 // Hideable is whether any column can be switched off, which is what decides
 // whether the columns menu is drawn.
@@ -483,39 +547,388 @@ func (p DataTableProps) Hideable() bool {
 	return false
 }
 
-// Sheets is how many pages there are.
-//
-// A complete list counts its own: the server sent every row, so how many
-// pages that makes is arithmetic and not something a caller should have to
-// pass in beside the rows it already passed. A windowed list is told, because
-// only the server knows how much it did not send.
+// ColumnsName is what the menu of columns is called.
+func (p DataTableProps) ColumnsName() string {
+	if p.ColumnsLabel != "" {
+		return p.ColumnsLabel
+	}
+	return say(p.PageData, "table.columns", "Columns")
+}
+
+// Off is whether a column is switched off: by the state when there is one, and
+// by the column's own Hidden when there is none. A column that cannot be
+// switched off is never off.
+func (p DataTableProps) Off(column TableColumn) bool {
+	if column.Key == "" || !column.Hideable {
+		return false
+	}
+	if p.State == nil {
+		return column.Hidden
+	}
+	return contains(p.State.Hidden(), column.Key)
+}
+
+// OffAt is whether the column at position i is switched off.
+func (p DataTableProps) OffAt(i int) bool { return i < len(p.Columns) && p.Off(p.Columns[i]) }
+
+// ColumnKey is the key of the column at position i, empty where a row carries
+// more cells than the table has columns.
+func (p DataTableProps) ColumnKey(i int) string {
+	if i < len(p.Columns) {
+		return p.Columns[i].Key
+	}
+	return ""
+}
+
+// AlignClass is the alignment of the column at position i, and the default
+// where a row carries more cells than the table has columns.
+func (p DataTableProps) AlignClass(i int) string {
+	if i < len(p.Columns) {
+		return p.Columns[i].AlignClass()
+	}
+	return TableColumn{}.AlignClass()
+}
+
+// ColumnHref is the address that switches one column off when it is shown and
+// back on when it is hidden.
+func (p DataTableProps) ColumnHref(column TableColumn) string {
+	return p.Href(DataTableChange{Hide: column.Key})
+}
+
+// HideHref is the address that switches a column off.
+func (p DataTableProps) HideHref(column TableColumn) string { return p.ColumnHref(column) }
+
+// Sorted is the direction the list is ordered in by this column, and empty
+// when it is not ordered by it.
+func (p DataTableProps) Sorted(column TableColumn) string {
+	if column.Key == "" || column.Key != p.state().SortKey() {
+		return ""
+	}
+	if p.state().SortDir() == "desc" {
+		return "desc"
+	}
+	return "asc"
+}
+
+// Sortable is whether the header of a column is a control that orders by it.
+func (p DataTableProps) Sortable(column TableColumn) bool { return column.Sortable && column.Key != "" }
+
+// Order is what aria-sort says for one column: the direction when it is the
+// one in force, and "none" on every other sortable column. A column that cannot
+// be sorted carries nothing.
+func (p DataTableProps) Order(column TableColumn) string {
+	if !p.Sortable(column) {
+		return ""
+	}
+	switch p.Sorted(column) {
+	case "asc":
+		return "ascending"
+	case "desc":
+		return "descending"
+	}
+	return "none"
+}
+
+// NextSort is the direction a click on this header asks for. The cycle is
+// ascending, descending, ascending: an ordered list never goes back to no
+// order, as the reference it follows does not.
+func (p DataTableProps) NextSort(column TableColumn) string {
+	if p.Sorted(column) == "asc" {
+		return "desc"
+	}
+	return "asc"
+}
+
+// SortHref is where one header points: the next step of its cycle.
+func (p DataTableProps) SortHref(column TableColumn) string {
+	return p.Href(DataTableChange{Sort: column.Key, Dir: p.NextSort(column)})
+}
+
+// AscHref and DescHref are the addresses of the two entries of a header menu.
+func (p DataTableProps) AscHref(column TableColumn) string {
+	return p.Href(DataTableChange{Sort: column.Key, Dir: "asc"})
+}
+func (p DataTableProps) DescHref(column TableColumn) string {
+	return p.Href(DataTableChange{Sort: column.Key, Dir: "desc"})
+}
+
+// SortName is what a sortable header is called, in the state it is in.
+func (p DataTableProps) SortName(column TableColumn) string {
+	lines := p.lines()
+	sentence := lines.Unsorted
+	switch p.Sorted(column) {
+	case "asc":
+		sentence = lines.Ascending
+	case "desc":
+		sentence = lines.Descending
+	}
+	return strings.ReplaceAll(sentence, "{column}", column.Label)
+}
+
+// Selectable is whether the rows carry a checkbox, and the footer a count.
+func (p DataTableProps) Selectable() bool { return p.SelectName != "" }
+
+// Bulky is whether a bar of bulk actions is drawn: there are actions, there is
+// somewhere to post them, and there is a selection to post.
+func (p DataTableProps) Bulky() bool {
+	return p.Selectable() && len(p.BulkActions) > 0 && p.BulkAction != ""
+}
+
+// PostMethod is how the bulk bar submits, and it is post unless the caller says
+// otherwise -- a bulk operation changes something.
+func (p DataTableProps) PostMethod() string {
+	if p.BulkMethod != "" {
+		return p.BulkMethod
+	}
+	return "post"
+}
+
+// SendsToken is whether the bulk form carries a token: only when there is one
+// and the form posts. A form submitted any other way puts its fields in the
+// address, which the history, the access log and every proxy between keep.
+func (p DataTableProps) SendsToken() bool {
+	return p.FormToken() != "" && strings.EqualFold(p.PostMethod(), "post")
+}
+
+// FormToken is the token the bulk form posts: Token when it is set, and the
+// page's otherwise.
+func (p DataTableProps) FormToken() string { return tokenFor(p.PageData, p.Token) }
+
+// BulkName is what the bar of actions is called.
+func (p DataTableProps) BulkName() string { return p.lines().Bulk }
+
+// Ticked is how many rows are drawn as selected.
+func (p DataTableProps) Ticked() int {
+	count := 0
+	for _, row := range p.Rows {
+		if row.Selected {
+			count++
+		}
+	}
+	return count
+}
+
+// RowName is what one row's checkbox is called: what the caller wrote, or the
+// sentence for a row.
+func (p DataTableProps) RowName(row TableRow) string {
+	if row.Label != "" {
+		return row.Label
+	}
+	return p.lines().SelectRow
+}
+
+// SelectedSentence is the count's sentence with its placeholders still in it:
+// SelectedLabel, or the page's kyse.table.selected, or the English.
+func (p DataTableProps) SelectedSentence() string {
+	if p.SelectedLabel != "" {
+		return p.SelectedLabel
+	}
+	return say(p.PageData, "table.selected", "{n} of {total} row(s) selected.")
+}
+
+// Known is whether the size of the whole list is known: always for a complete
+// list, and for a windowed one when its page counts.
+func (p DataTableProps) Known() bool {
+	if p.Complete {
+		return true
+	}
+	_, ok := counted(p.Paginator)
+	return ok
+}
+
+// Total is how many rows the whole list has, narrowed by the search and the
+// facets: the count the query ran. Zero when it is not known.
+func (p DataTableProps) Total() int {
+	if p.Complete {
+		return len(p.Rows)
+	}
+	if page, ok := counted(p.Paginator); ok {
+		return page.Total()
+	}
+	return 0
+}
+
+// FooterText is the sentence on the left of the footer: how many rows are
+// selected of the whole list, or how many rows there are.
+func (p DataTableProps) FooterText() string {
+	total := strconv.Itoa(p.Total())
+	if !p.Selectable() {
+		if !p.Known() {
+			return ""
+		}
+		return strings.ReplaceAll(p.lines().Rows, "{total}", total)
+	}
+	if !p.Known() {
+		return strings.ReplaceAll(p.lines().SelectedCount, "{n}", strconv.Itoa(p.Ticked()))
+	}
+	return strings.NewReplacer("{n}", strconv.Itoa(p.Ticked()), "{total}", total).Replace(p.SelectedSentence())
+}
+
+// Nothing is whether the list has nothing at all, which is the caller's Empty
+// to say. A list that has no rows on this page, or none that match, is not
+// nothing: it says "No results." in the table.
+func (p DataTableProps) Nothing() bool {
+	if len(p.Rows) > 0 || p.Active() {
+		return false
+	}
+	if page, ok := counted(p.Paginator); ok && page.Total() > 0 {
+		return false
+	}
+	return true
+}
+
+// Span is how many columns a full-width row spans.
+func (p DataTableProps) Span() int {
+	span := len(p.Columns)
+	if p.Selectable() {
+		span++
+	}
+	if p.Acting() {
+		span++
+	}
+	return span
+}
+
+// Acting is whether any row carries a menu of actions.
+func (p DataTableProps) Acting() bool {
+	for _, row := range p.Rows {
+		if len(row.Actions) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// Role is what the table announces as: a grid when it is navigated cell by
+// cell, a treegrid when those rows nest, and nothing at all otherwise.
+func (p DataTableProps) Role() string {
+	if !p.Navigable {
+		return ""
+	}
+	for _, row := range p.Rows {
+		if row.Level > 0 {
+			return "treegrid"
+		}
+	}
+	return "grid"
+}
+
+// RowAttrs are the attributes of a row: its facet values, as the attributes
+// the browser filters a complete list by, and then the caller's, which win on a
+// name both write.
+func (p DataTableProps) RowAttrs(row TableRow) map[string]string {
+	caller := p.PartAttrs("row")
+	if len(row.Facets) == 0 {
+		return caller
+	}
+	out := make(map[string]string, len(row.Facets)+len(caller))
+	for key, value := range row.Facets {
+		out["data-facet-"+key] = value
+	}
+	for key, value := range caller {
+		out[key] = value
+	}
+	return out
+}
+
+// dataTableLine is one line of the body as it is drawn: the row, whether it
+// lies outside the window of a complete list, and the id of its menu.
+type dataTableLine struct {
+	TableRow
+	// Outside marks a row of a complete list that is not on the page being
+	// shown, so the first paint is already the page and a page with no script
+	// does not contradict its own footer.
+	Outside bool
+	// MenuID is the id of the row's menu, which is what lets it stay open when
+	// the region is swapped.
+	MenuID string
+}
+
+// Body is the rows as they are drawn.
+func (p DataTableProps) Body() []dataTableLine {
+	lines := make([]dataTableLine, len(p.Rows))
+	first := (p.At()-1)*p.Size() + 1
+	for at, row := range p.Rows {
+		line := dataTableLine{TableRow: row, Outside: row.Hidden}
+		if p.Complete && p.Size() > 0 {
+			line.Outside = row.Hidden || at+1 < first || at+1 >= first+p.Size()
+		}
+		line.MenuID = p.ID + "-row-" + strconv.Itoa(at)
+		if row.Key != "" {
+			line.MenuID = p.ID + "-row-" + row.Key
+		}
+		lines[at] = line
+	}
+	return lines
+}
+
+// Size is how many rows a page holds: the state's, else PageSize, else the
+// page the query returned.
+func (p DataTableProps) Size() int {
+	if size := p.state().PageSize(); size > 0 {
+		return size
+	}
+	if p.PageSize > 0 {
+		return p.PageSize
+	}
+	if page, ok := counted(p.Paginator); ok {
+		if sized, ok := page.(interface{ PerPage() int }); ok {
+			return sized.PerPage()
+		}
+	}
+	return 0
+}
+
+// Sizes are the counts the chooser offers, with the one in force among them.
+func (p DataTableProps) Sizes() []int {
+	if len(p.PageSizes) == 0 {
+		return nil
+	}
+	sizes := append([]int{}, p.PageSizes...)
+	if size := p.Size(); size > 0 {
+		found := false
+		for _, one := range sizes {
+			found = found || one == size
+		}
+		if !found {
+			sizes = append(sizes, size)
+			sort.Ints(sizes)
+		}
+	}
+	return sizes
+}
+
+// At is the page being shown.
+func (p DataTableProps) At() int {
+	if !p.Complete {
+		if page, ok := presentPaginator(p.Paginator).(numberedPage); ok {
+			return max(1, page.CurrentPage())
+		}
+	}
+	return max(1, p.state().Page())
+}
+
+// Sheets is how many pages there are. A complete list counts its own: the
+// server sent every row, so how many pages that makes is arithmetic.
 func (p DataTableProps) Sheets() int {
-	if p.Complete && p.PageSize > 0 {
-		if len(p.Rows) == 0 {
+	if p.Complete {
+		if p.Size() == 0 || len(p.Rows) == 0 {
 			return 1
 		}
-		return (len(p.Rows) + p.PageSize - 1) / p.PageSize
+		return (len(p.Rows) + p.Size() - 1) / p.Size()
 	}
-	if page, ok := p.countedPage(); ok {
-		return page.LastPage()
+	if page, ok := counted(p.Paginator); ok {
+		return max(1, page.LastPage())
 	}
-	return p.Pages
+	return 0
 }
 
 // Paged is whether there is more than one page to move between.
 func (p DataTableProps) Paged() bool {
-	if paginator := p.uncountedPage(); paginator != nil {
-		return paginator.HasPages()
+	if page := p.uncountedPage(); page != nil {
+		return page.HasPages()
 	}
 	return p.Sheets() > 1
-}
-
-// countedPage is the paginator of a windowed list when it knows its total.
-func (p DataTableProps) countedPage() (countedPage, bool) {
-	if p.Complete {
-		return nil, false
-	}
-	return counted(p.Paginator)
 }
 
 // uncountedPage is the paginator of a windowed list when it knows no total --
@@ -531,32 +944,51 @@ func (p DataTableProps) uncountedPage() Paginator {
 	return paginator
 }
 
-// at is the page being shown: the paginator's number when it has one, Page
-// otherwise.
-func (p DataTableProps) at() int {
-	if !p.Complete {
-		if page, ok := presentPaginator(p.Paginator).(numberedPage); ok {
-			return page.CurrentPage()
-		}
-	}
-	return p.Page
+// Stepped is whether the pager is drawn: there is more than one page, or the
+// list is complete and the browser may filter it down to one and back.
+func (p DataTableProps) Stepped() bool { return p.Paged() || p.Complete }
+
+// PageHref is the address of a page, kept inside the list.
+func (p DataTableProps) PageHref(page int) string {
+	return p.Href(DataTableChange{Page: max(1, min(page, max(1, p.Sheets())))})
 }
 
-// pageParam is the query parameter the page number travels under: the
-// paginator's, so the address the table writes is the one the query reads.
-func (p DataTableProps) pageParam() string {
-	if page, ok := presentPaginator(p.Paginator).(numberedPage); ok && page.GetPageName() != "" {
-		return page.GetPageName()
+// HasPrevious and HasNext say whether a step exists.
+func (p DataTableProps) HasPrevious() bool {
+	if page := p.uncountedPage(); page != nil {
+		return p.steps().previous != ""
 	}
-	return "page"
+	return p.At() > 1
+}
+func (p DataTableProps) HasNext() bool {
+	if page := p.uncountedPage(); page != nil {
+		return p.steps().next != ""
+	}
+	return p.At() < p.Sheets()
 }
 
-// stepAddresses are the two steps of a page that knows no total, each built
-// from the table's own state like every other control, and empty where there
-// is nowhere to go.
-func (p DataTableProps) stepAddresses(paginator Paginator) steps {
+// FirstHref, PreviousHref, NextHref and LastHref are the four steps.
+func (p DataTableProps) FirstHref() string    { return p.PageHref(1) }
+func (p DataTableProps) LastHref() string     { return p.PageHref(p.Sheets()) }
+func (p DataTableProps) PreviousHref() string {
+	if p.uncountedPage() != nil {
+		return p.steps().previous
+	}
+	return p.PageHref(p.At() - 1)
+}
+func (p DataTableProps) NextHref() string {
+	if p.uncountedPage() != nil {
+		return p.steps().next
+	}
+	return p.PageHref(p.At() + 1)
+}
+
+// steps are the two steps of a page that knows no total, each built from the
+// table's own state like every other control, and empty where there is nowhere
+// to go.
+func (p DataTableProps) steps() steps {
 	var out steps
-	switch page := paginator.(type) {
+	switch page := p.uncountedPage().(type) {
 	case *pagination.CursorPage:
 		cursor := func(at *pagination.Cursor) string {
 			signer := page.GetOptions().Signer
@@ -567,672 +999,1035 @@ func (p DataTableProps) stepAddresses(paginator Paginator) steps {
 			if token == "" {
 				return ""
 			}
-			return p.Address(map[string]string{page.GetCursorName(): token, p.pageParam(): ""})
+			return p.Href(DataTableChange{CursorName: page.GetCursorName(), Cursor: token})
 		}
 		out.previous = cursor(page.PreviousCursor())
 		out.next = cursor(page.NextCursor())
 	case numberedPage:
 		at := page.CurrentPage()
 		if at > 1 {
-			out.previous = p.Address(map[string]string{p.pageParam(): strconv.Itoa(at - 1)})
+			out.previous = p.Href(DataTableChange{Page: at - 1})
 		}
 		if page.HasMorePages() {
-			out.next = p.Address(map[string]string{p.pageParam(): strconv.Itoa(at + 1)})
+			out.next = p.Href(DataTableChange{Page: at + 1})
 		}
+	case nil:
 	default:
 		// A page of a kind this does not know the parameters of has only its
 		// own addresses to offer.
-		out.previous = paginator.PreviousPageURL()
-		out.next = paginator.NextPageURL()
+		out.previous = page.PreviousPageURL()
+		out.next = page.NextPageURL()
 	}
 	return out
 }
 
-// Grid is the table this draws, built from this component's own fields so the
-// two cannot disagree about the order, the selection or the rows.
-//
-// The count and the columns menu are turned off there and drawn here instead:
-// they belong in the toolbar with the search, not stacked above the headers.
-func (p DataTableProps) Grid() TableProps {
-	columns := make([]TableColumn, 0, len(p.Columns))
-	for _, column := range p.Columns {
-		// Hideable is cleared so the table draws no menu of its own. The
-		// column keeps its Key and its Hidden, which is what the toggle here
-		// reaches and what the cells are marked with.
-		column.Hideable = false
-		columns = append(columns, column)
-	}
-	rows := p.Rows
-	if p.Complete && p.PageSize > 0 {
-		// The window is marked here so the first paint is already the page.
-		from, to, _ := p.window()
-		rows = make([]TableRow, 0, len(p.Rows))
-		for at, row := range p.Rows {
-			row.Hidden = at+1 < from || at+1 > to
-			rows = append(rows, row)
-		}
-	}
-
-	lines := p.lines()
-	return TableProps{
-		ComponentProps:  ComponentProps{Parts: p.Parts},
-		Composed:        true,
-		ID:              p.ID,
-		Navigable:       p.Navigable,
-		BulkMethod:      p.BulkMethod,
-		SelectAllLabel:  lines.SelectAll,
-		BulkLabel:       lines.Bulk,
-		AscendingLabel:  lines.Ascending,
-		DescendingLabel: lines.Descending,
-		UnsortedLabel:   lines.Unsorted,
-		Caption:         p.Caption,
-		Columns:         columns,
-		Rows:            rows,
-		Empty:           p.Empty,
-		SortKey:        p.SortKey,
-		SortDir:        p.SortDir,
-		SortURL:        p.SortURL(),
-		SelectName:     p.SelectName,
-		SelectedLabel:  p.SelectedLabel,
-		BulkActions:    p.BulkActions,
-		BulkAction:     p.BulkAction,
-		Token:          p.Token,
-		Page:           p.PageData,
-		HxTarget:       p.swapTarget(),
-		HxSwap:         p.swapKind(),
-	}
-}
-
-// swapTarget and swapKind are empty on a complete list, and that is the whole
-// of what keeps one gesture from running two engines.
-//
-// preventDefault does not cancel HTMX: its listener sits on the link itself,
-// so a header that carries hx-get fires a request the browser was told not to
-// follow, and the outerHTML swap then hands back the server's region -- wiping
-// the page, the size, the filter, the hidden columns and the selection the
-// browser had just worked out. href, action and method stay either way, so the
-// path with no script is unchanged.
-func (p DataTableProps) swapTarget() string {
-	if p.Complete {
+// PageOfText is where the reader is, beside the pager: "Page 2 of 7". It is
+// empty for a page that knows no total, because "Page 3 of" with nothing after
+// it says less than nothing.
+func (p DataTableProps) PageOfText() string {
+	if !p.Known() {
 		return ""
 	}
-	return p.Target()
+	return strings.NewReplacer("{n}", strconv.Itoa(p.At()), "{total}", strconv.Itoa(p.Sheets())).Replace(p.lines().PageOf)
 }
 
-// swapKind is how the region is replaced, and nothing when the browser is the
-// one working the rows.
-func (p DataTableProps) swapKind() string {
-	if p.Complete {
-		return ""
-	}
-	return "outerHTML"
+// PagerName is what the pager landmark is called.
+func (p DataTableProps) PagerName() string {
+	return PaginationProps{Label: p.Label, PageData: p.PageData}.LandmarkName()
 }
 
-// Pager is the pagination this draws, or the zero value when there is one page.
-func (p DataTableProps) Pager() PaginationProps {
-	lines := p.lines()
-	pager := PaginationProps{
-		ComponentProps: ComponentProps{Parts: p.Parts},
-		Page:           p.at(),
-		Pages:          p.Sheets(),
-		URL:            p.PageURL(),
-		Label:          p.Label,
-		PageData:       p.PageData,
-		PreviousLabel:  lines.Previous,
-		NextLabel:      lines.Next,
-		PageLabel:      lines.Page,
-		HxTarget:       p.swapTarget(),
-		HxSwap:         p.swapKind(),
-	}
-	if paginator := p.uncountedPage(); paginator != nil {
-		// A page that knows no total has no numbers to template, and is drawn
-		// as its two steps.
-		pager.Paginator = p.stepAddresses(paginator)
-	}
-	return pager
-}
+// Chooses is whether the rows-per-page chooser is drawn.
+func (p DataTableProps) Chooses() bool { return len(p.PageSizes) > 0 }
 
-// ColumnsName is what the menu of columns is called.
-func (p DataTableProps) ColumnsName() string {
-	if p.ColumnsLabel != "" {
-		return p.ColumnsLabel
-	}
-	return say(p.PageData, "table.columns", "Columns")
-}
-
-// DataTableQueryField is one hidden field that preserves query state across
-// a native GET form submission.
-type DataTableQueryField struct {
-	Name  string
-	Value string
-}
-
-// QueryFormID is the one form search and facets submit through.
-func (p DataTableProps) QueryFormID() string { return p.ID + "-query" }
-
-// QueryAction is URL without its query. The state that belongs to the
-// DataTable is submitted as named fields so a native GET form cannot discard it.
-func (p DataTableProps) QueryAction() string {
-	base, err := url.Parse(p.URL)
-	if err != nil {
-		return p.URL
-	}
-	base.RawQuery = ""
-	base.ForceQuery = false
-	base.Fragment = ""
-	return base.String()
-}
-
-
-// QueryFields are the hidden fields of the query form: the order in force,
-// which has no visible control of its own there. Search, page and facet values
-// are submitted by their own controls.
-//
-// Nothing of URL's own query is carried, for the reason given on URL: a hidden
-// field copied from the request's address is a parameter somebody else chose,
-// submitted again by whoever next searches.
-func (p DataTableProps) QueryFields() []DataTableQueryField {
-	if p.SortKey == "" {
-		return nil
-	}
-	fields := make([]DataTableQueryField, 0, 2)
-	if p.SortDir != "" {
-		fields = append(fields, DataTableQueryField{Name: "dir", Value: p.SortDir})
-	}
-	return append(fields, DataTableQueryField{Name: "sort", Value: p.SortKey})
-}
-
-// ApplyText is the no-script facet submit label.
-func (p DataTableProps) ApplyText() string {
-	return p.lines().Sentences()["apply"].(string)
-}
-
-// SearchTrigger is when the list is refetched as somebody types: after typing
-// has paused, and only when what is in the box actually changed.
-func (p DataTableProps) SearchTrigger() string {
-	return "input changed delay:300ms, search"
-}
-
-// SearchAddress is where the box submits: the endpoint with the order kept and
-// the page dropped, because a new search has no page four.
-func (p DataTableProps) SearchAddress() string {
-	return p.Address(map[string]string{p.SearchName: "", p.pageParam(): ""})
+// Bridge is the behaviour's props: what the browser needs and cannot read from
+// the markup.
+func (p DataTableProps) Bridge() map[string]any {
+	props := p.lines().Sentences()
+	props["selected"] = p.SelectedSentence()
+	props["complete"] = p.Complete
+	props["pageSize"] = p.Size()
+	props["selectName"] = p.SelectName
+	return props
 }
 
 // RootAttrs are the outermost element's attributes, with the client bridge
-// filled in when the caller named no behaviour of their own.
-//
-// It is the table's behaviour, because what needs mounting is the table's:
-// the count, the column toggles and the roving cell. Nothing about the
-// searching, the ordering or the paging needs a script -- they are addresses.
+// filled in when the caller named no behaviour of their own, and the facts the
+// browser reads off the region.
 func (p DataTableProps) RootAttrs() map[string]string {
 	if p.Behavior.Name == "" {
-		props := p.lines().Sentences()
-		props["selected"] = p.SelectedSentence()
-		props["complete"] = p.Complete
-		props["pageSize"] = p.PageSize
-		p.Behavior = Behavior{Name: TableBehavior, Props: props}
+		p.Behavior = Behavior{Name: TableBehavior, Props: p.Bridge()}
 	}
-	return p.ComponentProps.RootAttrs()
-}
-
-// Sizes are the counts the chooser offers.
-func (p DataTableProps) Sizes() []int { return p.PageSizes }
-
-// Chooses is whether the chooser is drawn: only on a complete list, because
-// only there can the count change without asking the server. A windowed list
-// is paged by the endpoint, and the size is the endpoint's to decide.
-func (p DataTableProps) Chooses() bool { return p.Complete && len(p.PageSizes) > 0 }
-
-// PerPageText is the label beside the chooser.
-func (p DataTableProps) PerPageText() string {
-	return p.lines().Sentences()["perPage"].(string)
-}
-
-// Showing is the range under the table, drawn by the server for the first
-// page and rewritten by the behaviour after that -- from the same sentence,
-// so the two cannot say it differently.
-func (p DataTableProps) Showing() string {
-	sentence := p.lines().Sentences()["showing"].(string)
-	from, to, total := p.window()
-	sentence = strings.ReplaceAll(sentence, "{from}", strconv.Itoa(from))
-	sentence = strings.ReplaceAll(sentence, "{to}", strconv.Itoa(to))
-	return strings.ReplaceAll(sentence, "{total}", strconv.Itoa(total))
-}
-
-// window is the range the table is showing and the size of the list it is a
-// window onto.
-func (p DataTableProps) window() (int, int, int) {
-	if page, ok := p.countedPage(); ok {
-		return page.FirstItem(), page.LastItem(), page.Total()
-	}
-	total := p.Total
-	if p.Complete {
-		total = len(p.Rows)
-	}
-	if total == 0 {
-		return 0, 0, 0
-	}
-	if !p.Complete && len(p.Rows) == 0 {
-		return 0, 0, total
-	}
-	at := p.at()
-	if at < 1 {
-		at = 1
-	}
-	if p.PageSize > 0 {
-		from := (at-1)*p.PageSize + 1
-		to := from + p.PageSize - 1
-		if to > total {
-			to = total
-		}
-		return from, to, total
-	}
-	if p.Complete {
-		return 1, total, total
-	}
-	// A windowed list with no page size still knows where it is from the rows
-	// it was handed.
-	from := (at-1)*len(p.Rows) + 1
-	return from, from + len(p.Rows) - 1, total
-}
-
-// Ranged is whether the range can be stated truthfully. A windowed list that
-// was not told the total cannot, and draws nothing rather than a number that
-// is silently the page size.
-func (p DataTableProps) Ranged() bool {
-	if page, ok := p.countedPage(); ok {
-		return page.Total() > 0
-	}
-	if p.uncountedPage() != nil {
-		return false
-	}
-	return p.Complete || p.Total > 0
+	attrs := p.ComponentProps.RootAttrs()
+	attrs["data-total"] = strconv.Itoa(p.Total())
+	attrs["data-url"] = p.SelfHref()
+	return attrs
 }
 
 // PartNames are the parts this component publishes.
-// PageOfText is where the reader is, beside the pager: "Page 2 of 7".
-// It is empty for a page that knows no total, because "Page 3 of" with nothing
-// after it says less than nothing.
-func (p DataTableProps) PageOfText() string {
-	if p.uncountedPage() != nil {
-		return ""
-	}
-	page := p.at()
-	if page < 1 {
-		page = 1
-	}
-	return strings.NewReplacer("{n}", strconv.Itoa(page), "{total}", strconv.Itoa(p.Sheets())).
-		Replace(p.lines().Sentences()["pageOf"].(string))
-}
-
-// PageOfTemplate is the sentence the browser rewrites as the page moves.
-func (p DataTableProps) PageOfTemplate() string { return p.lines().Sentences()["pageOf"].(string) }
-
-// PreviousPage and NextPage are the pages the two steps lead to, kept inside
-// the list.
-func (p DataTableProps) PreviousPage() int { return max(1, p.at()-1) }
-func (p DataTableProps) NextPage() int     { return min(max(1, p.Sheets()), max(1, p.at())+1) }
-
-// PreviousText and NextText are the words on the two steps.
-func (p DataTableProps) PreviousText() string { return p.lines().Sentences()["back"].(string) }
-func (p DataTableProps) NextText() string     { return p.lines().Sentences()["forward"].(string) }
-
-// Selectable is whether the rows carry a checkbox, and the footer a count.
-func (p DataTableProps) Selectable() bool { return p.SelectName != "" }
-
-// SelectedText is the count of rows ticked, as the table's own count says it.
-func (p DataTableProps) SelectedText() string { return p.Grid().SelectedText() }
-
-// FacetChosen are the labels of a facet's options in force, in the order the
-// options are listed, which is what the facet's button shows.
-func (p DataTableProps) FacetChosen(filter DataTableFilter) []string {
-	out := []string{}
-	for _, option := range filter.Options {
-		if p.Chosen(filter, option) {
-			out = append(out, option.Label)
-		}
-	}
-	return out
-}
-
-// FacetSummary is what the facet's button shows of its choice: every label
-// while there are two at most, and the count past that, so a facet with five
-// choices does not push the toolbar off the screen.
-func (p DataTableProps) FacetSummary(filter DataTableFilter) []string {
-	chosen := p.FacetChosen(filter)
-	if len(chosen) > 2 {
-		return []string{strconv.Itoa(len(chosen))}
-	}
-	return chosen
-}
-
-// FacetName names one facet's menu for a screen reader: its label.
-func (p DataTableProps) FacetName(filter DataTableFilter) string { return filter.Label }
-
 func (p DataTableProps) PartNames() []string {
-	// The table's names and the pager's are published here as well, because
-	// this draws both and the parts a caller can reach are the parts on the
-	// page -- not the parts this file happens to write itself.
-	names := []string{
-		"root", "toolbar", "search", "indicator", "columns", "toggle",
-		"pagination", "sizes", "showing", "footer", "filter",
-		"facet", "facet-chosen", "page-of", "previous", "next",
+	return []string{
+		"root", "toolbar", "search", "reset", "facet", "facet-chosen", "facet-search", "filter",
+		"columns", "toggle", "bulk", "wrapper", "table", "caption", "head",
+		"header-cell", "sort", "header-menu", "row", "cell", "select-all",
+		"select", "row-menu", "footer", "count", "sizes", "pagination", "page-of",
+		"first", "previous", "next", "last",
 	}
-	names = append(names, TableProps{}.PartNames()[1:]...)
-
-	// Deduplicated, because this composes two components that publish some of
-	// the same names and a list that repeats one is a list nobody can trust to
-	// be the set.
-	seen := map[string]bool{}
-	unique := names[:0]
-	for _, name := range names {
-		if seen[name] {
-			continue
-		}
-		seen[name] = true
-		unique = append(unique, name)
-	}
-	return unique
 }
 @endgo
 
-{{-- One region, one id, one target. Every control below swaps this element,
-     which is why the search can carry the order and the order can carry the
-     search: they are all rebuilt from the same struct on the way back. --}}
+{{-- One region, one id, one target. Every control swaps this element, which is
+     why the search can carry the order and the order can carry the search: they
+     are all rebuilt from the same state on the way back. --}}
 <div
 	data-part="root"
-	class="{{ .RootClass("data-table") }}"
+	class="{{ .RootClass("group/dt w-full") }}"
 	id="{{ .ID }}"
 	role="region"
 	@if(.Complete)
 		data-complete="true"
+	@endif
+	@if(.Navigable)
+		data-navigable="true"
 	@endif
 	@if(.Label != "")
 		aria-label="{{ .Label }}"
 	@endif
 	@attributes(.RootAttrs())
 >
-	@if(.Searchable() || .Hideable() || .Chooses())
-		<div
-			data-part="toolbar"
-			class="{{ .PartClass("toolbar", "data-table-toolbar") }}"
-			@attributes(.PartAttrs("toolbar"))
+	@if(.Nothing())
+		{!! Empty(.Empty) !!}
+	@else
+	<div
+		data-part="toolbar"
+		class="{{ .PartClass("toolbar", "flex items-start gap-2 py-4") }}"
+		@attributes(.PartAttrs("toolbar"))
+	>
+		{{-- The search and the facets are one form. With no script
+		     it is a native GET; with htmx it is the single request every one of
+		     them makes. The order and the hidden columns ride in it as fields,
+		     once each, from the state. --}}
+		<form
+			id="{{ .QueryFormID() }}"
+			class="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+			action="{{ .QueryAction() }}"
+			method="get"
+			@if(.Searchable)
+				role="search"
+			@endif
+			@if(.Complete)
+				hx-boost="false"
+			@endif
+			@if(!.Complete)
+				hx-get="{{ .QueryAction() }}"
+				hx-trigger="submit, change"
+				hx-target="{{ .Target() }}"
+				hx-swap="outerHTML"
+				hx-select="{{ .Target() }}"
+				hx-push-url="true"
+				hx-sync="closest [data-part=root]:replace"
+				hx-indicator="{{ .Target() }}"
+			@endif
 		>
-			@if(.Searchable() || .Filtered())
-				{{-- Search and facets are one native GET form. Keeping them in one
-				     form is what makes the no-script path preserve the same state
-				     HTMX sends, instead of turning each control into a separate
-				     implementation. --}}
-				<form
-					class="data-table-controls"
-					id="{{ .QueryFormID() }}"
-					action="{{ .QueryAction() }}"
-					method="get"
-					@if(.Searchable())
-						role="search"
-					@endif
-				>
-					@foreach(.QueryFields() as field)
-						<input type="hidden" name="{{ field.Name }}" value="{{ field.Value }}">
-					@endforeach
-					@if(.Searchable())
-						<label class="sr-only" for="{{ .ID }}-search">{{ .SearchTitle() }}</label>
-						<input
-							data-part="search"
-							class="{{ .PartClass("search", "input") }}"
-							type="search"
-							id="{{ .ID }}-search"
-							name="{{ .SearchName }}"
-							value="{{ .Query }}"
-							autocomplete="off"
-							@if(!.Complete)
-								hx-get="{{ .SearchAddress() }}"
-								hx-trigger="{{ .SearchTrigger() }}"
-								hx-include="closest form"
-								hx-target="{{ .Target() }}"
-								hx-swap="outerHTML"
-								hx-select="{{ .Target() }}"
-								hx-sync="this:replace"
-								hx-indicator="#{{ .ID }}-indicator"
-							@endif
-							@if(.SearchPlaceholder != "")
-								placeholder="{{ .SearchPlaceholder }}"
-							@endif
-							@attributes(.PartAttrs("search"))
-						>
-						<span
-							data-part="indicator"
-							class="{{ .PartClass("indicator", "spinner") }}"
-							id="{{ .ID }}-indicator"
-							aria-hidden="true"
-							@attributes(.PartAttrs("indicator"))
-						></span>
-					@endif
+			@foreach(.QueryFields() as field)
+				<input type="hidden" name="{{ field.Name }}" value="{{ field.Value }}">
+			@endforeach
+			@if(.Searchable)
+				<label class="sr-only" for="{{ .SearchID() }}">{{ .SearchTitle() }}</label>
+				@if(.Faceted())
+					<input
+						data-part="search"
+						class="{{ .PartClass("search", "h-8 w-[150px] lg:w-[250px] rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30") }}"
+						type="text"
+						role="searchbox"
+						id="{{ .SearchID() }}"
+						name="{{ .SearchName() }}"
+						value="{{ .Query() }}"
+						autocomplete="off"
+						placeholder="{{ .Placeholder() }}"
+						@attributes(.PartAttrs("search"))
+					>
+				@endif
+				@if(!.Faceted())
+					<input
+						data-part="search"
+						class="{{ .PartClass("search", "h-8 w-full min-w-0 max-w-sm rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30") }}"
+						type="text"
+						role="searchbox"
+						id="{{ .SearchID() }}"
+						name="{{ .SearchName() }}"
+						value="{{ .Query() }}"
+						autocomplete="off"
+						placeholder="{{ .Placeholder() }}"
+						@attributes(.PartAttrs("search"))
+					>
+				@endif
+			@endif
 
-					@if(.Filtered())
-						{{-- A facet is a button that opens a list of checkboxes, as
-						     shadcn's faceted filter: the label, and what is chosen
-						     beside it. The checkboxes are native and in the form, so
-						     with no script the same choice is submitted by Apply. --}}
-						@foreach(.Filters as filter)
-							<details
-								data-part="facet"
-								class="{{ .PartClass("facet", "data-table-facet") }}"
-								@attributes(.PartAttrs("facet"))
-							>
-								<summary>
-									{!! icons.PlusCircle(icons.Props{}) !!}
-									<span>{{ filter.Label }}</span>
-									@if(len(.FacetSummary(filter)) > 0)
-										<span
-											data-part="facet-chosen"
-											class="{{ .PartClass("facet-chosen", "data-table-facet-chosen") }}"
-											@attributes(.PartAttrs("facet-chosen"))
-										>
-											@foreach(.FacetSummary(filter) as label)
-												<span class="badge" data-variant="secondary">{{ label }}</span>
-											@endforeach
-										</span>
+			@foreach(.Filters as filter)
+				{{-- A facet opens a popover of checkboxes, as shadcn's faceted
+				     filter: the title, and what is chosen beside it. The boxes are
+				     native and in the form, so ticking one is a change of the form.
+				     Every option is drawn with its count; the search inside the
+				     popover only hides the ones that do not match. --}}
+				<details
+					id="{{ .ID }}-facet-{{ filter.Key }}"
+					data-part="facet"
+					data-menu
+					class="{{ .PartClass("facet", "group/menu relative") }}"
+					@attributes(.PartAttrs("facet"))
+				>
+					<summary class="{{ "inline-flex cursor-pointer list-none [&::-webkit-details-marker]:hidden group/button shrink-0 items-center justify-center rounded-lg border border-dashed border-border bg-background bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none h-8 gap-1.5 px-2.5 hover:bg-muted hover:text-foreground group-open/menu:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:border-input dark:bg-input/30 dark:hover:bg-input/50" }}">
+						{!! icons.PlusCircle(icons.Props{}) !!}
+						<span>{{ filter.Label }}</span>
+						<span
+							class="{{ "mx-2 h-4 w-px shrink-0 bg-border" }}"
+							role="separator"
+							aria-orientation="vertical"
+							@if(len(.Chosen(filter)) == 0)
+								hidden
+							@endif
+						></span>
+						<span
+							data-part="facet-chosen"
+							class="{{ .PartClass("facet-chosen", "inline-flex items-center gap-1") }}"
+							@if(len(.Chosen(filter)) == 0)
+								hidden
+							@endif
+							@attributes(.PartAttrs("facet-chosen"))
+						>
+							<span
+								data-facet-count
+								class="rounded-sm bg-secondary px-1 text-xs font-normal text-secondary-foreground lg:hidden"
+							>{{ len(.Chosen(filter)) }}</span>
+							<span class="hidden gap-1 lg:flex">
+								<span
+									data-facet-many
+									class="rounded-sm bg-secondary px-1 text-xs font-normal text-secondary-foreground"
+									@if(.FacetBadges(filter))
+										hidden
 									@endif
-								</summary>
-								<div
-									class="data-table-facet-menu"
-									role="group"
-									aria-label="{{ .FacetName(filter) }}"
+								>{{ .FacetSelectedText(filter) }}</span>
+								@foreach(filter.Options as option)
+									<span
+										data-facet-badge="{{ option.Value }}"
+										class="rounded-sm bg-secondary px-1 text-xs font-normal text-secondary-foreground"
+										@if(!.FacetBadges(filter) || !.OptionChosen(filter, option))
+											hidden
+										@endif
+									>{{ option.Label }}</span>
+								@endforeach
+							</span>
+						</span>
+					</summary>
+					<div
+						data-menu-panel
+						data-align="start"
+						class="{{ "fixed z-50 w-[200px] overflow-hidden rounded-lg bg-popover p-0 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none" }}"
+					>
+						<div class="flex h-9 items-center gap-2 border-b px-3">
+							<span class="shrink-0 opacity-50 [&_svg]:size-4" aria-hidden="true">{!! icons.MagnifyingGlass(icons.Props{}) !!}</span>
+							<input
+								data-part="facet-search"
+								class="{{ .PartClass("facet-search", "flex h-9 w-full min-w-0 bg-transparent py-3 text-sm outline-hidden placeholder:text-muted-foreground") }}"
+								type="text"
+								autocomplete="off"
+								placeholder="{{ filter.Label }}"
+								aria-label="{{ filter.Label }}"
+								@attributes(.PartAttrs("facet-search"))
+							>
+						</div>
+						<div class="max-h-[300px] overflow-x-hidden overflow-y-auto p-1" role="group" aria-label="{{ filter.Label }}">
+							@foreach(filter.Options as option)
+								<label
+									data-facet-item
+									data-text="{{ option.Label }}"
+									class="relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm select-none hover:bg-accent hover:text-accent-foreground has-focus-visible:bg-accent has-focus-visible:text-accent-foreground has-disabled:opacity-50"
+								>
+									<input
+										data-part="filter"
+										class="{{ .PartClass("filter", "peer relative block size-4 shrink-0 cursor-pointer appearance-none rounded-[4px] border border-input outline-none transition-colors after:absolute after:top-[42%] after:left-1/2 after:hidden after:h-[9px] after:w-[5px] after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-r-2 after:border-b-2 after:border-current after:content-[''] checked:border-primary checked:bg-primary checked:text-primary-foreground checked:after:block disabled:cursor-not-allowed dark:bg-input/30 dark:checked:bg-primary") }}"
+										type="checkbox"
+										name="{{ filter.Key }}"
+										value="{{ option.Value }}"
+										@if(.OptionChosen(filter, option))
+											checked
+										@endif
+										@if(option.Disabled)
+											disabled
+										@endif
+										@attributes(.PartAttrs("filter"))
+									>
+									<span class="min-w-0 flex-1 truncate">{{ option.Label }}</span>
+									@if(.FacetCounted(filter))
+										<span class="ml-auto flex size-4 items-center justify-center font-mono text-xs text-muted-foreground">{{ .FacetCount(filter, option) }}</span>
+									@endif
+								</label>
+							@endforeach
+							<div data-facet-empty hidden class="py-6 text-center text-sm">{{ .lines().NoFacetResults }}</div>
+						</div>
+						@if(len(.Chosen(filter)) > 0)
+							<div class="border-t p-1" data-facet-clear>
+								<a
+									class="flex cursor-pointer items-center justify-center rounded-sm px-2 py-1.5 text-center text-sm select-none hover:bg-accent hover:text-accent-foreground"
+									href="{{ .ClearFacetHref(filter) }}"
+									@if(.Complete)
+										hx-boost="false"
+									@endif
 									@if(!.Complete)
-										hx-get="{{ .SearchAddress() }}"
-										hx-trigger="change"
-										hx-include="closest form"
+										hx-get="{{ .ClearFacetHref(filter) }}"
 										hx-target="{{ .Target() }}"
 										hx-swap="outerHTML"
 										hx-select="{{ .Target() }}"
-										hx-sync="closest form:replace"
-										hx-indicator="#{{ .ID }}-indicator"
+										hx-push-url="true"
+										hx-sync="closest [data-part=root]:replace"
+										hx-indicator="{{ .Target() }}"
 									@endif
-								>
-									@foreach(filter.Options as option)
-										<label class="data-table-facet-option">
-											<input
-												data-part="filter"
-												class="{{ .PartClass("filter", "input") }}"
-												type="checkbox"
-												name="{{ filter.Key }}"
-												value="{{ option.Value }}"
-												@if(.Chosen(filter, option))
-													checked
-												@endif
-												@attributes(.PartAttrs("filter"))
-											>
-											<span>{{ option.Label }}</span>
-										</label>
-									@endforeach
-								</div>
-							</details>
-						@endforeach
-						<noscript>{!! Button(ButtonProps{Label: .ApplyText(), Type: "submit", Variant: "outline", Size: "sm"}) !!}</noscript>
-					@endif
-				</form>
-			@endif
-
-			@if(.Hideable())
-				{{-- Checkboxes and not menu entries: switching a column off is a
-				     two-state choice that stays chosen, which is what a checkbox
-				     is and what a menu entry is not. --}}
-				<details
-					data-part="columns"
-					class="{{ .PartClass("columns", "table-columns") }}"
-					@attributes(.PartAttrs("columns"))
-				>
-					<summary>{{ .ColumnsName() }}{!! icons.CaretDown(icons.Props{}) !!}</summary>
-					<div>
-						@foreach(.Columns as column)
-							@if(column.Hideable && column.Key != "")
-								<label
-									data-part="toggle"
-									@if(.PartClass("toggle") != "")
-										class="{{ .PartClass("toggle") }}"
-									@endif
-									@attributes(.PartAttrs("toggle"))
-								>
-									<input
-										class="input"
-										type="checkbox"
-										data-column-toggle="{{ column.Key }}"
-										@if(!column.Hidden)
-											checked
-										@endif
-									>
-									{{ column.Label }}
-								</label>
-							@endif
-						@endforeach
+									data-facet-clear-link
+								>{{ .lines().ClearFilters }}</a>
+							</div>
+						@endif
 					</div>
 				</details>
+			@endforeach
+
+			@if(.Active() && (.Searchable || .Faceted()))
+				<a
+					data-part="reset"
+					class="{{ .PartClass("reset", "inline-flex group/button shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none h-8 gap-1.5 px-2.5 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:hover:bg-muted/50") }}"
+					href="{{ .ResetHref() }}"
+					@if(.Complete)
+						hx-boost="false"
+					@endif
+					@if(!.Complete)
+						hx-get="{{ .ResetHref() }}"
+						hx-target="{{ .Target() }}"
+						hx-swap="outerHTML"
+						hx-select="{{ .Target() }}"
+						hx-push-url="true"
+						hx-sync="closest [data-part=root]:replace"
+						hx-indicator="{{ .Target() }}"
+					@endif
+					@attributes(.PartAttrs("reset"))
+				>{{ .lines().Reset }}{!! icons.X(icons.Props{}) !!}</a>
 			@endif
-		</div>
+			@if(.Searchable || .Faceted())
+				<noscript><button type="submit" class="{{ "inline-flex group/button shrink-0 items-center justify-center rounded-lg border border-border bg-background text-sm font-medium h-7 px-2.5" }}">{{ .lines().Apply }}</button></noscript>
+			@endif
+		</form>
+
+		@if(.Hideable())
+			{{-- Columns are switched on and off from a menu that stays open, as
+			     shadcn's: each line is the address of the state with that column
+			     toggled, so the choice lives in the address and survives the swap,
+			     the reload and the history. --}}
+			<details
+				id="{{ .ID }}-columns"
+				data-part="columns"
+				data-menu
+				class="{{ .PartClass("columns", "group/menu relative ms-auto") }}"
+				@attributes(.PartAttrs("columns"))
+			>
+				<summary class="{{ "inline-flex cursor-pointer list-none [&::-webkit-details-marker]:hidden group/button shrink-0 items-center justify-center rounded-lg border border-border bg-background bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none h-8 gap-1.5 px-2.5 hover:bg-muted hover:text-foreground group-open/menu:bg-muted group-open/menu:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:border-input dark:bg-input/30 dark:hover:bg-input/50" }}">{{ .ColumnsName() }}{!! icons.CaretDown(icons.Props{}) !!}</summary>
+				<div
+					data-menu-panel
+					data-align="end"
+					role="menu"
+					aria-label="{{ .lines().ToggleColumns }}"
+					class="{{ "fixed z-50 w-44 min-w-32 overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none" }}"
+				>
+					@foreach(.Columns as column)
+						@if(column.Hideable && column.Key != "")
+							<a
+								data-part="toggle"
+								data-column-toggle="{{ column.Key }}"
+								class="{{ .PartClass("toggle", "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pe-8 ps-1.5 text-sm capitalize outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground") }}"
+								role="menuitemcheckbox"
+								aria-checked="{{ !.Off(column) }}"
+								href="{{ .ColumnHref(column) }}"
+								@if(.Complete)
+									hx-boost="false"
+								@endif
+								@if(!.Complete)
+									hx-get="{{ .ColumnHref(column) }}"
+									hx-target="{{ .Target() }}"
+									hx-swap="outerHTML"
+									hx-select="{{ .Target() }}"
+									hx-push-url="true"
+									hx-sync="closest [data-part=root]:replace"
+									hx-indicator="{{ .Target() }}"
+								@endif
+								@attributes(.PartAttrs("toggle"))
+							>
+								{{ column.Label }}
+								<span
+									class="pointer-events-none absolute end-2 flex items-center justify-center [&_svg]:size-4 [&_path[opacity]]:hidden"
+									data-indicator
+									@if(.Off(column))
+										hidden
+									@endif
+								>{!! icons.Check(icons.Props{}) !!}</span>
+							</a>
+						@endif
+					@endforeach
+				</div>
+			</details>
+		@endif
+	</div>
+
+	@if(.Bulky())
+		{{-- The bar of bulk actions. It is shown once something is ticked, and the
+		     keys ticked on other pages travel in it as hidden fields the behaviour
+		     keeps, so one press posts the whole selection. --}}
+		<form
+			id="{{ .BulkID() }}"
+			data-part="bulk"
+			class="{{ .PartClass("bulk", "mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-accent px-3 py-2 text-accent-foreground") }}"
+			method="{{ .PostMethod() }}"
+			action="{{ .BulkAction }}"
+			aria-label="{{ .BulkName() }}"
+			@if(.Ticked() == 0)
+				hidden
+			@endif
+			@if(.Complete)
+				hx-boost="false"
+			@endif
+			@attributes(.PartAttrs("bulk"))
+		>
+			@if(.SendsToken())
+				<input type="hidden" name="_token" value="{{ .FormToken() }}">
+			@endif
+			@foreach(.BulkActions as action)
+				{!! Button(action) !!}
+			@endforeach
+		</form>
 	@endif
 
-	{!! Table(.Grid()) !!}
+	<div
+		data-part="wrapper"
+		class="{{ .PartClass("wrapper", "overflow-hidden rounded-md border transition-opacity group-[.htmx-request]/dt:opacity-60") }}"
+		@attributes(.PartAttrs("wrapper"))
+	>
+		<div class="relative w-full overflow-x-auto">
+			<table
+				data-part="table"
+				class="{{ .PartClass("table", "w-full caption-bottom text-sm") }}"
+				@if(.Role() != "")
+					role="{{ .Role() }}"
+				@endif
+				@attributes(.PartAttrs("table"))
+			>
+				@if(.Caption != "")
+					<caption
+						data-part="caption"
+						class="{{ .PartClass("caption", "mt-4 text-sm text-muted-foreground") }}"
+						@attributes(.PartAttrs("caption"))
+					>{{ .Caption }}</caption>
+				@endif
+				<thead
+					data-part="head"
+					class="{{ .PartClass("head", "[&_tr]:border-b") }}"
+					@attributes(.PartAttrs("head"))
+				>
+					<tr class="{{ "border-b transition-colors hover:bg-muted/50 has-[details[open]]:bg-muted/50 data-[state=selected]:bg-muted" }}">
+						@if(.Selectable())
+							<th
+								data-part="header-cell"
+								scope="col"
+								class="{{ .PartClass("header-cell", "h-10 px-2 text-start align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0 w-0") }}"
+								data-select
+								@attributes(.PartAttrs("header-cell"))
+							>
+								<input
+									data-part="select-all"
+									data-select-all
+									class="{{ .PartClass("select-all", "peer relative block size-4 shrink-0 cursor-pointer appearance-none rounded-[4px] border border-input outline-none transition-colors after:absolute after:top-[42%] after:left-1/2 after:hidden after:h-[9px] after:w-[5px] after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-r-2 after:border-b-2 after:border-current after:content-[''] checked:border-primary checked:bg-primary checked:text-primary-foreground checked:after:block indeterminate:after:block focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30 dark:checked:bg-primary") }}"
+									type="checkbox"
+									aria-label="{{ .lines().SelectAll }}"
+									@attributes(.PartAttrs("select-all"))
+								>
+							</th>
+						@endif
+						@foreach(.Columns as column)
+							<th
+								data-part="header-cell"
+								scope="col"
+								class="{{ .PartClass("header-cell", "h-10 px-2 align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0", column.AlignClass()) }}"
+								@if(column.Key != "")
+									data-column="{{ column.Key }}"
+								@endif
+								@if(.Off(column))
+									hidden
+								@endif
+								@if(.Order(column) != "")
+									aria-sort="{{ .Order(column) }}"
+								@endif
+								@attributes(.PartAttrs("header-cell"))
+							>
+								@if(.Sortable(column) && !.HeaderMenu)
+									<a
+										data-part="sort"
+										class="{{ .PartClass("sort", "inline-flex group/button shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none h-8 gap-1.5 px-2.5 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:hover:bg-muted/50") }}"
+										href="{{ .SortHref(column) }}"
+										aria-label="{{ .SortName(column) }}"
+										data-sort-key="{{ column.Key }}"
+										@if(.Complete)
+											hx-boost="false"
+										@endif
+										@if(!.Complete)
+											hx-get="{{ .SortHref(column) }}"
+											hx-target="{{ .Target() }}"
+											hx-swap="outerHTML"
+											hx-select="{{ .Target() }}"
+											hx-push-url="true"
+											hx-sync="closest [data-part=root]:replace"
+											hx-indicator="{{ .Target() }}"
+										@endif
+										@attributes(.PartAttrs("sort"))
+									>
+										{{ column.Label }}
+										<span
+											data-sort-icon="none"
+											@if(.Sorted(column) != "")
+												hidden
+											@endif
+										>{!! icons.ArrowsDownUp(icons.Props{}) !!}</span>
+										<span
+											data-sort-icon="asc"
+											@if(.Sorted(column) != "asc")
+												hidden
+											@endif
+										>{!! icons.ArrowUp(icons.Props{}) !!}</span>
+										<span
+											data-sort-icon="desc"
+											@if(.Sorted(column) != "desc")
+												hidden
+											@endif
+										>{!! icons.ArrowDown(icons.Props{}) !!}</span>
+									</a>
+								@endif
+								@if(.Sortable(column) && .HeaderMenu)
+									<div class="flex items-center gap-2">
+										<details
+											id="{{ .ID }}-head-{{ column.Key }}"
+											data-part="header-menu"
+											data-menu
+											data-closes
+											class="{{ .PartClass("header-menu", "group/menu relative") }}"
+											@attributes(.PartAttrs("header-menu"))
+										>
+											<summary
+												class="{{ "-ms-3 inline-flex cursor-pointer list-none [&::-webkit-details-marker]:hidden group/button shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none h-8 gap-1 px-3 hover:bg-muted hover:text-foreground group-open/menu:bg-accent focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:hover:bg-muted/50" }}"
+												aria-label="{{ .SortName(column) }}"
+											>
+												<span>{{ column.Label }}</span>
+												<span
+													data-sort-icon="none"
+													@if(.Sorted(column) != "")
+														hidden
+													@endif
+												>{!! icons.CaretUpDown(icons.Props{}) !!}</span>
+												<span
+													data-sort-icon="asc"
+													@if(.Sorted(column) != "asc")
+														hidden
+													@endif
+												>{!! icons.ArrowUp(icons.Props{}) !!}</span>
+												<span
+													data-sort-icon="desc"
+													@if(.Sorted(column) != "desc")
+														hidden
+													@endif
+												>{!! icons.ArrowDown(icons.Props{}) !!}</span>
+											</summary>
+											<div
+												data-menu-panel
+												data-align="start"
+												role="menu"
+												class="{{ "fixed z-50 min-w-32 overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none" }}"
+											>
+												<a
+													role="menuitem"
+													data-sort-key="{{ column.Key }}"
+													data-dir="asc"
+													class="{{ "relative flex w-full cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4" }}"
+													href="{{ .AscHref(column) }}"
+													@if(.Complete)
+														hx-boost="false"
+													@endif
+													@if(!.Complete)
+														hx-get="{{ .AscHref(column) }}"
+														hx-target="{{ .Target() }}"
+														hx-swap="outerHTML"
+														hx-select="{{ .Target() }}"
+														hx-push-url="true"
+														hx-sync="closest [data-part=root]:replace"
+														hx-indicator="{{ .Target() }}"
+													@endif
+												>{!! icons.ArrowUp(icons.Props{}) !!}{{ .lines().Asc }}</a>
+												<a
+													role="menuitem"
+													data-sort-key="{{ column.Key }}"
+													data-dir="desc"
+													class="{{ "relative flex w-full cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4" }}"
+													href="{{ .DescHref(column) }}"
+													@if(.Complete)
+														hx-boost="false"
+													@endif
+													@if(!.Complete)
+														hx-get="{{ .DescHref(column) }}"
+														hx-target="{{ .Target() }}"
+														hx-swap="outerHTML"
+														hx-select="{{ .Target() }}"
+														hx-push-url="true"
+														hx-sync="closest [data-part=root]:replace"
+														hx-indicator="{{ .Target() }}"
+													@endif
+												>{!! icons.ArrowDown(icons.Props{}) !!}{{ .lines().Desc }}</a>
+												@if(column.Hideable)
+													<div class="-mx-1 my-1 h-px bg-border" role="separator"></div>
+													<a
+														role="menuitem"
+														data-column-hide="{{ column.Key }}"
+														class="{{ "relative flex w-full cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4" }}"
+														href="{{ .HideHref(column) }}"
+														@if(.Complete)
+															hx-boost="false"
+														@endif
+														@if(!.Complete)
+															hx-get="{{ .HideHref(column) }}"
+															hx-target="{{ .Target() }}"
+															hx-swap="outerHTML"
+															hx-select="{{ .Target() }}"
+															hx-push-url="true"
+															hx-sync="closest [data-part=root]:replace"
+															hx-indicator="{{ .Target() }}"
+														@endif
+													>{!! icons.EyeSlash(icons.Props{}) !!}{{ .lines().Hide }}</a>
+												@endif
+											</div>
+										</details>
+									</div>
+								@endif
+								@if(!.Sortable(column))
+									{{ column.Label }}
+								@endif
+							</th>
+						@endforeach
+						@if(.Acting())
+							<th
+								class="{{ "h-10 px-2 text-start align-middle font-medium whitespace-nowrap text-foreground" }}"
+								scope="col"
+							><span class="sr-only">{{ .lines().Actions }}</span></th>
+						@endif
+					</tr>
+				</thead>
+				<tbody class="[&_tr:last-child]:border-0">
+					@foreach(.Body() as row)
+						<tr
+							data-part="row"
+							class="{{ .PartClass("row", "border-b transition-colors hover:bg-muted/50 has-[details[open]]:bg-muted/50 data-[state=selected]:bg-muted") }}"
+							@if(row.Selected)
+								data-state="selected"
+							@endif
+							@if(row.Outside)
+								hidden
+							@endif
+							@if(row.Key != "")
+								data-key="{{ row.Key }}"
+							@endif
+							@if(row.Level > 0)
+								aria-level="{{ row.Level }}"
+								data-level="{{ row.Level }}"
+							@endif
+							@if(row.Branch && row.Expanded)
+								aria-expanded="true"
+							@endif
+							@if(row.Branch && !row.Expanded)
+								aria-expanded="false"
+							@endif
+							@attributes(.RowAttrs(row.TableRow))
+						>
+							@if(.Selectable())
+								<td
+									data-part="cell"
+									class="{{ .PartClass("cell", "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0") }}"
+									data-select
+									@attributes(.PartAttrs("cell"))
+								>
+									<input
+										data-part="select"
+										class="{{ .PartClass("select", "peer relative block size-4 shrink-0 cursor-pointer appearance-none rounded-[4px] border border-input outline-none transition-colors after:absolute after:top-[42%] after:left-1/2 after:hidden after:h-[9px] after:w-[5px] after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-r-2 after:border-b-2 after:border-current after:content-[''] checked:border-primary checked:bg-primary checked:text-primary-foreground checked:after:block focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30 dark:checked:bg-primary") }}"
+										type="checkbox"
+										value="{{ row.Key }}"
+										@if(.Bulky())
+											name="{{ .SelectName }}"
+											form="{{ .BulkID() }}"
+										@endif
+										aria-label="{{ .RowName(row.TableRow) }}"
+										@if(row.Selected)
+											checked
+										@endif
+										@attributes(.PartAttrs("select"))
+									>
+								</td>
+							@endif
+							@for(i := 0; i < len(row.Cells); i++)
+								<td
+									data-part="cell"
+									class="{{ .PartClass("cell", "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0", .AlignClass(i)) }}"
+									@if(.ColumnKey(i) != "")
+										data-column="{{ .ColumnKey(i) }}"
+									@endif
+									@if(.OffAt(i))
+										hidden
+									@endif
+									@if(row.Cells[i].SortValue != "")
+										data-sort-value="{{ row.Cells[i].SortValue }}"
+									@endif
+									@attributes(.PartAttrs("cell"))
+								>
+									@if(row.Cells[i].HTML != "")
+										{!! row.Cells[i].HTML !!}
+									@endif
+									@if(row.Cells[i].HTML == "")
+										{{ row.Cells[i].Text }}
+									@endif
+								</td>
+							@endfor
+							@if(.Acting())
+								<td class="{{ "p-2 align-middle whitespace-nowrap" }}">
+									@if(len(row.Actions) > 0)
+										<details
+											id="{{ row.MenuID }}"
+											data-part="row-menu"
+											data-menu
+											data-closes
+											class="{{ .PartClass("row-menu", "group/menu relative") }}"
+											@attributes(.PartAttrs("row-menu"))
+										>
+											<summary class="{{ "inline-flex cursor-pointer list-none [&::-webkit-details-marker]:hidden group/button shrink-0 items-center justify-center rounded-[min(var(--radius-md),10px)] border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none size-6 hover:bg-muted hover:text-foreground group-open/menu:bg-muted group-open/menu:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:hover:bg-muted/50" }}">
+												<span class="sr-only">{{ .lines().OpenMenu }}</span>
+												{!! icons.DotsThree(icons.Props{}) !!}
+											</summary>
+											<div
+												data-menu-panel
+												data-align="end"
+												role="menu"
+												class="{{ "fixed z-50 w-44 min-w-32 overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none" }}"
+											>
+												@for(n := 0; n < len(row.Actions); n++)
+													@if(row.Actions[n].Separator)
+														<div class="-mx-1 my-1 h-px bg-border" role="separator"></div>
+													@elseif(row.Actions[n].Heading)
+														<div class="px-1.5 py-1 text-xs font-medium text-muted-foreground" role="heading" aria-level="3">{{ row.Actions[n].Label }}</div>
+													@elseif(row.Actions[n].URL != "")
+														<a
+															role="menuitem"
+															class="{{ "relative flex w-full cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4" }}"
+															href="{{ row.Actions[n].URL }}"
+															@if(row.Actions[n].Variant != "")
+																data-variant="{{ row.Actions[n].Variant }}"
+															@endif
+															@if(row.Actions[n].Disabled)
+																aria-disabled="true"
+															@endif
+														>
+															{{ row.Actions[n].Label }}
+															@if(row.Actions[n].Shortcut != "")
+																<span class="ml-auto text-xs tracking-widest text-muted-foreground">{{ row.Actions[n].Shortcut }}</span>
+															@endif
+														</a>
+													@else
+														<button
+															type="button"
+															role="menuitem"
+															class="{{ "relative flex w-full cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4" }}"
+															@if(row.Actions[n].Variant != "")
+																data-variant="{{ row.Actions[n].Variant }}"
+															@endif
+															@if(row.Actions[n].Disabled)
+																aria-disabled="true"
+															@endif
+															@if(row.Actions[n].HxPost != "")
+																hx-post="{{ row.Actions[n].HxPost }}"
+															@endif
+															@if(row.Actions[n].HxGet != "")
+																hx-get="{{ row.Actions[n].HxGet }}"
+															@endif
+															@if(row.Actions[n].HxTarget != "")
+																hx-target="{{ row.Actions[n].HxTarget }}"
+															@endif
+															@if(row.Actions[n].HxConfirm != "")
+																hx-confirm="{{ row.Actions[n].HxConfirm }}"
+															@endif
+														>
+															{{ row.Actions[n].Label }}
+															@if(row.Actions[n].Shortcut != "")
+																<span class="ml-auto text-xs tracking-widest text-muted-foreground">{{ row.Actions[n].Shortcut }}</span>
+															@endif
+														</button>
+													@endif
+												@endfor
+											</div>
+										</details>
+									@endif
+								</td>
+							@endif
+						</tr>
+					@endforeach
+					@if(len(.Rows) == 0)
+						<tr class="{{ "border-b transition-colors hover:bg-muted/50" }}">
+							<td colspan="{{ .Span() }}" class="h-24 p-2 text-center">{{ .lines().NoResult }}</td>
+						</tr>
+					@endif
+					@if(.Complete && len(.Rows) > 0)
+						{{-- Drawn hidden, and shown by the browser when a search or a
+						     facet leaves no row: a script that builds a styled row
+						     would carry classes the stylesheet was never compiled
+						     with. --}}
+						<tr data-empty-row hidden class="{{ "border-b transition-colors hover:bg-muted/50" }}">
+							<td colspan="{{ .Span() }}" class="h-24 p-2 text-center">{{ .lines().NoResult }}</td>
+						</tr>
+					@endif
+				</tbody>
+			</table>
+		</div>
+	</div>
 
-	{{-- The range and the pager sit together, because between them they say
-	     one thing: where in the list the reader is. The range is a live region
-	     so a page change is announced -- rows changing under somebody is
-	     otherwise silent. --}}
-	@if(.Paged() || .Complete || .Searchable() || .Chooses() || .Selectable())
+	{{-- The footer: how many rows are selected of the whole list on the left,
+	     and on the right the page size, where the reader is, and the steps. The
+	     count is a live region so a page change is announced. --}}
+	@if(.FooterText() != "" || .Stepped() || .Chooses())
 		<div
 			data-part="footer"
-			class="{{ .PartClass("footer", "data-table-footer") }}"
+			class="{{ .PartClass("footer", "flex flex-wrap items-center justify-end gap-x-2 gap-y-2 py-4") }}"
 			@attributes(.PartAttrs("footer"))
 		>
-			<div class="data-table-status">
-				@if(.Selectable())
-					<p
-						data-part="count"
-						class="{{ .PartClass("count", "data-table-count") }}"
-						role="status"
-						aria-live="polite"
-						data-selected-template="{{ .SelectedSentence() }}"
-						@attributes(.PartAttrs("count"))
-					>{{ .SelectedText() }}</p>
-				@endif
-				@if(.Ranged())
-					<p
-						data-part="showing"
-						class="{{ .PartClass("showing", "data-table-showing") }}"
-						role="status"
-						aria-live="polite"
-						@attributes(.PartAttrs("showing"))
-					>{{ .Showing() }}</p>
-				@endif
-			</div>
+			<div
+				data-part="count"
+				class="{{ .PartClass("count", "min-w-[10rem] flex-1 text-sm text-muted-foreground") }}"
+				role="status"
+				aria-live="polite"
+				data-selected-template="{{ .SelectedSentence() }}"
+				@attributes(.PartAttrs("count"))
+			>{{ .FooterText() }}</div>
 
-			<div class="data-table-pager">
+			<div class="flex flex-wrap items-center gap-x-6 gap-y-2 lg:gap-x-8">
 				@if(.Chooses())
-					<label class="data-table-sizes">
-						<span>{{ .PerPageText() }}</span>
-						<select
+					{{-- The size is a menu of addresses, not a field of the form: the
+					     state decides which page keeps the first row on screen, and
+					     only a link built from the state can say so. --}}
+					<div class="flex items-center space-x-2">
+						<p id="{{ .SizesID() }}-label" class="text-sm font-medium">{{ .lines().RowsPerPage }}</p>
+						<details
+							id="{{ .SizesID() }}"
 							data-part="sizes"
-							class="{{ .PartClass("sizes", "select") }}"
-							data-page-size
+							data-menu
+							data-closes
+							class="{{ .PartClass("sizes", "group/menu relative") }}"
 							@attributes(.PartAttrs("sizes"))
 						>
-							@foreach(.Sizes() as size)
-								<option
-									value="{{ size }}"
-									@if(size == .PageSize)
-										selected
-									@endif
-								>{{ size }}</option>
-							@endforeach
-						</select>
-					</label>
+							<summary
+								class="{{ "inline-flex cursor-pointer list-none [&::-webkit-details-marker]:hidden h-8 w-[70px] items-center justify-between gap-1 rounded-md border border-input bg-transparent px-2 py-1 text-sm whitespace-nowrap shadow-xs outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 group-open/menu:bg-muted [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg]:opacity-50 dark:bg-input/30" }}"
+								aria-labelledby="{{ .SizesID() }}-label {{ .SizesID() }}-value"
+							>
+								<span id="{{ .SizesID() }}-value" data-size-value>{{ .Size() }}</span>
+								{!! icons.CaretUpDown(icons.Props{}) !!}
+							</summary>
+							<div
+								data-menu-panel
+								data-align="start"
+								role="menu"
+								class="{{ "fixed z-50 min-w-[70px] overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none" }}"
+							>
+								@foreach(.Sizes() as size)
+									<a
+										role="menuitemradio"
+										aria-checked="{{ size == .Size() }}"
+										data-size="{{ size }}"
+										class="{{ "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pe-8 ps-1.5 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground" }}"
+										href="{{ .SizeHref(size) }}"
+										@if(.Complete)
+											hx-boost="false"
+										@endif
+										@if(!.Complete)
+											hx-get="{{ .SizeHref(size) }}"
+											hx-target="{{ .Target() }}"
+											hx-swap="outerHTML"
+											hx-select="{{ .Target() }}"
+											hx-push-url="true"
+											hx-sync="closest [data-part=root]:replace"
+											hx-indicator="{{ .Target() }}"
+										@endif
+									>
+										{{ size }}
+										<span
+											class="pointer-events-none absolute end-2 flex items-center justify-center [&_svg]:size-4 [&_path[opacity]]:hidden"
+											data-indicator
+											@if(size != .Size())
+												hidden
+											@endif
+										>{!! icons.Check(icons.Props{}) !!}</span>
+									</a>
+								@endforeach
+							</div>
+						</details>
+					</div>
 				@endif
-				@if(.Paged() || .Complete)
-					{{-- Where the reader is, and the two steps: a numbered row of
-					     pages is noise on a list that is read top to bottom. The
-					     links stay addresses, so with no script they load the
-					     page from the server. --}}
+				@if(.Stepped())
+					@if(.FullPager && .PageOfText() != "")
+						<div
+							data-part="page-of"
+							class="{{ .PartClass("page-of", "flex w-[100px] items-center justify-center text-sm font-medium") }}"
+							data-page-of-template="{{ .lines().PageOf }}"
+							@attributes(.PartAttrs("page-of"))
+						>{{ .PageOfText() }}</div>
+					@endif
 					<nav
 						data-part="pagination"
-						class="{{ .PartClass("pagination", "data-table-pagination") }}"
-						aria-label="{{ .Pager().LandmarkName() }}"
-						data-page-of-template="{{ .PageOfTemplate() }}"
-						@if(!.Paged())
+						class="{{ .PartClass("pagination", "flex items-center space-x-2") }}"
+						aria-label="{{ .PagerName() }}"
+						@if(!.Paged() && !.Complete)
 							hidden
 						@endif
 						@attributes(.PartAttrs("pagination"))
 					>
-						@if(.PageOfText() != "")
-						<span
-							data-part="page-of"
-							class="{{ .PartClass("page-of", "data-table-page-of") }}"
-							@attributes(.PartAttrs("page-of"))
-						>{{ .PageOfText() }}</span>
+						@if(.FullPager && .Known())
+							<a
+								data-part="first"
+								data-step="first"
+								class="{{ .PartClass("first", "hidden lg:flex group/button shrink-0 items-center justify-center rounded-lg border border-border bg-background bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none size-8 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:border-input dark:bg-input/30 dark:hover:bg-input/50") }}"
+								aria-label="{{ .lines().First }}"
+								@if(.HasPrevious() || .Complete)
+									href="{{ .FirstHref() }}"
+								@endif
+								@if(!.HasPrevious())
+									aria-disabled="true"
+									tabindex="-1"
+								@endif
+								@if(.Complete)
+									hx-boost="false"
+								@endif
+								@if(!.Complete && .HasPrevious())
+									hx-get="{{ .FirstHref() }}"
+									hx-target="{{ .Target() }}"
+									hx-swap="outerHTML"
+									hx-select="{{ .Target() }}"
+									hx-push-url="true"
+									hx-sync="closest [data-part=root]:replace"
+									hx-indicator="{{ .Target() }}"
+								@endif
+								@attributes(.PartAttrs("first"))
+							>{!! icons.CaretDoubleLeft(icons.Props{}) !!}</a>
 						@endif
 						<a
 							data-part="previous"
-							class="{{ .PartClass("previous", "btn") }}"
-							data-variant="outline"
-							data-size="sm"
-							href="{{ .Pager().PreviousHref() }}"
-							data-page="{{ .PreviousPage() }}"
-							aria-label="{{ .Pager().PreviousName() }}"
-							@if(!.Pager().HasPrevious())
+							data-step="previous"
+							@if(.FullPager)
+								class="{{ .PartClass("previous", "inline-flex group/button shrink-0 items-center justify-center rounded-lg border border-border bg-background bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none size-8 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:border-input dark:bg-input/30 dark:hover:bg-input/50") }}"
+							@endif
+							@if(!.FullPager)
+								class="{{ .PartClass("previous", "inline-flex group/button shrink-0 items-center justify-center rounded-[min(var(--radius-md),12px)] border border-border bg-background bg-clip-padding text-[0.8rem] font-medium whitespace-nowrap transition-all outline-none select-none h-7 gap-1 px-2.5 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5 dark:border-input dark:bg-input/30 dark:hover:bg-input/50") }}"
+							@endif
+							aria-label="{{ .lines().Previous }}"
+							@if(.HasPrevious() || .Complete)
+								href="{{ .PreviousHref() }}"
+							@endif
+							@if(!.HasPrevious())
 								aria-disabled="true"
 								tabindex="-1"
 							@endif
-							@if(!.Complete)
-								hx-get="{{ .Pager().PreviousHref() }}"
+							@if(.Complete)
+								hx-boost="false"
+							@endif
+							@if(!.Complete && .HasPrevious())
+								hx-get="{{ .PreviousHref() }}"
 								hx-target="{{ .Target() }}"
 								hx-swap="outerHTML"
 								hx-select="{{ .Target() }}"
+								hx-push-url="true"
+								hx-sync="closest [data-part=root]:replace"
+								hx-indicator="{{ .Target() }}"
 							@endif
 							@attributes(.PartAttrs("previous"))
-						>{!! icons.CaretLeft(icons.Props{}) !!}<span>{{ .PreviousText() }}</span></a>
+						>
+							@if(.FullPager)
+								{!! icons.CaretLeft(icons.Props{}) !!}
+							@endif
+							@if(!.FullPager)
+								{{ .lines().Back }}
+							@endif
+						</a>
 						<a
 							data-part="next"
-							class="{{ .PartClass("next", "btn") }}"
-							data-variant="outline"
-							data-size="sm"
-							href="{{ .Pager().NextHref() }}"
-							data-page="{{ .NextPage() }}"
-							aria-label="{{ .Pager().NextName() }}"
-							@if(!.Pager().HasNext())
+							data-step="next"
+							@if(.FullPager)
+								class="{{ .PartClass("next", "inline-flex group/button shrink-0 items-center justify-center rounded-lg border border-border bg-background bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none size-8 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:border-input dark:bg-input/30 dark:hover:bg-input/50") }}"
+							@endif
+							@if(!.FullPager)
+								class="{{ .PartClass("next", "inline-flex group/button shrink-0 items-center justify-center rounded-[min(var(--radius-md),12px)] border border-border bg-background bg-clip-padding text-[0.8rem] font-medium whitespace-nowrap transition-all outline-none select-none h-7 gap-1 px-2.5 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5 dark:border-input dark:bg-input/30 dark:hover:bg-input/50") }}"
+							@endif
+							aria-label="{{ .lines().Next }}"
+							@if(.HasNext() || .Complete)
+								href="{{ .NextHref() }}"
+							@endif
+							@if(!.HasNext())
 								aria-disabled="true"
 								tabindex="-1"
 							@endif
-							@if(!.Complete)
-								hx-get="{{ .Pager().NextHref() }}"
+							@if(.Complete)
+								hx-boost="false"
+							@endif
+							@if(!.Complete && .HasNext())
+								hx-get="{{ .NextHref() }}"
 								hx-target="{{ .Target() }}"
 								hx-swap="outerHTML"
 								hx-select="{{ .Target() }}"
+								hx-push-url="true"
+								hx-sync="closest [data-part=root]:replace"
+								hx-indicator="{{ .Target() }}"
 							@endif
 							@attributes(.PartAttrs("next"))
-						><span>{{ .NextText() }}</span>{!! icons.CaretRight(icons.Props{}) !!}</a>
+						>
+							@if(.FullPager)
+								{!! icons.CaretRight(icons.Props{}) !!}
+							@endif
+							@if(!.FullPager)
+								{{ .lines().Forward }}
+							@endif
+						</a>
+						@if(.FullPager && .Known())
+							<a
+								data-part="last"
+								data-step="last"
+								class="{{ .PartClass("last", "hidden lg:flex group/button shrink-0 items-center justify-center rounded-lg border border-border bg-background bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none size-8 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:border-input dark:bg-input/30 dark:hover:bg-input/50") }}"
+								aria-label="{{ .lines().Last }}"
+								@if(.HasNext() || .Complete)
+									href="{{ .LastHref() }}"
+								@endif
+								@if(!.HasNext())
+									aria-disabled="true"
+									tabindex="-1"
+								@endif
+								@if(.Complete)
+									hx-boost="false"
+								@endif
+								@if(!.Complete && .HasNext())
+									hx-get="{{ .LastHref() }}"
+									hx-target="{{ .Target() }}"
+									hx-swap="outerHTML"
+									hx-select="{{ .Target() }}"
+									hx-push-url="true"
+									hx-sync="closest [data-part=root]:replace"
+									hx-indicator="{{ .Target() }}"
+								@endif
+								@attributes(.PartAttrs("last"))
+							>{!! icons.CaretDoubleRight(icons.Props{}) !!}</a>
+						@endif
 					</nav>
 				@endif
 			</div>
 		</div>
+	@endif
 	@endif
 </div>

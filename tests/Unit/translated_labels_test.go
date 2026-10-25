@@ -97,16 +97,17 @@ func marked(t *testing.T) translation.Lines {
 		lines[key] = "PT[" + key + "]"
 	}
 	for key, placeholders := range map[string]string{
-		"pagination.page":      " {n}",
-		"table.selected":       " {n}/{total}",
-		"table.ascending":      " {column}",
-		"table.descending":     " {column}",
-		"table.unsorted":       " {column}",
-		"data_table.showing":   " {from}-{to}/{total}",
-		"data_table.page":      " {n}",
-		"data_table.page_of":   " {n}/{total}",
-		"data_table.search":    " {label}",
-		"data_table.no_result": "",
+		"pagination.page":           " {n}",
+		"table.selected":            " {n}/{total}",
+		"table.ascending":           " {column}",
+		"table.descending":          " {column}",
+		"table.unsorted":            " {column}",
+		"data_table.page_of":        " {n}/{total}",
+		"data_table.search":         " {label}",
+		"data_table.filter":         " {label}",
+		"data_table.rows":           " {total}",
+		"data_table.selected_count": " {n}",
+		"data_table.facet_selected": " {n}",
 	} {
 		lines[key] += placeholders
 	}
@@ -137,9 +138,26 @@ func everyLabel(page components.Page) string {
 		})),
 		string(components.DataTable(components.DataTableProps{
 			ID: "invoices", Label: "Invoices", URL: "/invoices", Columns: columns, Rows: rows,
-			SearchName: "q", SelectName: "ids", BulkActions: bulk, SortKey: "number", SortDir: "desc",
-			Filters:   []components.DataTableFilter{{Key: "status", Label: "Status", Options: []components.SelectOption{{Value: "open", Label: "Open"}}}},
+			Searchable: true, SelectName: "ids", BulkActions: bulk, BulkAction: "/invoices/bulk",
+			HeaderMenu: true, FullPager: true, PageSizes: []int{10, 20},
+			State:     components.DataTableValues{Q: "ada", Sort: "number", Dir: "desc", Facets: map[string][]string{"status": {"open"}}},
+			Filters:   []components.DataTableFilter{{Key: "status", Label: "Status", Options: []components.SelectOption{{Value: "open", Label: "Open"}}, Counts: map[string]int{"open": 1}}},
 			Paginator: paginator, PageData: page,
+		})),
+		// No selection, and the rows with an action: the footer counts rows.
+		string(components.DataTable(components.DataTableProps{
+			ID: "plain", Label: "Plain", URL: "/plain", Columns: columns, Paginator: paginator, PageData: page,
+			Rows: []components.TableRow{{Cells: []components.TableCell{{Text: "1"}, {Text: "open"}}, Actions: []components.MenuItem{{Label: "Open", URL: "/x"}}}},
+		})),
+		// A selection over a page that knows no total.
+		string(components.DataTable(components.DataTableProps{
+			ID: "steps", Label: "Steps", URL: "/steps", Columns: columns, Rows: rows, SelectName: "ids", PageData: page,
+			Paginator: pagination.NewPage(21, 20, 2, pagination.Options{}),
+		})),
+		// Nothing matched.
+		string(components.DataTable(components.DataTableProps{
+			ID: "none", Label: "None", URL: "/none", Columns: columns, Searchable: true, PageData: page,
+			State: components.DataTableValues{Q: "zzz"},
 		})),
 	}, "\n")
 }
@@ -160,7 +178,7 @@ func TestEveryDocumentedKeyIsDrawnFromTheCatalogue(t *testing.T) {
 
 func TestACataloguePlaceholderIsFilled(t *testing.T) {
 	html := everyLabel(ptPage(marked(t)))
-	for _, want := range []string{"PT[pagination.page] 3", "PT[data_table.page_of] 3/7", "PT[data_table.showing] 41-41/137", "PT[data_table.search] Invoices"} {
+	for _, want := range []string{"PT[pagination.page] 3", "PT[data_table.page_of] 3/7", "PT[data_table.search] Invoices"} {
 		if !strings.Contains(html, want) {
 			t.Errorf("missing %q", want)
 		}
@@ -193,10 +211,11 @@ func TestALabelWrittenOnThePropsWinsOverTheCatalogue(t *testing.T) {
 		t.Errorf("the catalogue replaced labels the caller wrote:\n%s", html)
 	}
 	lines := string(components.DataTable(components.DataTableProps{
-		ID: "invoices", URL: "/invoices", PageData: page, Lines: components.DataTableLines{PerPage: "por página"},
+		ID: "invoices", URL: "/invoices", PageData: page, Lines: components.DataTableLines{RowsPerPage: "por página"},
 		Complete: true, PageSize: 10, PageSizes: []int{10, 20},
+		Columns: []components.TableColumn{{Label: "N"}}, Rows: []components.TableRow{{Cells: []components.TableCell{{Text: "1"}}}},
 	}))
-	if !strings.Contains(lines, "por página") || strings.Contains(lines, "PT[data_table.per_page]") {
+	if !strings.Contains(lines, "por página") || strings.Contains(lines, "PT[data_table.rows_per_page]") {
 		t.Errorf("the catalogue replaced a line the caller wrote:\n%s", lines)
 	}
 }

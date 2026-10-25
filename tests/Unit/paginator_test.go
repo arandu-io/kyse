@@ -136,23 +136,18 @@ func windowedList(paginator components.Paginator) components.DataTableProps {
 		ID: "invoices", Label: "Invoices", URL: "/invoices",
 		Columns:    []components.TableColumn{{Label: "Number", Key: "number"}},
 		Rows:       twentyRows(),
-		SearchName: "q", Query: "ada",
+		Searchable: true, FullPager: true,
+		State:     components.DataTableValues{Q: "ada"},
 		Paginator: paginator,
 	}
 }
 
-// The page the query returned says what the three copied fields said, and the
-// table draws the same bytes either way.
-func TestADataTableDrawsTheLengthAwarePageAsTheCopiedFieldsDid(t *testing.T) {
+// The page the query returned says where the reader is and how long the list
+// is, and the table draws the numbers from it.
+func TestADataTableDrawsTheLengthAwarePage(t *testing.T) {
 	page := pagination.NewLengthAwarePage(20, 137, 20, 3, pagination.Options{Path: "/invoices", Query: listQuery})
 	given := string(components.DataTable(windowedList(page)))
-
-	copied := windowedList(nil)
-	copied.Page, copied.Pages, copied.Total = 3, 7, 137
-	if want := string(components.DataTable(copied)); given != want {
-		t.Errorf("the paginator drew differently from Page, Pages and Total:\n%s\n---\n%s", given, want)
-	}
-	for _, want := range []string{"41 to 60 of 137", "Page 3 of 7"} {
+	for _, want := range []string{"Page 3 of 7", "137 row(s)."} {
 		if !strings.Contains(given, want) {
 			t.Errorf("missing %q:\n%s", want, given)
 		}
@@ -183,12 +178,13 @@ func TestADataTableKeepsItsOwnAddressesOverThePages(t *testing.T) {
 func TestADataTableWritesThePagesParameterName(t *testing.T) {
 	page := pagination.NewLengthAwarePage(20, 137, 20, 3, pagination.Options{Path: "/invoices", PageName: "sheet"})
 	props := windowedList(page)
+	props.State = components.DataTableValues{Q: "ada", Names: components.DataTableParams{Page: "sheet"}}
 	html := strings.ReplaceAll(string(components.DataTable(props)), "&amp;", "&")
 	if !strings.Contains(html, "sheet=4") || !strings.Contains(html, "sheet=2") {
-		t.Errorf("the steps do not use the page's parameter:\n%s", html)
+		t.Errorf("the steps do not use the state's parameter:\n%s", html)
 	}
-	if strings.Contains(props.PageURL(), "page=") || !strings.Contains(props.PageURL(), "sheet={page}") {
-		t.Errorf("PageURL = %q, want the page's parameter", props.PageURL())
+	if strings.Contains(html, "page=") {
+		t.Errorf("an address used the conventional name instead of the state's:\n%s", html)
 	}
 }
 
@@ -205,8 +201,8 @@ func TestADataTableOverAPageWithNoTotalDrawsTwoStepsAndNoCount(t *testing.T) {
 	}
 
 	for name, html := range map[string]string{"simple": simple, "cursor": cursor} {
-		if strings.Contains(html, `data-part="page-of"`) || strings.Contains(html, `data-part="showing"`) {
-			t.Errorf("%s: drew a count for a page that knows no total:\n%s", name, html)
+		if strings.Contains(html, `data-part="page-of"`) || strings.Contains(html, `data-part="first"`) || strings.Contains(html, `data-part="last"`) {
+			t.Errorf("%s: drew a count or a jump for a page that knows no total:\n%s", name, html)
 		}
 		if !strings.Contains(html, `data-part="pagination"`) {
 			t.Errorf("%s: drew no steps:\n%s", name, html)
