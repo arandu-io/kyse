@@ -264,6 +264,9 @@ func TestEveryComponentRenders(t *testing.T) {
 		{"DateTimePicker", string(components.DateTimePicker(components.DateTimePickerProps{
 			Name: "starts_at", Label: "Starts at", Kind: "datetime",
 		}))},
+		{"DateRangePicker", string(components.DateRangePicker(components.DateRangePickerProps{
+			Name: "period", Label: "Period", From: "2026-09-15", To: "2026-10-07",
+		}))},
 		{"NumberInput", string(components.NumberInput(components.NumberInputProps{
 			Name: "quantity", Label: "Quantity", Value: "1", Min: "1", Unit: "kg",
 		}))},
@@ -344,6 +347,11 @@ func TestAPropIsEscaped(t *testing.T) {
 		})),
 		"InputGroup": string(components.InputGroup(components.InputGroupProps{
 			Name: "x", Label: payload, Start: payload,
+		})),
+		"DateRangePicker": string(components.DateRangePicker(components.DateRangePickerProps{
+			Name: "x", Label: payload, Placeholder: payload, PanelLabel: payload, Hint: payload,
+			PreviousLabel: payload, NextLabel: payload, PendingLabel: payload, ClearLabel: payload,
+			Presets: []components.DateRangePreset{{Label: payload, Days: 7}},
 		})),
 		"RangeSlider": string(components.RangeSlider(components.RangeSliderProps{
 			Name: "x", Label: payload,

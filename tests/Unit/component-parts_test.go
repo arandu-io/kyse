@@ -849,6 +849,20 @@ var extensible = []struct {
 		components.DateTimePickerProps{}.PartNames,
 	},
 	{
+		"DateRangePicker",
+		func(c components.ComponentProps) []string {
+			props := components.DateRangePickerProps{
+				ComponentProps: c, Name: "period", Label: "Period",
+				From: "2026-09-15", To: "2026-10-07", Hint: "Both ends.",
+				Presets: []components.DateRangePreset{{Label: "Today", Days: 1}},
+			}
+			withHint := string(components.DateRangePicker(props))
+			props.Page = page{errs: map[string]string{"period_from": "Required."}}
+			return []string{withHint, string(components.DateRangePicker(props))}
+		},
+		components.DateRangePickerProps{}.PartNames,
+	},
+	{
 		"NumberInput",
 		func(c components.ComponentProps) []string {
 			props := components.NumberInputProps{
