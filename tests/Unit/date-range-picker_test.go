@@ -251,3 +251,20 @@ func TestTheDayPickersGroupIsAPopover(t *testing.T) {
 		t.Error("the calendar's arrows and footer are not named like the pager's")
 	}
 }
+
+// The one-day picker names its arrows in the reader's language: the grid it
+// builds takes the words from the picker, so an application does not have to
+// rewrite the markup afterwards.
+func TestTheDayPickerNamesItsArrows(t *testing.T) {
+	html := string(components.DateTimePicker(components.DateTimePickerProps{
+		Name: "d", Label: "D", Calendar: true, PreviousLabel: "Mês anterior", NextLabel: "Próximo mês",
+	}))
+	for _, want := range []string{`aria-label="Mês anterior"`, `aria-label="Próximo mês"`} {
+		if !strings.Contains(html, want) {
+			t.Errorf("the picker draws %q", want)
+		}
+	}
+	if strings.Contains(html, "Previous month") {
+		t.Error("the picker says its arrows in English when it was told otherwise")
+	}
+}

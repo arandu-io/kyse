@@ -95,6 +95,11 @@ type DateTimePickerProps struct {
 	// TodayLabel and ClearLabel are the two controls under the grid.
 	TodayLabel string
 	ClearLabel string
+	// PreviousLabel and NextLabel name the grid's two arrows. Empty says
+	// "Previous month" and "Next month", so a picker that could not say them
+	// in the reader's language left English in the middle of the screen.
+	PreviousLabel string
+	NextLabel     string
 }
 
 // InputType is the element type for the kind asked for. An unknown kind is a
@@ -205,9 +210,11 @@ func (p DateTimePickerProps) Grid() CalendarProps {
 		MonthNames:   p.MonthNames,
 		WeekdayNames: p.WeekdayNames,
 		FirstDay:     p.FirstDay,
-		TodayLabel:   p.TodayLabel,
-		ClearLabel:   p.ClearLabel,
-		Target:       p.ElementID(),
+		TodayLabel:    p.TodayLabel,
+		ClearLabel:    p.ClearLabel,
+		PreviousLabel: p.PreviousLabel,
+		NextLabel:     p.NextLabel,
+		Target:        p.ElementID(),
 	}
 }
 
