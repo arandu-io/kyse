@@ -21,6 +21,32 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## v0.46.0
+
+Nothing stops compiling. What changes is the name of three parts of `Calendar`,
+and so of the `DateTimePicker` that draws one: they were called `previous`,
+`next` and `footer`, which is what a `DataTable` calls the parts of its pager, so
+a calendar inside a table's toolbar was found first by anything that looks the
+pager up by part. A style, a test or a script that reached them by the old name
+stops finding them.
+
+| it was | it is |
+| --- | --- |
+| `Parts{"previous": {...}}`, `data-part="previous"` on a calendar | `"month-previous"` |
+| `Parts{"next": {...}}`, `data-part="next"` on a calendar | `"month-next"` |
+| `Parts{"footer": {...}}`, `data-part="footer"` on a calendar | `"calendar-footer"` |
+
+`DateTimePicker` with `Calendar` also writes `popover` on its group by default.
+The shipped popover behaviour binds to an element of that name and a group
+without it drew a calendar nothing opened, so an application that added the class
+to the group by hand (`Parts{"group": {Class: "popover"}}`) can stop.
+
+`DateRangePicker`, a period chosen in one field, is new and breaks nobody. It
+needs `hesape` v0.89.1 or later, which carries its behaviour, and the stylesheet
+of the skeleton (`date-range-picker.css`).
+
+---
+
 ## v0.45.0
 
 A build stops here, and only a list drawn with `DataTable` is touched. The data

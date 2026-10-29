@@ -37,8 +37,11 @@ const CalendarBehavior = "calendar"
 // -- so a month change costs nothing and cannot disagree with the first month
 // the server drew. Nothing here fetches, and nothing computes a name.
 //
-// It publishes root, header, title, previous, next, grid, weekday, week, day
-// and footer.
+// It publishes root, header, title, month-previous, month-next, grid, weekday,
+// week, day and calendar-footer. The arrows and the footer carry the word
+// calendar or month in the name because a data table publishes previous, next
+// and footer for its pager, and a calendar inside its toolbar must not be found
+// when the pager is looked up by part.
 type CalendarProps struct {
 	// ComponentProps is the class, attributes and parts the caller adds.
 	ComponentProps
@@ -286,8 +289,8 @@ func (p CalendarProps) RootAttrs() map[string]string {
 // PartNames are the parts this component publishes.
 func (p CalendarProps) PartNames() []string {
 	return []string{
-		"root", "header", "title", "previous", "next",
-		"grid", "weekday", "week", "day", "footer",
+		"root", "header", "title", "month-previous", "month-next",
+		"grid", "weekday", "week", "day", "calendar-footer",
 	}
 }
 @endgo
@@ -308,15 +311,15 @@ func (p CalendarProps) PartNames() []string {
 		@attributes(.PartAttrs("header"))
 	>
 		<button
-			data-part="previous"
-			class="{{ .PartClass("previous", "btn") }}"
+			data-part="month-previous"
+			class="{{ .PartClass("month-previous", "btn") }}"
 			type="button"
 			data-variant="ghost"
 			data-size="sm"
 			data-calendar-step="-1"
 			aria-label="{{ .PreviousName() }}"
 			aria-controls="{{ .GridID() }}"
-			@attributes(.PartAttrs("previous"))
+			@attributes(.PartAttrs("month-previous"))
 		>{!! icons.CaretLeft(icons.Props{}) !!}</button>
 
 		<h2
@@ -328,15 +331,15 @@ func (p CalendarProps) PartNames() []string {
 		>{{ .Title() }}</h2>
 
 		<button
-			data-part="next"
-			class="{{ .PartClass("next", "btn") }}"
+			data-part="month-next"
+			class="{{ .PartClass("month-next", "btn") }}"
 			type="button"
 			data-variant="ghost"
 			data-size="sm"
 			data-calendar-step="1"
 			aria-label="{{ .NextName() }}"
 			aria-controls="{{ .GridID() }}"
-			@attributes(.PartAttrs("next"))
+			@attributes(.PartAttrs("month-next"))
 		>{!! icons.CaretRight(icons.Props{}) !!}</button>
 	</header>
 
@@ -412,9 +415,9 @@ func (p CalendarProps) PartNames() []string {
 
 	@if(.HasFooter())
 		<footer
-			data-part="footer"
-			class="{{ .PartClass("footer", "calendar-footer") }}"
-			@attributes(.PartAttrs("footer"))
+			data-part="calendar-footer"
+			class="{{ .PartClass("calendar-footer", "calendar-footer") }}"
+			@attributes(.PartAttrs("calendar-footer"))
 		>
 			<button type="button" class="btn" data-variant="ghost" data-size="sm" data-calendar-clear>{{ .ClearText() }}</button>
 			<button type="button" class="btn" data-variant="ghost" data-size="sm" data-calendar-today>{{ .TodayText() }}</button>

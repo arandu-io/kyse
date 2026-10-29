@@ -250,7 +250,7 @@ func (p DateTimePickerProps) ElementID() string {
 	@if(.Griddable())
 		<div
 			data-part="group"
-			class="{{ .PartClass("group", "date-picker") }}"
+			class="{{ .PartClass("group", "date-picker popover") }}"
 			@attributes(.PartAttrs("group"))
 		>
 	@endif
@@ -290,7 +290,13 @@ func (p DateTimePickerProps) ElementID() string {
 	>
 
 	@if(.Griddable())
-			{{-- The panel is a popover the shipped behaviour already opens and
+			{{-- The group is a `popover`: the shipped popover behaviour binds to
+			     an element of that name, takes its first button as the trigger
+			     and opens its [data-popover] child, and a group without the
+			     class draws a calendar nothing ever opens. The panel is placed
+			     from the button by the view layer's script, so a dialog or a
+			     card around it cannot cut it.
+			     The panel is a popover the shipped behaviour already opens and
 			     light-dismisses, so nothing here decides when it is on screen.
 			     The grid inside it is the Calendar component, built from this
 			     picker's own fields -- the two cannot disagree about the day,

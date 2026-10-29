@@ -45,8 +45,11 @@ const CalendarBehavior = "calendar"
 // -- so a month change costs nothing and cannot disagree with the first month
 // the server drew. Nothing here fetches, and nothing computes a name.
 //
-// It publishes root, header, title, previous, next, grid, weekday, week, day
-// and footer.
+// It publishes root, header, title, month-previous, month-next, grid, weekday,
+// week, day and calendar-footer. The arrows and the footer carry the word
+// calendar or month in the name because a data table publishes previous, next
+// and footer for its pager, and a calendar inside its toolbar must not be found
+// when the pager is looked up by part.
 type CalendarProps struct {
 	// ComponentProps is the class, attributes and parts the caller adds.
 	ComponentProps
@@ -294,12 +297,12 @@ func (p CalendarProps) RootAttrs() map[string]string {
 // PartNames are the parts this component publishes.
 func (p CalendarProps) PartNames() []string {
 	return []string{
-		"root", "header", "title", "previous", "next",
-		"grid", "weekday", "week", "day", "footer",
+		"root", "header", "title", "month-previous", "month-next",
+		"grid", "weekday", "week", "day", "calendar-footer",
 	}
 }
 
-//line components/calendar.go:303
+//line components/calendar.go:306
 
 // Calendar renders the calendar component.
 func Calendar(kyse__props CalendarProps) kyse__template.HTML {
@@ -322,9 +325,9 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:297
+//line components/calendar.kyse.go:300
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("calendar")))
-//line components/calendar.go:328
+//line components/calendar.go:331
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -333,9 +336,9 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:298
+//line components/calendar.kyse.go:301
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ID))
-//line components/calendar.go:339
+//line components/calendar.go:342
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -344,23 +347,23 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tdata-month=\"")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:299
+//line components/calendar.kyse.go:302
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.MonthValue()))
-//line components/calendar.go:350
+//line components/calendar.go:353
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-//line components/calendar.kyse.go:300
+//line components/calendar.kyse.go:303
 	if kyse__d.Value != "" {
-//line components/calendar.go:357
+//line components/calendar.go:360
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-value=\"")
 		}
 		if kyse__err == nil {
-//line components/calendar.kyse.go:301
+//line components/calendar.kyse.go:304
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Value))
-//line components/calendar.go:364
+//line components/calendar.go:367
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -368,11 +371,11 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/calendar.kyse.go:303
+//line components/calendar.kyse.go:306
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/calendar.go:374
+//line components/calendar.go:377
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:303", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:306", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
@@ -390,20 +393,20 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:307
+//line components/calendar.kyse.go:310
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("header", "calendar-header")))
-//line components/calendar.go:396
+//line components/calendar.go:399
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v2 string
-//line components/calendar.kyse.go:308
+//line components/calendar.kyse.go:311
 		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("header"))
-//line components/calendar.go:405
+//line components/calendar.go:408
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:308", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:311", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
@@ -415,15 +418,15 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<button\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"previous\"\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"month-previous\"\n")
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:312
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("previous", "btn")))
-//line components/calendar.go:427
+//line components/calendar.kyse.go:315
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("month-previous", "btn")))
+//line components/calendar.go:430
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -444,9 +447,9 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-label=\"")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:317
+//line components/calendar.kyse.go:320
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PreviousName()))
-//line components/calendar.go:450
+//line components/calendar.go:453
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -455,20 +458,20 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-controls=\"")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:318
+//line components/calendar.kyse.go:321
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.GridID()))
-//line components/calendar.go:461
+//line components/calendar.go:464
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v3 string
-//line components/calendar.kyse.go:319
-		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("previous"))
-//line components/calendar.go:470
+//line components/calendar.kyse.go:322
+		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("month-previous"))
+//line components/calendar.go:473
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:319", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:322", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
@@ -477,9 +480,9 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:320
+//line components/calendar.kyse.go:323
 		var kyse__v4 kyse__template.HTML = icons.CaretLeft(icons.Props{})
-//line components/calendar.go:483
+//line components/calendar.go:486
 		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v4))
 	}
 	if kyse__err == nil {
@@ -498,9 +501,9 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:324
+//line components/calendar.kyse.go:327
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("title", "calendar-title")))
-//line components/calendar.go:504
+//line components/calendar.go:507
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -509,9 +512,9 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:325
+//line components/calendar.kyse.go:328
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.TitleID()))
-//line components/calendar.go:515
+//line components/calendar.go:518
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -521,11 +524,11 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v5 string
-//line components/calendar.kyse.go:327
+//line components/calendar.kyse.go:330
 		kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("title"))
-//line components/calendar.go:527
+//line components/calendar.go:530
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:327", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:330", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 		}
@@ -534,9 +537,9 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:328
+//line components/calendar.kyse.go:331
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Title())))
-//line components/calendar.go:540
+//line components/calendar.go:543
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</h2>\n")
@@ -548,15 +551,15 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<button\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"next\"\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"month-next\"\n")
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:332
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("next", "btn")))
-//line components/calendar.go:560
+//line components/calendar.kyse.go:335
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("month-next", "btn")))
+//line components/calendar.go:563
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -577,9 +580,9 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-label=\"")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:337
+//line components/calendar.kyse.go:340
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.NextName()))
-//line components/calendar.go:583
+//line components/calendar.go:586
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -588,20 +591,20 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-controls=\"")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:338
+//line components/calendar.kyse.go:341
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.GridID()))
-//line components/calendar.go:594
+//line components/calendar.go:597
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v6 string
-//line components/calendar.kyse.go:339
-		kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("next"))
-//line components/calendar.go:603
+//line components/calendar.kyse.go:342
+		kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("month-next"))
+//line components/calendar.go:606
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:339", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:342", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 		}
@@ -610,9 +613,9 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:340
+//line components/calendar.kyse.go:343
 		var kyse__v7 kyse__template.HTML = icons.CaretRight(icons.Props{})
-//line components/calendar.go:616
+//line components/calendar.go:619
 		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v7))
 	}
 	if kyse__err == nil {
@@ -634,9 +637,9 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:348
+//line components/calendar.kyse.go:351
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("grid", "calendar-grid")))
-//line components/calendar.go:640
+//line components/calendar.go:643
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -645,9 +648,9 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:349
+//line components/calendar.kyse.go:352
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.GridID()))
-//line components/calendar.go:651
+//line components/calendar.go:654
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -659,23 +662,23 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-labelledby=\"")
 	}
 	if kyse__err == nil {
-//line components/calendar.kyse.go:351
+//line components/calendar.kyse.go:354
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.TitleID()))
-//line components/calendar.go:665
+//line components/calendar.go:668
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-//line components/calendar.kyse.go:352
+//line components/calendar.kyse.go:355
 	if kyse__d.Label != "" {
-//line components/calendar.go:672
+//line components/calendar.go:675
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-label=\"")
 		}
 		if kyse__err == nil {
-//line components/calendar.kyse.go:353
+//line components/calendar.kyse.go:356
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
-//line components/calendar.go:679
+//line components/calendar.go:682
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -683,11 +686,11 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v8 string
-//line components/calendar.kyse.go:355
+//line components/calendar.kyse.go:358
 		kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("grid"))
-//line components/calendar.go:689
+//line components/calendar.go:692
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:355", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:358", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 		}
@@ -701,10 +704,10 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<tr>\n")
 	}
-//line components/calendar.kyse.go:359
+//line components/calendar.kyse.go:362
 	for _, column := range kyse__d.Columns() {
 		_ = column
-//line components/calendar.go:708
+//line components/calendar.go:711
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<th\n")
 		}
@@ -715,9 +718,9 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/calendar.kyse.go:362
+//line components/calendar.kyse.go:365
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("weekday", "calendar-weekday")))
-//line components/calendar.go:721
+//line components/calendar.go:724
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -727,11 +730,11 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 			var kyse__v9 string
-//line components/calendar.kyse.go:364
+//line components/calendar.kyse.go:367
 			kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("weekday"))
-//line components/calendar.go:733
+//line components/calendar.go:736
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:364", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:367", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
 			}
@@ -740,9 +743,9 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t>")
 		}
 		if kyse__err == nil {
-//line components/calendar.kyse.go:365
+//line components/calendar.kyse.go:368
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(column)))
-//line components/calendar.go:746
+//line components/calendar.go:749
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</th>\n")
@@ -757,26 +760,26 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<tbody>\n")
 	}
-//line components/calendar.kyse.go:370
+//line components/calendar.kyse.go:373
 	for _, week := range kyse__d.Weeks() {
 		_ = week
-//line components/calendar.go:764
+//line components/calendar.go:767
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<tr\n")
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-part=\"week\"\n")
 		}
-//line components/calendar.kyse.go:373
+//line components/calendar.kyse.go:376
 		if kyse__d.PartClass("week") != "" {
-//line components/calendar.go:773
+//line components/calendar.go:776
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/calendar.kyse.go:374
+//line components/calendar.kyse.go:377
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("week")))
-//line components/calendar.go:780
+//line components/calendar.go:783
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -784,11 +787,11 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 			var kyse__v10 string
-//line components/calendar.kyse.go:376
+//line components/calendar.kyse.go:379
 			kyse__v10, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("week"))
-//line components/calendar.go:790
+//line components/calendar.go:793
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:376", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:379", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v10)
 			}
@@ -796,10 +799,10 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>\n")
 		}
-//line components/calendar.kyse.go:378
+//line components/calendar.kyse.go:381
 		for _, day := range week {
 			_ = day
-//line components/calendar.go:803
+//line components/calendar.go:806
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<td\n")
 			}
@@ -810,9 +813,9 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/calendar.kyse.go:381
+//line components/calendar.kyse.go:384
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("day", "calendar-day")))
-//line components/calendar.go:816
+//line components/calendar.go:819
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -824,69 +827,69 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-date=\"")
 			}
 			if kyse__err == nil {
-//line components/calendar.kyse.go:383
+//line components/calendar.kyse.go:386
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(day.Date))
-//line components/calendar.go:830
+//line components/calendar.go:833
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
-//line components/calendar.kyse.go:384
+//line components/calendar.kyse.go:387
 			if day.Outside {
-//line components/calendar.go:837
+//line components/calendar.go:840
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-outside=\"true\"\n")
 				}
 			}
-//line components/calendar.kyse.go:387
+//line components/calendar.kyse.go:390
 			if day.Today {
-//line components/calendar.go:844
+//line components/calendar.go:847
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\tdata-today=\"true\"\n")
 				}
 			}
-//line components/calendar.kyse.go:390
+//line components/calendar.kyse.go:393
 			if day.Selected {
-//line components/calendar.go:851
+//line components/calendar.go:854
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-selected=\"true\"\n")
 				}
 			}
-//line components/calendar.kyse.go:393
+//line components/calendar.kyse.go:396
 			if !day.Selected {
-//line components/calendar.go:858
+//line components/calendar.go:861
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-selected=\"false\"\n")
 				}
 			}
-//line components/calendar.kyse.go:396
+//line components/calendar.kyse.go:399
 			if day.Disabled {
-//line components/calendar.go:865
+//line components/calendar.go:868
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\taria-disabled=\"true\"\n")
 				}
 			}
-//line components/calendar.kyse.go:399
+//line components/calendar.kyse.go:402
 			if kyse__d.Stop(day) {
-//line components/calendar.go:872
+//line components/calendar.go:875
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\ttabindex=\"0\"\n")
 				}
 			}
-//line components/calendar.kyse.go:402
+//line components/calendar.kyse.go:405
 			if !kyse__d.Stop(day) {
-//line components/calendar.go:879
+//line components/calendar.go:882
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\ttabindex=\"-1\"\n")
 				}
 			}
 			if kyse__err == nil {
 				var kyse__v11 string
-//line components/calendar.kyse.go:405
+//line components/calendar.kyse.go:408
 				kyse__v11, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("day"))
-//line components/calendar.go:888
+//line components/calendar.go:891
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:405", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:408", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v11)
 				}
@@ -895,9 +898,9 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/calendar.kyse.go:406
+//line components/calendar.kyse.go:409
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(day.Number)))
-//line components/calendar.go:901
+//line components/calendar.go:904
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</td>\n")
@@ -916,33 +919,33 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/calendar.kyse.go:413
+//line components/calendar.kyse.go:416
 	if kyse__d.HasFooter() {
-//line components/calendar.go:922
+//line components/calendar.go:925
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<footer\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"footer\"\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"calendar-footer\"\n")
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/calendar.kyse.go:416
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("footer", "calendar-footer")))
-//line components/calendar.go:935
+//line components/calendar.kyse.go:419
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("calendar-footer", "calendar-footer")))
+//line components/calendar.go:938
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v12 string
-//line components/calendar.kyse.go:417
-			kyse__v12, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("footer"))
-//line components/calendar.go:944
+//line components/calendar.kyse.go:420
+			kyse__v12, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("calendar-footer"))
+//line components/calendar.go:947
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:417", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/calendar.kyse.go:420", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v12)
 			}
@@ -954,9 +957,9 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<button type=\"button\" class=\"btn\" data-variant=\"ghost\" data-size=\"sm\" data-calendar-clear>")
 		}
 		if kyse__err == nil {
-//line components/calendar.kyse.go:419
+//line components/calendar.kyse.go:422
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.ClearText())))
-//line components/calendar.go:960
+//line components/calendar.go:963
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</button>\n")
@@ -965,9 +968,9 @@ func Calendar(kyse__props CalendarProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<button type=\"button\" class=\"btn\" data-variant=\"ghost\" data-size=\"sm\" data-calendar-today>")
 		}
 		if kyse__err == nil {
-//line components/calendar.kyse.go:420
+//line components/calendar.kyse.go:423
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.TodayText())))
-//line components/calendar.go:971
+//line components/calendar.go:974
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</button>\n")
