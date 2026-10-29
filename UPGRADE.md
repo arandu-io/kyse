@@ -42,7 +42,7 @@ without it drew a calendar nothing opened, so an application that added the clas
 to the group by hand (`Parts{"group": {Class: "popover"}}`) can stop.
 
 `DateRangePicker`, a period chosen in one field, is new and breaks nobody. It
-needs `hesape` v0.89.1 or later, which carries its behaviour, and the stylesheet
+needs `hesape` v0.89.2 or later, which carries its behaviour, and the stylesheet
 of the skeleton (`date-range-picker.css`).
 
 ---
