@@ -21,7 +21,7 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
-## Unreleased
+## v0.48.0
 
 Nothing stops compiling. Three things change in what is drawn, and the last one
 needs your attention if a test of yours reads the footer.
