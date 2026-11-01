@@ -1,5 +1,9 @@
 # Release Notes
 
+## [v0.48.1](https://github.com/arandu-io/kyse/compare/v0.48.0...v0.48.1) - 2026-11-01
+
+**Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.48.0...v0.48.1
+
 ## [v0.48.0](https://github.com/arandu-io/kyse/compare/v0.47.0...v0.48.0) - 2026-11-01
 
 - `DataTable` footer with a singular and a plural: `DataTableLines` gains `RowsOne` ("{total} row.") and `RowsMany` ("{total} rows."), `DataTableLines.RowsFor(total)` chooses between them, and the catalogue gains `kyse.data_table.rows_one` and `kyse.data_table.rows_many`. `Rows` and `kyse.data_table.rows` keep saying one sentence for both counts, so a project that passes them draws what it drew.
