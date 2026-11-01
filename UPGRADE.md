@@ -21,6 +21,47 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## Unreleased
+
+Nothing stops compiling. Three things change in what is drawn, and the last one
+needs your attention if a test of yours reads the footer.
+
+**The English footer of a `DataTable` is no longer "{total} row(s)."** It says
+"1 row." for one row and "{total} rows." for every other count. A project that
+passes `Lines.Rows`, or whose catalogue carries `kyse.data_table.rows`, draws
+exactly the sentence it drew, for every count. To say a singular, add the two
+forms:
+
+| it was | it can be |
+| --- | --- |
+| `Lines{Rows: "{total} linha(s)."}` | `Lines{RowsOne: "{total} linha.", RowsMany: "{total} linhas."}` |
+| `kyse.data_table.rows` | `kyse.data_table.rows_one` and `kyse.data_table.rows_many` |
+
+A form written on the props wins over the catalogue, and a form written beside
+`Rows` wins for its own count. The sentence of a selected row ("{n} of {total}
+row(s) selected.") is not split.
+
+**A `DataTable` is drawn as cards where its region is narrower than 600px.** The
+region is now a container (`@container/dt`) and every row, cell and header
+carries classes under `@max-[600px]/dt:`. Tailwind compiles them from the
+component sources, so rebuild the stylesheet (`aru view:build`) when you
+upgrade; a stylesheet compiled before it has no card rules and draws the table
+at every width, which is the old behaviour and not a break. Mark the card's
+title with `TableColumn.Primary`, and leave a column out of it with
+`CardHidden`; with none marked the first column the card shows is the title. A
+`Parts{"row": {Replace: true, ...}}` or the same on `cell` drops the card
+classes of that part, which is the way to keep a table a table.
+
+A cell is the same element it was and its text is only its value: the name of the
+column is the cell's `data-label`, which the card draws in front of it.
+
+**The footer of a list the browser narrows** (`Complete: true`) says one row in
+the singular only with a `hesape` that carries `rowsOne` in the table behaviour.
+With an older one the footer is right on the first paint and says the plural
+("1 rows.") after a search leaves exactly one row.
+
+---
+
 ## v0.46.0
 
 Nothing stops compiling. What changes is the name of three parts of `Calendar`,

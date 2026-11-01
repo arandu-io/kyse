@@ -1,5 +1,11 @@
 # Release Notes
 
+## [Unreleased](https://github.com/arandu-io/kyse/compare/v0.47.0...HEAD)
+
+- `DataTable` footer with a singular and a plural: `DataTableLines` gains `RowsOne` ("{total} row.") and `RowsMany` ("{total} rows."), `DataTableLines.RowsFor(total)` chooses between them, and the catalogue gains `kyse.data_table.rows_one` and `kyse.data_table.rows_many`. `Rows` and `kyse.data_table.rows` keep saying one sentence for both counts, so a project that passes them draws what it drew.
+- `DataTable` as cards on a narrow screen: under 600px (a container query on the region, the breakpoint Ayra uses) every row is a card and nothing scrolls sideways. `TableColumn` gains `Primary` (the card's title; with none marked, the first column the card shows) and `CardHidden` (the column is left out of the card), the same names as Ayra's `DataColumn`. Each cell carries a `data-label` with the name of its column, the head stays as a bar of the controls that order the list, and a row's menu sits along the foot of its card. At 600px and above the table is unchanged.
+- The behaviour props of a `DataTable` carry `rowsOne` beside `rows`; the footer of a list the browser narrows says one row in the singular with `hesape` carrying it, and says the plural as before with an older one.
+
 ## [v0.47.0](https://github.com/arandu-io/kyse/compare/v0.46.0...v0.47.0) - 2026-11-01
 
 **Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.46.0...v0.47.0
