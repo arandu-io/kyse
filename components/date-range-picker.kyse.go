@@ -3,6 +3,7 @@
 package components
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/arandu-io/kyse/icons"
@@ -113,13 +114,81 @@ type DateRangePickerProps struct {
 	ClearLabel string
 }
 
-// DateRangePreset is a shortcut: the last Days days, counting today.
+// DateRangePreset is a shortcut, worked out in the browser from the reader's own
+// today. It says its range in one of three ways, and the first one that is set
+// wins.
+//
+//   - Unit and Back: the calendar week, month or year that is Back units ago.
+//     Back 0 is the current one, from its first day through today ("this
+//     month"); Back 1 is the one before it, whole ("last month", "last year").
+//     A week begins on the picker's FirstDay.
+//   - Months: the same day Months months ago through today, or through the day
+//     EndsAgo before it ("the last 3 months"). A month without that day gives
+//     its last.
+//   - Days: the last Days days, the last of them EndsAgo days before today. It
+//     is the only way a preset could be said before the other two, and a preset
+//     that sets only Days draws as it always did.
+//
+// So Polar's nine named ranges are: Today {Days: 1}, Yesterday {Days: 1,
+// EndsAgo: 1}, This week {Unit: "week"}, This month {Unit: "month"}, Last month
+// {Unit: "month", Back: 1}, Last 3 months {Months: 3}, This year {Unit: "year"},
+// Last year {Unit: "year", Back: 1}, and All time, which is the field's Clear.
 type DateRangePreset struct {
 	// Label is what the shortcut is called.
 	Label string
-	// Days is how many days the period spans, ending today: 1 is today, 7 is
-	// the last week, 30 the last thirty days.
+	// Days is how many days the period spans, ending EndsAgo days before today:
+	// 1 is today, 7 is the last week, 30 the last thirty days.
 	Days int
+	// EndsAgo is how many days before today the period ends: 0 ends today, 1
+	// ends yesterday. It applies to Days and to Months.
+	EndsAgo int
+	// Unit is "week", "month" or "year": the calendar period Back units ago.
+	// Any other value is ignored.
+	Unit string
+	// Back is how many units before the current one Unit counts. Zero is the
+	// current unit up to today; one or more is a whole earlier unit.
+	Back int
+	// Months is how many months back the period begins, on the same day of the
+	// month, and ends today.
+	Months int
+}
+
+// Attrs are the attributes the button carries for the browser to work the
+// range out from: only the ones its fields set, and none that contradict each
+// other.
+func (preset DateRangePreset) Attrs() map[string]string {
+	attrs := map[string]string{}
+	switch {
+	case preset.Unit == "week" || preset.Unit == "month" || preset.Unit == "year":
+		attrs["data-range-unit"] = preset.Unit
+		if preset.Back > 0 {
+			attrs["data-range-back"] = strconv.Itoa(preset.Back)
+		}
+	case preset.Months > 0:
+		attrs["data-range-months"] = strconv.Itoa(preset.Months)
+		if preset.EndsAgo > 0 {
+			attrs["data-range-ends-ago"] = strconv.Itoa(preset.EndsAgo)
+		}
+	default:
+		attrs["data-range-days"] = strconv.Itoa(preset.Days)
+		if preset.EndsAgo > 0 {
+			attrs["data-range-ends-ago"] = strconv.Itoa(preset.EndsAgo)
+		}
+	}
+	return attrs
+}
+
+// PresetAttrs are the attributes of one shortcut's button: the caller's for the
+// preset part, then the ones that say its range, which win on a name both write.
+func (p DateRangePickerProps) PresetAttrs(preset DateRangePreset) map[string]string {
+	attrs := map[string]string{}
+	for name, value := range p.PartAttrs("preset") {
+		attrs[name] = value
+	}
+	for name, value := range preset.Attrs() {
+		attrs[name] = value
+	}
+	return attrs
 }
 
 // DateRangeDay is one cell of a month the picker draws.
@@ -558,8 +627,7 @@ func (p DateRangePickerProps) PartNames() []string {
 							type="button"
 							data-variant="outline"
 							data-size="sm"
-							data-range-days="{{ preset.Days }}"
-							@attributes(.PartAttrs("preset"))
+							@attributes(.PresetAttrs(preset))
 						>{{ preset.Label }}</button>
 					@endforeach
 				</div>

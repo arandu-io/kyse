@@ -12,10 +12,11 @@ import (
 
 	kyse__view "github.com/arandu-io/hesape/view"
 	"github.com/arandu-io/kyse/icons"
+	"strconv"
 	"time"
 )
 
-//line components/date-range-picker.kyse.go:11
+//line components/date-range-picker.kyse.go:12
 
 // DateRangePickerBehavior is the name the client behaviour is registered under
 // with arandu.ui.define.
@@ -121,13 +122,81 @@ type DateRangePickerProps struct {
 	ClearLabel string
 }
 
-// DateRangePreset is a shortcut: the last Days days, counting today.
+// DateRangePreset is a shortcut, worked out in the browser from the reader's own
+// today. It says its range in one of three ways, and the first one that is set
+// wins.
+//
+//   - Unit and Back: the calendar week, month or year that is Back units ago.
+//     Back 0 is the current one, from its first day through today ("this
+//     month"); Back 1 is the one before it, whole ("last month", "last year").
+//     A week begins on the picker's FirstDay.
+//   - Months: the same day Months months ago through today, or through the day
+//     EndsAgo before it ("the last 3 months"). A month without that day gives
+//     its last.
+//   - Days: the last Days days, the last of them EndsAgo days before today. It
+//     is the only way a preset could be said before the other two, and a preset
+//     that sets only Days draws as it always did.
+//
+// So Polar's nine named ranges are: Today {Days: 1}, Yesterday {Days: 1,
+// EndsAgo: 1}, This week {Unit: "week"}, This month {Unit: "month"}, Last month
+// {Unit: "month", Back: 1}, Last 3 months {Months: 3}, This year {Unit: "year"},
+// Last year {Unit: "year", Back: 1}, and All time, which is the field's Clear.
 type DateRangePreset struct {
 	// Label is what the shortcut is called.
 	Label string
-	// Days is how many days the period spans, ending today: 1 is today, 7 is
-	// the last week, 30 the last thirty days.
+	// Days is how many days the period spans, ending EndsAgo days before today:
+	// 1 is today, 7 is the last week, 30 the last thirty days.
 	Days int
+	// EndsAgo is how many days before today the period ends: 0 ends today, 1
+	// ends yesterday. It applies to Days and to Months.
+	EndsAgo int
+	// Unit is "week", "month" or "year": the calendar period Back units ago.
+	// Any other value is ignored.
+	Unit string
+	// Back is how many units before the current one Unit counts. Zero is the
+	// current unit up to today; one or more is a whole earlier unit.
+	Back int
+	// Months is how many months back the period begins, on the same day of the
+	// month, and ends today.
+	Months int
+}
+
+// Attrs are the attributes the button carries for the browser to work the
+// range out from: only the ones its fields set, and none that contradict each
+// other.
+func (preset DateRangePreset) Attrs() map[string]string {
+	attrs := map[string]string{}
+	switch {
+	case preset.Unit == "week" || preset.Unit == "month" || preset.Unit == "year":
+		attrs["data-range-unit"] = preset.Unit
+		if preset.Back > 0 {
+			attrs["data-range-back"] = strconv.Itoa(preset.Back)
+		}
+	case preset.Months > 0:
+		attrs["data-range-months"] = strconv.Itoa(preset.Months)
+		if preset.EndsAgo > 0 {
+			attrs["data-range-ends-ago"] = strconv.Itoa(preset.EndsAgo)
+		}
+	default:
+		attrs["data-range-days"] = strconv.Itoa(preset.Days)
+		if preset.EndsAgo > 0 {
+			attrs["data-range-ends-ago"] = strconv.Itoa(preset.EndsAgo)
+		}
+	}
+	return attrs
+}
+
+// PresetAttrs are the attributes of one shortcut's button: the caller's for the
+// preset part, then the ones that say its range, which win on a name both write.
+func (p DateRangePickerProps) PresetAttrs(preset DateRangePreset) map[string]string {
+	attrs := map[string]string{}
+	for name, value := range p.PartAttrs("preset") {
+		attrs[name] = value
+	}
+	for name, value := range preset.Attrs() {
+		attrs[name] = value
+	}
+	return attrs
 }
 
 // DateRangeDay is one cell of a month the picker draws.
@@ -453,7 +522,7 @@ func (p DateRangePickerProps) PartNames() []string {
 	}
 }
 
-//line components/date-range-picker.go:457
+//line components/date-range-picker.go:526
 
 // DateRangePicker renders the date-range-picker component.
 func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
@@ -476,9 +545,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:451
+//line components/date-range-picker.kyse.go:520
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("field date-range")))
-//line components/date-range-picker.go:482
+//line components/date-range-picker.go:551
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -487,20 +556,20 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tdata-month=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:452
+//line components/date-range-picker.kyse.go:521
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.MonthValue()))
-//line components/date-range-picker.go:493
+//line components/date-range-picker.go:562
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/date-range-picker.kyse.go:453
+//line components/date-range-picker.kyse.go:522
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/date-range-picker.go:502
+//line components/date-range-picker.go:571
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:453", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:522", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
@@ -518,9 +587,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:457
+//line components/date-range-picker.kyse.go:526
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("label", "label")))
-//line components/date-range-picker.go:524
+//line components/date-range-picker.go:593
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -529,20 +598,20 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tfor=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:458
+//line components/date-range-picker.kyse.go:527
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.TriggerID()))
-//line components/date-range-picker.go:535
+//line components/date-range-picker.go:604
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v2 string
-//line components/date-range-picker.kyse.go:459
+//line components/date-range-picker.kyse.go:528
 		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("label"))
-//line components/date-range-picker.go:544
+//line components/date-range-picker.go:613
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:459", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:528", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
@@ -551,9 +620,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:460
+//line components/date-range-picker.kyse.go:529
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
-//line components/date-range-picker.go:557
+//line components/date-range-picker.go:626
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</label>\n")
@@ -571,20 +640,20 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:464
+//line components/date-range-picker.kyse.go:533
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("group", "date-range-box")))
-//line components/date-range-picker.go:577
+//line components/date-range-picker.go:646
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v3 string
-//line components/date-range-picker.kyse.go:465
+//line components/date-range-picker.kyse.go:534
 		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("group"))
-//line components/date-range-picker.go:586
+//line components/date-range-picker.go:655
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:465", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:534", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
@@ -602,9 +671,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:473
+//line components/date-range-picker.kyse.go:542
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("trigger", "btn date-range-trigger")))
-//line components/date-range-picker.go:608
+//line components/date-range-picker.go:677
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -619,9 +688,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:476
+//line components/date-range-picker.kyse.go:545
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.TriggerID()))
-//line components/date-range-picker.go:625
+//line components/date-range-picker.go:694
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -636,56 +705,56 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-controls=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:479
+//line components/date-range-picker.kyse.go:548
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PanelID()))
-//line components/date-range-picker.go:642
+//line components/date-range-picker.go:711
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-//line components/date-range-picker.kyse.go:480
+//line components/date-range-picker.kyse.go:549
 	if kyse__d.DescribedBy() != "" {
-//line components/date-range-picker.go:649
+//line components/date-range-picker.go:718
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/date-range-picker.kyse.go:481
+//line components/date-range-picker.kyse.go:550
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/date-range-picker.go:656
+//line components/date-range-picker.go:725
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/date-range-picker.kyse.go:483
+//line components/date-range-picker.kyse.go:552
 	if kyse__d.Message() != "" {
-//line components/date-range-picker.go:664
+//line components/date-range-picker.go:733
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/date-range-picker.kyse.go:486
+//line components/date-range-picker.kyse.go:555
 	if kyse__d.Required {
-//line components/date-range-picker.go:671
+//line components/date-range-picker.go:740
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-required=\"true\"\n")
 		}
 	}
-//line components/date-range-picker.kyse.go:489
+//line components/date-range-picker.kyse.go:558
 	if kyse__d.Disabled {
-//line components/date-range-picker.go:678
+//line components/date-range-picker.go:747
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdisabled\n")
 		}
 	}
 	if kyse__err == nil {
 		var kyse__v4 string
-//line components/date-range-picker.kyse.go:492
+//line components/date-range-picker.kyse.go:561
 		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("trigger"))
-//line components/date-range-picker.go:687
+//line components/date-range-picker.go:756
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:492", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:561", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 		}
@@ -697,9 +766,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:494
+//line components/date-range-picker.kyse.go:563
 		var kyse__v5 kyse__template.HTML = icons.CalendarBlank(icons.Props{})
-//line components/date-range-picker.go:703
+//line components/date-range-picker.go:772
 		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v5))
 	}
 	if kyse__err == nil {
@@ -715,27 +784,27 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:497
+//line components/date-range-picker.kyse.go:566
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("value", "date-range-value")))
-//line components/date-range-picker.go:721
+//line components/date-range-picker.go:790
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-//line components/date-range-picker.kyse.go:498
+//line components/date-range-picker.kyse.go:567
 	if kyse__d.Empty() {
-//line components/date-range-picker.go:728
+//line components/date-range-picker.go:797
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-empty=\"true\"\n")
 		}
 	}
 	if kyse__err == nil {
 		var kyse__v6 string
-//line components/date-range-picker.kyse.go:501
+//line components/date-range-picker.kyse.go:570
 		kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("value"))
-//line components/date-range-picker.go:737
+//line components/date-range-picker.go:806
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:501", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:570", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 		}
@@ -744,9 +813,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:502
+//line components/date-range-picker.kyse.go:571
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Text())))
-//line components/date-range-picker.go:750
+//line components/date-range-picker.go:819
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
@@ -766,16 +835,16 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\ttype=\"hidden\"\n")
 	}
-//line components/date-range-picker.kyse.go:508
+//line components/date-range-picker.kyse.go:577
 	if kyse__d.PartClass("from") != "" {
-//line components/date-range-picker.go:772
+//line components/date-range-picker.go:841
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/date-range-picker.kyse.go:509
+//line components/date-range-picker.kyse.go:578
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("from")))
-//line components/date-range-picker.go:779
+//line components/date-range-picker.go:848
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -785,9 +854,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tname=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:511
+//line components/date-range-picker.kyse.go:580
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.FromField()))
-//line components/date-range-picker.go:791
+//line components/date-range-picker.go:860
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -796,27 +865,27 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tvalue=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:512
+//line components/date-range-picker.kyse.go:581
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.FromValue()))
-//line components/date-range-picker.go:802
+//line components/date-range-picker.go:871
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-//line components/date-range-picker.kyse.go:513
+//line components/date-range-picker.kyse.go:582
 	if kyse__d.Disabled {
-//line components/date-range-picker.go:809
+//line components/date-range-picker.go:878
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdisabled\n")
 		}
 	}
 	if kyse__err == nil {
 		var kyse__v7 string
-//line components/date-range-picker.kyse.go:516
+//line components/date-range-picker.kyse.go:585
 		kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("from"))
-//line components/date-range-picker.go:818
+//line components/date-range-picker.go:887
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:516", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:585", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 		}
@@ -833,16 +902,16 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\ttype=\"hidden\"\n")
 	}
-//line components/date-range-picker.kyse.go:521
+//line components/date-range-picker.kyse.go:590
 	if kyse__d.PartClass("to") != "" {
-//line components/date-range-picker.go:839
+//line components/date-range-picker.go:908
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/date-range-picker.kyse.go:522
+//line components/date-range-picker.kyse.go:591
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("to")))
-//line components/date-range-picker.go:846
+//line components/date-range-picker.go:915
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -852,9 +921,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tname=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:524
+//line components/date-range-picker.kyse.go:593
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ToField()))
-//line components/date-range-picker.go:858
+//line components/date-range-picker.go:927
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -863,27 +932,27 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tvalue=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:525
+//line components/date-range-picker.kyse.go:594
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ToValue()))
-//line components/date-range-picker.go:869
+//line components/date-range-picker.go:938
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-//line components/date-range-picker.kyse.go:526
+//line components/date-range-picker.kyse.go:595
 	if kyse__d.Disabled {
-//line components/date-range-picker.go:876
+//line components/date-range-picker.go:945
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdisabled\n")
 		}
 	}
 	if kyse__err == nil {
 		var kyse__v8 string
-//line components/date-range-picker.kyse.go:529
+//line components/date-range-picker.kyse.go:598
 		kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("to"))
-//line components/date-range-picker.go:885
+//line components/date-range-picker.go:954
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:529", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:598", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 		}
@@ -904,9 +973,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:534
+//line components/date-range-picker.kyse.go:603
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("backdrop", "date-range-backdrop")))
-//line components/date-range-picker.go:910
+//line components/date-range-picker.go:979
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -916,11 +985,11 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v9 string
-//line components/date-range-picker.kyse.go:536
+//line components/date-range-picker.kyse.go:605
 		kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("backdrop"))
-//line components/date-range-picker.go:922
+//line components/date-range-picker.go:991
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:536", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:605", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
 		}
@@ -941,9 +1010,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:541
+//line components/date-range-picker.kyse.go:610
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("panel", "date-range-panel")))
-//line components/date-range-picker.go:947
+//line components/date-range-picker.go:1016
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -952,9 +1021,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:542
+//line components/date-range-picker.kyse.go:611
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PanelID()))
-//line components/date-range-picker.go:958
+//line components/date-range-picker.go:1027
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -966,9 +1035,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-label=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:544
+//line components/date-range-picker.kyse.go:613
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PanelName()))
-//line components/date-range-picker.go:972
+//line components/date-range-picker.go:1041
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -978,11 +1047,11 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v10 string
-//line components/date-range-picker.kyse.go:546
+//line components/date-range-picker.kyse.go:615
 		kyse__v10, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("panel"))
-//line components/date-range-picker.go:984
+//line components/date-range-picker.go:1053
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:546", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:615", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v10)
 		}
@@ -990,9 +1059,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>\n")
 	}
-//line components/date-range-picker.kyse.go:548
+//line components/date-range-picker.kyse.go:617
 	if len(kyse__d.Presets) > 0 {
-//line components/date-range-picker.go:996
+//line components/date-range-picker.go:1065
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<div\n")
 		}
@@ -1003,20 +1072,20 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/date-range-picker.kyse.go:551
+//line components/date-range-picker.kyse.go:620
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("presets", "date-range-presets")))
-//line components/date-range-picker.go:1009
+//line components/date-range-picker.go:1078
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v11 string
-//line components/date-range-picker.kyse.go:552
+//line components/date-range-picker.kyse.go:621
 			kyse__v11, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("presets"))
-//line components/date-range-picker.go:1018
+//line components/date-range-picker.go:1087
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:552", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:621", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v11)
 			}
@@ -1024,10 +1093,10 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>\n")
 		}
-//line components/date-range-picker.kyse.go:554
+//line components/date-range-picker.kyse.go:623
 		for _, preset := range kyse__d.Presets {
 			_ = preset
-//line components/date-range-picker.go:1031
+//line components/date-range-picker.go:1100
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<button\n")
 			}
@@ -1038,9 +1107,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/date-range-picker.kyse.go:557
+//line components/date-range-picker.kyse.go:626
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("preset", "btn")))
-//line components/date-range-picker.go:1044
+//line components/date-range-picker.go:1113
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1055,23 +1124,12 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-size=\"sm\"\n")
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tdata-range-days=\"")
-			}
-			if kyse__err == nil {
-//line components/date-range-picker.kyse.go:561
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(preset.Days))
-//line components/date-range-picker.go:1064
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
-			if kyse__err == nil {
 				var kyse__v12 string
-//line components/date-range-picker.kyse.go:562
-				kyse__v12, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("preset"))
-//line components/date-range-picker.go:1073
+//line components/date-range-picker.kyse.go:630
+				kyse__v12, kyse__err = kyse__view.Attributes(kyse__d.PresetAttrs(preset))
+//line components/date-range-picker.go:1131
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:562", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:630", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v12)
 				}
@@ -1080,9 +1138,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/date-range-picker.kyse.go:563
+//line components/date-range-picker.kyse.go:631
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(preset.Label)))
-//line components/date-range-picker.go:1086
+//line components/date-range-picker.go:1144
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</button>\n")
@@ -1105,20 +1163,20 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:570
+//line components/date-range-picker.kyse.go:638
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("months", "date-range-months")))
-//line components/date-range-picker.go:1111
+//line components/date-range-picker.go:1169
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v13 string
-//line components/date-range-picker.kyse.go:571
+//line components/date-range-picker.kyse.go:639
 		kyse__v13, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("months"))
-//line components/date-range-picker.go:1120
+//line components/date-range-picker.go:1178
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:571", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:639", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v13)
 		}
@@ -1136,9 +1194,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:575
+//line components/date-range-picker.kyse.go:643
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("month-previous", "btn date-range-nav")))
-//line components/date-range-picker.go:1142
+//line components/date-range-picker.go:1200
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1159,20 +1217,20 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-label=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:580
+//line components/date-range-picker.kyse.go:648
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PreviousName()))
-//line components/date-range-picker.go:1165
+//line components/date-range-picker.go:1223
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v14 string
-//line components/date-range-picker.kyse.go:581
+//line components/date-range-picker.kyse.go:649
 		kyse__v14, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("month-previous"))
-//line components/date-range-picker.go:1174
+//line components/date-range-picker.go:1232
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:581", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:649", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v14)
 		}
@@ -1181,9 +1239,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:582
+//line components/date-range-picker.kyse.go:650
 		var kyse__v15 kyse__template.HTML = icons.CaretLeft(icons.Props{})
-//line components/date-range-picker.go:1187
+//line components/date-range-picker.go:1245
 		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v15))
 	}
 	if kyse__err == nil {
@@ -1199,9 +1257,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:585
+//line components/date-range-picker.kyse.go:653
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("month-next", "btn date-range-nav")))
-//line components/date-range-picker.go:1205
+//line components/date-range-picker.go:1263
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1222,20 +1280,20 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-label=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:590
+//line components/date-range-picker.kyse.go:658
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.NextName()))
-//line components/date-range-picker.go:1228
+//line components/date-range-picker.go:1286
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v16 string
-//line components/date-range-picker.kyse.go:591
+//line components/date-range-picker.kyse.go:659
 		kyse__v16, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("month-next"))
-//line components/date-range-picker.go:1237
+//line components/date-range-picker.go:1295
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:591", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:659", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v16)
 		}
@@ -1244,9 +1302,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:592
+//line components/date-range-picker.kyse.go:660
 		var kyse__v17 kyse__template.HTML = icons.CaretRight(icons.Props{})
-//line components/date-range-picker.go:1250
+//line components/date-range-picker.go:1308
 		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v17))
 	}
 	if kyse__err == nil {
@@ -1255,10 +1313,10 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/date-range-picker.kyse.go:594
+//line components/date-range-picker.kyse.go:662
 	for _, month := range kyse__d.Grids() {
 		_ = month
-//line components/date-range-picker.go:1262
+//line components/date-range-picker.go:1320
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<section\n")
 		}
@@ -1269,20 +1327,20 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/date-range-picker.kyse.go:597
+//line components/date-range-picker.kyse.go:665
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("month", "date-range-month")))
-//line components/date-range-picker.go:1275
+//line components/date-range-picker.go:1333
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v18 string
-//line components/date-range-picker.kyse.go:598
+//line components/date-range-picker.kyse.go:666
 			kyse__v18, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("month"))
-//line components/date-range-picker.go:1284
+//line components/date-range-picker.go:1342
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:598", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:666", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v18)
 			}
@@ -1300,9 +1358,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/date-range-picker.kyse.go:602
+//line components/date-range-picker.kyse.go:670
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("month-title", "date-range-title")))
-//line components/date-range-picker.go:1306
+//line components/date-range-picker.go:1364
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1312,11 +1370,11 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 			var kyse__v19 string
-//line components/date-range-picker.kyse.go:604
+//line components/date-range-picker.kyse.go:672
 			kyse__v19, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("month-title"))
-//line components/date-range-picker.go:1318
+//line components/date-range-picker.go:1376
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:604", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:672", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v19)
 			}
@@ -1325,9 +1383,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t>")
 		}
 		if kyse__err == nil {
-//line components/date-range-picker.kyse.go:605
+//line components/date-range-picker.kyse.go:673
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(month.Title)))
-//line components/date-range-picker.go:1331
+//line components/date-range-picker.go:1389
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</h2>\n")
@@ -1342,9 +1400,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/date-range-picker.kyse.go:608
+//line components/date-range-picker.kyse.go:676
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("month-grid", "date-range-grid")))
-//line components/date-range-picker.go:1348
+//line components/date-range-picker.go:1406
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1356,20 +1414,20 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\taria-label=\"")
 		}
 		if kyse__err == nil {
-//line components/date-range-picker.kyse.go:610
+//line components/date-range-picker.kyse.go:678
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(month.Title))
-//line components/date-range-picker.go:1362
+//line components/date-range-picker.go:1420
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v20 string
-//line components/date-range-picker.kyse.go:611
+//line components/date-range-picker.kyse.go:679
 			kyse__v20, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("month-grid"))
-//line components/date-range-picker.go:1371
+//line components/date-range-picker.go:1429
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:611", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:679", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v20)
 			}
@@ -1383,10 +1441,10 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t<tr>\n")
 		}
-//line components/date-range-picker.kyse.go:615
+//line components/date-range-picker.kyse.go:683
 		for _, column := range kyse__d.Columns() {
 			_ = column
-//line components/date-range-picker.go:1390
+//line components/date-range-picker.go:1448
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t<th\n")
 			}
@@ -1397,9 +1455,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/date-range-picker.kyse.go:618
+//line components/date-range-picker.kyse.go:686
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("weekday", "date-range-weekday")))
-//line components/date-range-picker.go:1403
+//line components/date-range-picker.go:1461
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1409,11 +1467,11 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v21 string
-//line components/date-range-picker.kyse.go:620
+//line components/date-range-picker.kyse.go:688
 				kyse__v21, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("weekday"))
-//line components/date-range-picker.go:1415
+//line components/date-range-picker.go:1473
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:620", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:688", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v21)
 				}
@@ -1422,9 +1480,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/date-range-picker.kyse.go:621
+//line components/date-range-picker.kyse.go:689
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(column)))
-//line components/date-range-picker.go:1428
+//line components/date-range-picker.go:1486
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</th>\n")
@@ -1439,33 +1497,33 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<tbody>\n")
 		}
-//line components/date-range-picker.kyse.go:626
+//line components/date-range-picker.kyse.go:694
 		for _, week := range month.Weeks {
 			_ = week
-//line components/date-range-picker.go:1446
+//line components/date-range-picker.go:1504
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t<tr\n")
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\tdata-part=\"week\"\n")
 			}
-//line components/date-range-picker.kyse.go:629
+//line components/date-range-picker.kyse.go:697
 			if week.Empty {
-//line components/date-range-picker.go:1455
+//line components/date-range-picker.go:1513
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\thidden\n")
 				}
 			}
-//line components/date-range-picker.kyse.go:632
+//line components/date-range-picker.kyse.go:700
 			if kyse__d.PartClass("week") != "" {
-//line components/date-range-picker.go:1462
+//line components/date-range-picker.go:1520
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\tclass=\"")
 				}
 				if kyse__err == nil {
-//line components/date-range-picker.kyse.go:633
+//line components/date-range-picker.kyse.go:701
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("week")))
-//line components/date-range-picker.go:1469
+//line components/date-range-picker.go:1527
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1473,11 +1531,11 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v22 string
-//line components/date-range-picker.kyse.go:635
+//line components/date-range-picker.kyse.go:703
 				kyse__v22, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("week"))
-//line components/date-range-picker.go:1479
+//line components/date-range-picker.go:1537
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:635", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:703", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v22)
 				}
@@ -1485,10 +1543,10 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t>\n")
 			}
-//line components/date-range-picker.kyse.go:637
+//line components/date-range-picker.kyse.go:705
 			for _, day := range week.Days {
 				_ = day
-//line components/date-range-picker.go:1492
+//line components/date-range-picker.go:1550
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t<td\n")
 				}
@@ -1499,9 +1557,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\tclass=\"")
 				}
 				if kyse__err == nil {
-//line components/date-range-picker.kyse.go:640
+//line components/date-range-picker.kyse.go:708
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("day", "date-range-day")))
-//line components/date-range-picker.go:1505
+//line components/date-range-picker.go:1563
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1513,37 +1571,37 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\tdata-date=\"")
 				}
 				if kyse__err == nil {
-//line components/date-range-picker.kyse.go:642
+//line components/date-range-picker.kyse.go:710
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(day.Date))
-//line components/date-range-picker.go:1519
+//line components/date-range-picker.go:1577
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
-//line components/date-range-picker.kyse.go:643
+//line components/date-range-picker.kyse.go:711
 				if day.Outside {
-//line components/date-range-picker.go:1526
+//line components/date-range-picker.go:1584
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\tdata-outside=\"true\"\n")
 					}
 				}
-//line components/date-range-picker.kyse.go:646
+//line components/date-range-picker.kyse.go:714
 				if day.Today {
-//line components/date-range-picker.go:1533
+//line components/date-range-picker.go:1591
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\tdata-today=\"true\"\n")
 					}
 				}
-//line components/date-range-picker.kyse.go:649
+//line components/date-range-picker.kyse.go:717
 				if day.Kind != "" {
-//line components/date-range-picker.go:1540
+//line components/date-range-picker.go:1598
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\tdata-range=\"")
 					}
 					if kyse__err == nil {
-//line components/date-range-picker.kyse.go:650
+//line components/date-range-picker.kyse.go:718
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(day.Kind))
-//line components/date-range-picker.go:1547
+//line components/date-range-picker.go:1605
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1552,41 +1610,41 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\taria-selected=\"true\"\n")
 					}
 				}
-//line components/date-range-picker.kyse.go:653
+//line components/date-range-picker.kyse.go:721
 				if day.Kind == "" {
-//line components/date-range-picker.go:1558
+//line components/date-range-picker.go:1616
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\taria-selected=\"false\"\n")
 					}
 				}
-//line components/date-range-picker.kyse.go:656
+//line components/date-range-picker.kyse.go:724
 				if day.Disabled {
-//line components/date-range-picker.go:1565
+//line components/date-range-picker.go:1623
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\taria-disabled=\"true\"\n")
 					}
 				}
-//line components/date-range-picker.kyse.go:659
+//line components/date-range-picker.kyse.go:727
 				if day.Stop {
-//line components/date-range-picker.go:1572
+//line components/date-range-picker.go:1630
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\ttabindex=\"0\"\n")
 					}
 				}
-//line components/date-range-picker.kyse.go:662
+//line components/date-range-picker.kyse.go:730
 				if !day.Stop {
-//line components/date-range-picker.go:1579
+//line components/date-range-picker.go:1637
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\ttabindex=\"-1\"\n")
 					}
 				}
 				if kyse__err == nil {
 					var kyse__v23 string
-//line components/date-range-picker.kyse.go:665
+//line components/date-range-picker.kyse.go:733
 					kyse__v23, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("day"))
-//line components/date-range-picker.go:1588
+//line components/date-range-picker.go:1646
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:665", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:733", kyse__err)
 					} else {
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v23)
 					}
@@ -1594,16 +1652,16 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t>\n")
 				}
-//line components/date-range-picker.kyse.go:667
+//line components/date-range-picker.kyse.go:735
 				if !day.Outside {
-//line components/date-range-picker.go:1600
+//line components/date-range-picker.go:1658
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\t\t\t\t")
 					}
 					if kyse__err == nil {
-//line components/date-range-picker.kyse.go:668
+//line components/date-range-picker.kyse.go:736
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(day.Number)))
-//line components/date-range-picker.go:1607
+//line components/date-range-picker.go:1665
 					}
 					if kyse__err == nil {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
@@ -1643,20 +1701,20 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:682
+//line components/date-range-picker.kyse.go:750
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("actions", "date-range-actions")))
-//line components/date-range-picker.go:1649
+//line components/date-range-picker.go:1707
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v24 string
-//line components/date-range-picker.kyse.go:683
+//line components/date-range-picker.kyse.go:751
 		kyse__v24, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("actions"))
-//line components/date-range-picker.go:1658
+//line components/date-range-picker.go:1716
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:683", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:751", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v24)
 		}
@@ -1674,9 +1732,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:687
+//line components/date-range-picker.kyse.go:755
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("status", "date-range-status")))
-//line components/date-range-picker.go:1680
+//line components/date-range-picker.go:1738
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1689,11 +1747,11 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v25 string
-//line components/date-range-picker.kyse.go:690
+//line components/date-range-picker.kyse.go:758
 		kyse__v25, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("status"))
-//line components/date-range-picker.go:1695
+//line components/date-range-picker.go:1753
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:690", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:758", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v25)
 		}
@@ -1711,9 +1769,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:694
+//line components/date-range-picker.kyse.go:762
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("clear", "btn")))
-//line components/date-range-picker.go:1717
+//line components/date-range-picker.go:1775
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1732,11 +1790,11 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v26 string
-//line components/date-range-picker.kyse.go:699
+//line components/date-range-picker.kyse.go:767
 		kyse__v26, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("clear"))
-//line components/date-range-picker.go:1738
+//line components/date-range-picker.go:1796
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:699", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:767", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v26)
 		}
@@ -1745,9 +1803,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t>")
 	}
 	if kyse__err == nil {
-//line components/date-range-picker.kyse.go:700
+//line components/date-range-picker.kyse.go:768
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.ClearText())))
-//line components/date-range-picker.go:1751
+//line components/date-range-picker.go:1809
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</button>\n")
@@ -1764,9 +1822,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/date-range-picker.kyse.go:705
+//line components/date-range-picker.kyse.go:773
 	if kyse__d.Message() != "" {
-//line components/date-range-picker.go:1770
+//line components/date-range-picker.go:1828
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<p\n")
 		}
@@ -1777,9 +1835,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
 		}
 		if kyse__err == nil {
-//line components/date-range-picker.kyse.go:708
+//line components/date-range-picker.kyse.go:776
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/date-range-picker.go:1783
+//line components/date-range-picker.go:1841
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "-error\"\n")
@@ -1788,20 +1846,20 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/date-range-picker.kyse.go:709
+//line components/date-range-picker.kyse.go:777
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("message", "text-destructive text-sm")))
-//line components/date-range-picker.go:1794
+//line components/date-range-picker.go:1852
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v27 string
-//line components/date-range-picker.kyse.go:710
+//line components/date-range-picker.kyse.go:778
 			kyse__v27, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("message"))
-//line components/date-range-picker.go:1803
+//line components/date-range-picker.go:1861
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:710", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:778", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v27)
 			}
@@ -1810,20 +1868,20 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
 		}
 		if kyse__err == nil {
-//line components/date-range-picker.kyse.go:711
+//line components/date-range-picker.kyse.go:779
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message())))
-//line components/date-range-picker.go:1816
+//line components/date-range-picker.go:1874
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
 		}
 	}
-//line components/date-range-picker.kyse.go:713
+//line components/date-range-picker.kyse.go:781
 	if kyse__d.Message() == "" {
-//line components/date-range-picker.go:1824
-//line components/date-range-picker.kyse.go:714
+//line components/date-range-picker.go:1882
+//line components/date-range-picker.kyse.go:782
 		if kyse__d.Hint != "" {
-//line components/date-range-picker.go:1827
+//line components/date-range-picker.go:1885
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<p\n")
 			}
@@ -1834,9 +1892,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tid=\"")
 			}
 			if kyse__err == nil {
-//line components/date-range-picker.kyse.go:717
+//line components/date-range-picker.kyse.go:785
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/date-range-picker.go:1840
+//line components/date-range-picker.go:1898
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "-hint\"\n")
@@ -1845,20 +1903,20 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/date-range-picker.kyse.go:718
+//line components/date-range-picker.kyse.go:786
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("hint", "text-muted-foreground text-sm")))
-//line components/date-range-picker.go:1851
+//line components/date-range-picker.go:1909
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 			if kyse__err == nil {
 				var kyse__v28 string
-//line components/date-range-picker.kyse.go:719
+//line components/date-range-picker.kyse.go:787
 				kyse__v28, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("hint"))
-//line components/date-range-picker.go:1860
+//line components/date-range-picker.go:1918
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:719", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/date-range-picker.kyse.go:787", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v28)
 				}
@@ -1867,9 +1925,9 @@ func DateRangePicker(kyse__props DateRangePickerProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/date-range-picker.kyse.go:720
+//line components/date-range-picker.kyse.go:788
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Hint)))
-//line components/date-range-picker.go:1873
+//line components/date-range-picker.go:1931
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
