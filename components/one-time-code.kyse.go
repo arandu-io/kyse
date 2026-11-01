@@ -4,7 +4,9 @@ package components
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
+	"unicode"
 )
 
 @go
@@ -60,6 +62,15 @@ const OneTimeCodeBehavior = "one-time-code"
 // somebody cannot see for themselves, and a row of red squares with nothing
 // saying why reads as a field that is broken.
 //
+// # Naming the squares
+//
+// Each square is an input a screen reader stops on, so each carries a name of
+// its own: the group's Label and the square's place, "Email code, digit 3 of
+// 6". The sentence is SquareLabel, or kyse.one_time_code.square from the page's
+// catalogue, in the language the page is served in -- "{label}, dígito {n} de
+// {total}" in Portuguese. The component writes the name itself: aria-label is
+// not an attribute a part can be given.
+//
 // It publishes root, square, raw and message.
 type OneTimeCodeProps struct {
 	// ComponentProps is the class, attributes and parts the caller adds.
@@ -82,6 +93,12 @@ type OneTimeCodeProps struct {
 	// Label is the accessible name of the group. A code field with no label is
 	// announced as a row of unnamed boxes.
 	Label string
+	// SquareLabel is the name each square carries, with {label}, {n} and {total}
+	// in place of the group's Label, the square's place and the length of the
+	// code: "{label}, digit {n} of {total}". Empty says kyse.one_time_code.square
+	// from the Page, or the English above. A square is an input of its own, and
+	// one with no name of its own is announced as "edit text" six times over.
+	SquareLabel string
 	// DescribedBy is the id of an element the caller drew that explains this
 	// field. The rejection is not it: this component draws that one and names
 	// it ahead of this id.
@@ -160,6 +177,30 @@ func (p OneTimeCodeProps) Pattern() string {
 		return fmt.Sprintf("[0-9A-Za-z]{%d}", p.Size())
 	}
 	return fmt.Sprintf("[0-9]{%d}", p.Size())
+}
+
+// SquareName is the accessible name of the square at a position: the sentence
+// of SquareLabel, or of the catalogue, with the group's Label, the place of the
+// square counting from one and the length of the code in it. A group with no
+// Label has the name without it ("Digit 3 of 6") rather than a stray comma.
+func (p OneTimeCodeProps) SquareName(at int) string {
+	sentence := p.SquareLabel
+	if sentence == "" {
+		sentence = say(p.Page, "one_time_code.square", "{label}, digit {n} of {total}")
+	}
+	name := strings.NewReplacer(
+		"{label}", p.Label,
+		"{n}", strconv.Itoa(at+1),
+		"{total}", strconv.Itoa(p.Size()),
+	).Replace(sentence)
+	if p.Label == "" {
+		name = strings.TrimLeft(name, ", ")
+		if letters := []rune(name); len(letters) > 0 {
+			letters[0] = unicode.ToUpper(letters[0])
+			name = string(letters)
+		}
+	}
+	return name
 }
 
 // AutocompleteAt is the autofill hint for one square.
@@ -242,6 +283,7 @@ func (p OneTimeCodeProps) PartNames() []string { return []string{"root", "square
 			class="{{ .PartClass("square", "otp-square") }}"
 			type="text"
 			hidden
+			aria-label="{{ .SquareName(index) }}"
 			inputmode="{{ .InputMode() }}"
 			maxlength="1"
 			value="{{ .CharAt(index) }}"

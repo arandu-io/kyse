@@ -60,8 +60,8 @@
 //   - [FlashPage]: what the request before this one said. Toast draws it when
 //     its Title is empty.
 //   - [TranslatorPage]: the application's catalogue and the request's locale.
-//     Pagination, Dialog, FormDialog, Toast, ThemeToggle, Table and DataTable
-//     read their own words from it when the label for them is empty, and say
+//     Pagination, Dialog, FormDialog, Toast, ThemeToggle, Table, DataTable and
+//     OneTimeCode read their own words from it when the label for them is empty, and say
 //     the English they always said when it carries no line. Pagination and
 //     DataTable take the page as PageData, because their Page is a number.
 //
@@ -91,6 +91,7 @@
 //	kyse.form_dialog.cancel       Cancel
 //	kyse.form_dialog.close        Close
 //	kyse.toast.close              Close
+//	kyse.one_time_code.square     {label}, digit {n} of {total}
 //	kyse.theme_toggle.label       Change the theme
 //	kyse.theme_toggle.menu        Theme
 //	kyse.theme_toggle.auto        Auto

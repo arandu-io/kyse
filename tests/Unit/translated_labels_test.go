@@ -108,6 +108,7 @@ func marked(t *testing.T) translation.Lines {
 		"data_table.rows":           " {total}",
 		"data_table.selected_count": " {n}",
 		"data_table.facet_selected": " {n}",
+		"one_time_code.square":      " {label}/{n}/{total}",
 	} {
 		lines[key] += placeholders
 	}
@@ -132,6 +133,7 @@ func everyLabel(page components.Page) string {
 		string(components.FormDialog(components.FormDialogProps{ID: "rename", Title: "Rename", Action: "/x", Page: page})),
 		string(components.Toast(components.ToastProps{Title: "Saved.", Dismissible: true, Page: page})),
 		string(components.ThemeToggle(components.ThemeToggleProps{Page: page})),
+		string(components.OneTimeCode(components.OneTimeCodeProps{Name: "code", Label: "Code", Page: page})),
 		string(components.Table(components.TableProps{
 			ID: "plain", Columns: columns, Rows: rows, SelectName: "ids", BulkActions: bulk,
 			SortKey: "number", SortDir: "asc", SortURL: "/x?sort={sort}&dir={dir}", Page: page,
