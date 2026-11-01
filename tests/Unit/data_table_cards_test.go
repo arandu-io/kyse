@@ -2,6 +2,7 @@ package unit
 
 import (
 	"html"
+	"html/template"
 	"regexp"
 	"strings"
 	"testing"
@@ -328,5 +329,107 @@ func TestTheNoResultRowIsABlockInACardLayout(t *testing.T) {
 	html := string(components.DataTable(p))
 	if !strings.Contains(html, "No results.") || !strings.Contains(html, "@max-[600px]/dt:block") {
 		t.Errorf("the no-result row is not a block:\n%s", html)
+	}
+}
+
+// actionsList is a list whose last column holds the row's own controls: the
+// first row has some and the second has an empty cell.
+func actionsList() components.DataTableProps {
+	return components.DataTableProps{
+		ID: "a", Label: "A", URL: "/a",
+		Columns: []components.TableColumn{
+			{Label: "Name", Key: "name", Primary: true},
+			{Label: "Note", Key: "note"},
+			{Label: "Actions", Align: "end", Actions: true},
+		},
+		Rows: []components.TableRow{
+			{Key: "1", Cells: []components.TableCell{{Text: "Ada"}, {Text: ""}, {HTML: `<a href="/1">Edit</a>`}}},
+			{Key: "2", Cells: []components.TableCell{{Text: "Grace"}, {Text: "kept"}, {}}},
+			{Key: "3", Cells: []components.TableCell{{Text: "Alan"}, {Text: "kept"}, {HTML: " \n\t "}}},
+		},
+	}
+}
+
+// cellsOf is the opening tag of each cell of the body, row by row.
+func cellsOf(html string) [][]string {
+	body := html[strings.Index(html, "<tbody"):]
+	var rows [][]string
+	for _, tr := range strings.Split(body, "<tr")[1:] {
+		rows = append(rows, tags(tr, "td"))
+	}
+	return rows
+}
+
+// The cell of the column marked Actions is the foot of the card with no name in
+// front of it; one with nothing in it is left out of the card, and so is the
+// label of any other cell that has no value.
+func TestTheActionsCellIsTheFootOfTheCardAndAnEmptyOneIsLeftOut(t *testing.T) {
+	rows := cellsOf(string(components.DataTable(actionsList())))
+	if len(rows) != 3 {
+		t.Fatalf("%d rows, want 3", len(rows))
+	}
+	foot := rows[0][2]
+	for _, want := range []string{"@max-[600px]/dt:border-t", "@max-[600px]/dt:justify-end", "@max-[600px]/dt:before:hidden", "@max-[600px]/dt:order-last"} {
+		if !strings.Contains(foot, want) {
+			t.Errorf("the actions cell lacks %s: %s", want, foot)
+		}
+	}
+	// Under the breakpoint only: the cell is the cell it was above it.
+	for _, class := range strings.Fields(foot[strings.Index(foot, `class="`)+7:]) {
+		if strings.Contains(class, "border-t") && !strings.HasPrefix(class, "@max-[600px]/dt:") {
+			t.Errorf("a rule outside the card query: %s", class)
+		}
+	}
+	// A note with nothing in it is not drawn; one with a value is.
+	if !strings.Contains(rows[0][1], "@max-[600px]/dt:hidden") {
+		t.Errorf("an empty note stays in the card: %s", rows[0][1])
+	}
+	if strings.Contains(rows[1][1], "@max-[600px]/dt:hidden") {
+		t.Errorf("a note with a value is left out: %s", rows[1][1])
+	}
+	// An empty actions cell, or one of white space only, draws no foot and no label.
+	for _, n := range []int{1, 2} {
+		cell := rows[n][2]
+		if !strings.Contains(cell, "@max-[600px]/dt:hidden") || strings.Contains(cell, "@max-[600px]/dt:border-t") {
+			t.Errorf("row %d has no actions and draws a foot: %s", n+1, cell)
+		}
+	}
+	// The header still names the column for the table above the breakpoint.
+	page := string(components.DataTable(actionsList()))
+	if !strings.Contains(page[strings.Index(page, "<thead"):strings.Index(page, "</thead>")], "Actions") {
+		t.Error("the column of actions lost its header")
+	}
+}
+
+// The card's title is drawn when it is empty, so a card never loses its heading
+// to the rule that leaves empty cells out.
+func TestAnEmptyTitleIsStillTheCardsTitle(t *testing.T) {
+	p := actionsList()
+	p.Rows[0].Cells[0] = components.TableCell{}
+	rows := cellsOf(string(components.DataTable(p)))
+	if strings.Contains(rows[0][0], "@max-[600px]/dt:hidden") || !strings.Contains(rows[0][0], "@max-[600px]/dt:order-first") {
+		t.Errorf("an empty title is left out of its card: %s", rows[0][0])
+	}
+}
+
+// A column marked Actions and Primary is the title: the card has to have one.
+func TestAnActionsColumnThatIsAlsoThePrimaryIsStillTheTitle(t *testing.T) {
+	p := actionsList()
+	p.Columns[2].Primary = true
+	p.Columns[0].Primary = false
+	rows := cellsOf(string(components.DataTable(p)))
+	if !strings.Contains(rows[0][2], "@max-[600px]/dt:order-first") || strings.Contains(rows[0][2], "@max-[600px]/dt:order-last") {
+		t.Errorf("the primary column is not the title: %s", rows[0][2])
+	}
+}
+
+func TestACellIsEmptyWhenItHasNeitherTextNorMarkup(t *testing.T) {
+	for cell, want := range map[string]bool{"": true, "  ": true, "x": false} {
+		if got := (components.TableCell{Text: cell}).Empty(); got != want {
+			t.Errorf("Text %q: Empty is %t, want %t", cell, got, want)
+		}
+		if got := (components.TableCell{HTML: template.HTML(cell)}).Empty(); got != want {
+			t.Errorf("HTML %q: Empty is %t, want %t", cell, got, want)
+		}
 	}
 }

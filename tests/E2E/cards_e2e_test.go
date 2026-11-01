@@ -5,6 +5,7 @@ package e2e
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"os"
 	"strconv"
 	"testing"
@@ -39,6 +40,36 @@ func cardsTable(total int) string {
 			{Label: "Status", Key: "status", Sortable: true},
 			{Label: "Total", Key: "total", Sortable: true, Align: "end"},
 			{Label: "", Key: ""},
+		},
+		Rows: rows,
+	}))
+}
+
+// footTable is a list whose last column holds the row's own controls, the way an
+// application draws "Edit" and "Remove" as icon buttons in a cell: the first and
+// third rows have some, the second and fourth have none and their cell is empty.
+func footTable() string {
+	rows := make([]components.TableRow, 0, 4)
+	for n, name := range []string{"Ada Lovelace", "Grace Hopper", "Alan Turing", "Edsger Dijkstra"} {
+		var controls components.TableCell
+		if n%2 == 0 {
+			controls.HTML = template.HTML(`<div class="flex justify-end gap-0.5" data-row-actions>` +
+				string(components.Button(components.ButtonProps{Label: "Edit", Variant: "ghost", Size: "sm"})) +
+				string(components.Button(components.ButtonProps{Label: "Remove", Variant: "ghost", Size: "sm"})) + `</div>`)
+		}
+		rows = append(rows, components.TableRow{
+			Key:   strconv.Itoa(n + 1),
+			Cells: []components.TableCell{{Text: name}, {Text: []string{"Free", "Pro", "Pro", "Free"}[n]}, {Text: ""}, controls},
+		})
+	}
+	return string(components.DataTable(components.DataTableProps{
+		ID: "foot", Label: "Accounts", URL: "/foot",
+		Paginator: pagination.NewLengthAwarePage(len(rows), len(rows), 10, 1, pagination.Options{Path: "/foot"}),
+		Columns: []components.TableColumn{
+			{Label: "Account", Key: "account", Primary: true},
+			{Label: "Plan", Key: "plan"},
+			{Label: "Note", Key: "note"},
+			{Label: "Actions", Align: "end", Actions: true},
 		},
 		Rows: rows,
 	}))
@@ -95,6 +126,51 @@ func TestARowIsACardOnAPhone(t *testing.T) {
 		return menu.left >= 0 && menu.right <= innerWidth && menu.top >= last.bottom && menu.bottom <= box.bottom;
 	})())`), "true", "the row menu sitting inside the card, under the values")
 	shot(t, page, "cards-390-light")
+}
+
+// The cell of the column marked Actions is the foot of the card with no name in
+// front of the controls, at the end of the card. A row with nothing in it draws
+// no cell, so no "Actions" stands alone and no rule closes an empty foot; the
+// label of any other column with no value is left out the same way.
+func TestTheActionsOfACardAreItsFootAndAnEmptyOneDrawsNothing(t *testing.T) {
+	app := serve(t, true)
+	page := open(t, app, 390)
+	page.Visit("/foot")
+
+	const cell = `#foot tbody tr:nth-child(%d) td[data-label=Actions]`
+	first := fmt.Sprintf(cell, 1)
+	requireStyle(t, style(t, page, first, "", "display"), "flex", "the actions cell of a row that has some")
+	requireStyle(t, style(t, page, first, "::before", "display"), "none", "the label of the actions cell")
+	requireStyle(t, style(t, page, first, "", "justify-content"), "flex-end", "where the actions sit")
+	requireStyle(t, style(t, page, first, "", "border-top-width"), "1px", "the rule over the actions")
+	requireStyle(t, eval(t, page, `String((function () {
+		var td = document.querySelector('`+first+`'), box = td.getBoundingClientRect(), group = td.querySelector('[data-row-actions]').getBoundingClientRect(), card = td.closest('tr').getBoundingClientRect();
+		return Math.abs(group.right - box.right) < 2 && box.right <= card.right && group.left > box.left + box.width / 2;
+	})())`), "true", "the controls at the end of the card, not after a label")
+	// Rows two and four have none: nothing is drawn for them, no label and no rule.
+	for _, n := range []int{2, 4} {
+		requireStyle(t, style(t, page, fmt.Sprintf(cell, n), "", "display"), "none", fmt.Sprintf("the actions cell of row %d, which has none", n))
+	}
+	// Nor does the empty "Note" of any card draw its name in front of nothing.
+	requireStyle(t, style(t, page, `#foot tbody tr:nth-child(1) td[data-column=note]`, "", "display"), "none", "an empty note")
+	// No card draws the name of the actions column.
+	requireStyle(t, eval(t, page, `String(Array.from(document.querySelectorAll('#foot tbody td[data-label=Actions]')).some(function (td) {
+		return getComputedStyle(td).display !== 'none' && getComputedStyle(td, '::before').display !== 'none';
+	}))`), "false", "a card drawing the name of the actions column")
+	requireStyle(t, eval(t, page, `String(document.documentElement.scrollWidth <= document.documentElement.clientWidth)`), "true", "the page fitting its width")
+	shot(t, page, "foot-390-light")
+}
+
+// A table above the breakpoint keeps the column of actions as a column, its
+// header and its empty cells too.
+func TestTheActionsColumnIsAColumnOnADesktop(t *testing.T) {
+	app := serve(t, true)
+	page := open(t, app, 1280)
+	page.Visit("/foot")
+	requireStyle(t, style(t, page, "#foot tbody tr:nth-child(2) td[data-label=Actions]", "", "display"), "table-cell", "the empty actions cell")
+	requireStyle(t, style(t, page, "#foot tbody tr:nth-child(1) td[data-label=Actions]", "", "border-top-width"), "0px", "a rule over the actions of a table row")
+	requireStyle(t, style(t, page, "#foot thead th:last-child", "", "display"), "table-cell", "the header of the actions column")
+	shot(t, page, "foot-1280-light")
 }
 
 // Above the breakpoint nothing changed: it is a table, with its labels unspoken.
@@ -177,7 +253,7 @@ func TestPhotographTheCardsAndTheTable(t *testing.T) {
 	app := serve(t, true)
 	for _, size := range []struct{ width, height int }{{390, 1300}, {1280, 800}} {
 		for _, scheme := range []string{"light", "dark"} {
-			for _, path := range []string{"cards", "invoices"} {
+			for _, path := range []string{"cards", "invoices", "foot"} {
 				page := browser.Open(t, drivers, browser.BaseURL(app.URL), browser.WithViewport(browser.Viewport{Width: size.width, Height: size.height}))
 				page.Visit("/" + path)
 				if scheme == "dark" {

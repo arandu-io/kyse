@@ -177,6 +177,13 @@ type TableColumn struct {
 	// DataColumn.CardHidden. A column that is Primary is never left out: the card
 	// would have no title.
 	CardHidden bool
+	// Actions marks the column of a row's own controls: icon buttons, a link, a
+	// form that posts. A card draws it as the foot of the card, along the end and
+	// under a rule, with no name in front of it -- the controls say what they do,
+	// and a label beside them ("Actions") only crowds the first one -- the way a
+	// DataTable draws the menu of a row. Above the breakpoint it is a column like
+	// any other and keeps its header. Ayra draws a row's actions the same way.
+	Actions bool
 }
 
 // AlignClass is the alignment this column draws with.
@@ -260,6 +267,12 @@ type TableCell struct {
 	// a badge, a button, an icon -- and never a string assembled around a value
 	// somebody typed.
 	HTML template.HTML
+}
+
+// Empty is whether the cell has nothing to draw: no text and no markup, or only
+// white space. A card leaves such a cell out.
+func (c TableCell) Empty() bool {
+	return strings.TrimSpace(c.Text) == "" && strings.TrimSpace(string(c.HTML)) == ""
 }
 
 // AlignClass is the alignment of the column at position i, and the default

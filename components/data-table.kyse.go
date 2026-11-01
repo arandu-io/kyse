@@ -1184,6 +1184,9 @@ const (
 	cardLeft = "@max-[600px]/dt:hidden"
 	// cardSelect is the row's checkbox, at the top corner of its card.
 	cardSelect = "@max-[600px]/dt:absolute @max-[600px]/dt:start-3 @max-[600px]/dt:top-3 @max-[600px]/dt:p-0"
+	// cardActionCell is a cell of the column marked Actions: the foot of the card,
+	// at its end and under a rule, with no name in front of the controls.
+	cardActionCell = "@max-[600px]/dt:order-last @max-[600px]/dt:flex @max-[600px]/dt:items-center @max-[600px]/dt:justify-end @max-[600px]/dt:gap-x-3 @max-[600px]/dt:border-t @max-[600px]/dt:p-0 @max-[600px]/dt:pt-2 @max-[600px]/dt:text-start @max-[600px]/dt:whitespace-normal @max-[600px]/dt:before:hidden"
 	// cardActions is the row's menu, along the foot of the card and in sight.
 	cardActions = "@max-[600px]/dt:order-last @max-[600px]/dt:flex @max-[600px]/dt:justify-end @max-[600px]/dt:border-t @max-[600px]/dt:p-0 @max-[600px]/dt:pt-2"
 	// cardFull is a row that spans the table, the one that says nothing matched.
@@ -1221,12 +1224,31 @@ func (p DataTableProps) LabelAt(i int) string {
 	return ""
 }
 
+// ActionsAt is whether column i holds the row's own controls (Actions).
+func (p DataTableProps) ActionsAt(i int) bool {
+	return i < len(p.Columns) && p.Columns[i].Actions
+}
+
+// CardCellFor is the classes cell i draws with once the region is narrower than
+// the breakpoint, given the cell itself: a cell with nothing in it is left out of
+// the card, so a name is never drawn in front of nothing and a row with no action
+// has no foot. The title of the card is drawn even when it is empty.
+func (p DataTableProps) CardCellFor(i int, cell TableCell) string {
+	if cell.Empty() && i != p.PrimaryColumn() {
+		return cardLeft
+	}
+	return p.CardCell(i)
+}
+
 // CardCell is the classes cell i draws with once the region is narrower than the
-// breakpoint, which are none above it.
+// breakpoint, which are none above it. The cell's own content is not known here:
+// CardCellFor leaves an empty one out.
 func (p DataTableProps) CardCell(i int) string {
 	switch {
 	case p.CardHiddenAt(i):
 		return cardLeft
+	case p.ActionsAt(i) && i != p.PrimaryColumn():
+		return cardActionCell
 	case i == p.PrimaryColumn():
 		if p.Selectable() {
 			return joinClasses(cardCell, cardTitle, cardTitleSelect)
@@ -2156,7 +2178,7 @@ func (p DataTableProps) PartNames() []string {
 							@for(i := 0; i < len(row.Cells); i++)
 								<td
 									data-part="cell"
-									class="{{ .PartClass("cell", "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0", .AlignClass(i), .CardCell(i)) }}"
+									class="{{ .PartClass("cell", "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0", .AlignClass(i), .CardCellFor(i, row.Cells[i])) }}"
 									@if(.ColumnKey(i) != "")
 										data-column="{{ .ColumnKey(i) }}"
 									@endif
