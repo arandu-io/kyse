@@ -797,6 +797,10 @@ var extensible = []struct {
 				SelectName: "ids", Token: "csrf", BulkAction: "/invoices/bulk",
 				BulkActions: []components.ButtonProps{{Label: "Archive", Type: "submit", Name: "do", Value: "archive"}},
 				Paginator:   pagination.NewLengthAwarePage(3, 137, 3, 12, pagination.Options{Path: "/invoices"}),
+				Controls: []components.DataTableControl{
+					{Key: "number", Kind: components.DataTableText, Label: "Number", Placeholder: "2026-"},
+					{Key: "kind", Kind: components.DataTableSelect, Label: "Kind", Placeholder: "All", Options: []components.SelectOption{{Value: "a", Label: "A"}}},
+				},
 			}
 			plain := menu
 			plain.HeaderMenu, plain.FullPager = false, false

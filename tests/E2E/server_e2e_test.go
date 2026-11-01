@@ -433,6 +433,22 @@ func serve(t *testing.T, needStyles bool) *app {
 		w.Header().Set("Cache-Control", "no-store")
 		fmt.Fprint(w, layout("Small invoices", small()))
 	})
+	mux.HandleFunc("GET /controlled", func(w http.ResponseWriter, r *http.Request) {
+		a.record(r)
+		a.mu.Lock()
+		wait := a.delay
+		a.mu.Unlock()
+		time.Sleep(wait)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Header().Set("Vary", "HX-Request, HX-History-Restore-Request")
+		w.Header().Set("Cache-Control", "no-store")
+		body := controlledTable(r.URL.Query())
+		if fragment(r) {
+			fmt.Fprint(w, body)
+			return
+		}
+		fmt.Fprint(w, layout("Controlled invoices", body))
+	})
 	mux.HandleFunc("GET /other", func(w http.ResponseWriter, r *http.Request) {
 		a.record(r)
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")

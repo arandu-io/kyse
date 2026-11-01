@@ -58,14 +58,26 @@ import (
 // buttons with "Page X of Y", and a row's Actions the menu at the end of the
 // row. A column that is Hideable is listed in the columns menu.
 //
+// # Controls on the search's line
+//
+// Controls draws a text, a choice or a period beside the search, in the same
+// form, so one request carries all of them and a new order, a page or a size
+// keeps them. See [DataTableControl]. An application that wrote its own toolbar
+// of filters and spliced them into the markup draws them with this instead.
+//
 // # A list that holds all its rows
 //
 // Complete says the rows are the whole list. The browser then searches, orders,
 // filters and pages them itself and the server is not asked. Every control is
 // still a link or a form, so the page works with no script.
 //
-// It publishes root, toolbar, search, reset, facet, facet-chosen, facet-search, filter,
-// columns, toggle, bulk, wrapper, table, caption, head, header-cell, sort,
+// The browser searches a cell by its own words, without regard to case or to the
+// marks on a letter. What a cell holds that is not the row's words -- a [Dialog]
+// drawn in it, the text of an action, anything with data-search="false" -- is
+// left out of the search and of the order.
+//
+// It publishes root, toolbar, query, search, reset, facet, facet-chosen, facet-search, filter,
+// control, control-input, columns, toggle, bulk, wrapper, table, caption, head, header-cell, sort,
 // header-menu, row, cell, select-all, select, row-menu, footer, count, sizes,
 // pagination, page-of, first, previous, next and last.
 type DataTableProps struct {
@@ -171,6 +183,9 @@ type DataTableProps struct {
 	// Filters are the faceted filters, drawn beside the search. Their chosen
 	// values are State.Chosen(Key).
 	Filters []DataTableFilter
+	// Controls are a text, a choice and a period drawn on the search's line,
+	// inside the query form, after the facets. See [DataTableControl].
+	Controls []DataTableControl
 
 	// Navigable turns the table into a grid: one tab stop, and the arrow keys
 	// moving from cell to cell. See TableProps.Navigable.
@@ -231,6 +246,66 @@ type DataTableFilter struct {
 	// query counted them: ignoring this facet's own choice and respecting the
 	// others. Nil draws no counts.
 	Counts map[string]int
+}
+
+// The kinds of control a data table draws on the search's line.
+const (
+	// DataTableText is a short text, asked for after a pause like the search.
+	DataTableText = "text"
+	// DataTableSelect is a choice among options, asked for when it changes.
+	DataTableSelect = "select"
+	// DataTablePeriod is two days chosen in one field, asked for when the second
+	// is pressed, a shortcut is or Clear is.
+	DataTablePeriod = "period"
+)
+
+// DataTableControl is a control drawn on the search's line, in the one form
+// that owns the search and the facets: a text, a choice or a period.
+//
+// It is a facet that is not a list of checkboxes. Its value is in the state
+// under Key -- and, for a period, its end under ToKey -- so it travels in every
+// address the table draws (a new order, a page, a size keep it) and Reset drops
+// it with the search. The query that reads the state declares those keys as the
+// facets they are: a key the listing did not declare is dropped from the state,
+// as in any request.
+//
+// On a table the server answers, one request carries the search, the facets and
+// every control. On a complete table the browser narrows the rows with them
+// against each row's Facets: a choice must equal the row's value for Key, a text
+// must be found in it without regard to case or accents, and a period must
+// hold it, a day as "2026-10-27" or a timestamp that begins with one.
+type DataTableControl struct {
+	// Key is the query parameter the value travels in, and for a period the
+	// start of it.
+	Key string
+	// ToKey is the query parameter of the end of a period.
+	ToKey string
+	// Kind is DataTableText, DataTableSelect or DataTablePeriod. Empty is a text.
+	Kind string
+	// Label names the control, drawn beside it. A period names its field with it.
+	Label string
+	// Placeholder is the grey text of a text, and the first option of a choice,
+	// the one that narrows nothing ("All").
+	Placeholder string
+	// Options are what a choice offers.
+	Options []SelectOption
+	// Value is what the control holds when the state says nothing about Key, and
+	// ToValue the end of a period.
+	Value   string
+	ToValue string
+	// Period is the picker of a period, for the words and shortcuts only: month
+	// and weekday names, date format, labels, Presets. The names, id, label and
+	// the two days are the control's.
+	Period DateRangePickerProps
+}
+
+// Type is the kind of the control, a text when none is written.
+func (c DataTableControl) Type() string {
+	switch c.Kind {
+	case DataTableSelect, DataTablePeriod:
+		return c.Kind
+	}
+	return DataTableText
 }
 
 // Name is the name of the filter's boxes: the parameter its values travel in.
@@ -514,6 +589,9 @@ func (p DataTableProps) QueryFields() []DataTableQueryField {
 	for _, filter := range p.Facets() {
 		owned[filter.Name()] = true
 	}
+	for _, key := range p.controlKeys() {
+		owned[key] = true
+	}
 	values := p.state().Values(DataTableChange{})
 	keys := make([]string, 0, len(values))
 	for key := range values {
@@ -560,6 +638,74 @@ func (p DataTableProps) Placeholder() string {
 // Faceted is whether any facet is drawn.
 func (p DataTableProps) Faceted() bool { return len(p.Filters) > 0 }
 
+// Controlled is whether any control is drawn on the search's line.
+func (p DataTableProps) Controlled() bool { return len(p.Controls) > 0 }
+
+// Narrowable is whether anything on the search's line narrows the list: the
+// search, a facet or a control.
+func (p DataTableProps) Narrowable() bool { return p.Searchable || p.Faceted() || p.Controlled() }
+
+// ControlID is the id of the control's field.
+func (p DataTableProps) ControlID(control DataTableControl) string {
+	return p.ID + "-control-" + control.Key
+}
+
+// controlValue is what the state holds under a key, and the fallback when it
+// holds nothing.
+func (p DataTableProps) controlValue(key, fallback string) string {
+	if chosen := p.state().Chosen(key); len(chosen) > 0 {
+		return chosen[0]
+	}
+	return fallback
+}
+
+// ControlFrom is the value a control shows: the state's for its Key, and the
+// control's own Value when the state has none. A period's start.
+func (p DataTableProps) ControlFrom(control DataTableControl) string {
+	return p.controlValue(control.Key, control.Value)
+}
+
+// ControlTo is the end of a period.
+func (p DataTableProps) ControlTo(control DataTableControl) string {
+	if control.ToKey == "" {
+		return ""
+	}
+	return p.controlValue(control.ToKey, control.ToValue)
+}
+
+// ControlChosen is whether an option of a choice is the one in force.
+func (p DataTableProps) ControlChosen(control DataTableControl, option SelectOption) bool {
+	return option.Value != "" && option.Value == p.ControlFrom(control)
+}
+
+// ControlPeriod is the picker a period control draws: the caller's words, with
+// the names, the id, the label and the two days of the control.
+func (p DataTableProps) ControlPeriod(control DataTableControl) DateRangePickerProps {
+	picker := control.Period
+	picker.Name = control.Key
+	picker.FromName = control.Key
+	picker.ToName = control.ToKey
+	picker.ID = p.ControlID(control)
+	picker.Label = control.Label
+	picker.From = p.ControlFrom(control)
+	picker.To = p.ControlTo(control)
+	return picker
+}
+
+// controlKeys are the query parameters the controls own.
+func (p DataTableProps) controlKeys() []string {
+	var keys []string
+	for _, control := range p.Controls {
+		if control.Key != "" {
+			keys = append(keys, control.Key)
+		}
+		if control.Type() == DataTablePeriod && control.ToKey != "" {
+			keys = append(keys, control.ToKey)
+		}
+	}
+	return keys
+}
+
 // Chosen are the values chosen for one facet.
 func (p DataTableProps) Chosen(filter DataTableFilter) []string {
 	return p.state().Chosen(filter.Key)
@@ -578,6 +724,11 @@ func (p DataTableProps) Active() bool {
 	}
 	for _, filter := range p.Facets() {
 		if len(p.Chosen(filter)) > 0 {
+			return true
+		}
+	}
+	for _, key := range p.controlKeys() {
+		if len(p.state().Chosen(key)) > 0 {
 			return true
 		}
 	}
@@ -1144,8 +1295,8 @@ func (p DataTableProps) RootAttrs() map[string]string {
 // PartNames are the parts this component publishes.
 func (p DataTableProps) PartNames() []string {
 	return []string{
-		"root", "toolbar", "search", "reset", "facet", "facet-chosen", "facet-search", "filter",
-		"columns", "toggle", "bulk", "wrapper", "table", "caption", "head",
+		"root", "toolbar", "query", "search", "reset", "facet", "facet-chosen", "facet-search", "filter",
+		"control", "control-input", "columns", "toggle", "bulk", "wrapper", "table", "caption", "head",
 		"header-cell", "sort", "header-menu", "row", "cell", "select-all",
 		"select", "row-menu", "footer", "count", "sizes", "pagination", "page-of",
 		"first", "previous", "next", "last",
@@ -1186,7 +1337,8 @@ func (p DataTableProps) PartNames() []string {
 		     once each, from the state. --}}
 		<form
 			id="{{ .QueryFormID() }}"
-			class="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+			data-part="query"
+			class="{{ .PartClass("query", "flex min-w-0 flex-1 flex-wrap items-center gap-2") }}"
 			action="{{ .QueryAction() }}"
 			method="get"
 			@if(.Searchable)
@@ -1205,6 +1357,7 @@ func (p DataTableProps) PartNames() []string {
 				hx-sync="closest [data-part=root]:replace"
 				hx-indicator="{{ .Target() }}"
 			@endif
+			@attributes(.PartAttrs("query"))
 		>
 			@foreach(.QueryFields() as field)
 				<input type="hidden" name="{{ field.Name }}" value="{{ field.Value }}">
@@ -1368,7 +1521,62 @@ func (p DataTableProps) PartNames() []string {
 				</details>
 			@endforeach
 
-			@if(.Active() && (.Searchable || .Faceted()))
+			@foreach(.Controls as control)
+				{{-- A control is a facet that is not a list of boxes. It sits in the
+				     query form with the search, so its value is a field of the one
+				     request, and its key is in the state, so every address the
+				     table draws carries it. --}}
+				<div
+					data-part="control"
+					data-control="{{ control.Type() }}"
+					class="{{ .PartClass("control", "flex min-w-0 items-center gap-2 max-sm:w-full [&_.field]:flex [&_.field]:flex-row [&_.field]:items-center [&_.field]:gap-2") }}"
+					@attributes(.PartAttrs("control"))
+				>
+					@if(control.Type() == "period")
+						{!! DateRangePicker(.ControlPeriod(control)) !!}
+					@endif
+					@if(control.Type() == "select")
+						<label class="{{ "text-sm font-medium whitespace-nowrap text-muted-foreground" }}" for="{{ .ControlID(control) }}">{{ control.Label }}</label>
+						<select
+							data-part="control-input"
+							class="{{ .PartClass("control-input", "select h-8 w-44 max-sm:w-full py-0 text-sm") }}"
+							id="{{ .ControlID(control) }}"
+							name="{{ control.Key }}"
+							@attributes(.PartAttrs("control-input"))
+						>
+							<option value="">{{ control.Placeholder }}</option>
+							@foreach(control.Options as option)
+								<option
+									value="{{ option.Value }}"
+									@if(.ControlChosen(control, option))
+										selected
+									@endif
+									@if(option.Disabled)
+										disabled
+									@endif
+								>{{ option.Label }}</option>
+							@endforeach
+						</select>
+					@endif
+					@if(control.Type() == "text")
+						<label class="{{ "text-sm font-medium whitespace-nowrap text-muted-foreground" }}" for="{{ .ControlID(control) }}">{{ control.Label }}</label>
+						<input
+							data-part="control-input"
+							class="{{ .PartClass("control-input", "input h-8 w-44 max-sm:w-full py-0 text-sm") }}"
+							type="search"
+							id="{{ .ControlID(control) }}"
+							name="{{ control.Key }}"
+							value="{{ .ControlFrom(control) }}"
+							placeholder="{{ control.Placeholder }}"
+							autocomplete="off"
+							enterkeyhint="search"
+							@attributes(.PartAttrs("control-input"))
+						>
+					@endif
+				</div>
+			@endforeach
+
+			@if(.Active() && .Narrowable())
 				<a
 					data-part="reset"
 					class="{{ .PartClass("reset", "inline-flex group/button shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none h-8 gap-1.5 px-2.5 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:hover:bg-muted/50") }}"
@@ -1388,7 +1596,7 @@ func (p DataTableProps) PartNames() []string {
 					@attributes(.PartAttrs("reset"))
 				>{{ .lines().Reset }}{!! icons.X(icons.Props{}) !!}</a>
 			@endif
-			@if(.Searchable || .Faceted())
+			@if(.Narrowable())
 				<noscript><button type="submit" class="{{ "inline-flex group/button shrink-0 items-center justify-center rounded-lg border border-border bg-background text-sm font-medium h-7 px-2.5" }}">{{ .lines().Apply }}</button></noscript>
 			@endif
 		</form>
