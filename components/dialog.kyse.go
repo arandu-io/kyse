@@ -121,7 +121,9 @@ func (p DialogProps) Surface() string {
 
 // DialogField is a hidden field of the form a dialog confirms with.
 type DialogField struct {
-	Name  string
+	// Name is the name the field is posted under.
+	Name string
+	// Value is what the field posts: the key of the row, the return address.
 	Value string
 }
 
