@@ -56,9 +56,9 @@ A cell is the same element it was and its text is only its value: the name of th
 column is the cell's `data-label`, which the card draws in front of it.
 
 **The footer of a list the browser narrows** (`Complete: true`) says one row in
-the singular only with a `hesape` that carries `rowsOne` in the table behaviour.
-With an older one the footer is right on the first paint and says the plural
-("1 rows.") after a search leaves exactly one row.
+the singular only with `hesape` v0.93.0 or later, which carries `rowsOne` in the
+table behaviour. With an older one the footer is right on the first paint and
+says the plural ("1 rows.") after a search leaves exactly one row.
 
 ---
 
