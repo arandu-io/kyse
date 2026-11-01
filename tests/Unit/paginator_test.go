@@ -147,7 +147,7 @@ func windowedList(paginator components.Paginator) components.DataTableProps {
 func TestADataTableDrawsTheLengthAwarePage(t *testing.T) {
 	page := pagination.NewLengthAwarePage(20, 137, 20, 3, pagination.Options{Path: "/invoices", Query: listQuery})
 	given := string(components.DataTable(windowedList(page)))
-	for _, want := range []string{"Page 3 of 7", "137 row(s)."} {
+	for _, want := range []string{"Page 3 of 7", "137 rows."} {
 		if !strings.Contains(given, want) {
 			t.Errorf("missing %q:\n%s", want, given)
 		}

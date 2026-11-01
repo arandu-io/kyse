@@ -128,6 +128,29 @@ func say(page Page, key, english string) string {
 	return translator.Get(locale, key, nil)
 }
 
+// sayFirst is the first of keys the page's catalogue carries, and english when
+// it carries none of them. It is for a sentence that was split into more than
+// one key while the old key keeps working: the specific key is listed first and
+// the one it replaced after it.
+func sayFirst(page Page, english string, keys ...string) string {
+	speaker, ok := page.(TranslatorPage)
+	if !ok {
+		return english
+	}
+	translator := speaker.Translator()
+	if translator == nil {
+		return english
+	}
+	locale := speaker.Locale()
+	for _, key := range keys {
+		key = "kyse." + key
+		if translator.Has(locale, key) {
+			return translator.Get(locale, key, nil)
+		}
+	}
+	return english
+}
+
 // tokenFor is the token a form posts: the one the caller wrote, or else the
 // one its page carries.
 func tokenFor(page Page, given string) string {

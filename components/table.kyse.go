@@ -165,6 +165,18 @@ type TableColumn struct {
 	// A column of numbers is "end": the digits then line up on the units, which
 	// is what makes two amounts comparable by looking at them.
 	Align string
+	// Primary makes the column the title of a row drawn as a card on a narrow
+	// screen. A [DataTable] with none marked takes its first column that is
+	// neither CardHidden nor switched off; the first one marked wins when several
+	// are. It is the name Ayra's DataColumn.Primary has. A plain [Table] never
+	// draws cards and ignores it.
+	Primary bool
+	// CardHidden leaves the column out of the card, for a value that only makes
+	// sense under a heading. The column is still a column of the table above the
+	// breakpoint, and its header still orders the list. Ayra's
+	// DataColumn.CardHidden. A column that is Primary is never left out: the card
+	// would have no title.
+	CardHidden bool
 }
 
 // AlignClass is the alignment this column draws with.

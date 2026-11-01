@@ -449,6 +449,29 @@ func serve(t *testing.T, needStyles bool) *app {
 		}
 		fmt.Fprint(w, layout("Controlled invoices", body))
 	})
+	mux.HandleFunc("GET /cards", func(w http.ResponseWriter, r *http.Request) {
+		a.record(r)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-store")
+		total, err := strconv.Atoi(r.URL.Query().Get("total"))
+		if err != nil {
+			total = 60
+		}
+		fmt.Fprint(w, layout("Cards", cardsTable(total)))
+	})
+	mux.HandleFunc("GET /wide", func(w http.ResponseWriter, r *http.Request) {
+		a.record(r)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Header().Set("Vary", "HX-Request, HX-History-Restore-Request")
+		w.Header().Set("Cache-Control", "no-store")
+		page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+		body := wideTable(max(1, page))
+		if fragment(r) {
+			fmt.Fprint(w, body)
+			return
+		}
+		fmt.Fprint(w, layout("Wide", body))
+	})
 	mux.HandleFunc("GET /other", func(w http.ResponseWriter, r *http.Request) {
 		a.record(r)
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")

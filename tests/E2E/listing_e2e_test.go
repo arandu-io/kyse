@@ -390,7 +390,7 @@ func TestTheListingFlowFromTheDatabaseToTheClick(t *testing.T) {
 
 	page.Visit("/listing")
 	expect("/listing")
-	page.ExpectText("60 row(s).")
+	page.ExpectText("60 rows.")
 	page.ExpectText("Page 1 of 6")
 
 	// A facet ticked and unticked: the counts are the query's and the address
@@ -402,7 +402,7 @@ func TestTheListingFlowFromTheDatabaseToTheClick(t *testing.T) {
 	}
 	page.Find(facetBox("paid")).Check()
 	expect("/listing?status=paid")
-	page.ExpectText("24 row(s).")
+	page.ExpectText("24 rows.")
 	page.Find(facetBox("open")).Check()
 	expect("/listing?status=paid&status=open")
 	page.Find(facetBox("paid")).Uncheck()

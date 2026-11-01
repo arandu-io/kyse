@@ -107,7 +107,9 @@
 //	kyse.data_table.filter        Filter {label}...
 //	kyse.data_table.search        Search {label}
 //	kyse.data_table.no_result     No results.
-//	kyse.data_table.rows          {total} row(s).
+//	kyse.data_table.rows_one      {total} row.
+//	kyse.data_table.rows_many     {total} rows.
+//	kyse.data_table.rows          one sentence for both counts, read when the key of the count is absent
 //	kyse.data_table.selected_count {n} row(s) selected.
 //	kyse.data_table.rows_per_page Rows per page
 //	kyse.data_table.page_of       Page {n} of {total}

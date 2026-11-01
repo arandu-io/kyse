@@ -116,7 +116,7 @@ func TestAResultFillsTheStateThePageTheCountsAndTheSizes(t *testing.T) {
 	}
 	html := strings.Join(strings.Fields(strings.ReplaceAll(string(components.DataTable(props)), "&amp;", "&")), " ")
 	for _, want := range []string{
-		"Page 2 of 2", "31 row(s).",
+		"Page 2 of 2", "31 rows.",
 		`name="s" value="paid"`, `name="s" value="open"`, `name="s" value="void"`,
 		`>24</span>`, `>7</span>`,
 		`data-column="total"`, `hidden`,

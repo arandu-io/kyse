@@ -67,6 +67,13 @@ func askedKeys(t *testing.T) []string {
 			asked[match[1]] = true
 		}
 	}
+	// A sentence split in two keeps the older key beside the new ones, and asks
+	// for them in one call: sayFirst(page, english, "specific", "older").
+	for _, call := range regexp.MustCompile(`sayFirst\([^)]*\)`).FindAllString(allSources(t, sources), -1) {
+		for _, match := range regexp.MustCompile(`"([a-z_.]+)"`).FindAllStringSubmatch(call, -1) {
+			asked[match[1]] = true
+		}
+	}
 	// SortName asks with a key chosen by the order, not a literal.
 	for _, key := range []string{"table.ascending", "table.descending", "table.unsorted"} {
 		asked[key] = true
@@ -106,6 +113,8 @@ func marked(t *testing.T) translation.Lines {
 		"data_table.search":         " {label}",
 		"data_table.filter":         " {label}",
 		"data_table.rows":           " {total}",
+		"data_table.rows_one":       " {total}",
+		"data_table.rows_many":      " {total}",
 		"data_table.selected_count": " {n}",
 		"data_table.facet_selected": " {n}",
 		"one_time_code.square":      " {label}/{n}/{total}",
@@ -151,6 +160,12 @@ func everyLabel(page components.Page) string {
 			ID: "plain", Label: "Plain", URL: "/plain", Columns: columns, Paginator: paginator, PageData: page,
 			Rows: []components.TableRow{{Cells: []components.TableCell{{Text: "1"}, {Text: "open"}}, Actions: []components.MenuItem{{Label: "Open", URL: "/x"}}}},
 		})),
+		// A list of one row, which says the singular.
+		string(components.DataTable(components.DataTableProps{
+			ID: "one", Label: "One", URL: "/one", Columns: columns, PageData: page,
+			Paginator: pagination.NewLengthAwarePage(1, 1, 20, 1, pagination.Options{Path: "/one"}),
+			Rows:      []components.TableRow{{Cells: []components.TableCell{{Text: "1"}, {Text: "open"}}}},
+		})),
 		// A selection over a page that knows no total.
 		string(components.DataTable(components.DataTableProps{
 			ID: "steps", Label: "Steps", URL: "/steps", Columns: columns, Rows: rows, SelectName: "ids", PageData: page,
@@ -167,6 +182,12 @@ func everyLabel(page components.Page) string {
 func TestEveryDocumentedKeyIsDrawnFromTheCatalogue(t *testing.T) {
 	html := everyLabel(ptPage(marked(t)))
 	for _, key := range documentedKeys(t) {
+		// The older sentence for the footer is drawn only where the key of the
+		// count is absent, which the catalogue here carries, so it has its own
+		// test: TestTheOlderFooterKeyStillSpeaksForBothCounts.
+		if key == "data_table.rows" {
+			continue
+		}
 		if !strings.Contains(html, "PT["+key+"]") {
 			t.Errorf("kyse.%s was not drawn from the catalogue", key)
 		}
@@ -253,4 +274,19 @@ func TestTheCatalogueIsTheApplicationsKyseFile(t *testing.T) {
 	if !strings.Contains(es, ">Siguiente</a>") || !strings.Contains(es, `aria-label="Page 4"`) {
 		t.Errorf("the request's locale did not choose the file, or a missing line was not English:\n%s", es)
 	}
+}
+
+// allSources is the text of every source file named, joined.
+func allSources(t *testing.T, paths []string) string {
+	t.Helper()
+	var all strings.Builder
+	for _, path := range paths {
+		body, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		all.Write(body)
+		all.WriteByte('\n')
+	}
+	return all.String()
 }

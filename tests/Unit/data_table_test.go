@@ -457,7 +457,7 @@ func TestTheFooterCountsTheSelectionAgainstTheWholeList(t *testing.T) {
 	}
 	plain := listing()
 	plain.SelectName, plain.BulkActions, plain.BulkAction = "", nil, ""
-	if html := string(components.DataTable(plain)); !strings.Contains(html, "137 row(s).") {
+	if html := string(components.DataTable(plain)); !strings.Contains(html, "137 rows.") {
 		t.Errorf("an unselectable list does not count its rows:\n%s", html)
 	}
 }

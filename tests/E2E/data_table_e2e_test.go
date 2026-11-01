@@ -607,17 +607,22 @@ func TestPhotographs(t *testing.T) {
 
 // A swap that replaces the region keeps what the reader had under their hands:
 // how far the table was scrolled sideways, and a menu that was open.
+//
+// It is measured on a table wider than the 652 pixels its region has in a
+// 700 pixel window: the region is what the card layout measures, so a window a
+// little over 600 is still cards, and under 600 nothing scrolls sideways, which
+// TestARowIsACardOnAPhone holds.
 func TestASwapKeepsTheSidewaysScroll(t *testing.T) {
 	app := serve(t, true)
-	page := open(t, app, 390)
-	page.Visit("/invoices")
-	scroller := `document.querySelector('#invoices [data-part=table]').parentElement`
+	page := open(t, app, 700)
+	page.Visit("/wide")
+	scroller := `document.querySelector('#wide [data-part=table]').parentElement`
 	page.Evaluate(`(function () { var s = `+scroller+`; s.scrollLeft = 80; return s.scrollLeft; })()`, nil)
 	if got := eval(t, page, scroller+`.scrollLeft`); got != "80" {
-		t.Fatalf("the table does not scroll sideways at 390 pixels: %s", got)
+		t.Fatalf("the table does not scroll sideways at 700 pixels: %s", got)
 	}
 	page.ClickRole("link", "Go to next page")
-	page.ExpectURL("/invoices?page=2")
+	page.ExpectURL("/wide?page=2")
 	if got := eval(t, page, scroller+`.scrollLeft`); got != "80" {
 		t.Fatalf("the scroll is %s after the swap, want the 80 it had", got)
 	}

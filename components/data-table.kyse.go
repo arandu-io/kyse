@@ -76,6 +76,24 @@ import (
 // drawn in it, the text of an action, anything with data-search="false" -- is
 // left out of the search and of the order.
 //
+// # On a narrow screen
+//
+// Where the region is narrower than 600px -- the same breakpoint Ayra's DataTable
+// draws cards under -- each row is a card and nothing scrolls sideways. The
+// column marked Primary on [TableColumn] is the card's title and with none marked
+// it is the first column the card shows; the others are a line each, the name of
+// the column and then the value; a column marked CardHidden is left out; a row's
+// menu is along the foot of its card. The head is left as a bar of the controls
+// that order the list, so ordering is still there, and the search, the facets and
+// the pager are as they were.
+//
+// It is the same markup as the table, drawn under a container query on the
+// region, so the width that counts is the one the table is given and not the
+// window's, and there is no script, no inline style and nothing to switch on:
+// a table at 600px or more is the table it was. The name in front of a value is
+// the cell's data-label, drawn by CSS, so the text of a cell is still only its
+// value and a screen reader reads the name with it.
+//
 // It publishes root, toolbar, query, search, reset, facet, facet-chosen, facet-search, filter,
 // control, control-input, columns, toggle, bulk, wrapper, table, caption, head, header-cell, sort,
 // header-menu, row, cell, select-all, select, row-menu, footer, count, sizes,
@@ -335,8 +353,18 @@ type DataTableLines struct {
 	// "No results.". It is not the same sentence as an empty list: the list has
 	// rows, and none of them is the answer.
 	NoResult string
-	// Rows is the footer of a list with no selection: "{total} row(s).".
+	// Rows is the footer of a list with no selection, in one form for every
+	// count: "{total} row(s).". It is what a project wrote before the footer
+	// had a singular and a plural, and it still wins over the catalogue: a
+	// sentence given here is the sentence drawn for a total of one and for every
+	// other, unless RowsOne or RowsMany says otherwise for its own count.
 	Rows string
+	// RowsOne is the footer when the list has exactly one row: "{total} row.".
+	// RowsMany is the footer for every other total, zero included: "{total}
+	// rows.". A language with no singular for the count -- or one that wants the
+	// two to differ in more than a suffix -- writes the whole sentence in each.
+	RowsOne  string
+	RowsMany string
 	// SelectedCount is the footer of a selectable list whose total is unknown:
 	// "{n} row(s) selected.".
 	SelectedCount string
@@ -402,7 +430,6 @@ func (lines DataTableLines) Filled(page Page) DataTableLines {
 	}{
 		{&lines.Filter, "data_table.filter", "Filter {label}..."},
 		{&lines.NoResult, "data_table.no_result", "No results."},
-		{&lines.Rows, "data_table.rows", "{total} row(s)."},
 		{&lines.SelectedCount, "data_table.selected_count", "{n} row(s) selected."},
 		{&lines.RowsPerPage, "data_table.rows_per_page", "Rows per page"},
 		{&lines.PageOf, "data_table.page_of", "Page {n} of {total}"},
@@ -434,7 +461,55 @@ func (lines DataTableLines) Filled(page Page) DataTableLines {
 			*line.field = say(page, line.key, line.english)
 		}
 	}
+	lines.fillRows(page)
 	return lines
+}
+
+// fillRows settles the three forms of the footer. The order of who wins is the
+// caller's own fields, then the catalogue, then the English:
+//
+//   - RowsOne or RowsMany, written on the props, is the sentence for its count.
+//   - Rows, written on the props, is the sentence for whichever count has none
+//     of its own, so a project that passed it before the split draws exactly what
+//     it drew.
+//   - Then the catalogue: kyse.data_table.rows_one and rows_many, and for a
+//     count with neither, the older kyse.data_table.rows.
+//   - Then "{total} row." and "{total} rows.".
+//
+// Rows is left holding the plural, because that is the form the browser writes
+// into the footer of a list it filters (see Sentences), and a script that
+// predates the singular reads only that.
+func (l *DataTableLines) fillRows(page Page) {
+	one, many := l.RowsOne, l.RowsMany
+	if l.Rows != "" {
+		if one == "" {
+			one = l.Rows
+		}
+		if many == "" {
+			many = l.Rows
+		}
+	}
+	if one == "" {
+		one = sayFirst(page, "{total} row.", "data_table.rows_one", "data_table.rows")
+	}
+	if many == "" {
+		many = sayFirst(page, "{total} rows.", "data_table.rows_many", "data_table.rows")
+	}
+	l.RowsOne, l.RowsMany, l.Rows = one, many, many
+}
+
+// RowsFor is the footer for a list of total rows: RowsOne for exactly one,
+// RowsMany for every other count. It reads the lines as they are, so a caller
+// that wants the catalogue's words calls it on [DataTableLines.Filled].
+func (l DataTableLines) RowsFor(total int) string {
+	sentence := l.RowsMany
+	if total == 1 {
+		sentence = l.RowsOne
+	}
+	if sentence == "" {
+		sentence = l.Rows
+	}
+	return strings.ReplaceAll(sentence, "{total}", strconv.Itoa(total))
 }
 
 // Sentences are the sentences the browser rewrites or reads, by name, for the
@@ -444,6 +519,7 @@ func (l DataTableLines) Sentences() map[string]any {
 		"pageOf":        l.PageOf,
 		"selectedCount": l.SelectedCount,
 		"rows":          l.Rows,
+		"rowsOne":       l.RowsOne,
 		"ascending":     l.Ascending,
 		"descending":    l.Descending,
 		"unsorted":      l.Unsorted,
@@ -985,7 +1061,7 @@ func (p DataTableProps) FooterText() string {
 		if !p.Known() {
 			return ""
 		}
-		return strings.ReplaceAll(p.lines().Rows, "{total}", total)
+		return p.lines().RowsFor(p.Total())
 	}
 	if !p.Known() {
 		return strings.ReplaceAll(p.lines().SelectedCount, "{n}", strconv.Itoa(p.Ticked()))
@@ -1058,6 +1134,126 @@ func (p DataTableProps) RowAttrs(row TableRow) map[string]string {
 		out[key] = value
 	}
 	return out
+}
+
+// The classes that draw the table as a list of cards. Every one of them is the
+// same utility written under a container query on the region -- "@max-[600px]/dt:"
+// is "when the region is narrower than 600px" -- so above the breakpoint none of
+// them applies and the table is the table it was. They are written out whole
+// because Tailwind compiles the class names it finds as text: a class put
+// together at run time from a prefix and a name would never reach the stylesheet.
+//
+// The region is the container, not the window, because the width that matters is
+// the one the table is given: a table in the content column of a page with its
+// sidebar open needs cards on a window much wider than a phone.
+const (
+	// cardRegion makes the region the container the queries ask.
+	cardRegion = "@container/dt"
+	// cardWrapper, cardScroller and cardTable stop being a bordered, scrolling
+	// table: the cards carry their own border and nothing scrolls sideways.
+	cardWrapper  = "@max-[600px]/dt:overflow-visible @max-[600px]/dt:rounded-none @max-[600px]/dt:border-0"
+	cardScroller = "@max-[600px]/dt:overflow-visible"
+	cardTable    = "@max-[600px]/dt:block"
+	cardCaption  = "@max-[600px]/dt:block"
+	// cardHead is the head turned into a bar of the controls that order the list,
+	// and cardHeadRow the row it holds them in.
+	cardHead    = "@max-[600px]/dt:block"
+	cardHeadRow = "@max-[600px]/dt:flex @max-[600px]/dt:flex-wrap @max-[600px]/dt:items-center @max-[600px]/dt:gap-2 @max-[600px]/dt:border-b-0 @max-[600px]/dt:pb-3"
+	// cardHeadCell keeps a header that orders the list, cardHeadSelect the
+	// checkbox that ticks every row, and cardHeadOff drops a header that only
+	// names a column, which each card names for itself.
+	cardHeadCell   = "@max-[600px]/dt:block @max-[600px]/dt:h-auto @max-[600px]/dt:p-0"
+	cardHeadSelect = "@max-[600px]/dt:block @max-[600px]/dt:h-auto @max-[600px]/dt:w-auto @max-[600px]/dt:p-0 @max-[600px]/dt:pe-1"
+	cardHeadOff    = "@max-[600px]/dt:hidden"
+	// cardBody stacks the cards. The rule that takes the border off the last row
+	// of a table is put back, because the last card has four sides.
+	cardBody = "@max-[600px]/dt:flex @max-[600px]/dt:flex-col @max-[600px]/dt:gap-3 @max-[600px]/dt:[&_tr:last-child]:border"
+	// cardRow is one card.
+	cardRow = "@max-[600px]/dt:relative @max-[600px]/dt:flex @max-[600px]/dt:flex-col @max-[600px]/dt:gap-1.5 @max-[600px]/dt:rounded-lg @max-[600px]/dt:border @max-[600px]/dt:bg-card @max-[600px]/dt:p-3"
+	// cardCell is a line of a card: the column's name in front, drawn from the
+	// cell's own data-label so the text of the cell is still only its value, and
+	// the value after it.
+	cardCell = "@max-[600px]/dt:flex @max-[600px]/dt:items-baseline @max-[600px]/dt:gap-x-3 @max-[600px]/dt:p-0 @max-[600px]/dt:text-start @max-[600px]/dt:whitespace-normal @max-[600px]/dt:before:w-2/5 @max-[600px]/dt:before:shrink-0 @max-[600px]/dt:before:text-xs @max-[600px]/dt:before:text-muted-foreground @max-[600px]/dt:before:content-[attr(data-label)]"
+	// cardNoLabel is a cell with no column name to put in front of it.
+	cardNoLabel = "@max-[600px]/dt:before:hidden"
+	// cardTitle is the cell of the primary column, first and larger, with no name
+	// in front; cardTitleSelect leaves room for the checkbox.
+	cardTitle       = "@max-[600px]/dt:order-first @max-[600px]/dt:text-base @max-[600px]/dt:font-medium @max-[600px]/dt:before:hidden"
+	cardTitleSelect = "@max-[600px]/dt:ps-8"
+	// cardLeft is a column left out of the card.
+	cardLeft = "@max-[600px]/dt:hidden"
+	// cardSelect is the row's checkbox, at the top corner of its card.
+	cardSelect = "@max-[600px]/dt:absolute @max-[600px]/dt:start-3 @max-[600px]/dt:top-3 @max-[600px]/dt:p-0"
+	// cardActions is the row's menu, along the foot of the card and in sight.
+	cardActions = "@max-[600px]/dt:order-last @max-[600px]/dt:flex @max-[600px]/dt:justify-end @max-[600px]/dt:border-t @max-[600px]/dt:p-0 @max-[600px]/dt:pt-2"
+	// cardFull is a row that spans the table, the one that says nothing matched.
+	cardFull = "@max-[600px]/dt:block"
+)
+
+// PrimaryColumn is the position of the column that titles a card: the first one
+// marked Primary, and with none marked the first column that is neither left out
+// of the card nor switched off. It is -1 for a table with no column that can.
+func (p DataTableProps) PrimaryColumn() int {
+	for i, column := range p.Columns {
+		if column.Primary {
+			return i
+		}
+	}
+	for i, column := range p.Columns {
+		if !column.CardHidden && !p.Off(column) {
+			return i
+		}
+	}
+	return -1
+}
+
+// CardHiddenAt is whether column i is left out of a card. The title never is.
+func (p DataTableProps) CardHiddenAt(i int) bool {
+	return i < len(p.Columns) && p.Columns[i].CardHidden && i != p.PrimaryColumn()
+}
+
+// LabelAt is the name of column i, which a card writes in front of its value.
+// It is empty where a row carries more cells than the table has columns.
+func (p DataTableProps) LabelAt(i int) string {
+	if i < len(p.Columns) {
+		return p.Columns[i].Label
+	}
+	return ""
+}
+
+// CardCell is the classes cell i draws with once the region is narrower than the
+// breakpoint, which are none above it.
+func (p DataTableProps) CardCell(i int) string {
+	switch {
+	case p.CardHiddenAt(i):
+		return cardLeft
+	case i == p.PrimaryColumn():
+		if p.Selectable() {
+			return joinClasses(cardCell, cardTitle, cardTitleSelect)
+		}
+		return joinClasses(cardCell, cardTitle)
+	case p.LabelAt(i) == "":
+		return joinClasses(cardCell, cardNoLabel)
+	}
+	return cardCell
+}
+
+// CardHead is the classes the header of a column draws with in a card layout:
+// kept when it orders the list, dropped when it only names the column.
+func (p DataTableProps) CardHead(column TableColumn) string {
+	if p.Sortable(column) {
+		return cardHeadCell
+	}
+	return cardHeadOff
+}
+
+// CardActions is the classes a row's last cell draws with in a card layout: the
+// foot of the card when the row has a menu, and nothing at all when it has none.
+func (p DataTableProps) CardActions(row TableRow) string {
+	if len(row.Actions) == 0 {
+		return cardLeft
+	}
+	return cardActions
 }
 
 // dataTableLine is one line of the body as it is drawn: the row, whether it
@@ -1309,7 +1505,7 @@ func (p DataTableProps) PartNames() []string {
      are all rebuilt from the same state on the way back. --}}
 <div
 	data-part="root"
-	class="{{ .RootClass("group/dt w-full") }}"
+	class="{{ .RootClass("group/dt w-full", cardRegion) }}"
 	id="{{ .ID }}"
 	role="region"
 	@if(.Complete)
@@ -1690,13 +1886,13 @@ func (p DataTableProps) PartNames() []string {
 
 	<div
 		data-part="wrapper"
-		class="{{ .PartClass("wrapper", "overflow-hidden rounded-md border transition-opacity group-[.htmx-request]/dt:opacity-60") }}"
+		class="{{ .PartClass("wrapper", "overflow-hidden rounded-md border transition-opacity group-[.htmx-request]/dt:opacity-60", cardWrapper) }}"
 		@attributes(.PartAttrs("wrapper"))
 	>
-		<div class="relative w-full overflow-x-auto">
+		<div class="{{ "relative w-full overflow-x-auto " + cardScroller }}">
 			<table
 				data-part="table"
-				class="{{ .PartClass("table", "w-full caption-bottom text-sm") }}"
+				class="{{ .PartClass("table", "w-full caption-bottom text-sm", cardTable) }}"
 				@if(.Role() != "")
 					role="{{ .Role() }}"
 				@endif
@@ -1705,21 +1901,21 @@ func (p DataTableProps) PartNames() []string {
 				@if(.Caption != "")
 					<caption
 						data-part="caption"
-						class="{{ .PartClass("caption", "mt-4 text-sm text-muted-foreground") }}"
+						class="{{ .PartClass("caption", "mt-4 text-sm text-muted-foreground", cardCaption) }}"
 						@attributes(.PartAttrs("caption"))
 					>{{ .Caption }}</caption>
 				@endif
 				<thead
 					data-part="head"
-					class="{{ .PartClass("head", "[&_tr]:border-b") }}"
+					class="{{ .PartClass("head", "[&_tr]:border-b", cardHead) }}"
 					@attributes(.PartAttrs("head"))
 				>
-					<tr class="{{ "border-b transition-colors hover:bg-muted/50 has-[details[open]]:bg-muted/50 data-[state=selected]:bg-muted" }}">
+					<tr class="{{ "border-b transition-colors hover:bg-muted/50 has-[details[open]]:bg-muted/50 data-[state=selected]:bg-muted " + cardHeadRow }}">
 						@if(.Selectable())
 							<th
 								data-part="header-cell"
 								scope="col"
-								class="{{ .PartClass("header-cell", "h-10 px-2 text-start align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0 w-0") }}"
+								class="{{ .PartClass("header-cell", "h-10 px-2 text-start align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0 w-0", cardHeadSelect) }}"
 								data-select
 								@attributes(.PartAttrs("header-cell"))
 							>
@@ -1737,7 +1933,7 @@ func (p DataTableProps) PartNames() []string {
 							<th
 								data-part="header-cell"
 								scope="col"
-								class="{{ .PartClass("header-cell", "h-10 px-2 align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0", column.AlignClass()) }}"
+								class="{{ .PartClass("header-cell", "h-10 px-2 align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0", column.AlignClass(), .CardHead(column)) }}"
 								@if(column.Key != "")
 									data-column="{{ column.Key }}"
 								@endif
@@ -1901,17 +2097,17 @@ func (p DataTableProps) PartNames() []string {
 						@endforeach
 						@if(.Acting())
 							<th
-								class="{{ "h-10 px-2 text-start align-middle font-medium whitespace-nowrap text-foreground" }}"
+								class="{{ "h-10 px-2 text-start align-middle font-medium whitespace-nowrap text-foreground " + cardHeadOff }}"
 								scope="col"
 							><span class="sr-only">{{ .lines().Actions }}</span></th>
 						@endif
 					</tr>
 				</thead>
-				<tbody class="[&_tr:last-child]:border-0">
+				<tbody class="{{ "[&_tr:last-child]:border-0 " + cardBody }}">
 					@foreach(.Body() as row)
 						<tr
 							data-part="row"
-							class="{{ .PartClass("row", "border-b transition-colors hover:bg-muted/50 has-[details[open]]:bg-muted/50 data-[state=selected]:bg-muted") }}"
+							class="{{ .PartClass("row", "border-b transition-colors hover:bg-muted/50 has-[details[open]]:bg-muted/50 data-[state=selected]:bg-muted", cardRow) }}"
 							@if(row.Selected)
 								data-state="selected"
 							@endif
@@ -1936,7 +2132,7 @@ func (p DataTableProps) PartNames() []string {
 							@if(.Selectable())
 								<td
 									data-part="cell"
-									class="{{ .PartClass("cell", "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0") }}"
+									class="{{ .PartClass("cell", "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0", cardSelect) }}"
 									data-select
 									@attributes(.PartAttrs("cell"))
 								>
@@ -1960,9 +2156,12 @@ func (p DataTableProps) PartNames() []string {
 							@for(i := 0; i < len(row.Cells); i++)
 								<td
 									data-part="cell"
-									class="{{ .PartClass("cell", "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0", .AlignClass(i)) }}"
+									class="{{ .PartClass("cell", "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pe-0 [&:has([data-select])]:pe-0", .AlignClass(i), .CardCell(i)) }}"
 									@if(.ColumnKey(i) != "")
 										data-column="{{ .ColumnKey(i) }}"
+									@endif
+									@if(.LabelAt(i) != "")
+										data-label="{{ .LabelAt(i) }}"
 									@endif
 									@if(.OffAt(i))
 										hidden
@@ -1981,7 +2180,7 @@ func (p DataTableProps) PartNames() []string {
 								</td>
 							@endfor
 							@if(.Acting())
-								<td class="{{ "p-2 align-middle whitespace-nowrap" }}">
+								<td class="{{ "p-2 align-middle whitespace-nowrap " + .CardActions(row.TableRow) }}">
 									@if(len(row.Actions) > 0)
 										<details
 											id="{{ row.MenuID }}"
@@ -2062,8 +2261,8 @@ func (p DataTableProps) PartNames() []string {
 						</tr>
 					@endforeach
 					@if(len(.Rows) == 0)
-						<tr class="{{ "border-b transition-colors hover:bg-muted/50" }}">
-							<td colspan="{{ .Span() }}" class="h-24 p-2 text-center">{{ .lines().NoResult }}</td>
+						<tr class="{{ "border-b transition-colors hover:bg-muted/50 " + cardFull }}">
+							<td colspan="{{ .Span() }}" class="{{ "h-24 p-2 text-center " + cardFull }}">{{ .lines().NoResult }}</td>
 						</tr>
 					@endif
 					@if(.Complete && len(.Rows) > 0)
@@ -2071,8 +2270,8 @@ func (p DataTableProps) PartNames() []string {
 						     facet leaves no row: a script that builds a styled row
 						     would carry classes the stylesheet was never compiled
 						     with. --}}
-						<tr data-empty-row hidden class="{{ "border-b transition-colors hover:bg-muted/50" }}">
-							<td colspan="{{ .Span() }}" class="h-24 p-2 text-center">{{ .lines().NoResult }}</td>
+						<tr data-empty-row hidden class="{{ "border-b transition-colors hover:bg-muted/50 " + cardFull }}">
+							<td colspan="{{ .Span() }}" class="{{ "h-24 p-2 text-center " + cardFull }}">{{ .lines().NoResult }}</td>
 						</tr>
 					@endif
 				</tbody>
