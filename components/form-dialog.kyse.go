@@ -99,6 +99,17 @@ type FormDialogProps struct {
 	// is what makes writing it unescaped safe.
 	Body []template.HTML
 
+	// Forms is for a dialog whose Body holds forms of its own, each posting to
+	// its own address: the panels of a Tabs, one per kind of change, with a
+	// submit in each. The dialog is then a panel and not a form -- a form
+	// inside a form is not HTML, the browser drops the inner one -- so it draws
+	// no Action, no hidden fields and no footer; the title, the description,
+	// the scrolling body and the close button stay, and so does the rule that a
+	// page sent back opens the dialog it was sent from. A panel that has to say
+	// which dialog it belongs to writes FormDialogField with this ID in a
+	// hidden field of its own.
+	Forms bool
+
 	// Action and Method are where the form posts and how. PUT, PATCH and
 	// DELETE are carried by a POST with a hidden _method field, because
 	// browsers cannot submit those methods directly. Use the action the full
@@ -327,6 +338,14 @@ func (p FormDialogProps) PartNames() []string {
 	     the stylesheet places the header, the section and the footer as
 	     children of the panel, and a form wrapped around them would take them
 	     out of its reach. --}}
+	@if(.Forms)
+	<div
+		data-part="content"
+		id="{{ .FormID() }}"
+		class="{{ .PartClass("content", .WidthClass(), .SheetClass()) }}"
+		@attributes(.PartAttrs("content"))
+	>
+	@else
 	<form
 		data-part="content"
 		id="{{ .FormID() }}"
@@ -348,6 +367,7 @@ func (p FormDialogProps) PartNames() []string {
 		@if(.SendsToken())
 			<input type="hidden" name="_token" value="{{ .FormToken() }}">
 		@endif
+	@endif
 
 		<header
 			data-part="header"
@@ -386,6 +406,7 @@ func (p FormDialogProps) PartNames() []string {
 			@endforeach
 		</section>
 
+		@if(!.Forms)
 		{{-- Submit is first in the document and drawn last: the first submit
 		     button a form owns is the one Enter presses, and that has to be the
 		     one that sends it. Cancel is owned by the dismiss form, so it is
@@ -416,6 +437,7 @@ func (p FormDialogProps) PartNames() []string {
 				@attributes(.PartAttrs("cancel"))
 			>{{ .Cancel() }}</button>
 		</footer>
+		@endif
 
 		@if(!.Alert)
 			<button
@@ -429,6 +451,10 @@ func (p FormDialogProps) PartNames() []string {
 				@attributes(.PartAttrs("close"))
 			>{!! icons.X(icons.Props{}) !!}</button>
 		@endif
+	@if(.Forms)
+	</div>
+	@else
 	</form>
+	@endif
 	<form method="dialog" id="{{ .DismissID() }}" hidden></form>
 </dialog>
