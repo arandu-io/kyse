@@ -1,5 +1,9 @@
 # Release Notes
 
+## [v0.49.0](https://github.com/arandu-io/kyse/compare/v0.48.1...v0.49.0) - 2026-11-02
+
+**Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.48.1...v0.49.0
+
 ## v0.49.0 - 2026-11-02
 
 - `DataTable` cards: a cell with nothing in it is left out of the card, so the name of its column is no longer drawn in front of nothing. A row with no action used to show "Actions" alone in its card; it now shows neither the label nor a rule. The title of the card is drawn even when it is empty. `TableCell.Empty()` and `DataTableProps.CardCellFor(i, cell)` say so; `CardCell(i)` is unchanged. Above 600px nothing changes.
