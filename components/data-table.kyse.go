@@ -1844,7 +1844,7 @@ func (p DataTableProps) PartNames() []string {
 							<a
 								data-part="toggle"
 								data-column-toggle="{{ column.Key }}"
-								class="{{ .PartClass("toggle", "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pe-8 ps-1.5 text-sm capitalize outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground") }}"
+								class="{{ .PartClass("toggle", "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pe-8 ps-1.5 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground") }}"
 								role="menuitemcheckbox"
 								aria-checked="{{ !.Off(column) }}"
 								href="{{ .ColumnHref(column) }}"

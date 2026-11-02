@@ -360,7 +360,12 @@ func TestHiddenColumnsComeFromTheStateAndOnlyHideableOnesAreListed(t *testing.T)
 	if strings.Contains(menu, ">\n\t\t\t\t\t\t\t\tId\n") || strings.Count(menu, `data-column-toggle=`) != 2 {
 		t.Errorf("the menu must list the two hideable columns:\n%s", menu)
 	}
-	if !strings.Contains(menu, "capitalize") || !strings.Contains(menu, `aria-checked="false"`) || !strings.Contains(menu, `aria-checked="true"`) {
+	// The label is written as the caller wrote it: a CSS capitalize would turn
+	// "Data de renovação" into "Data De Renovação".
+	if strings.Contains(menu, "capitalize") {
+		t.Errorf("the column menu must not capitalize the caller's labels:\n%s", menu)
+	}
+	if !strings.Contains(menu, `aria-checked="false"`) || !strings.Contains(menu, `aria-checked="true"`) {
 		t.Errorf("the menu does not show which columns are on:\n%s", menu)
 	}
 	// A list without a state still starts a column off by its own Hidden.
