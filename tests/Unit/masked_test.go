@@ -243,3 +243,29 @@ func TestTheFrameworkNamesNoNationalPattern(t *testing.T) {
 		}
 	}
 }
+
+// A phone shows the number pad for a field that takes digits, and the full
+// keyboard for one that takes letters: the visible box is a text input, which
+// asks for the full keyboard unless it is told otherwise.
+func TestADigitsOnlyMaskAsksForTheNumberPadAndALetterMaskDoesNot(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name     string
+		props    components.MaskedProps
+		wantMode bool
+	}{
+		{"a postcode", components.MaskedProps{Name: "postcode", Pattern: "00000-000"}, true},
+		{"a phone that grows from one shape to the other", components.MaskedProps{Name: "phone", Patterns: []string{"(00) 0000-0000", "(00) 00000-0000"}}, true},
+		{"a money field", components.MaskedProps{Name: "amount", Pattern: "#.##0,00", Reverse: true}, true},
+		{"an alphanumeric document", components.MaskedProps{Name: "doc", Pattern: "AA.AAA.AAA/AAAA-00"}, false},
+		{"a document that takes either shape", components.MaskedProps{Name: "doc", Patterns: []string{"000.000.000-00", "AA.AAA.AAA/AAAA-00"}}, false},
+		{"no pattern at all", components.MaskedProps{Name: "free"}, false},
+	} {
+		html := string(components.Masked(tc.props))
+		got := strings.Contains(html, `inputmode="numeric"`)
+		if got != tc.wantMode {
+			t.Errorf("%s: inputmode numeric = %v, want %v:\n%s", tc.name, got, tc.wantMode, html)
+		}
+	}
+}

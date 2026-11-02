@@ -174,6 +174,29 @@ func (p MaskedProps) Message() string {
 	return p.Page.FieldError(p.Name)
 }
 
+// InputMode is "numeric" when every pattern takes digits only, and empty
+// otherwise, so a phone shows the number pad for a postcode or a phone number
+// and keeps the full keyboard for a field that takes letters.
+//
+// A pattern takes digits only when its tokens are 0, 9 and #. A letter in it
+// is either a token that takes letters (A, S) or a literal written through, and
+// either way the number pad would be the wrong keyboard, so one letter anywhere
+// in any pattern leaves the attribute off.
+func (p MaskedProps) InputMode() string {
+	patterns := p.Applied()
+	if len(patterns) == 0 {
+		return ""
+	}
+	for _, pattern := range patterns {
+		for _, r := range pattern {
+			if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') {
+				return ""
+			}
+		}
+	}
+	return "numeric"
+}
+
 // RootAttrs are the outermost element's attributes, with the client bridge
 // filled in from the pattern when the caller named no behaviour of their own.
 //
@@ -369,6 +392,9 @@ func maskUnmask(pattern, value string) string {
 		name="{{ .Name }}"
 		value="{{ .Formatted() }}"
 		autocomplete="off"
+		@if(.InputMode() != "")
+			inputmode="{{ .InputMode() }}"
+		@endif
 		@if(.Placeholder != "")
 			placeholder="{{ .Placeholder }}"
 		@endif
