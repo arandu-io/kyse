@@ -2,10 +2,6 @@
 
 ## [v0.49.1](https://github.com/arandu-io/kyse/compare/v0.49.0...v0.49.1) - 2026-11-02
 
-**Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.49.0...v0.49.1
-
-## v0.49.1
-
 - `DataTable` column menu: a column's label is written as the caller wrote it; the menu no longer capitalizes every word ("Data de renovação", not "Data De Renovação").
 - `Progress`: the fill is a block, so its width draws; it used to be an empty track.
 - `Badge`: the "default" variant draws as a pill, and a long label wraps inside the screen instead of widening the page.
@@ -13,6 +9,8 @@
 - `Avatar`: a picture that fails to load no longer draws its alt text and the broken-image icon outside the circle.
 - `StatCard`: the first column header is translated through the catalogue instead of the English "Name".
 - `Masked`: a mask that takes digits only asks for the number pad (`inputmode="numeric"`); a mask with a letter in it (the alphanumeric CNPJ) keeps the full keyboard.
+
+**Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.49.0...v0.49.1
 
 ## [v0.49.0](https://github.com/arandu-io/kyse/compare/v0.48.1...v0.49.0) - 2026-11-02
 
