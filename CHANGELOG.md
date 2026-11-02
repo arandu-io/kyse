@@ -1,5 +1,15 @@
 # Release Notes
 
+## v0.49.1
+
+- `DataTable` column menu: a column's label is written as the caller wrote it; the menu no longer capitalizes every word ("Data de renovação", not "Data De Renovação").
+- `Progress`: the fill is a block, so its width draws; it used to be an empty track.
+- `Badge`: the "default" variant draws as a pill, and a long label wraps inside the screen instead of widening the page.
+- `Alert`: a long e-mail address or URL in the title or the message wraps inside the card.
+- `Avatar`: a picture that fails to load no longer draws its alt text and the broken-image icon outside the circle.
+- `StatCard`: the first column header is translated through the catalogue instead of the English "Name".
+- `Masked`: a mask that takes digits only asks for the number pad (`inputmode="numeric"`); a mask with a letter in it (the alphanumeric CNPJ) keeps the full keyboard.
+
 ## [v0.49.0](https://github.com/arandu-io/kyse/compare/v0.48.1...v0.49.0) - 2026-11-02
 
 - `DataTable` cards: a cell with nothing in it is left out of the card, so the name of its column is no longer drawn in front of nothing. A row with no action used to show "Actions" alone in its card; it now shows neither the label nor a rule. The title of the card is drawn even when it is empty. `TableCell.Empty()` and `DataTableProps.CardCellFor(i, cell)` say so; `CardCell(i)` is unchanged. Above 600px nothing changes.
