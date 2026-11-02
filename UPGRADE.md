@@ -21,6 +21,42 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## v0.50.0
+
+Nothing stops compiling. One thing changes in what is drawn, and it undoes a
+break of v0.48.0.
+
+**A `DataTable` is cards by the width of the screen, not by the width of the block it
+sits in.** v0.48.0 drew cards where the table's own region was narrower than 600px
+(a container query), so a short list inside a card of a dashboard, which is under
+600px on any desktop, became a list of cards with the sort bar for a head. From
+v0.50.0 the rule is a media query on the screen: under 600px wide the rows are
+cards, from 600px up the table is the table it was in v0.47.0, in any block. Ayra's
+`DataTable` asks the width of the window in the same way. Rebuild the stylesheet
+with `aru view:build`: the cards are `max-[600px]:` utilities now, and the region is
+no longer a container (`@container/dt` is gone from the markup).
+
+The rule lives in the component and not in each application: a `DataTable` is
+described once, with typed columns (`Primary`, `CardHidden`, `Actions`), and each
+layer decides how to draw it. Kyse draws a table on a computer and cards on a
+phone's browser, from the width of the screen; Ayra draws cards on a phone and a
+table on a wide window, from the width of the window. Nobody marks a table to get
+this. The two props below are the explicit exception.
+
+Two props give the choice back to the list:
+
+| you want | write |
+| --- | --- |
+| the table on a phone too (a short list beside a video, in a card) | `Mode: components.DataTableModeTable` |
+| the cards on a desktop too | `Mode: components.DataTableModeCards` |
+| the default, cards under 600px | nothing, or `DataTableModeAuto` |
+
+A script that adds a row as it arrives should not write the classes itself. Set
+`RowTemplate: true`, clone `template[data-part="row-template"]` in the list and
+write the cells: the row has the classes of the others in every mode.
+
+---
+
 ## v0.48.0
 
 Nothing stops compiling. Three things change in what is drawn, and the last one

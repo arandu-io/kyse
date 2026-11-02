@@ -293,11 +293,10 @@ func wideTable(page int) string {
 	}))
 }
 
-// The width that counts is the region's, not the window's: the page keeps 24
-// pixels of padding on each side, so a 640 pixel window gives the table 592 and
-// it is cards, and a 700 pixel one gives it 652 and it is a table.
-func TestTheRegionAndNotTheWindowDecidesBetweenCardsAndTable(t *testing.T) {
-	for width, want := range map[int]string{640: "block", 700: "table"} {
+// The width that counts is the screen's, not the block's: a 640 pixel window is
+// a table although the page's padding leaves the table 592, and 590 is cards.
+func TestTheWindowAndNotTheBlockDecidesBetweenCardsAndTable(t *testing.T) {
+	for width, want := range map[int]string{590: "block", 640: "table", 700: "table"} {
 		app := serve(t, true)
 		page := open(t, app, width)
 		page.Visit("/cards")

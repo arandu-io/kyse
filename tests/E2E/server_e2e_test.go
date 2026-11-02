@@ -459,6 +459,12 @@ func serve(t *testing.T, needStyles bool) *app {
 		}
 		fmt.Fprint(w, layout("Cards", cardsTable(total)))
 	})
+	mux.HandleFunc("GET /mode", func(w http.ResponseWriter, r *http.Request) {
+		a.record(r)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-store")
+		fmt.Fprint(w, layout("Modes", modeBoxes()))
+	})
 	mux.HandleFunc("GET /foot", func(w http.ResponseWriter, r *http.Request) {
 		a.record(r)
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")

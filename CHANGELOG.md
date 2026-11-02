@@ -1,5 +1,11 @@
 # Release Notes
 
+## v0.50.0
+
+- `DataTable` cards are chosen by the width of the screen and not of the block: under 600px wide the rows are cards (a media query, `max-[600px]:`), from 600px up the table is the table it was before v0.48.0, however narrow the block it sits in. v0.48.0 asked the width of the region with a container query, so a short list inside a card of a dashboard was drawn as cards on a desktop. The region is no longer a container (`@container/dt` is gone). It is how Ayra decides. Rebuild the stylesheet with `aru view:build`.
+- `DataTable` gains `Mode`, with the names of Ayra's `DataTable`: `DataTableModeAuto` (the zero value, the rule above), `DataTableModeTable` (the table at every width, a short list that stays a list of lines on a phone) and `DataTableModeCards` (the cards at every width). The table mode draws no card class at all, so it is the markup and the pixels of the table before v0.48.0, with `data-label` on the cells as the only addition. The cards mode writes the card classes under `min-[0px]:`, a query that is always true, so they still sit after the table's own utilities in the stylesheet.
+- `DataTable` gains `RowTemplate`, which draws an inert `<template data-part="row-template">` after the table: one row with the classes of the row and of each cell, the `data-column` and the `data-label`, in the mode the table is in. A script that puts a row into the list as it arrives, a read from a socket, clones it and writes the cells, so the row it adds is the row the server draws and no class is written in a script, where the stylesheet was never compiled with it.
+
 ## [v0.49.1](https://github.com/arandu-io/kyse/compare/v0.49.0...v0.49.1) - 2026-11-02
 
 - `DataTable` column menu: a column's label is written as the caller wrote it; the menu no longer capitalizes every word ("Data de renovação", not "Data De Renovação").

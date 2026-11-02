@@ -157,19 +157,20 @@ func tags(html, element string) []string {
 
 func withData(tag, name string) bool { return strings.Contains(tag, "data-column=\""+name+"\"") }
 
-func TestTheRegionIsTheContainerTheCardsAreAskedAgainst(t *testing.T) {
+func TestTheScreenAndNotTheBlockIsWhatTheCardsAreAskedAgainst(t *testing.T) {
 	html := string(components.DataTable(phoneList(phoneColumns, true, "")))
-	root := tags(html, "div")[0]
-	if !strings.Contains(root, "@container/dt") {
-		t.Errorf("the region is not the container: %s", root)
+	// The block is not a container: a container query would ask its width, which
+	// on a desktop is under 600px inside any card of a dashboard.
+	if strings.Contains(html, "@container") || strings.Contains(html, "@max-[") || strings.Contains(html, "@min-[") {
+		t.Error("a card rule asks the width of the block the table is in")
 	}
-	// Every card rule is under the container query, so above it nothing applies.
-	for _, class := range regexp.MustCompile(`@max-\[600px\]/dt:[^\s"]+`).FindAllString(html, -1) {
-		if !strings.HasPrefix(class, "@max-[600px]/dt:") {
+	// Every card rule is under the media query, so above it nothing applies.
+	for _, class := range regexp.MustCompile(`[^\s"]*max-\[600px\]:[^\s"]+`).FindAllString(html, -1) {
+		if !strings.HasPrefix(class, "max-[600px]:") {
 			t.Errorf("a card rule outside the query: %s", class)
 		}
 	}
-	if !strings.Contains(html, "@max-[600px]/dt:flex") {
+	if !strings.Contains(html, "max-[600px]:flex") {
 		t.Error("no row is drawn as a card under 600px")
 	}
 }
@@ -212,15 +213,15 @@ func TestThePrimaryColumnTitlesTheCardAndCardHiddenIsLeftOut(t *testing.T) {
 	for _, td := range tags(body, "td") {
 		switch {
 		case withData(td, "customer"):
-			if !strings.Contains(td, "@max-[600px]/dt:order-first") || !strings.Contains(td, "@max-[600px]/dt:before:hidden") {
+			if !strings.Contains(td, "max-[600px]:order-first") || !strings.Contains(td, "max-[600px]:before:hidden") {
 				t.Errorf("the primary cell is not the title: %s", td)
 			}
 		case withData(td, "number"):
-			if !strings.Contains(td, "@max-[600px]/dt:hidden") {
+			if !strings.Contains(td, "max-[600px]:hidden") {
 				t.Errorf("a CardHidden cell stays in the card: %s", td)
 			}
 		case withData(td, "status"):
-			if strings.Contains(td, "order-first") || strings.Contains(td, "@max-[600px]/dt:hidden") {
+			if strings.Contains(td, "order-first") || strings.Contains(td, "max-[600px]:hidden") {
 				t.Errorf("a plain cell is a title or hidden: %s", td)
 			}
 		}
@@ -267,16 +268,16 @@ func TestTheHeadKeepsOnlyTheControlsThatOrderTheList(t *testing.T) {
 	for _, th := range tags(head, "th") {
 		switch {
 		case withData(th, "number"), withData(th, "customer"):
-			if strings.Contains(th, "@max-[600px]/dt:hidden") {
+			if strings.Contains(th, "max-[600px]:hidden") {
 				t.Errorf("a header that orders the list is dropped: %s", th)
 			}
 		case withData(th, "status"), withData(th, "total"):
-			if !strings.Contains(th, "@max-[600px]/dt:hidden") {
+			if !strings.Contains(th, "max-[600px]:hidden") {
 				t.Errorf("a header that only names a column stays: %s", th)
 			}
 		}
 	}
-	if !strings.Contains(html, "@max-[600px]/dt:overflow-visible") {
+	if !strings.Contains(html, "max-[600px]:overflow-visible") {
 		t.Error("the table still scrolls sideways under the breakpoint")
 	}
 }
@@ -288,7 +289,7 @@ func TestARowMenuStaysInTheCardAndARowWithNoneDrawsNoFoot(t *testing.T) {
 	body := html[strings.Index(html, "<tbody"):]
 	feet := 0
 	for _, td := range tags(body, "td") {
-		if strings.Contains(td, "@max-[600px]/dt:border-t") {
+		if strings.Contains(td, "max-[600px]:border-t") {
 			feet++
 		}
 	}
@@ -300,11 +301,11 @@ func TestARowMenuStaysInTheCardAndARowWithNoneDrawsNoFoot(t *testing.T) {
 func TestTheCheckboxSitsInTheCornerAndTheTitleLeavesRoomForIt(t *testing.T) {
 	html := string(components.DataTable(phoneList(phoneColumns, false, "ids")))
 	body := html[strings.Index(html, "<tbody"):]
-	if !strings.Contains(body, "@max-[600px]/dt:absolute") || !strings.Contains(body, "@max-[600px]/dt:ps-8") {
+	if !strings.Contains(body, "max-[600px]:absolute") || !strings.Contains(body, "max-[600px]:ps-8") {
 		t.Error("the checkbox is not in the corner of the card, or the title does not leave room for it")
 	}
 	without := string(components.DataTable(phoneList(phoneColumns, false, "")))
-	if strings.Contains(without[strings.Index(without, "<tbody"):], "@max-[600px]/dt:ps-8") {
+	if strings.Contains(without[strings.Index(without, "<tbody"):], "max-[600px]:ps-8") {
 		t.Error("a table with no selection leaves room for a checkbox")
 	}
 }
@@ -327,7 +328,7 @@ func TestTheNoResultRowIsABlockInACardLayout(t *testing.T) {
 	p.Searchable = true
 	p.State = components.DataTableValues{Q: "zzz"}
 	html := string(components.DataTable(p))
-	if !strings.Contains(html, "No results.") || !strings.Contains(html, "@max-[600px]/dt:block") {
+	if !strings.Contains(html, "No results.") || !strings.Contains(html, "max-[600px]:block") {
 		t.Errorf("the no-result row is not a block:\n%s", html)
 	}
 }
@@ -369,28 +370,28 @@ func TestTheActionsCellIsTheFootOfTheCardAndAnEmptyOneIsLeftOut(t *testing.T) {
 		t.Fatalf("%d rows, want 3", len(rows))
 	}
 	foot := rows[0][2]
-	for _, want := range []string{"@max-[600px]/dt:border-t", "@max-[600px]/dt:justify-end", "@max-[600px]/dt:before:hidden", "@max-[600px]/dt:order-last"} {
+	for _, want := range []string{"max-[600px]:border-t", "max-[600px]:justify-end", "max-[600px]:before:hidden", "max-[600px]:order-last"} {
 		if !strings.Contains(foot, want) {
 			t.Errorf("the actions cell lacks %s: %s", want, foot)
 		}
 	}
 	// Under the breakpoint only: the cell is the cell it was above it.
 	for _, class := range strings.Fields(foot[strings.Index(foot, `class="`)+7:]) {
-		if strings.Contains(class, "border-t") && !strings.HasPrefix(class, "@max-[600px]/dt:") {
+		if strings.Contains(class, "border-t") && !strings.HasPrefix(class, "max-[600px]:") {
 			t.Errorf("a rule outside the card query: %s", class)
 		}
 	}
 	// A note with nothing in it is not drawn; one with a value is.
-	if !strings.Contains(rows[0][1], "@max-[600px]/dt:hidden") {
+	if !strings.Contains(rows[0][1], "max-[600px]:hidden") {
 		t.Errorf("an empty note stays in the card: %s", rows[0][1])
 	}
-	if strings.Contains(rows[1][1], "@max-[600px]/dt:hidden") {
+	if strings.Contains(rows[1][1], "max-[600px]:hidden") {
 		t.Errorf("a note with a value is left out: %s", rows[1][1])
 	}
 	// An empty actions cell, or one of white space only, draws no foot and no label.
 	for _, n := range []int{1, 2} {
 		cell := rows[n][2]
-		if !strings.Contains(cell, "@max-[600px]/dt:hidden") || strings.Contains(cell, "@max-[600px]/dt:border-t") {
+		if !strings.Contains(cell, "max-[600px]:hidden") || strings.Contains(cell, "max-[600px]:border-t") {
 			t.Errorf("row %d has no actions and draws a foot: %s", n+1, cell)
 		}
 	}
@@ -407,7 +408,7 @@ func TestAnEmptyTitleIsStillTheCardsTitle(t *testing.T) {
 	p := actionsList()
 	p.Rows[0].Cells[0] = components.TableCell{}
 	rows := cellsOf(string(components.DataTable(p)))
-	if strings.Contains(rows[0][0], "@max-[600px]/dt:hidden") || !strings.Contains(rows[0][0], "@max-[600px]/dt:order-first") {
+	if strings.Contains(rows[0][0], "max-[600px]:hidden") || !strings.Contains(rows[0][0], "max-[600px]:order-first") {
 		t.Errorf("an empty title is left out of its card: %s", rows[0][0])
 	}
 }
@@ -418,7 +419,7 @@ func TestAnActionsColumnThatIsAlsoThePrimaryIsStillTheTitle(t *testing.T) {
 	p.Columns[2].Primary = true
 	p.Columns[0].Primary = false
 	rows := cellsOf(string(components.DataTable(p)))
-	if !strings.Contains(rows[0][2], "@max-[600px]/dt:order-first") || strings.Contains(rows[0][2], "@max-[600px]/dt:order-last") {
+	if !strings.Contains(rows[0][2], "max-[600px]:order-first") || strings.Contains(rows[0][2], "max-[600px]:order-last") {
 		t.Errorf("the primary column is not the title: %s", rows[0][2])
 	}
 }

@@ -96,6 +96,23 @@ draws the messages an application sends, in tables and inline attributes,
 because a stylesheet does not survive a mail client. `fonts` serves the faces a
 project vendored and writes the preload links for them.
 
+## A data table adapts itself
+
+A `DataTable` is described once, with typed columns (`Primary`, `CardHidden`,
+`Actions`, `Align`) and rows, and the renderer of each layer decides how that
+description is drawn. Whoever uses it does not mark one table at a time.
+
+- **Kyse, on the web:** a table on a computer and cards on a phone's browser,
+  decided by the width of the **screen** (a media query under 600px) and never by
+  the width of the block the table sits in. A short list in a card of a dashboard
+  is a table on a desktop with nothing written.
+- **Ayra, native:** cards on a phone and a table on a wide window, decided by the
+  native renderer from the width of the **window**.
+
+`Mode` (`DataTableModeTable`, `DataTableModeCards`) is the explicit exception, for
+the list that must stay a table on a phone or cards on a desktop. See
+`UPGRADE.md` (v0.50.0).
+
 ## A form in a dialog
 
 `FormDialog` is a create or edit form drawn over the list it belongs to -- "New
