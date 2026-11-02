@@ -1,5 +1,9 @@
 # Release Notes
 
+## [v0.50.0](https://github.com/arandu-io/kyse/compare/v0.49.1...v0.50.0) - 2026-11-02
+
+**Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.49.1...v0.50.0
+
 ## v0.50.0
 
 - `DataTable` cards are chosen by the width of the screen and not of the block: under 600px wide the rows are cards (a media query, `max-[600px]:`), from 600px up the table is the table it was before v0.48.0, however narrow the block it sits in. v0.48.0 asked the width of the region with a container query, so a short list inside a card of a dashboard was drawn as cards on a desktop. The region is no longer a container (`@container/dt` is gone). It is how Ayra decides. Rebuild the stylesheet with `aru view:build`.
