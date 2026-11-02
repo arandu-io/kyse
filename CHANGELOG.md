@@ -1,5 +1,9 @@
 # Release Notes
 
+## [v0.51.0](https://github.com/arandu-io/kyse/compare/v0.50.0...v0.51.0) - 2026-11-02
+
+**Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.50.0...v0.51.0
+
 ## v0.51.0
 
 - `FormDialog` gains `Forms`, for a dialog whose `Body` holds forms of its own: the panels of a `Tabs`, one per kind of change, each posting to its own address. The dialog is then a `div` panel and not a form (a form inside a form is not HTML, and the browser drops the inner one), so it draws no `Action`, no hidden fields and no footer; the title, the description, the scrolling body and the close button stay, and a page sent back with the dialog's name in `_dialog` still opens it. Without `Forms` the dialog is the one form it always was.
