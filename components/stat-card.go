@@ -43,6 +43,9 @@ type StatCardProps struct {
 	// Meta is the small line under it -- when the numbers were read, what
 	// period they cover. Empty draws none.
 	Meta string
+	// LabelHeader is the header over the labels, the first column. Empty is
+	// "Name"; an application that is not in English writes its own word.
+	LabelHeader string
 	// Columns are the headers over the numbers, left to right. A row with more
 	// values than there are columns draws them anyway; the extra ones sit under
 	// no header, which is visible and therefore fixable.
@@ -52,6 +55,14 @@ type StatCardProps struct {
 	// Empty is what stands in when there are no rows. A blank card reads as a
 	// card that failed rather than one with nothing to show.
 	Empty EmptyProps
+}
+
+// LabelHeaderText is the first column's header.
+func (p StatCardProps) LabelHeaderText() string {
+	if p.LabelHeader == "" {
+		return "Name"
+	}
+	return p.LabelHeader
 }
 
 // StatRow is one line: what it is, and the numbers about it.
@@ -68,7 +79,7 @@ func (p StatCardProps) PartNames() []string {
 	return []string{"root", "header", "title", "meta", "table"}
 }
 
-//line components/stat-card.go:72
+//line components/stat-card.go:83
 
 // StatCard renders the stat-card component.
 func StatCard(kyse__props StatCardProps) kyse__template.HTML {
@@ -91,20 +102,20 @@ func StatCard(kyse__props StatCardProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/stat-card.kyse.go:59
+//line components/stat-card.kyse.go:70
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("card p-5")))
-//line components/stat-card.go:97
+//line components/stat-card.go:108
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/stat-card.kyse.go:60
+//line components/stat-card.kyse.go:71
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/stat-card.go:106
+//line components/stat-card.go:117
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/stat-card.kyse.go:60", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/stat-card.kyse.go:71", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
@@ -118,16 +129,16 @@ func StatCard(kyse__props StatCardProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-part=\"header\"\n")
 	}
-//line components/stat-card.kyse.go:64
+//line components/stat-card.kyse.go:75
 	if kyse__d.PartClass("header") != "" {
-//line components/stat-card.go:124
+//line components/stat-card.go:135
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/stat-card.kyse.go:65
+//line components/stat-card.kyse.go:76
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("header")))
-//line components/stat-card.go:131
+//line components/stat-card.go:142
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -135,11 +146,11 @@ func StatCard(kyse__props StatCardProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v2 string
-//line components/stat-card.kyse.go:67
+//line components/stat-card.kyse.go:78
 		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("header"))
-//line components/stat-card.go:141
+//line components/stat-card.go:152
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/stat-card.kyse.go:67", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/stat-card.kyse.go:78", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
@@ -157,20 +168,20 @@ func StatCard(kyse__props StatCardProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/stat-card.kyse.go:71
+//line components/stat-card.kyse.go:82
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("title", "font-semibold tracking-tight")))
-//line components/stat-card.go:163
+//line components/stat-card.go:174
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v3 string
-//line components/stat-card.kyse.go:72
+//line components/stat-card.kyse.go:83
 		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("title"))
-//line components/stat-card.go:172
+//line components/stat-card.go:183
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/stat-card.kyse.go:72", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/stat-card.kyse.go:83", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
@@ -179,16 +190,16 @@ func StatCard(kyse__props StatCardProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
 	}
 	if kyse__err == nil {
-//line components/stat-card.kyse.go:73
+//line components/stat-card.kyse.go:84
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Title)))
-//line components/stat-card.go:185
+//line components/stat-card.go:196
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</h3>\n")
 	}
-//line components/stat-card.kyse.go:74
+//line components/stat-card.kyse.go:85
 	if kyse__d.Meta != "" {
-//line components/stat-card.go:192
+//line components/stat-card.go:203
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<p\n")
 		}
@@ -199,20 +210,20 @@ func StatCard(kyse__props StatCardProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/stat-card.kyse.go:77
+//line components/stat-card.kyse.go:88
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("meta", "text-muted-foreground mt-1 text-xs")))
-//line components/stat-card.go:205
+//line components/stat-card.go:216
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v4 string
-//line components/stat-card.kyse.go:78
+//line components/stat-card.kyse.go:89
 			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("meta"))
-//line components/stat-card.go:214
+//line components/stat-card.go:225
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/stat-card.kyse.go:78", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/stat-card.kyse.go:89", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 			}
@@ -221,9 +232,9 @@ func StatCard(kyse__props StatCardProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 		}
 		if kyse__err == nil {
-//line components/stat-card.kyse.go:79
+//line components/stat-card.kyse.go:90
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Meta)))
-//line components/stat-card.go:227
+//line components/stat-card.go:238
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
@@ -235,9 +246,9 @@ func StatCard(kyse__props StatCardProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/stat-card.kyse.go:83
+//line components/stat-card.kyse.go:94
 	if len(kyse__d.Rows) > 0 {
-//line components/stat-card.go:241
+//line components/stat-card.go:252
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<table\n")
 		}
@@ -248,20 +259,20 @@ func StatCard(kyse__props StatCardProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/stat-card.kyse.go:86
+//line components/stat-card.kyse.go:97
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("table", "mt-4 w-full text-sm")))
-//line components/stat-card.go:254
+//line components/stat-card.go:265
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v5 string
-//line components/stat-card.kyse.go:87
+//line components/stat-card.kyse.go:98
 			kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("table"))
-//line components/stat-card.go:263
+//line components/stat-card.go:274
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/stat-card.kyse.go:87", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/stat-card.kyse.go:98", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 			}
@@ -276,19 +287,27 @@ func StatCard(kyse__props StatCardProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<tr class=\"text-muted-foreground text-left text-xs\">\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<th class=\"font-medium\">Name</th>\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<th class=\"font-medium\">")
 		}
-//line components/stat-card.kyse.go:92
+		if kyse__err == nil {
+//line components/stat-card.kyse.go:102
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.LabelHeaderText())))
+//line components/stat-card.go:296
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</th>\n")
+		}
+//line components/stat-card.kyse.go:103
 		for _, column := range kyse__d.Columns {
 			_ = column
-//line components/stat-card.go:285
+//line components/stat-card.go:304
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<th class=\"font-medium text-right\">")
 			}
 			if kyse__err == nil {
-//line components/stat-card.kyse.go:93
+//line components/stat-card.kyse.go:104
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(column)))
-//line components/stat-card.go:292
+//line components/stat-card.go:311
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</th>\n")
@@ -303,10 +322,10 @@ func StatCard(kyse__props StatCardProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<tbody class=\"divide-y\">\n")
 		}
-//line components/stat-card.kyse.go:98
+//line components/stat-card.kyse.go:109
 		for _, row := range kyse__d.Rows {
 			_ = row
-//line components/stat-card.go:310
+//line components/stat-card.go:329
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t<tr>\n")
 			}
@@ -314,24 +333,24 @@ func StatCard(kyse__props StatCardProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t<td class=\"py-2\">")
 			}
 			if kyse__err == nil {
-//line components/stat-card.kyse.go:100
+//line components/stat-card.kyse.go:111
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(row.Label)))
-//line components/stat-card.go:320
+//line components/stat-card.go:339
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</td>\n")
 			}
-//line components/stat-card.kyse.go:101
+//line components/stat-card.kyse.go:112
 			for _, value := range row.Values {
 				_ = value
-//line components/stat-card.go:328
+//line components/stat-card.go:347
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t<td class=\"py-2 text-right tabular-nums\">")
 				}
 				if kyse__err == nil {
-//line components/stat-card.kyse.go:102
+//line components/stat-card.kyse.go:113
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(value)))
-//line components/stat-card.go:335
+//line components/stat-card.go:354
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "</td>\n")
@@ -352,9 +371,9 @@ func StatCard(kyse__props StatCardProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<div class=\"mt-4\">")
 		}
 		if kyse__err == nil {
-//line components/stat-card.kyse.go:109
+//line components/stat-card.kyse.go:120
 			var kyse__v6 kyse__template.HTML = Empty(kyse__d.Empty)
-//line components/stat-card.go:358
+//line components/stat-card.go:377
 			_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v6))
 		}
 		if kyse__err == nil {

@@ -101,13 +101,13 @@ func (p ProgressProps) PartNames() []string { return []string{"root", "fill"} }
 	@if(.Indeterminate)
 		<span
 			data-part="fill"
-			class="{{ .PartClass("fill", "w-full animate-pulse") }}"
+			class="{{ .PartClass("fill", "block h-full w-full animate-pulse") }}"
 			@attributes(.PartAttrs("fill"))
 		></span>
 	@else
 		<span
 			data-part="fill"
-			class="{{ .PartClass("fill", .WidthClass()) }}"
+			class="{{ .PartClass("fill", "block h-full " + .WidthClass()) }}"
 			@attributes(.PartAttrs("fill"))
 		></span>
 	@endif

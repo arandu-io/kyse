@@ -120,28 +120,24 @@ func Alert(kyse__props AlertProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-part=\"title\"\n")
 	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
+	}
+	if kyse__err == nil {
 //line components/alert.kyse.go:47
-	if kyse__d.PartClass("title") != "" {
-//line components/alert.go:126
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
-		}
-		if kyse__err == nil {
-//line components/alert.kyse.go:48
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("title")))
-//line components/alert.go:133
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-		}
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("title", "wrap-anywhere")))
+//line components/alert.go:130
+	}
+	if kyse__err == nil {
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v2 string
-//line components/alert.kyse.go:50
+//line components/alert.kyse.go:48
 		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("title"))
-//line components/alert.go:143
+//line components/alert.go:139
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/alert.kyse.go:50", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/alert.kyse.go:48", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
@@ -150,44 +146,40 @@ func Alert(kyse__props AlertProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>")
 	}
 	if kyse__err == nil {
-//line components/alert.kyse.go:51
+//line components/alert.kyse.go:49
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Title)))
-//line components/alert.go:156
+//line components/alert.go:152
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</h2>\n")
 	}
-//line components/alert.kyse.go:52
+//line components/alert.kyse.go:50
 	if kyse__d.Message != "" {
-//line components/alert.go:163
+//line components/alert.go:159
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<section\n")
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"message\"\n")
 		}
-//line components/alert.kyse.go:55
-		if kyse__d.PartClass("message") != "" {
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
+		}
+		if kyse__err == nil {
+//line components/alert.kyse.go:53
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("message", "wrap-anywhere")))
 //line components/alert.go:172
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
-			}
-			if kyse__err == nil {
-//line components/alert.kyse.go:56
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("message")))
-//line components/alert.go:179
-			}
-			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-			}
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v3 string
-//line components/alert.kyse.go:58
+//line components/alert.kyse.go:54
 			kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("message"))
-//line components/alert.go:189
+//line components/alert.go:181
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/alert.kyse.go:58", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/alert.kyse.go:54", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 			}
@@ -196,9 +188,9 @@ func Alert(kyse__props AlertProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
 		}
 		if kyse__err == nil {
-//line components/alert.kyse.go:59
+//line components/alert.kyse.go:55
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message)))
-//line components/alert.go:202
+//line components/alert.go:194
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</section>\n")

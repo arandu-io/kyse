@@ -44,17 +44,13 @@ func (p AlertProps) PartNames() []string { return []string{"root", "title", "mes
 >
 	<h2
 		data-part="title"
-		@if(.PartClass("title") != "")
-			class="{{ .PartClass("title") }}"
-		@endif
+		class="{{ .PartClass("title", "wrap-anywhere") }}"
 		@attributes(.PartAttrs("title"))
 	>{{ .Title }}</h2>
 	@if(.Message != "")
 		<section
 			data-part="message"
-			@if(.PartClass("message") != "")
-				class="{{ .PartClass("message") }}"
-			@endif
+			class="{{ .PartClass("message", "wrap-anywhere") }}"
 			@attributes(.PartAttrs("message"))
 		>{{ .Message }}</section>
 	@endif

@@ -20,6 +20,12 @@ import "strings"
 // the letters read are both decisions about this avatar rather than about every
 // avatar.
 //
+// The picture is drawn with an empty alt, and the name is read from the sr-only
+// span beside it, as it is beside the initials. A picture that fails to load
+// and carries its name as alt text draws that text, and the broken-image icon,
+// over the circle and past it; with an empty alt it draws nothing, and the circle
+// stays the size it was.
+//
 // The name beside the initials is not a part. It is the sentence a screen reader
 // is given in place of the letters, and its class is what keeps it out of the
 // circle; a handle for it would be a handle for breaking that.
@@ -75,9 +81,10 @@ func (p AvatarProps) PartNames() []string { return []string{"root", "image", "in
 				class="{{ .PartClass("image") }}"
 			@endif
 			src="{{ .ImageURL }}"
-			alt="{{ .Name }}"
+			alt=""
 			@attributes(.PartAttrs("image"))
 		>
+		<span class="sr-only">{{ .Name }}</span>
 	@endif
 	@if(.ImageURL == "")
 		<span

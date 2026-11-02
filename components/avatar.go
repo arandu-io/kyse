@@ -31,6 +31,12 @@ import (
 // the letters read are both decisions about this avatar rather than about every
 // avatar.
 //
+// The picture is drawn with an empty alt, and the name is read from the sr-only
+// span beside it, as it is beside the initials. A picture that fails to load
+// and carries its name as alt text draws that text, and the broken-image icon,
+// over the circle and past it; with an empty alt it draws nothing, and the circle
+// stays the size it was.
+//
 // The name beside the initials is not a part. It is the sentence a screen reader
 // is given in place of the letters, and its class is what keeps it out of the
 // circle; a handle for it would be a handle for breaking that.
@@ -70,7 +76,7 @@ func (p AvatarProps) Initials() string {
 // PartNames are the parts this component publishes.
 func (p AvatarProps) PartNames() []string { return []string{"root", "image", "initials"} }
 
-//line components/avatar.go:74
+//line components/avatar.go:80
 
 // Avatar renders the avatar component.
 func Avatar(kyse__props AvatarProps) kyse__template.HTML {
@@ -93,23 +99,23 @@ func Avatar(kyse__props AvatarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/avatar.kyse.go:65
+//line components/avatar.kyse.go:71
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("avatar")))
-//line components/avatar.go:99
+//line components/avatar.go:105
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-//line components/avatar.kyse.go:66
+//line components/avatar.kyse.go:72
 	if kyse__d.Size != "" {
-//line components/avatar.go:106
+//line components/avatar.go:112
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdata-size=\"")
 		}
 		if kyse__err == nil {
-//line components/avatar.kyse.go:67
+//line components/avatar.kyse.go:73
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Size))
-//line components/avatar.go:113
+//line components/avatar.go:119
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -117,11 +123,11 @@ func Avatar(kyse__props AvatarProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/avatar.kyse.go:69
+//line components/avatar.kyse.go:75
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/avatar.go:123
+//line components/avatar.go:129
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/avatar.kyse.go:69", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/avatar.kyse.go:75", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
@@ -129,25 +135,25 @@ func Avatar(kyse__props AvatarProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")
 	}
-//line components/avatar.kyse.go:71
+//line components/avatar.kyse.go:77
 	if kyse__d.ImageURL != "" {
-//line components/avatar.go:135
+//line components/avatar.go:141
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<img\n")
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"image\"\n")
 		}
-//line components/avatar.kyse.go:74
+//line components/avatar.kyse.go:80
 		if kyse__d.PartClass("image") != "" {
-//line components/avatar.go:144
+//line components/avatar.go:150
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/avatar.kyse.go:75
+//line components/avatar.kyse.go:81
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("image")))
-//line components/avatar.go:151
+//line components/avatar.go:157
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -158,11 +164,11 @@ func Avatar(kyse__props AvatarProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 			var kyse__v2 string
-//line components/avatar.kyse.go:77
+//line components/avatar.kyse.go:83
 			kyse__v2, kyse__err = kyse__view.TextURL(kyse__d.ImageURL)
-//line components/avatar.go:164
+//line components/avatar.go:170
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/avatar.kyse.go:77", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/avatar.kyse.go:83", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 			}
@@ -171,23 +177,15 @@ func Avatar(kyse__props AvatarProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\talt=\"")
-		}
-		if kyse__err == nil {
-//line components/avatar.kyse.go:78
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/avatar.go:180
-		}
-		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\talt=\"\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v3 string
-//line components/avatar.kyse.go:79
+//line components/avatar.kyse.go:85
 			kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("image"))
-//line components/avatar.go:189
+//line components/avatar.go:187
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/avatar.kyse.go:79", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/avatar.kyse.go:85", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 			}
@@ -195,26 +193,37 @@ func Avatar(kyse__props AvatarProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>\n")
 		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<span class=\"sr-only\">")
+		}
+		if kyse__err == nil {
+//line components/avatar.kyse.go:87
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Name)))
+//line components/avatar.go:203
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
+		}
 	}
-//line components/avatar.kyse.go:82
+//line components/avatar.kyse.go:89
 	if kyse__d.ImageURL == "" {
-//line components/avatar.go:202
+//line components/avatar.go:211
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<span\n")
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"initials\"\n")
 		}
-//line components/avatar.kyse.go:85
+//line components/avatar.kyse.go:92
 		if kyse__d.PartClass("initials") != "" {
-//line components/avatar.go:211
+//line components/avatar.go:220
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/avatar.kyse.go:86
+//line components/avatar.kyse.go:93
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("initials")))
-//line components/avatar.go:218
+//line components/avatar.go:227
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -225,11 +234,11 @@ func Avatar(kyse__props AvatarProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 			var kyse__v4 string
-//line components/avatar.kyse.go:89
+//line components/avatar.kyse.go:96
 			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("initials"))
-//line components/avatar.go:231
+//line components/avatar.go:240
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/avatar.kyse.go:89", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/avatar.kyse.go:96", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 			}
@@ -238,9 +247,9 @@ func Avatar(kyse__props AvatarProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
 		}
 		if kyse__err == nil {
-//line components/avatar.kyse.go:90
+//line components/avatar.kyse.go:97
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Initials())))
-//line components/avatar.go:244
+//line components/avatar.go:253
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
@@ -249,9 +258,9 @@ func Avatar(kyse__props AvatarProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<span class=\"sr-only\">")
 		}
 		if kyse__err == nil {
-//line components/avatar.kyse.go:91
+//line components/avatar.kyse.go:98
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Name)))
-//line components/avatar.go:255
+//line components/avatar.go:264
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")

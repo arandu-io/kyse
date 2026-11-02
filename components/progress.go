@@ -200,7 +200,7 @@ func Progress(kyse__props ProgressProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 //line components/progress.kyse.go:104
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("fill", "w-full animate-pulse")))
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("fill", "block h-full w-full animate-pulse")))
 //line components/progress.go:205
 		}
 		if kyse__err == nil {
@@ -232,7 +232,7 @@ func Progress(kyse__props ProgressProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 //line components/progress.kyse.go:110
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("fill", kyse__d.WidthClass())))
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("fill", "block h-full "+kyse__d.WidthClass())))
 //line components/progress.go:237
 		}
 		if kyse__err == nil {

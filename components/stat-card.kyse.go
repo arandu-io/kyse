@@ -31,6 +31,9 @@ type StatCardProps struct {
 	// Meta is the small line under it -- when the numbers were read, what
 	// period they cover. Empty draws none.
 	Meta string
+	// LabelHeader is the header over the labels, the first column. Empty is
+	// "Name"; an application that is not in English writes its own word.
+	LabelHeader string
 	// Columns are the headers over the numbers, left to right. A row with more
 	// values than there are columns draws them anyway; the extra ones sit under
 	// no header, which is visible and therefore fixable.
@@ -40,6 +43,14 @@ type StatCardProps struct {
 	// Empty is what stands in when there are no rows. A blank card reads as a
 	// card that failed rather than one with nothing to show.
 	Empty EmptyProps
+}
+
+// LabelHeaderText is the first column's header.
+func (p StatCardProps) LabelHeaderText() string {
+	if p.LabelHeader == "" {
+		return "Name"
+	}
+	return p.LabelHeader
 }
 
 // StatRow is one line: what it is, and the numbers about it.
@@ -88,7 +99,7 @@ func (p StatCardProps) PartNames() []string { return []string{"root", "header", 
 		>
 			<thead>
 				<tr class="text-muted-foreground text-left text-xs">
-					<th class="font-medium">Name</th>
+					<th class="font-medium">{{ .LabelHeaderText() }}</th>
 					@foreach(.Columns as column)
 						<th class="font-medium text-right">{{ column }}</th>
 					@endforeach
