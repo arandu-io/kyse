@@ -1,5 +1,9 @@
 # Release Notes
 
+## [v0.49.1](https://github.com/arandu-io/kyse/compare/v0.49.0...v0.49.1) - 2026-11-02
+
+**Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.49.0...v0.49.1
+
 ## v0.49.1
 
 - `DataTable` column menu: a column's label is written as the caller wrote it; the menu no longer capitalizes every word ("Data de renovação", not "Data De Renovação").
