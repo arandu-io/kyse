@@ -1,5 +1,9 @@
 # Release Notes
 
+## [v0.52.0](https://github.com/arandu-io/kyse/compare/v0.51.0...v0.52.0) - 2026-11-03
+
+**Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.51.0...v0.52.0
+
 ## v0.52.0
 
 - `MenuItem` gains `Dialog`, the id of a `Dialog` drawn beside the menu: the entry opens it, centred, and sends nothing itself, as `DialogTriggerProps.Dialog` does for a button. A menu entry had no way to ask "are you sure" except `HxConfirm`, which htmx turns into the browser's own confirm box. A link entry that names a dialog is left out of a boosted layout (`hx-boost="false"`), as a `DialogTrigger` link is.
