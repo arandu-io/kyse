@@ -1,5 +1,10 @@
 # Release Notes
 
+## v0.52.0
+
+- `MenuItem` gains `Dialog`, the id of a `Dialog` drawn beside the menu: the entry opens it, centred, and sends nothing itself, as `DialogTriggerProps.Dialog` does for a button. A menu entry had no way to ask "are you sure" except `HxConfirm`, which htmx turns into the browser's own confirm box. A link entry that names a dialog is left out of a boosted layout (`hx-boost="false"`), as a `DialogTrigger` link is.
+- `HxConfirm` of `MenuItem` and `ButtonProps` is documented for what hesape v0.103.0 does with it: the view layer's script takes the question before htmx does and draws it as the confirmation dialog, with `data-confirm-title`, `data-confirm-label` and `data-confirm-cancel` to name its words, and the control's `destructive` variant on the button that goes through with it. Nothing in this library can reach the browser's own box any more. Use `Dialog` where the words matter.
+
 ## [v0.51.0](https://github.com/arandu-io/kyse/compare/v0.50.0...v0.51.0) - 2026-11-02
 
 **Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.50.0...v0.51.0

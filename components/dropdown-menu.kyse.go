@@ -72,6 +72,15 @@ type MenuItem struct {
 	Separator bool
 	// Disabled draws the entry unavailable, and the arrow keys pass over it.
 	Disabled bool
+	// Dialog is the id of a Dialog on the page. The entry opens it, centred over
+	// the page, and sends nothing itself: it is DialogTriggerProps.Dialog for a
+	// line of a menu. It is how an entry asks "are you sure". The Dialog carries
+	// the question, the consequence, the word on the button that goes through
+	// with it, and the Action, Method and Fields of what that button does.
+	//
+	// Draw the Dialog beside the menu and not inside its panel. The panel is
+	// hidden once an entry is chosen, and a dialog drawn inside it goes with it.
+	Dialog string
 
 	// The HTMX attributes, written only when they carry something. An empty
 	// hx-post is an attribute HTMX acts on: it would post to the current URL.
@@ -82,6 +91,13 @@ type MenuItem struct {
 	// the reply is a whole document: the swap drops its head, puts the body's
 	// children inside the target, and the page ends up holding a second copy of
 	// its own header and navigation.
+	//
+	// HxConfirm is the question asked before the request. It is drawn as a
+	// centred confirmation dialog by the view layer's script (hesape v0.103.0
+	// and later) and never as the browser's own: the entry carries its Variant
+	// to the button that goes through with it, so a destructive entry asks with
+	// a destructive button. Where the words matter, use Dialog instead, which
+	// names what the button says.
 	HxPost    string
 	HxGet     string
 	HxTarget  string
@@ -173,6 +189,11 @@ func (p DropdownMenuProps) PartNames() []string {
 						role="menuitem"
 						id="{{ .ItemID(at) }}"
 						href="{{ .Items[at].URL }}"
+						@if(.Items[at].Dialog != "")
+							data-dialog-open="{{ .Items[at].Dialog }}"
+							aria-haspopup="dialog"
+							hx-boost="false"
+						@endif
 						@if(.Items[at].Variant != "")
 							data-variant="{{ .Items[at].Variant }}"
 						@endif
@@ -195,6 +216,10 @@ func (p DropdownMenuProps) PartNames() []string {
 						type="button"
 						role="menuitem"
 						id="{{ .ItemID(at) }}"
+						@if(.Items[at].Dialog != "")
+							data-dialog-open="{{ .Items[at].Dialog }}"
+							aria-haspopup="dialog"
+						@endif
 						@if(.Items[at].Variant != "")
 							data-variant="{{ .Items[at].Variant }}"
 						@endif

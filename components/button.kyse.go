@@ -50,6 +50,12 @@ type ButtonProps struct {
 	// document says it is, so a button that narrows a swap and never seems to
 	// receive one is asking a question the page has not been configured to
 	// accept.
+	//
+	// HxConfirm is the question asked before the request. The view layer's
+	// script draws it as a centred confirmation dialog (hesape v0.103.0 and
+	// later) and never as the browser's own box; the button's Variant is the
+	// variant of the button that goes through with it, so a destructive button
+	// asks with a destructive one.
 	HxPost    string
 	HxGet     string
 	HxTarget  string
