@@ -3,7 +3,7 @@ module github.com/arandu-io/kyse
 go 1.26.10
 
 require (
-	github.com/arandu-io/framework v0.66.0
+	github.com/arandu-io/framework v0.67.0
 	github.com/arandu-io/hesape v0.93.0
 )
 
