@@ -488,7 +488,15 @@ func (p PasswordProps) ElementID() string {
 		     words, so it is marked decorative: announced as well, it would read
 		     the same count twice on every keystroke. The sentence is the live
 		     region, and it is what a reader who cannot see the fill is left
-		     with. The fill starts empty because the box does. --}}
+		     with. The fill starts empty because the box does.
+
+		     The fill is a block that takes the track's height. It is a span, and
+		     a span is inline: its width, which the behaviour writes on every
+		     keystroke, does not apply to it, so a stylesheet that does not make
+		     the track a flex container (Basecoat's progress.css does, and an
+		     application is free not to import it) drew a bar that never moved.
+		     The markup carries what it needs instead of leaning on a rule that
+		     may not be there. --}}
 		<div
 			data-part="meter"
 			class="{{ .PartClass("meter", "progress h-1.5! rounded-full bg-foreground/10 [&>span]:rounded-full [&>span]:bg-destructive [&[data-password-complete=true]>span]:bg-primary") }}"
@@ -499,7 +507,7 @@ func (p PasswordProps) ElementID() string {
 		>
 			<span
 				data-part="fill"
-				class="{{ .PartClass("fill", "w-0") }}"
+				class="{{ .PartClass("fill", "block h-full w-0") }}"
 				@attributes(.PartAttrs("fill"))
 			></span>
 		</div>

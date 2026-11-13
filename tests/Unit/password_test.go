@@ -1,11 +1,14 @@
 package unit
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"regexp"
 	"strings"
 	"testing"
 
 	"github.com/arandu-io/hesape/validation"
+	"github.com/arandu-io/hesape/view"
 	"github.com/arandu-io/kyse/components"
 )
 
@@ -121,8 +124,81 @@ func TestThePanelIsDrawnClosed(t *testing.T) {
 	if strings.Contains(html, `data-met="true"`) {
 		t.Errorf("a requirement arrived met on an empty box:\n%s", html)
 	}
-	if !strings.Contains(html, `class="w-0"`) {
-		t.Errorf("the strength bar arrived filled on an empty box:\n%s", html)
+	fill := regexp.MustCompile(`(?s)<span[^>]*data-part="fill"[^>]*>`).FindString(html)
+	if !regexp.MustCompile(`class="[^"]*\bw-0\b`).MatchString(fill) {
+		t.Errorf("the strength bar arrived filled on an empty box:\n%s", fill)
+	}
+}
+
+// TestTheMeterFillIsABlockThatTakesTheTrackHeight.
+//
+// The fill is a span, and a span is inline: the width the behaviour writes on
+// every keystroke does not apply to it. A stylesheet that does not make the
+// track a flex container (Basecoat's progress.css does, an application may not
+// import it) drew a bar that never moved, so the markup carries what it needs.
+func TestTheMeterFillIsABlockThatTakesTheTrackHeight(t *testing.T) {
+	html := string(components.Password(components.PasswordProps{Name: "password", Label: "Password"}))
+
+	fill := regexp.MustCompile(`(?s)<span[^>]*data-part="fill"[^>]*>`).FindString(html)
+	if fill == "" {
+		t.Fatalf("the meter has no fill:\n%s", html)
+	}
+	for _, class := range []string{"block", "h-full"} {
+		if !regexp.MustCompile(`class="[^"]*\b` + class + `\b`).MatchString(fill) {
+			t.Errorf("the fill lacks %q, so its width does not draw unless the stylesheet makes the track a flex box:\n%s", class, fill)
+		}
+	}
+}
+
+// TestEveryHookTheBehaviourReadsIsInTheMarkup holds the contract between the two
+// halves from both ends: the markup writes each attribute the script reads, and
+// the script still reads it. A name changed on one side only is a checklist that
+// is drawn and never ticks, with nothing failing.
+func TestEveryHookTheBehaviourReadsIsInTheMarkup(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	view.Handler(recorder, httptest.NewRequest(http.MethodGet, view.Asset("ui.js"), nil))
+	script := recorder.Body.String()
+	if !strings.Contains(script, "define('password'") {
+		t.Fatalf("the served script registers no password behaviour:\n%.200s", script)
+	}
+
+	html := string(components.Password(components.PasswordProps{
+		Name: "password", Label: "Password",
+		Policy: validation.NewPassword(12).Max(64).Letters().MixedCase().Numbers().Symbols(),
+	}))
+
+	hooks := []struct{ markup, script string }{
+		{`data-kyse-behavior="password"`, `data-kyse-props`},
+		{`data-requirement="min"`, `data-requirement`},
+		{`data-met="false"`, `data-met`},
+		{`data-password-met=`, `data-password-met`},
+		{`data-password-unmet=`, `data-password-unmet`},
+		{`data-password-summary=`, `data-password-summary`},
+		{`data-password-status`, `data-password-status`},
+		{`data-part="input"`, `[data-part="input"]`},
+		{`data-part="panel"`, `[data-part="panel"]`},
+		{`data-part="meter"`, `[data-part="meter"]`},
+		{`data-part="fill"`, `[data-part="fill"]`},
+		{`data-part="strength"`, `[data-part="strength"]`},
+		{`data-part="reveal"`, `[data-part="reveal"]`},
+		{`data-part="done"`, `[data-part="done"]`},
+		{`data-reveal-hidden=`, `data-reveal-hidden`},
+		{`data-reveal-shown=`, `data-reveal-shown`},
+	}
+	for _, hook := range hooks {
+		if !strings.Contains(html, hook.markup) {
+			t.Errorf("the markup no longer writes %s, which the behaviour reads", hook.markup)
+		}
+		if !strings.Contains(script, hook.script) {
+			t.Errorf("the behaviour no longer reads %s, which the markup writes", hook.script)
+		}
+	}
+
+	// Each rule the checklist can draw is one the behaviour judges by the same name.
+	for _, key := range []string{"min", "max", "letters", "mixedCase", "numbers", "symbols", "uncompromised"} {
+		if !strings.Contains(script, key+":") {
+			t.Errorf("the behaviour has no verdict for the rule %q the policy can declare", key)
+		}
 	}
 }
 

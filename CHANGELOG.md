@@ -1,5 +1,10 @@
 # Release Notes
 
+## v0.52.1
+
+- `Password`: the strength bar draws. Its fill is a span, a span is inline, and the width the behaviour writes on every keystroke does not apply to an inline box, so in an application whose stylesheet does not make the track a flex container (Basecoat's `progress.css` does; an application may leave it out) the bar stayed empty at every count while the lines under it ticked. The fill is now `block h-full`, so the markup carries what it needs. Rebuild the stylesheet with `aru view:build`.
+- Tests: the checklist is driven in a real browser, key by key, by a paste and inside a fragment an htmx swap brought in, and held to the policy's own verdict for every line and to the width of the bar; a unit test holds the attributes the markup writes to the ones the behaviour in hesape reads.
+
 ## [v0.52.0](https://github.com/arandu-io/kyse/compare/v0.51.0...v0.52.0) - 2026-11-03
 
 **Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.51.0...v0.52.0
