@@ -423,35 +423,39 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "    data-password-met=\"")
-	}
-	if kyse__err == nil {
 //line components/password.kyse.go:402
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.MetText()))
-//line components/password.go:433
-	}
-	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
-	}
-	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "    data-password-unmet=\"")
-	}
-	if kyse__err == nil {
+	if !kyse__d.Confirming {
+//line components/password.go:429
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "    data-password-met=\"")
+		}
+		if kyse__err == nil {
 //line components/password.kyse.go:403
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.UnmetText()))
-//line components/password.go:444
-	}
-	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.MetText()))
+//line components/password.go:436
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "    data-password-unmet=\"")
+		}
+		if kyse__err == nil {
+//line components/password.kyse.go:404
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.UnmetText()))
+//line components/password.go:447
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/password.kyse.go:404
+//line components/password.kyse.go:406
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/password.go:453
+//line components/password.go:457
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:404", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:406", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
@@ -469,9 +473,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/password.kyse.go:408
+//line components/password.kyse.go:410
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("label", "label")))
-//line components/password.go:475
+//line components/password.go:479
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -480,20 +484,20 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tfor=\"")
 	}
 	if kyse__err == nil {
-//line components/password.kyse.go:409
+//line components/password.kyse.go:411
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/password.go:486
+//line components/password.go:490
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v2 string
-//line components/password.kyse.go:410
+//line components/password.kyse.go:412
 		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("label"))
-//line components/password.go:495
+//line components/password.go:499
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:410", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:412", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
@@ -502,9 +506,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>")
 	}
 	if kyse__err == nil {
-//line components/password.kyse.go:411
+//line components/password.kyse.go:413
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
-//line components/password.go:508
+//line components/password.go:512
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</label>\n")
@@ -522,20 +526,20 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/password.kyse.go:415
+//line components/password.kyse.go:417
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("group", "input-group")))
-//line components/password.go:528
+//line components/password.go:532
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v3 string
-//line components/password.kyse.go:416
+//line components/password.kyse.go:418
 		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("group"))
-//line components/password.go:537
+//line components/password.go:541
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:416", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:418", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
@@ -549,16 +553,16 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-part=\"input\"\n")
 	}
-//line components/password.kyse.go:420
+//line components/password.kyse.go:422
 	if kyse__d.PartClass("input") != "" {
-//line components/password.go:555
+//line components/password.go:559
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:421
+//line components/password.kyse.go:423
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("input")))
-//line components/password.go:562
+//line components/password.go:566
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -571,9 +575,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/password.kyse.go:424
+//line components/password.kyse.go:426
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/password.go:577
+//line components/password.go:581
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -582,9 +586,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tname=\"")
 	}
 	if kyse__err == nil {
-//line components/password.kyse.go:425
+//line components/password.kyse.go:427
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/password.go:588
+//line components/password.go:592
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -593,9 +597,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tautocomplete=\"")
 	}
 	if kyse__err == nil {
-//line components/password.kyse.go:426
+//line components/password.kyse.go:428
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.InputAutocomplete()))
-//line components/password.go:599
+//line components/password.go:603
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -609,16 +613,16 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "            autocorrect=\"off\"\n")
 	}
-//line components/password.kyse.go:430
+//line components/password.kyse.go:432
 	if !kyse__d.Confirming {
-//line components/password.go:615
+//line components/password.go:619
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "                aria-controls=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:431
+//line components/password.kyse.go:433
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PanelID()))
-//line components/password.go:622
+//line components/password.go:626
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -627,64 +631,64 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "                aria-expanded=\"false\"\n")
 		}
 	}
-//line components/password.kyse.go:434
+//line components/password.kyse.go:436
 	if kyse__d.DescribedBy() != "" {
-//line components/password.go:633
+//line components/password.go:637
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:435
+//line components/password.kyse.go:437
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/password.go:640
+//line components/password.go:644
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/password.kyse.go:437
+//line components/password.kyse.go:439
 	if kyse__d.Placeholder != "" {
-//line components/password.go:648
+//line components/password.go:652
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tplaceholder=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:438
+//line components/password.kyse.go:440
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Placeholder))
-//line components/password.go:655
+//line components/password.go:659
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/password.kyse.go:440
+//line components/password.kyse.go:442
 	if kyse__d.Message() != "" {
-//line components/password.go:663
+//line components/password.go:667
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/password.kyse.go:443
+//line components/password.kyse.go:445
 	if kyse__d.Required {
-//line components/password.go:670
+//line components/password.go:674
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\trequired\n")
 		}
 	}
-//line components/password.kyse.go:446
+//line components/password.kyse.go:448
 	if kyse__d.Autofocus {
-//line components/password.go:677
+//line components/password.go:681
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tautofocus\n")
 		}
 	}
 	if kyse__err == nil {
 		var kyse__v4 string
-//line components/password.kyse.go:449
+//line components/password.kyse.go:451
 		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/password.go:686
+//line components/password.go:690
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:449", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:451", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 		}
@@ -705,9 +709,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/password.kyse.go:459
+//line components/password.kyse.go:461
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("reveal", "btn")))
-//line components/password.go:711
+//line components/password.go:715
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -728,9 +732,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-reveal-hidden=\"")
 	}
 	if kyse__err == nil {
-//line components/password.kyse.go:464
+//line components/password.kyse.go:466
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RevealText()))
-//line components/password.go:734
+//line components/password.go:738
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -739,9 +743,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdata-reveal-shown=\"")
 	}
 	if kyse__err == nil {
-//line components/password.kyse.go:465
+//line components/password.kyse.go:467
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ConcealText()))
-//line components/password.go:745
+//line components/password.go:749
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -750,9 +754,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-label=\"")
 	}
 	if kyse__err == nil {
-//line components/password.kyse.go:466
+//line components/password.kyse.go:468
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RevealText()))
-//line components/password.go:756
+//line components/password.go:760
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -764,20 +768,20 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-controls=\"")
 	}
 	if kyse__err == nil {
-//line components/password.kyse.go:468
+//line components/password.kyse.go:470
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/password.go:770
+//line components/password.go:774
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v5 string
-//line components/password.kyse.go:469
+//line components/password.kyse.go:471
 		kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("reveal"))
-//line components/password.go:779
+//line components/password.go:783
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:469", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:471", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 		}
@@ -786,18 +790,18 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t><span data-reveal-icon-hidden aria-hidden=\"true\">")
 	}
 	if kyse__err == nil {
-//line components/password.kyse.go:470
+//line components/password.kyse.go:472
 		var kyse__v6 kyse__template.HTML = icons.Eye(icons.Props{})
-//line components/password.go:792
+//line components/password.go:796
 		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v6))
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</span><span data-reveal-icon-shown aria-hidden=\"true\" hidden>")
 	}
 	if kyse__err == nil {
-//line components/password.kyse.go:470
+//line components/password.kyse.go:472
 		var kyse__v7 kyse__template.HTML = icons.EyeSlash(icons.Props{})
-//line components/password.go:801
+//line components/password.go:805
 		_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v7))
 	}
 	if kyse__err == nil {
@@ -809,9 +813,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/password.kyse.go:479
+//line components/password.kyse.go:481
 	if !kyse__d.Confirming {
-//line components/password.go:815
+//line components/password.go:819
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t<section\n")
 		}
@@ -822,9 +826,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:482
+//line components/password.kyse.go:484
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("panel", "password-panel top-auto! bottom-full! mt-0! mb-2 p-3! border-primary/35 bg-popover! text-popover-foreground! gap-2!")))
-//line components/password.go:828
+//line components/password.go:832
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -833,9 +837,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tid=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:483
+//line components/password.kyse.go:485
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PanelID()))
-//line components/password.go:839
+//line components/password.go:843
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -845,11 +849,11 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 			var kyse__v8 string
-//line components/password.kyse.go:485
+//line components/password.kyse.go:487
 			kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("panel"))
-//line components/password.go:851
+//line components/password.go:855
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:485", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:487", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 			}
@@ -867,9 +871,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:502
+//line components/password.kyse.go:504
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("meter", "progress h-1.5! rounded-full bg-foreground/10 [&>span]:rounded-full [&>span]:bg-destructive [&[data-password-complete=true]>span]:bg-primary")))
-//line components/password.go:873
+//line components/password.go:877
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -884,20 +888,20 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-valuemax=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:505
+//line components/password.kyse.go:507
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RequirementTotal()))
-//line components/password.go:890
+//line components/password.go:894
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v9 string
-//line components/password.kyse.go:506
+//line components/password.kyse.go:508
 			kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("meter"))
-//line components/password.go:899
+//line components/password.go:903
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:506", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:508", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
 			}
@@ -915,20 +919,20 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:510
+//line components/password.kyse.go:512
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("fill", "block h-full w-0")))
-//line components/password.go:921
+//line components/password.go:925
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v10 string
-//line components/password.kyse.go:511
+//line components/password.kyse.go:513
 			kyse__v10, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("fill"))
-//line components/password.go:930
+//line components/password.go:934
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:511", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:513", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v10)
 			}
@@ -952,9 +956,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:517
+//line components/password.kyse.go:519
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("strength", "sr-only")))
-//line components/password.go:958
+//line components/password.go:962
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -963,9 +967,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "            id=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:518
+//line components/password.kyse.go:520
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.StrengthID()))
-//line components/password.go:969
+//line components/password.go:973
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -974,9 +978,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "            data-password-summary=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:519
+//line components/password.kyse.go:521
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.SummaryTemplate()))
-//line components/password.go:980
+//line components/password.go:984
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -989,11 +993,11 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 			var kyse__v11 string
-//line components/password.kyse.go:522
+//line components/password.kyse.go:524
 			kyse__v11, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("strength"))
-//line components/password.go:995
+//line components/password.go:999
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:522", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:524", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v11)
 			}
@@ -1002,9 +1006,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:523
+//line components/password.kyse.go:525
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.StrengthText())))
-//line components/password.go:1008
+//line components/password.go:1012
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
@@ -1022,9 +1026,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:532
+//line components/password.kyse.go:534
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("requirements", "flex flex-wrap gap-1.5")))
-//line components/password.go:1028
+//line components/password.go:1032
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1033,20 +1037,20 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:533
+//line components/password.kyse.go:535
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RequirementsID()))
-//line components/password.go:1039
+//line components/password.go:1043
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v12 string
-//line components/password.kyse.go:534
+//line components/password.kyse.go:536
 			kyse__v12, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("requirements"))
-//line components/password.go:1048
+//line components/password.go:1052
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:534", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:536", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v12)
 			}
@@ -1054,10 +1058,10 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>\n")
 		}
-//line components/password.kyse.go:536
+//line components/password.kyse.go:538
 		for _, requirement := range kyse__d.Requirements() {
 			_ = requirement
-//line components/password.go:1061
+//line components/password.go:1065
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t<li\n")
 			}
@@ -1068,9 +1072,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/password.kyse.go:539
+//line components/password.kyse.go:541
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("requirement", "flex items-center gap-1! rounded-full border border-dashed border-foreground/25 bg-foreground/5 px-2 py-1 text-xs! leading-none! font-medium [&[hidden]]:hidden! [&>span>svg]:size-3! [&>span]:size-auto! data-[met=true]:border-solid data-[met=true]:border-primary/60 data-[met=true]:bg-primary/10")))
-//line components/password.go:1074
+//line components/password.go:1078
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1079,9 +1083,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-requirement=\"")
 			}
 			if kyse__err == nil {
-//line components/password.kyse.go:540
+//line components/password.kyse.go:542
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(requirement.Key))
-//line components/password.go:1085
+//line components/password.go:1089
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1089,20 +1093,20 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-met=\"false\"\n")
 			}
-//line components/password.kyse.go:542
+//line components/password.kyse.go:544
 			if requirement.Key == "max" {
-//line components/password.go:1095
+//line components/password.go:1099
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thidden\n")
 				}
 			}
 			if kyse__err == nil {
 				var kyse__v13 string
-//line components/password.kyse.go:545
+//line components/password.kyse.go:547
 				kyse__v13, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("requirement"))
-//line components/password.go:1104
+//line components/password.go:1108
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:545", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:547", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v13)
 				}
@@ -1111,35 +1115,35 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t><span data-requirement-met aria-hidden=\"true\">")
 			}
 			if kyse__err == nil {
-//line components/password.kyse.go:546
+//line components/password.kyse.go:548
 				var kyse__v14 kyse__template.HTML = icons.CheckCircle(icons.Props{})
-//line components/password.go:1117
+//line components/password.go:1121
 				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v14))
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</span><span data-requirement-unmet aria-hidden=\"true\">")
 			}
 			if kyse__err == nil {
-//line components/password.kyse.go:546
+//line components/password.kyse.go:548
 				var kyse__v15 kyse__template.HTML = icons.Circle(icons.Props{})
-//line components/password.go:1126
+//line components/password.go:1130
 				_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v15))
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</span><span class=\"sr-only\" data-password-status>")
 			}
 			if kyse__err == nil {
-//line components/password.kyse.go:546
+//line components/password.kyse.go:548
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.UnmetText())))
-//line components/password.go:1135
+//line components/password.go:1139
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</span>")
 			}
 			if kyse__err == nil {
-//line components/password.kyse.go:546
+//line components/password.kyse.go:548
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(requirement.Text)))
-//line components/password.go:1143
+//line components/password.go:1147
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</li>\n")
@@ -1161,9 +1165,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:552
+//line components/password.kyse.go:554
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("done", "btn self-start w-auto! rounded-full px-2! py-1! h-auto! min-h-0! text-xs!")))
-//line components/password.go:1167
+//line components/password.go:1171
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -1178,20 +1182,20 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-controls=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:555
+//line components/password.kyse.go:557
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PanelID()))
-//line components/password.go:1184
+//line components/password.go:1188
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v16 string
-//line components/password.kyse.go:556
+//line components/password.kyse.go:558
 			kyse__v16, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("done"))
-//line components/password.go:1193
+//line components/password.go:1197
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:556", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:558", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v16)
 			}
@@ -1200,9 +1204,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:557
+//line components/password.kyse.go:559
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.DoneText())))
-//line components/password.go:1206
+//line components/password.go:1210
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</button>\n")
@@ -1214,9 +1218,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/password.kyse.go:561
+//line components/password.kyse.go:563
 	if kyse__d.Message() != "" {
-//line components/password.go:1220
+//line components/password.go:1224
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<p\n")
 		}
@@ -1227,9 +1231,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:564
+//line components/password.kyse.go:566
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/password.go:1233
+//line components/password.go:1237
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "-error\"\n")
@@ -1238,20 +1242,20 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:565
+//line components/password.kyse.go:567
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("message", "text-destructive text-sm")))
-//line components/password.go:1244
+//line components/password.go:1248
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v17 string
-//line components/password.kyse.go:566
+//line components/password.kyse.go:568
 			kyse__v17, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("message"))
-//line components/password.go:1253
+//line components/password.go:1257
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:566", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:568", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v17)
 			}
@@ -1260,20 +1264,20 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
 		}
 		if kyse__err == nil {
-//line components/password.kyse.go:567
+//line components/password.kyse.go:569
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message())))
-//line components/password.go:1266
+//line components/password.go:1270
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
 		}
 	}
-//line components/password.kyse.go:569
+//line components/password.kyse.go:571
 	if kyse__d.Message() == "" {
-//line components/password.go:1274
-//line components/password.kyse.go:570
+//line components/password.go:1278
+//line components/password.kyse.go:572
 		if kyse__d.Hint != "" {
-//line components/password.go:1277
+//line components/password.go:1281
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<p\n")
 			}
@@ -1284,9 +1288,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tid=\"")
 			}
 			if kyse__err == nil {
-//line components/password.kyse.go:573
+//line components/password.kyse.go:575
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/password.go:1290
+//line components/password.go:1294
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "-hint\"\n")
@@ -1295,20 +1299,20 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/password.kyse.go:574
+//line components/password.kyse.go:576
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("hint", "text-muted-foreground text-sm")))
-//line components/password.go:1301
+//line components/password.go:1305
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 			if kyse__err == nil {
 				var kyse__v18 string
-//line components/password.kyse.go:575
+//line components/password.kyse.go:577
 				kyse__v18, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("hint"))
-//line components/password.go:1310
+//line components/password.go:1314
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:575", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/password.kyse.go:577", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v18)
 				}
@@ -1317,9 +1321,9 @@ func Password(kyse__props PasswordProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/password.kyse.go:576
+//line components/password.kyse.go:578
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Hint)))
-//line components/password.go:1323
+//line components/password.go:1327
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")

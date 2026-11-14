@@ -1,5 +1,10 @@
 # Release Notes
 
+## v0.52.2
+
+- `Password`: a box drawn with `Confirming` (the sign-in, the second box of a pair, the re-entry of a protected area) no longer writes `data-password-met` and `data-password-unmet` on its root. They are the sentences the behaviour announces a checklist line with, there is no line in such a box, and they were written in English whatever language the page spoke. A box that chooses a password writes them as before.
+- The checklist's summary of a password over the maximum length counts the line that appears for it: that is hesape v0.105.2, which the application takes with this release (`go get github.com/arandu-io/hesape@v0.105.2`).
+
 ## [v0.52.1](https://github.com/arandu-io/kyse/compare/v0.52.0...v0.52.1) - 2026-11-13
 
 **Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.52.0...v0.52.1

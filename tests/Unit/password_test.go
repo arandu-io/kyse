@@ -334,3 +334,24 @@ func TestACallerKeepsTheBehaviourTheyNamed(t *testing.T) {
 		t.Errorf("the caller's props were overwritten:\n%s", html)
 	}
 }
+
+// A box where a password is entered grades nothing, so it draws no sentence of
+// the checklist either: the labels the behaviour reads to announce a line are
+// part of the checklist, and a sign-in box that carried them in English told a
+// page in another language that something was "Met:" or "Not met:" when there
+// was no line to say it of.
+func TestAConfirmingBoxCarriesNoChecklistLabels(t *testing.T) {
+	html := string(components.Password(components.PasswordProps{Name: "password", Label: "Password", Confirming: true}))
+	for _, absent := range []string{"data-password-met", "data-password-unmet", "data-requirement=", "Met:", "Not met:"} {
+		if strings.Contains(html, absent) {
+			t.Errorf("a confirming box still draws %q:\n%s", absent, html)
+		}
+	}
+
+	html = string(components.Password(components.PasswordProps{Name: "password", Label: "Password", MetLabel: "Atendido:", UnmetLabel: "Não atendido:"}))
+	for _, want := range []string{`data-password-met="Atendido:"`, `data-password-unmet="Não atendido:"`, `data-requirement="min"`} {
+		if !strings.Contains(html, want) {
+			t.Errorf("a box that chooses a password lost %q:\n%s", want, html)
+		}
+	}
+}

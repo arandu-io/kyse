@@ -399,8 +399,10 @@ func (p PasswordProps) ElementID() string {
 <div
 	data-part="root"
     class="{{ .RootClass("field password") }}"
+    @if(!.Confirming)
     data-password-met="{{ .MetText() }}"
     data-password-unmet="{{ .UnmetText() }}"
+    @endif
 	@attributes(.RootAttrs())
 >
 	<label
