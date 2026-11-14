@@ -1,5 +1,9 @@
 # Release Notes
 
+## [v0.52.2](https://github.com/arandu-io/kyse/compare/v0.52.1...v0.52.2) - 2026-11-14
+
+**Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.52.1...v0.52.2
+
 ## v0.52.2
 
 - `Password`: a box drawn with `Confirming` (the sign-in, the second box of a pair, the re-entry of a protected area) no longer writes `data-password-met` and `data-password-unmet` on its root. They are the sentences the behaviour announces a checklist line with, there is no line in such a box, and they were written in English whatever language the page spoke. A box that chooses a password writes them as before.
