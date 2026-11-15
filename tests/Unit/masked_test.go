@@ -114,6 +114,26 @@ func TestTheFormattedValueIsRightInTheFirstFrame(t *testing.T) {
 	}
 }
 
+// TestTheCapitalTokensWriteCapitalsInTheFirstFrame: a licence plate is typed in
+// lower case as often as not and is stored as it is printed, so U and X write
+// what they accept in capitals, in the first frame as in the behaviour.
+func TestTheCapitalTokensWriteCapitalsInTheFirstFrame(t *testing.T) {
+	t.Parallel()
+
+	for _, c := range []struct{ value, want string }{
+		{"abc1234", "ABC-1234"},
+		{"abc1d23", "ABC-1D23"},
+		{"ABC1D23", "ABC-1D23"},
+	} {
+		html := string(components.Masked(components.MaskedProps{
+			Name: "plate", Pattern: "UUU-0X00", Value: c.value,
+		}))
+		if !strings.Contains(html, `value="`+c.want+`"`) {
+			t.Errorf("%q was formatted as something other than %q:\n%s", c.value, c.want, html)
+		}
+	}
+}
+
 // TestAPartialValueLeavesNoDanglingSeparator holds the small thing that makes
 // typing feel right: a separator with nothing behind it moves the caret for no
 // reason.
@@ -200,13 +220,13 @@ func TestBothSidesOfTheMaskAgree(t *testing.T) {
 	script := servedScript(t)
 
 	// The table in ui.js, as it is written there.
-	for _, token := range []string{"'0'", "'9'", "'#'", "'A'", "'S'"} {
+	for _, token := range []string{"'0'", "'9'", "'#'", "'A'", "'S'", "'U'", "'X'"} {
 		if !strings.Contains(script, token+": { accepts:") {
 			t.Errorf("the behaviour has no entry for %s, and the component does", token)
 		}
 	}
 
-	// And nothing beyond them: a sixth token on one side is a pattern that
+	// And nothing beyond them: an eighth token on one side is a pattern that
 	// formats differently depending on which side read it.
 	start := strings.Index(script, "var maskTokens = {")
 	if start < 0 {
@@ -216,8 +236,8 @@ func TestBothSidesOfTheMaskAgree(t *testing.T) {
 	if end < 0 {
 		t.Fatal("the mask dictionary in ui.js is not closed where this test can see it")
 	}
-	if got := strings.Count(script[start:start+end], "accepts:"); got != 5 {
-		t.Errorf("the behaviour declares %d tokens and the component declares 5", got)
+	if got := strings.Count(script[start:start+end], "accepts:"); got != 7 {
+		t.Errorf("the behaviour declares %d tokens and the component declares 7", got)
 	}
 }
 
