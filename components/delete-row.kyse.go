@@ -93,18 +93,20 @@ func (p DeleteRowProps) Look() string {
 func (p DeleteRowProps) PartNames() []string { return []string{"root"} }
 @endgo
 
-{{-- hx-swap outerHTML with the target set to the row is what removes it: the
-     endpoint answers with nothing, and nothing replacing the row is the row
-     gone. A 204 answers the same way and is the honest status for it. --}}
+{{-- ypy-swap outerHTML with the target set to the row is what removes it: the
+     endpoint answers 200 with an empty body, and nothing replacing the row is
+     the row gone. A 204 swaps nothing, so the row would stay. A refusal or a
+     failure (400 or more) leaves the row where it is: ypy-error-swap none. --}}
 <button
 	data-part="root"
 	class="{{ .RootClass("btn") }}"
 	type="button"
 	data-variant="{{ .Look() }}"
-	hx-delete="{{ .URL }}"
-	hx-confirm="{{ .Question() }}"
-	hx-target="{{ .Removes() }}"
-	hx-swap="outerHTML swap:200ms"
+	ypy-delete="{{ .URL }}"
+	ypy-confirm="{{ .Question() }}"
+	ypy-target="{{ .Removes() }}"
+	ypy-swap="outerHTML swap:200ms"
+	ypy-error-swap="none"
 	@if(.Size != "")
 		data-size="{{ .Size }}"
 	@endif

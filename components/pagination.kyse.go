@@ -76,12 +76,14 @@ type PaginationProps struct {
 	// is a floor and not a default worth shipping.
 	PageLabel string
 
-	// The HTMX attributes, written on every entry, for a pager that swaps the
+	// The YPY attributes, written on every entry, for a pager that swaps the
 	// list instead of loading a document. The links stay real addresses either
-	// way -- HTMX takes the click and the URL is still there for everything
+	// way -- YPY takes the click and the URL is still there for everything
 	// else.
-	HxTarget string
-	HxSwap   string
+	YpyTarget string
+	// YpySwap is the swap style. Empty leaves the default of YPY, which is
+	// morph: what the reader is typing, selecting or scrolling survives it.
+	YpySwap   string
 }
 
 // PaginationEntry is one thing drawn in the trail: a number, or the gap where
@@ -302,15 +304,16 @@ func (p PaginationProps) PartNames() []string {
 						@if(.PreviousNumber() > 0)
 							data-page="{{ .PreviousNumber() }}"
 						@endif
-						@if(.HxTarget != "")
-							hx-get="{{ .PreviousHref() }}"
-							hx-target="{{ .HxTarget }}"
+						@if(.YpyTarget != "")
+							ypy-get="{{ .PreviousHref() }}"
+							ypy-target="{{ .YpyTarget }}"
+							ypy-error-swap="none"
 						@endif
-						@if(.HxSwap != "")
-							hx-swap="{{ .HxSwap }}"
+						@if(.YpySwap != "")
+							ypy-swap="{{ .YpySwap }}"
 						@endif
-						@if(.HxSwap == "outerHTML" && .HxTarget != "")
-							hx-select="{{ .HxTarget }}"
+						@if(.YpySwap == "outerHTML" && .YpyTarget != "")
+							ypy-select="{{ .YpyTarget }}"
 						@endif
 						@attributes(.PartAttrs("previous"))
 					>{{ .PreviousName() }}</a>
@@ -345,15 +348,16 @@ func (p PaginationProps) PartNames() []string {
 							@if(entry.Current)
 								aria-current="page"
 							@endif
-							@if(.HxTarget != "")
-								hx-get="{{ .Href(entry.Number) }}"
-								hx-target="{{ .HxTarget }}"
+							@if(.YpyTarget != "")
+								ypy-get="{{ .Href(entry.Number) }}"
+								ypy-target="{{ .YpyTarget }}"
+								ypy-error-swap="none"
 							@endif
-							@if(.HxSwap != "")
-								hx-swap="{{ .HxSwap }}"
+							@if(.YpySwap != "")
+								ypy-swap="{{ .YpySwap }}"
 							@endif
-							@if(.HxSwap == "outerHTML" && .HxTarget != "")
-								hx-select="{{ .HxTarget }}"
+							@if(.YpySwap == "outerHTML" && .YpyTarget != "")
+								ypy-select="{{ .YpyTarget }}"
 							@endif
 							@attributes(.PartAttrs("link"))
 						>{{ entry.Number }}</a>
@@ -379,15 +383,16 @@ func (p PaginationProps) PartNames() []string {
 						@if(.NextNumber() > 0)
 							data-page="{{ .NextNumber() }}"
 						@endif
-						@if(.HxTarget != "")
-							hx-get="{{ .NextHref() }}"
-							hx-target="{{ .HxTarget }}"
+						@if(.YpyTarget != "")
+							ypy-get="{{ .NextHref() }}"
+							ypy-target="{{ .YpyTarget }}"
+							ypy-error-swap="none"
 						@endif
-						@if(.HxSwap != "")
-							hx-swap="{{ .HxSwap }}"
+						@if(.YpySwap != "")
+							ypy-swap="{{ .YpySwap }}"
 						@endif
-						@if(.HxSwap == "outerHTML" && .HxTarget != "")
-							hx-select="{{ .HxTarget }}"
+						@if(.YpySwap == "outerHTML" && .YpyTarget != "")
+							ypy-select="{{ .YpyTarget }}"
 						@endif
 						@attributes(.PartAttrs("next"))
 					>{{ .NextName() }}</a>

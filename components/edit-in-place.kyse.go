@@ -124,9 +124,10 @@ func (p EditInPlaceProps) PartNames() []string {
 			data-variant="ghost"
 			data-size="sm"
 			aria-label="{{ .EditName() }}"
-			hx-get="{{ .EditURL }}"
-			hx-target="#{{ .ID }}"
-			hx-swap="outerHTML"
+			ypy-get="{{ .EditURL }}"
+			ypy-target="#{{ .ID }}"
+			ypy-swap="outerHTML"
+			ypy-error-swap="none"
 			@attributes(.PartAttrs("edit"))
 		>{{ .EditName() }}</button>
 	</div>
@@ -140,9 +141,10 @@ func (p EditInPlaceProps) PartNames() []string {
 		data-part="root"
 		class="{{ .RootClass("edit-in-place") }}"
 		id="{{ .ID }}"
-		hx-put="{{ .SaveURL }}"
-		hx-target="#{{ .ID }}"
-		hx-swap="outerHTML"
+		ypy-put="{{ .SaveURL }}"
+		ypy-target="#{{ .ID }}"
+		ypy-swap="outerHTML"
+		ypy-status:5xx="swap:none"
 		@attributes(.RootAttrs())
 	>
 		<label
@@ -198,9 +200,10 @@ func (p EditInPlaceProps) PartNames() []string {
 				type="button"
 				data-variant="ghost"
 				data-size="sm"
-				hx-get="{{ .CancelURL }}"
-				hx-target="#{{ .ID }}"
-				hx-swap="outerHTML"
+				ypy-get="{{ .CancelURL }}"
+				ypy-target="#{{ .ID }}"
+				ypy-swap="outerHTML"
+				ypy-error-swap="none"
 				@attributes(.PartAttrs("cancel"))
 			>{{ .CancelName() }}</button>
 		@endif

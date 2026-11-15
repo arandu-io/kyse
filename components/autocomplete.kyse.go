@@ -154,11 +154,12 @@ func (p AutocompleteProps) ElementID() string {
 		list="{{ .ListID() }}"
 		autocomplete="off"
 		@if(.SearchURL != "")
-			hx-get="{{ .SearchURL }}"
-			hx-trigger="{{ .Trigger() }}"
-			hx-target="#{{ .ListID() }}"
-			hx-swap="innerHTML"
-			hx-sync="this:replace"
+			ypy-get="{{ .SearchURL }}"
+			ypy-trigger="{{ .Trigger() }}"
+			ypy-target="#{{ .ListID() }}"
+			ypy-swap="innerHTML"
+			ypy-error-swap="none"
+			ypy-sync="this:replace"
 		@endif
 		@if(.Placeholder != "")
 			placeholder="{{ .Placeholder }}"

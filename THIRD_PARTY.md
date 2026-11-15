@@ -1,46 +1,7 @@
 # Third-party notices
 
-This library is written here, and three projects are upstream of it. Two of them
-have their notice beside what was taken; the third has it here, because what was
-taken from it is a shape rather than a file.
-
-## shadcn-htmx
-
-The component set, the `data-variant` / `data-size` attribute API and the HTMX
-patterns are adapted from [shadcn-htmx](https://github.com/productdevbook/shadcn-htmx).
-No file of it is in this repository — the components are Go functions compiled
-from `.kyse.go` templates, and the upstream is TypeScript over Go
-`html/template`. What travelled is the vocabulary: which components exist, what
-each is called, which attribute carries the variant, and how the ARIA is put
-together.
-
-That is why this notice is a file of its own rather than a licence beside a
-directory. There is no directory. The debt is real all the same, and MIT asks
-for the notice to travel with a substantial portion of the work.
-
-```
-MIT License
-
-Copyright (c) 2026 productdevbook
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+This library is written here, and two projects are upstream of it. Each has its
+notice beside what was taken.
 
 ## Basecoat
 

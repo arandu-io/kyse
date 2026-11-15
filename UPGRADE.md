@@ -21,6 +21,85 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## v0.53.0 — the request props and attributes are YPY's
+
+This release stops compiling in every application that sets a request prop, and
+changes what is drawn for every component that asks the server for something.
+The view layer's request library is YPY now, and the components speak only its
+native language: `ypy-*` attributes, `ypy:*` events, `YPY-*` headers, morph as the
+default swap, and the native rule for a response of 400 or more.
+
+### The fields
+
+Every field of a props struct that carried the old library's prefix is now
+spelled `Ypy...`. The sets are the same and the values mean what they meant: an
+address, a selector, a swap style, a question, a trigger.
+
+| it was | it is | on |
+| --- | --- | --- |
+| the old `...Post` | `YpyPost` | `ButtonProps`, `MenuItem`, `SegmentedControlProps`, `SelectProps`, `SplitButtonProps`, `ToolbarItem` |
+| the old `...Get` | `YpyGet` | `ButtonProps`, `MenuItem`, `SegmentedControlProps`, `SelectProps`, `SplitButtonProps`, `ToolbarItem` |
+| the old `...Target` | `YpyTarget` | `ButtonProps`, `MenuItem`, `PaginationProps`, `SegmentedControlProps`, `SelectProps`, `SplitButtonProps`, `TableProps`, `ToolbarItem` |
+| the old `...Swap` | `YpySwap` | `ButtonProps`, `PaginationProps`, `SegmentedControlProps`, `SelectProps`, `SplitButtonProps`, `TableProps`, `ToolbarItem` |
+| the old `...Confirm` | `YpyConfirm` | `ButtonProps`, `MenuItem` |
+| the old `...Trigger` | `YpyTrigger` | `SegmentedControlProps`, `SelectProps` |
+| the old `...Include` | `YpyInclude` | `SelectProps` |
+
+The row actions of a `DataTable` are `MenuItem`s, so `row.Actions[n].YpyPost`,
+`YpyGet`, `YpyTarget` and `YpyConfirm` follow the table above.
+
+What an application does:
+
+- **Rename the fields with `ypy migrate --write .`**, run over the views and the
+  Go that builds the props. It renames the Go identifiers and the attributes in
+  your own markup in the same pass, and `ypy check .` lists what is left for a
+  person.
+- **Load the YPY script in the layout** (the hesape and framework releases that
+  embed `ypy.min.js`) and delete the old one. A page drawn by this release asks
+  for `ypy-*` and an older script reads none of them. The test server of a
+  project that renders components needs the same swap: `view.Asset("ypy.min.js")`.
+- **Run `aru view:build` with the `aru` of the same move** before regenerating
+  the compiled files. The older compiler does not know the new names, and loses
+  the check on the address of a request.
+- **A value that opens a swap, a header or a confirmation with a script prefix
+  stops the build**: `YpyConfirm` that starts with `js:` or `javascript:` is
+  refused at render with an error naming the line.
+
+### What the components do now
+
+- **A response of 400 or more swaps nothing.** YPY puts such a response into the
+  target by default, and that would replace a row, a list or a button with an
+  error page. Every element that asks for a fragment now writes
+  `ypy-error-swap="none"`: the page stays as it was and `ypy:response:error`
+  fires on the element, for a listener to show. It covers `ActiveSearch`,
+  `Autocomplete`, `Button`, `Combobox`, `DataTable`, `DeleteRow`,
+  `DropdownMenu`, `EditInPlace`, `LazyLoad`, `LoadMore`, `OptimisticToggle`,
+  `Pagination`, `SegmentedControl`, `Select`, `SplitButton`, `Table` and
+  `Toolbar`. The save of an `EditInPlace` keeps the native 422: an invalid save
+  draws the form again with its message, and a failure of the server (5xx)
+  leaves the form as it was.
+- **The default swap is morph.** A `Ypy...Swap` left empty used to mean the old
+  library's `innerHTML`. It now means YPY's default, which keeps what the reader
+  is typing, selecting or scrolling. Write `YpySwap: "innerHTML"` where the raw
+  replacement was the point. The components themselves always write their swap.
+- **A 204 and a 304 swap nothing.** A `DeleteRow` removes its row when the
+  endpoint answers 200 with an empty body; a 204 leaves the row where it is. The
+  comment of the component said the opposite.
+- **Nothing is inherited without being said.** The components write every
+  attribute on the element that uses it, so none relies on a container's
+  attribute reaching its descendants. A page of yours that did, writes
+  `:inherited` on the attribute (`ypy-target:inherited="#out"`).
+- **The layout writes `ypy-boost="true"` once, and a component that must not be
+  boosted writes `ypy-boost="false"`.** `DialogTrigger`, `FormDialog` (`NoBoost`)
+  and the links of a `DataTable` already do.
+- **`Masked` knows `U` and `X`**, the two tokens of hesape's mask that write
+  capitals: `U` a letter, `X` a letter or a digit, so a plate typed `abc1d23`
+  reads `ABC-1D23` in the first frame as it does under the script. Needs hesape
+  that carries them.
+- **The script of the view layer follows YPY's order of events**: for the main
+  swap `ypy:after:settle` fires before `ypy:after:swap`. A listener of your own
+  that carried state from the first to the second needs to read it in this order.
+
 ## v0.50.0
 
 Nothing stops compiling. One thing changes in what is drawn, and it undoes a
@@ -209,7 +288,7 @@ answers the second. The replacements are `Href(DataTableChange{...})`, `Active`,
 | `BulkAction` empty posted the selection to `URL`, which answered 204 and did nothing | the bar is drawn only when `BulkAction` is set | `BulkAction: "/invoices/bulk"` |
 | every bulk button posted the same fields | `ButtonProps.Name` and `Value` are written on the button, so the server can tell which was pressed | `ButtonProps{Label: "Archive", Type: "submit", Name: "do", Value: "archive"}` |
 | the rows ticked belonged to the page shown | the browser keeps the keys ticked per table across a search, an order, a facet and a page, and the bar posts all of them | nothing |
-| a complete list's links could be boosted into a request | a complete list's links and form say `hx-boost="false"` and the behaviour takes the click | nothing |
+| a complete list's links could be boosted into a request | a complete list's links and form turn the old library's boost off and the behaviour takes the click | nothing |
 | a sort, a page step or a search lost the hidden columns | the hidden columns are `State.Hidden()`, travel as `hide`, and survive a swap and a reload | `TableColumn{Hideable: true}`; `TableColumn.Hidden` is where a list with no `State` starts |
 | `PageSizes` drew a chooser on a complete list only | the chooser, a menu of addresses, is drawn on both, and a new size keeps the first row on screen | `PageSizes: []int{10, 20, 50}` |
 
@@ -302,7 +381,7 @@ before.
 ## v0.39.0
 
 Nothing stops a build, and one thing stops a render that used to come out
-empty. An attribute the view layer refuses -- `hx-*`, `on*`, `style`, an
+empty. An attribute the view layer refuses -- the request library's own, `on*`, `style`, an
 address, `class`, `role`, `aria-*` -- written in `Attrs` or in
 `Parts[...].Attrs` used to make the whole component render as nothing. It now
 panics with a `*components.RefusedAttribute` naming the part, the attribute and
@@ -311,7 +390,7 @@ handler turns into an error page.
 
 | it was | it is | write instead |
 | --- | --- | --- |
-| `Attrs{"hx-boost": "false"}` on a `FormDialog` drew no dialog | a panic naming `hx-boost` on `content` | `NoBoost: true` |
+| an `Attrs` entry that turned the boost off on a `FormDialog` drew no dialog | a panic naming that attribute on `content` | `NoBoost: true` |
 | any refused name in `Attrs` drew an empty component | a panic naming it | the component's own field for it, or nothing |
 
 A value the escapers refuse because it arrived as data -- an address whose
@@ -347,7 +426,7 @@ Hesape v0.54.1, whose script works the facets and the pager.
 ## v0.34.2
 
 Nothing to change. A data table's search, facets, sortable headers and pages
-now take the region out of the answer (`hx-select` equal to `hx-target`), so
+now take the region out of the answer (the select equal to the target), so
 an endpoint that answers the whole page swaps one list for one list instead
 of drawing the page inside the table.
 
@@ -584,7 +663,7 @@ utility beats a component class there. Utility against utility is the one case
 that needs the importance marker: `p-8!`.
 
 Attributes go through a check that refuses every name whose value a browser or a
-library would act on — `on*`, `hx-on*`, `x-*`, `style`, `href` and the other
+library would act on — `on*`, the request library's `on` attributes, `x-*`, `style`, `href` and the other
 address attributes, and the `class`, `role` and `aria-*` the component owns. A
 refused name is an error at render, naming the attribute and the view's line.
 

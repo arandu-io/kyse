@@ -68,7 +68,7 @@ func invoices() []invoice {
 type request struct {
 	Path   string
 	Query  string
-	Htmx   bool
+	YPY    bool
 	Method string
 	Form   url.Values
 }
@@ -83,12 +83,12 @@ type app struct {
 	delay time.Duration
 }
 
-func (a *app) requests(path string, htmxOnly bool) []request {
+func (a *app) requests(path string, ypyOnly bool) []request {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	var out []request
 	for _, r := range a.log {
-		if r.Path == path && (!htmxOnly || r.Htmx) {
+		if r.Path == path && (!ypyOnly || r.YPY) {
 			out = append(out, r)
 		}
 	}
@@ -101,7 +101,7 @@ func (a *app) slow(delay time.Duration) {
 	a.mu.Unlock()
 }
 
-func (a *app) count(path string, htmxOnly bool) int { return len(a.requests(path, htmxOnly)) }
+func (a *app) count(path string, ypyOnly bool) int { return len(a.requests(path, ypyOnly)) }
 
 func (a *app) posted() []request {
 	a.mu.Lock()
@@ -285,19 +285,18 @@ func small() string {
 
 func layout(title, body string) string {
 	return fmt.Sprintf(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>%s</title>
-<meta name="htmx-config" content='{"includeIndicatorStyles":false,"allowEval":false}'>
 <link rel="stylesheet" href="/app.css">
 <script src="%s"></script><script src="%s"></script></head>
-<body hx-boost="true" class="bg-background text-foreground antialiased">
+<body ypy-boost="true" class="bg-background text-foreground antialiased">
 <nav class="flex gap-4 border-b p-4 text-sm"><a href="/invoices">Invoices</a><a href="/menu">Menu header</a><a href="/small">Small list</a><a href="/other">Other page</a></nav>
 <main class="mx-auto max-w-5xl p-6"><h1 class="mb-2 text-2xl font-semibold tracking-tight">%s</h1>%s</main>
-</body></html>`, title, view.Asset("htmx.min.js"), view.Asset("ui.js"), title, body)
+</body></html>`, title, view.Asset("ypy.min.js"), view.Asset("ui.js"), title, body)
 }
 
-// fragment is whether the request wants the region alone: an htmx request that
+// fragment is whether the request wants the region alone: a YPY request that
 // is not the history restoring a page.
 func fragment(r *http.Request) bool {
-	return r.Header.Get("HX-Request") == "true" && r.Header.Get("HX-History-Restore-Request") != "true"
+	return r.Header.Get("YPY-Request") == "true" && r.Header.Get("YPY-History-Restore-Request") != "true"
 }
 
 var (
@@ -415,7 +414,7 @@ func serve(t *testing.T, needStyles bool) *app {
 			a.mu.Unlock()
 			time.Sleep(wait)
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
-			w.Header().Set("Vary", "HX-Request, HX-History-Restore-Request")
+			w.Header().Set("Vary", "YPY-Request, YPY-History-Restore-Request")
 			w.Header().Set("Cache-Control", "no-store")
 			body := table(path, r.URL.Query(), menu)
 			if fragment(r) {
@@ -440,7 +439,7 @@ func serve(t *testing.T, needStyles bool) *app {
 		a.mu.Unlock()
 		time.Sleep(wait)
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Header().Set("Vary", "HX-Request, HX-History-Restore-Request")
+		w.Header().Set("Vary", "YPY-Request, YPY-History-Restore-Request")
 		w.Header().Set("Cache-Control", "no-store")
 		body := controlledTable(r.URL.Query())
 		if fragment(r) {
@@ -474,7 +473,7 @@ func serve(t *testing.T, needStyles bool) *app {
 	mux.HandleFunc("GET /wide", func(w http.ResponseWriter, r *http.Request) {
 		a.record(r)
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Header().Set("Vary", "HX-Request, HX-History-Restore-Request")
+		w.Header().Set("Vary", "YPY-Request, YPY-History-Restore-Request")
 		w.Header().Set("Cache-Control", "no-store")
 		page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 		body := wideTable(max(1, page))
@@ -510,7 +509,7 @@ func (a *app) record(r *http.Request) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	a.log = append(a.log, request{
-		Path: r.URL.Path, Query: r.URL.RawQuery, Htmx: r.Header.Get("HX-Request") == "true",
+		Path: r.URL.Path, Query: r.URL.RawQuery, YPY: r.Header.Get("YPY-Request") == "true",
 		Method: r.Method, Form: r.PostForm,
 	})
 }

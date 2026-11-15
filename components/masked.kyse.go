@@ -2,6 +2,8 @@
 
 package components
 
+import "unicode"
+
 @go
 // MaskedBehavior is the name the client behaviour is registered under with
 // arandu.ui.define, and the name this component writes.
@@ -41,8 +43,9 @@ const MaskedBehavior = "mask"
 // # The pattern
 //
 // Pattern is the mask, in the tokens mask.Pattern documents: 0 a digit, 9 an
-// optional digit, # a digit repeated to the end, A alphanumeric, S a letter.
-// Everything else is written through.
+// optional digit, # a digit repeated to the end, A alphanumeric, S a letter, U a
+// letter written in capitals, X alphanumeric written in capitals. Everything
+// else is written through.
 //
 //	components.Masked(components.MaskedProps{
 //		Name:    "postcode",
@@ -179,7 +182,7 @@ func (p MaskedProps) Message() string {
 // and keeps the full keyboard for a field that takes letters.
 //
 // A pattern takes digits only when its tokens are 0, 9 and #. A letter in it
-// is either a token that takes letters (A, S) or a literal written through, and
+// is either a token that takes letters (A, S, U, X) or a literal written through, and
 // either way the number pad would be the wrong keyboard, so one letter anywhere
 // in any pattern leaves the attribute off.
 func (p MaskedProps) InputMode() string {
@@ -237,6 +240,8 @@ func (p MaskedProps) PartNames() []string { return []string{"root", "input", "ra
 //	#  a digit, repeated to the end
 //	A  a letter or a digit
 //	S  a letter
+//	U  a letter, written in capitals
+//	X  a letter or a digit, written in capitals
 func maskAccepts(symbol, value rune) (ok, isToken, repeating bool) {
 	digit := value >= '0' && value <= '9'
 	letter := (value >= 'a' && value <= 'z') || (value >= 'A' && value <= 'Z')
@@ -245,12 +250,21 @@ func maskAccepts(symbol, value rune) (ok, isToken, repeating bool) {
 		return digit, true, false
 	case '#':
 		return digit, true, true
-	case 'A':
+	case 'A', 'X':
 		return digit || letter, true, false
-	case 'S':
+	case 'S', 'U':
 		return letter, true, false
 	}
 	return false, false, false
+}
+
+// maskWrite is the character as the token keeps it: U and X write what they
+// accepted in capitals, and every other token keeps what was typed.
+func maskWrite(symbol, value rune) rune {
+	if symbol == 'U' || symbol == 'X' {
+		return unicode.ToUpper(value)
+	}
+	return value
 }
 
 // maskCapacity is how many characters a pattern's tokens accept, and -1 for one
@@ -328,7 +342,7 @@ func maskApply(pattern, value string) string {
 			at++
 			continue
 		}
-		out = append(out, input[at])
+		out = append(out, maskWrite(symbol, input[at]))
 		at++
 		if !repeating {
 			cursor++
@@ -369,7 +383,7 @@ func maskUnmask(pattern, value string) string {
 			at++
 			continue
 		}
-		out = append(out, input[at])
+		out = append(out, maskWrite(symbol, input[at]))
 		at++
 		if !repeating {
 			cursor++

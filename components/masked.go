@@ -11,9 +11,10 @@ import (
 	kyse__strings "strings"
 
 	kyse__view "github.com/arandu-io/hesape/view"
+	"unicode"
 )
 
-//line components/masked.kyse.go:5
+//line components/masked.kyse.go:7
 
 // MaskedBehavior is the name the client behaviour is registered under with
 // arandu.ui.define, and the name this component writes.
@@ -53,8 +54,9 @@ const MaskedBehavior = "mask"
 // # The pattern
 //
 // Pattern is the mask, in the tokens mask.Pattern documents: 0 a digit, 9 an
-// optional digit, # a digit repeated to the end, A alphanumeric, S a letter.
-// Everything else is written through.
+// optional digit, # a digit repeated to the end, A alphanumeric, S a letter, U a
+// letter written in capitals, X alphanumeric written in capitals. Everything
+// else is written through.
 //
 //	components.Masked(components.MaskedProps{
 //		Name:    "postcode",
@@ -191,7 +193,7 @@ func (p MaskedProps) Message() string {
 // and keeps the full keyboard for a field that takes letters.
 //
 // A pattern takes digits only when its tokens are 0, 9 and #. A letter in it
-// is either a token that takes letters (A, S) or a literal written through, and
+// is either a token that takes letters (A, S, U, X) or a literal written through, and
 // either way the number pad would be the wrong keyboard, so one letter anywhere
 // in any pattern leaves the attribute off.
 func (p MaskedProps) InputMode() string {
@@ -249,6 +251,8 @@ func (p MaskedProps) PartNames() []string { return []string{"root", "input", "ra
 //	#  a digit, repeated to the end
 //	A  a letter or a digit
 //	S  a letter
+//	U  a letter, written in capitals
+//	X  a letter or a digit, written in capitals
 func maskAccepts(symbol, value rune) (ok, isToken, repeating bool) {
 	digit := value >= '0' && value <= '9'
 	letter := (value >= 'a' && value <= 'z') || (value >= 'A' && value <= 'Z')
@@ -257,12 +261,21 @@ func maskAccepts(symbol, value rune) (ok, isToken, repeating bool) {
 		return digit, true, false
 	case '#':
 		return digit, true, true
-	case 'A':
+	case 'A', 'X':
 		return digit || letter, true, false
-	case 'S':
+	case 'S', 'U':
 		return letter, true, false
 	}
 	return false, false, false
+}
+
+// maskWrite is the character as the token keeps it: U and X write what they
+// accepted in capitals, and every other token keeps what was typed.
+func maskWrite(symbol, value rune) rune {
+	if symbol == 'U' || symbol == 'X' {
+		return unicode.ToUpper(value)
+	}
+	return value
 }
 
 // maskCapacity is how many characters a pattern's tokens accept, and -1 for one
@@ -340,7 +353,7 @@ func maskApply(pattern, value string) string {
 			at++
 			continue
 		}
-		out = append(out, input[at])
+		out = append(out, maskWrite(symbol, input[at]))
 		at++
 		if !repeating {
 			cursor++
@@ -381,7 +394,7 @@ func maskUnmask(pattern, value string) string {
 			at++
 			continue
 		}
-		out = append(out, input[at])
+		out = append(out, maskWrite(symbol, input[at]))
 		at++
 		if !repeating {
 			cursor++
@@ -390,7 +403,7 @@ func maskUnmask(pattern, value string) string {
 	return string(out)
 }
 
-//line components/masked.go:394
+//line components/masked.go:407
 
 // Masked renders the masked component.
 func Masked(kyse__props MaskedProps) kyse__template.HTML {
@@ -413,20 +426,20 @@ func Masked(kyse__props MaskedProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/masked.kyse.go:384
+//line components/masked.kyse.go:398
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("masked")))
-//line components/masked.go:419
+//line components/masked.go:432
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/masked.kyse.go:385
+//line components/masked.kyse.go:399
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/masked.go:428
+//line components/masked.go:441
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/masked.kyse.go:385", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/masked.kyse.go:399", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
@@ -444,9 +457,9 @@ func Masked(kyse__props MaskedProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/masked.kyse.go:389
+//line components/masked.kyse.go:403
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("input", "input")))
-//line components/masked.go:450
+//line components/masked.go:463
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -458,9 +471,9 @@ func Masked(kyse__props MaskedProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/masked.kyse.go:391
+//line components/masked.kyse.go:405
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/masked.go:464
+//line components/masked.go:477
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -469,9 +482,9 @@ func Masked(kyse__props MaskedProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tname=\"")
 	}
 	if kyse__err == nil {
-//line components/masked.kyse.go:392
+//line components/masked.kyse.go:406
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/masked.go:475
+//line components/masked.go:488
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -480,9 +493,9 @@ func Masked(kyse__props MaskedProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tvalue=\"")
 	}
 	if kyse__err == nil {
-//line components/masked.kyse.go:393
+//line components/masked.kyse.go:407
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Formatted()))
-//line components/masked.go:486
+//line components/masked.go:499
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -490,108 +503,108 @@ func Masked(kyse__props MaskedProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tautocomplete=\"off\"\n")
 	}
-//line components/masked.kyse.go:395
+//line components/masked.kyse.go:409
 	if kyse__d.InputMode() != "" {
-//line components/masked.go:496
+//line components/masked.go:509
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tinputmode=\"")
 		}
 		if kyse__err == nil {
-//line components/masked.kyse.go:396
+//line components/masked.kyse.go:410
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.InputMode()))
-//line components/masked.go:503
+//line components/masked.go:516
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/masked.kyse.go:398
+//line components/masked.kyse.go:412
 	if kyse__d.Placeholder != "" {
-//line components/masked.go:511
+//line components/masked.go:524
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tplaceholder=\"")
 		}
 		if kyse__err == nil {
-//line components/masked.kyse.go:399
+//line components/masked.kyse.go:413
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Placeholder))
-//line components/masked.go:518
+//line components/masked.go:531
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/masked.kyse.go:401
+//line components/masked.kyse.go:415
 	if kyse__d.AriaLabel != "" {
-//line components/masked.go:526
+//line components/masked.go:539
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-label=\"")
 		}
 		if kyse__err == nil {
-//line components/masked.kyse.go:402
+//line components/masked.kyse.go:416
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.AriaLabel))
-//line components/masked.go:533
+//line components/masked.go:546
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/masked.kyse.go:404
+//line components/masked.kyse.go:418
 	if kyse__d.DescribedBy != "" {
-//line components/masked.go:541
+//line components/masked.go:554
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/masked.kyse.go:405
+//line components/masked.kyse.go:419
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy))
-//line components/masked.go:548
+//line components/masked.go:561
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/masked.kyse.go:407
+//line components/masked.kyse.go:421
 	if kyse__d.Message() != "" {
-//line components/masked.go:556
+//line components/masked.go:569
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/masked.kyse.go:410
+//line components/masked.kyse.go:424
 	if kyse__d.Required {
-//line components/masked.go:563
+//line components/masked.go:576
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\trequired\n")
 		}
 	}
-//line components/masked.kyse.go:413
+//line components/masked.kyse.go:427
 	if kyse__d.Disabled {
-//line components/masked.go:570
+//line components/masked.go:583
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tdisabled\n")
 		}
 	}
-//line components/masked.kyse.go:416
+//line components/masked.kyse.go:430
 	if kyse__d.Readonly {
-//line components/masked.go:577
+//line components/masked.go:590
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\treadonly\n")
 		}
 	}
-//line components/masked.kyse.go:419
+//line components/masked.kyse.go:433
 	if kyse__d.Autofocus {
-//line components/masked.go:584
+//line components/masked.go:597
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tautofocus\n")
 		}
 	}
 	if kyse__err == nil {
 		var kyse__v2 string
-//line components/masked.kyse.go:422
+//line components/masked.kyse.go:436
 		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/masked.go:593
+//line components/masked.go:606
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/masked.kyse.go:422", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/masked.kyse.go:436", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
@@ -609,9 +622,9 @@ func Masked(kyse__props MaskedProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/masked.kyse.go:428
+//line components/masked.kyse.go:442
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("raw", "")))
-//line components/masked.go:615
+//line components/masked.go:628
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -623,9 +636,9 @@ func Masked(kyse__props MaskedProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tname=\"")
 	}
 	if kyse__err == nil {
-//line components/masked.kyse.go:430
+//line components/masked.kyse.go:444
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/masked.go:629
+//line components/masked.go:642
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -634,9 +647,9 @@ func Masked(kyse__props MaskedProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tvalue=\"")
 	}
 	if kyse__err == nil {
-//line components/masked.kyse.go:431
+//line components/masked.kyse.go:445
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Current()))
-//line components/masked.go:640
+//line components/masked.go:653
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -644,16 +657,16 @@ func Masked(kyse__props MaskedProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tdisabled\n")
 	}
-//line components/masked.kyse.go:433
+//line components/masked.kyse.go:447
 	if kyse__d.Autocomplete != "" {
-//line components/masked.go:650
+//line components/masked.go:663
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tautocomplete=\"")
 		}
 		if kyse__err == nil {
-//line components/masked.kyse.go:434
+//line components/masked.kyse.go:448
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Autocomplete))
-//line components/masked.go:657
+//line components/masked.go:670
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -661,11 +674,11 @@ func Masked(kyse__props MaskedProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v3 string
-//line components/masked.kyse.go:436
+//line components/masked.kyse.go:450
 		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("raw"))
-//line components/masked.go:667
+//line components/masked.go:680
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/masked.kyse.go:436", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/masked.kyse.go:450", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}

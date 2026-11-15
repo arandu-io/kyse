@@ -75,7 +75,7 @@ descendants of a button, an alert or a badge. A prop here would be a second
 place, and the two would disagree.
 
 There is no `Class` either, for the same reason.
-`TestSizeComesFromTheLineOrTheStylesheet` at `tests/Unit/icons_test.go:153`
+`TestSizeComesFromTheLineOrTheStylesheet` at `tests/Unit/icons_test.go:201`
 fails if the renderer stops writing `1em`, or starts writing a class.
 
 To make an icon larger or a different colour, style the element that contains
@@ -102,7 +102,7 @@ the package proper would pin all of them into every binary that draws one.
 
 **Never hand-edit a file under `icons/`.** That edit compiles, and the next
 regeneration silently undoes it. Two things catch it:
-`TestTheGeneratedIconsAreTheOnesInTheTree` at `tests/Unit/icons_test.go:231`
+`TestTheGeneratedIconsAreTheOnesInTheTree` at `tests/Unit/icons_test.go:279`
 fails on a generated file that no longer names the pinned commit, on an exported
 function missing from the registry, and on a set whose size is not 1512; and CI
 regenerates and fails if the tree moved.
@@ -131,13 +131,13 @@ every run:
 | test | line | what it holds |
 | --- | --- | --- |
 | `TestEveryIconIsOneWellFormedSVG` | 72 | one `<svg>`, one `<path>`, the Phosphor viewBox, non-empty path data |
-| `TestNoIconCarriesMarkup` | 101 | no angle bracket, quote, `script`, `javascript:` or `url(` in the path data, and no `on*` attribute anywhere |
-| `TestEveryIconTakesTheColourOfItsText` | 130 | `fill="currentColor"` on the svg and on nothing under it |
+| `TestNoIconCarriesMarkup` | 147 | no angle bracket, quote, `script`, `javascript:` or `url(` in the path data, and no `on*` attribute anywhere |
+| `TestEveryIconTakesTheColourOfItsText` | 178 | `fill="currentColor"` on the svg and on nothing under it |
 
 They walk the whole set rather than a sample, because a sample would pass on the
 day one file is different, which is the only day any of this matters.
 
-`TestALabelIsEscaped` at line 209 reads one icon, and that is enough: the label
+`TestALabelIsEscaped` at line 257 reads one icon, and that is enough: the label
 is escaped in the shared renderer that all 1512 call, so one of them proves it
 for the set.
 
@@ -145,6 +145,6 @@ for the set.
 
 The paths are somebody else's work under MIT, and the one condition is that the
 notice travels with them. It is in `icons/LICENSE.md`, beside the files, and
-`TestTheUpstreamLicenceIsHere` at `tests/Unit/icons_test.go:295` fails if it
+`TestTheUpstreamLicenceIsHere` at `tests/Unit/icons_test.go:343` fails if it
 stops carrying the copyright line. A directory of vendored artwork that lost its
 licence file is a violation nothing else in the build would notice.

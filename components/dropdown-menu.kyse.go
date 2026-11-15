@@ -82,26 +82,26 @@ type MenuItem struct {
 	// hidden once an entry is chosen, and a dialog drawn inside it goes with it.
 	Dialog string
 
-	// The HTMX attributes, written only when they carry something. An empty
-	// hx-post is an attribute HTMX acts on: it would post to the current URL.
+	// The YPY attributes, written only when they carry something. An empty
+	// ypy-post is an attribute YPY acts on: it would post to the current URL.
 	//
-	// HxTarget asks for a piece of the page back rather than a document, so what
+	// YpyTarget asks for a piece of the page back rather than a document, so what
 	// answers the request has to be a view that draws that piece and nothing
 	// around it -- one that extends no layout. Aimed at a view that extends one,
 	// the reply is a whole document: the swap drops its head, puts the body's
 	// children inside the target, and the page ends up holding a second copy of
 	// its own header and navigation.
 	//
-	// HxConfirm is the question asked before the request. It is drawn as a
+	// YpyConfirm is the question asked before the request. It is drawn as a
 	// centred confirmation dialog by the view layer's script (hesape v0.103.0
 	// and later) and never as the browser's own: the entry carries its Variant
 	// to the button that goes through with it, so a destructive entry asks with
 	// a destructive button. Where the words matter, use Dialog instead, which
 	// names what the button says.
-	HxPost    string
-	HxGet     string
-	HxTarget  string
-	HxConfirm string
+	YpyPost    string
+	YpyGet     string
+	YpyTarget  string
+	YpyConfirm string
 }
 
 // TriggerID is the id of the button that opens the menu.
@@ -192,7 +192,7 @@ func (p DropdownMenuProps) PartNames() []string {
 						@if(.Items[at].Dialog != "")
 							data-dialog-open="{{ .Items[at].Dialog }}"
 							aria-haspopup="dialog"
-							hx-boost="false"
+							ypy-boost="false"
 						@endif
 						@if(.Items[at].Variant != "")
 							data-variant="{{ .Items[at].Variant }}"
@@ -226,17 +226,20 @@ func (p DropdownMenuProps) PartNames() []string {
 						@if(.Items[at].Disabled)
 							aria-disabled="true"
 						@endif
-						@if(.Items[at].HxPost != "")
-							hx-post="{{ .Items[at].HxPost }}"
+						@if(.Items[at].YpyPost != "")
+							ypy-post="{{ .Items[at].YpyPost }}"
 						@endif
-						@if(.Items[at].HxGet != "")
-							hx-get="{{ .Items[at].HxGet }}"
+						@if(.Items[at].YpyGet != "")
+							ypy-get="{{ .Items[at].YpyGet }}"
 						@endif
-						@if(.Items[at].HxTarget != "")
-							hx-target="{{ .Items[at].HxTarget }}"
+						@if(.Items[at].YpyTarget != "")
+							ypy-target="{{ .Items[at].YpyTarget }}"
 						@endif
-						@if(.Items[at].HxConfirm != "")
-							hx-confirm="{{ .Items[at].HxConfirm }}"
+						@if(.Items[at].YpyPost != "" || .Items[at].YpyGet != "")
+							ypy-error-swap="none"
+						@endif
+						@if(.Items[at].YpyConfirm != "")
+							ypy-confirm="{{ .Items[at].YpyConfirm }}"
 						@endif
 						@attributes(.PartAttrs("item"))
 					>

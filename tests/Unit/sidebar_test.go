@@ -324,7 +324,7 @@ func TestTheSlimStripCarriesNoScriptAndNoStyle(t *testing.T) {
 	t.Parallel()
 
 	html := sidebarWith("slim", false)
-	for _, forbidden := range []string{"<script", " style=", " onclick", " x-", "@click", "hx-on", "localStorage"} {
+	for _, forbidden := range []string{"<script", " style=", " onclick", " x-", "@click", "ypy-on", "localStorage"} {
 		if strings.Contains(html, forbidden) {
 			t.Errorf("the strip carries %q", forbidden)
 		}

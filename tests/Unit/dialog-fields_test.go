@@ -109,12 +109,12 @@ func TestAHiddenInputCarriesTheRefusedValue(t *testing.T) {
 	}
 }
 
-// A layout that boosts its body boosts every link in it, and htmx answers the
+// A layout that boosts its body boosts every link in it, and YPY answers the
 // click on the link before the dialog script hears it: the page navigated to
 // the form instead of opening the dialog.
 func TestALinkTriggerIsNotBoosted(t *testing.T) {
 	link := string(components.DialogTrigger(components.DialogTriggerProps{Dialog: "d", Label: "Open", Href: "/d"}))
-	if !strings.Contains(link, `hx-boost="false"`) {
+	if !strings.Contains(link, `ypy-boost="false"`) {
 		t.Errorf("the link trigger is boosted by a boosted layout:\n%s", link)
 	}
 }

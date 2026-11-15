@@ -60,8 +60,8 @@ mitigation, and credit to the reporter.
 
 ## Supply chain
 
-- The core depends on the standard library and `golang.org/x/crypto`. That is
-  the main defense, and it is checked in CI
+- The module has two direct dependencies, the framework and hesape, and no
+  others of its own. That is the main defense, and it is checked in CI
 - `govulncheck` runs in CI and blocks the merge
 - Dependency updates are reviewed by a person; never merged automatically
 - No `replace` pointing outside the module in a release

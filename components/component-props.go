@@ -189,7 +189,7 @@ func (c ComponentProps) PartClass(part string, own ...string) string {
 // may be written at all; nothing here refuses one. What this decides is only
 // which part a caller was addressing.
 //
-// A name the view layer refuses -- an hx- or on- attribute, a style, an
+// A name the view layer refuses -- an ypy- or on- attribute, a style, an
 // address, class, role or aria- -- panics with a *RefusedAttribute; see there
 // for why it is not left to the render.
 func (c ComponentProps) PartAttrs(part string) map[string]string {
@@ -208,7 +208,7 @@ func (c ComponentProps) PartAttrs(part string) map[string]string {
 // for a value that arrived as data, and it stays the answer for one -- an
 // address whose scheme a browser acts on draws nothing.
 //
-// It is wrong for a name the caller wrote. Attrs{"hx-boost": "false"} on a
+// It is wrong for a name the caller wrote. Attrs{"ypy-boost": "false"} on a
 // FormDialog drew an empty space where the dialog should be, with nothing in a
 // log, a test or the console to say why: the screen looked as if the dialog had
 // never been written. A name in a view is the view's mistake, it is the same on

@@ -61,12 +61,14 @@ type ToolbarItem struct {
 	// IconOnly draws the label as the accessible name rather than as text.
 	IconOnly bool
 
-	// The HTMX attributes, written only when they carry something. An empty
-	// hx-post is an attribute HTMX acts on: it would post to the current URL.
-	HxPost   string
-	HxGet    string
-	HxTarget string
-	HxSwap   string
+	// The YPY attributes, written only when they carry something. An empty
+	// ypy-post is an attribute YPY acts on: it would post to the current URL.
+	YpyPost   string
+	YpyGet    string
+	YpyTarget string
+	// YpySwap is the swap style. Empty leaves the default of YPY, which is
+	// morph: what the reader is typing, selecting or scrolling survives it.
+	YpySwap   string
 }
 
 // Vertical is whether the arrow keys run up and down rather than left and
@@ -186,17 +188,20 @@ func (p ToolbarProps) PartNames() []string {
 				@if(.Items[at].IconOnly)
 					aria-label="{{ .Items[at].Label }}"
 				@endif
-				@if(.Items[at].HxPost != "")
-					hx-post="{{ .Items[at].HxPost }}"
+				@if(.Items[at].YpyPost != "")
+					ypy-post="{{ .Items[at].YpyPost }}"
 				@endif
-				@if(.Items[at].HxGet != "")
-					hx-get="{{ .Items[at].HxGet }}"
+				@if(.Items[at].YpyGet != "")
+					ypy-get="{{ .Items[at].YpyGet }}"
 				@endif
-				@if(.Items[at].HxTarget != "")
-					hx-target="{{ .Items[at].HxTarget }}"
+				@if(.Items[at].YpyTarget != "")
+					ypy-target="{{ .Items[at].YpyTarget }}"
 				@endif
-				@if(.Items[at].HxSwap != "")
-					hx-swap="{{ .Items[at].HxSwap }}"
+				@if(.Items[at].YpyPost != "" || .Items[at].YpyGet != "")
+					ypy-error-swap="none"
+				@endif
+				@if(.Items[at].YpySwap != "")
+					ypy-swap="{{ .Items[at].YpySwap }}"
 				@endif
 				@attributes(.PartAttrs("control"))
 			>

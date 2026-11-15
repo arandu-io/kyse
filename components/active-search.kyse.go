@@ -71,7 +71,7 @@ func (p ActiveSearchProps) Region() string {
 //
 // It is three things at once, and each one is load-bearing. "input changed"
 // runs only when the text actually differs, so an arrow key or a modifier does
-// not search again. "delay" waits for typing to stop. "search" is HTMX's own
+// not search again. "delay" waits for typing to stop. "search" is YPY's own
 // event for the box being cleared with the native clear button, which fires no
 // input event in some engines.
 func (p ActiveSearchProps) Trigger() string {
@@ -97,7 +97,7 @@ func (p ActiveSearchProps) PartNames() []string {
 @endgo
 
 {{-- A form, so Enter submits to the same endpoint and the page comes back with
-     the results in it. HTMX takes the typing before that ever happens; what is
+     the results in it. YPY takes the typing before that ever happens; what is
      left is the path for a browser that has not run the script yet. --}}
 <form
 	data-part="root"
@@ -124,7 +124,7 @@ func (p ActiveSearchProps) PartNames() []string {
 		class="{{ .PartClass("group", "input-group") }}"
 		@attributes(.PartAttrs("group"))
 	>
-		{{-- hx-sync replace is what stops an old answer overwriting a new one:
+		{{-- ypy-sync replace is what stops an old answer overwriting a new one:
 		     the request in flight is abandoned the moment another starts, so
 		     the last answer to arrive is always the last one asked for. --}}
 		<input
@@ -137,12 +137,13 @@ func (p ActiveSearchProps) PartNames() []string {
 			name="{{ .Name }}"
 			value="{{ .Value }}"
 			autocomplete="off"
-			hx-get="{{ .URL }}"
-			hx-trigger="{{ .Trigger() }}"
-			hx-target="#{{ .Region() }}"
-			hx-swap="innerHTML"
-			hx-sync="this:replace"
-			hx-indicator="#{{ .Name }}-indicator"
+			ypy-get="{{ .URL }}"
+			ypy-trigger="{{ .Trigger() }}"
+			ypy-target="#{{ .Region() }}"
+			ypy-swap="innerHTML"
+			ypy-error-swap="none"
+			ypy-sync="this:replace"
+			ypy-indicator="#{{ .Name }}-indicator"
 			@if(.Placeholder != "")
 				placeholder="{{ .Placeholder }}"
 			@endif

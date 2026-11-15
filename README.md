@@ -22,8 +22,8 @@ plain Go by the compiler in `aru/internal/kyse` — a build step, run by
 repository: the library of components, written in that language, that a view
 imports to draw a screen.
 
-The components themselves are adapted from shadcn/ui by way of shadcn-htmx, and
-importing the second is how a view writes the first.
+The components themselves are adapted from shadcn/ui, and importing them is how
+a view writes the first.
 
 ## Install
 
@@ -76,14 +76,14 @@ space and a 500.
 | group | components |
 |---|---|
 | Actions | `Button` `ButtonGroup` `SplitButton` `CopyButton` `Link` `DeleteRow` `OptimisticToggle` `DialogTrigger` |
-| Forms | `Field` `Input` `HiddenInput` `Label` `Textarea` `Checkbox` `RadioGroup` `Switch` `Select` `Combobox` `Autocomplete` `InputGroup` `RangeSlider` `NumberInput` `Password` `Masked` `OneTimeCode` `DateTimePicker` `Calendar` `ColorPicker` `FileUpload` `SegmentedControl` `Rating` `EditInPlace` `Output` `ActiveSearch` |
+| Forms | `Field` `Input` `HiddenInput` `Label` `Textarea` `Checkbox` `RadioGroup` `Switch` `Select` `Combobox` `Autocomplete` `InputGroup` `RangeSlider` `NumberInput` `Password` `Masked` `OneTimeCode` `DateTimePicker` `DateRangePicker` `Calendar` `ColorPicker` `FileUpload` `SegmentedControl` `Rating` `EditInPlace` `Output` `ActiveSearch` |
 | Layout | `Card` `ContainerCard` `Item` `Separator` `Sidebar` `Toolbar` `Menubar` `Figure` |
 | Display | `Avatar` `Badge` `Kbd` `Skeleton` `Table` `DataTable` `StatCard` `Status` `Meter` `Highlight` `RelativeTime` `ResponsiveImage` `MediaPlayer` `Carousel` `Feed` `Tree` |
 | Feedback | `Alert` `Toast` `Progress` `Empty` `Dialog` `FormDialog` |
 | Overlays | `Drawer` `Popover` `HoverCard` `Tooltip` `DropdownMenu` `Command` `Collapsible` |
 | Navigation | `Accordion` `Breadcrumb` `Tabs` `Pagination` `SkipLink` `ThemeToggle` `LoadMore` `LazyLoad` |
 
-Seventy-nine, one per `components/*.kyse.go`. What is here is what has been
+Eighty, one per `components/*.kyse.go`. What is here is what has been
 adapted, not what is planned.
 
 An alert dialog is not a component of its own: it is the `Alert` field on
@@ -159,12 +159,12 @@ of their own (`ID: "cancel-subscription-reason"`): the page answers by field
 name, and without the scope a refusal in one dialog draws its message and its
 typed value in every field of that name. `HiddenInput` carries a value nobody
 types -- the record a dialog acts on -- and takes the same scoped page. The
-trigger link writes `hx-boost="false"`, so a layout with a boosted body does
+trigger link writes `ypy-boost="false"`, so a layout with a boosted body does
 not navigate to the form page instead of opening the dialog.
 
 A form whose answer must be a whole document -- one that shows a secret once,
 an API token or a signing key, answered `no-store` -- sets `NoBoost: true`, and
-the form carries `hx-boost="false"` inside a boosted layout. `hx-*` cannot be
+the form carries `ypy-boost="false"` inside a boosted layout. `ypy-*` cannot be
 written through `Attrs`: a refused name there stops the render with a
 `*components.RefusedAttribute` that names it, instead of drawing nothing.
 
@@ -226,16 +226,12 @@ it writes.
 
 ## Where this came from
 
-The component set, the `data-variant` / `data-size` attribute API and the HTMX
-patterns are adapted from [shadcn-htmx](https://github.com/productdevbook/shadcn-htmx)
-(MIT). The stylesheet is [Basecoat](https://github.com/hunvreus/basecoat) (MIT).
-The icons are [Phosphor](https://github.com/phosphor-icons/core) (MIT). Every
+The stylesheet is [Basecoat](https://github.com/hunvreus/basecoat) (MIT). The
+icons are [Phosphor](https://github.com/phosphor-icons/core) (MIT). Every
 licence travels with what was taken, and [THIRD_PARTY.md](THIRD_PARTY.md) says
 what came from where: Basecoat's notice sits beside the vendored CSS in the
-skeleton, Phosphor's in [icons/LICENSE.md](icons/LICENSE.md), and shadcn-htmx's
-in THIRD_PARTY.md, because what was taken from it is a shape rather than a file
-and there is no directory to put it next to. This project's own is in
-[LICENSE.md](LICENSE.md).
+skeleton, and Phosphor's in [icons/LICENSE.md](icons/LICENSE.md). This project's
+own is in [LICENSE.md](LICENSE.md).
 
 Nothing arrives through npm and nothing is fetched from a CDN. There is no
 `package.json` in an Arandu project and the Content-Security-Policy is

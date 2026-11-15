@@ -357,7 +357,7 @@ func FileUpload(kyse__props FileUploadProps) kyse__template.HTML {
 	if kyse__d.UploadURL != "" {
 //line components/file-upload.go:359
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-post=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-post=\"")
 		}
 		if kyse__err == nil {
 			var kyse__v4 string
@@ -374,13 +374,13 @@ func FileUpload(kyse__props FileUploadProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-encoding=\"multipart/form-data\"\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-encoding=\"multipart/form-data\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-trigger=\"change\"\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-trigger=\"change\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-target=\"#")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-target=\"#")
 		}
 		if kyse__err == nil {
 //line components/file-upload.kyse.go:177
@@ -391,7 +391,7 @@ func FileUpload(kyse__props FileUploadProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-swap=\"beforeend\"\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-swap=\"beforeend\"\n")
 		}
 	}
 //line components/file-upload.kyse.go:180

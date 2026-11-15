@@ -130,7 +130,7 @@ func TestEveryStepMovesTheStateItShould(t *testing.T) {
 	}
 }
 
-// Every address the table draws is the state's own answer, once, and the htmx
+// Every address the table draws is the state's own answer, once, and the YPY
 // attribute on it is the same address.
 func TestEveryControlOfACombinedStateIsAnExactAddress(t *testing.T) {
 	html := unescaped(string(components.DataTable(listing())))
@@ -172,16 +172,16 @@ func TestEveryControlOfACombinedStateIsAnExactAddress(t *testing.T) {
 		}
 	}
 
-	// Every link that asks htmx for the swap asks for the address it points at.
-	tags := regexp.MustCompile(`<a\b[^>]*hx-get="[^"]*"[^>]*>`).FindAllString(html, -1)
+	// Every link that asks YPY for the swap asks for the address it points at.
+	tags := regexp.MustCompile(`<a\b[^>]*ypy-get="[^"]*"[^>]*>`).FindAllString(html, -1)
 	if len(tags) < 8 {
 		t.Fatalf("expected the headers, the steps, the columns, reset and clear to swap, found %d", len(tags))
 	}
 	for _, tag := range tags {
 		href := regexp.MustCompile(`href="([^"]*)"`).FindStringSubmatch(tag)
-		get := regexp.MustCompile(`hx-get="([^"]*)"`).FindStringSubmatch(tag)
+		get := regexp.MustCompile(`ypy-get="([^"]*)"`).FindStringSubmatch(tag)
 		if href == nil || href[1] != get[1] {
-			t.Errorf("a link's hx-get is not its href: %s", tag)
+			t.Errorf("a link's ypy-get is not its href: %s", tag)
 		}
 	}
 }
@@ -202,14 +202,14 @@ func TestTheFormCarriesTheStateOnceAndMakesOneRequest(t *testing.T) {
 		t.Fatalf("no query form:\n%s", html)
 	}
 	for _, want := range []string{
-		`hx-get="/invoices"`, `hx-push-url="true"`, `hx-target="#invoices"`, `hx-swap="outerHTML"`,
-		`hx-select="#invoices"`, `hx-trigger="submit, change"`,
+		`ypy-get="/invoices"`, `ypy-push-url="true"`, `ypy-target="#invoices"`, `ypy-swap="outerHTML"`,
+		`ypy-select="#invoices"`, `ypy-trigger="submit, change"`,
 	} {
 		if !strings.Contains(query, want) {
 			t.Errorf("the form is missing %s: %s", want, query)
 		}
 	}
-	if strings.Count(html, `hx-trigger=`) != 1 {
+	if strings.Count(html, `ypy-trigger=`) != 1 {
 		t.Errorf("more than one element listens for a trigger; the state has two owners:\n%s", html)
 	}
 
@@ -253,15 +253,15 @@ func TestACompleteListNeverAsksTheServerAndKeepsCorrectAddresses(t *testing.T) {
 	props.State = components.DataTableValues{DefaultSize: 4}
 	html := unescaped(string(components.DataTable(props)))
 
-	if strings.Contains(html, "hx-get") || strings.Contains(html, "hx-trigger") || strings.Contains(html, "hx-push-url") {
+	if strings.Contains(html, "ypy-get") || strings.Contains(html, "ypy-trigger") || strings.Contains(html, "ypy-push-url") {
 		t.Errorf("a complete list asks the server:\n%s", html)
 	}
 	for _, link := range regexp.MustCompile(`<a\b[^>]*href="[^"]*"[^>]*>`).FindAllString(html, -1) {
-		if !strings.Contains(link, `hx-boost="false"`) {
+		if !strings.Contains(link, `ypy-boost="false"`) {
 			t.Errorf("a link of a complete list may be boosted into a request: %s", link)
 		}
 	}
-	if !strings.Contains(html, `hx-boost="false"`) || !strings.Contains(html, `data-complete="true"`) {
+	if !strings.Contains(html, `ypy-boost="false"`) || !strings.Contains(html, `data-complete="true"`) {
 		t.Errorf("a complete list is not marked, nor kept out of the boost:\n%s", html)
 	}
 	for _, address := range hrefs(html) {
@@ -294,7 +294,7 @@ func TestThePagerIsDisabledAtTheEnds(t *testing.T) {
 	html := unescaped(string(components.DataTable(first)))
 	for _, step := range []string{"first", "previous"} {
 		tag := regexp.MustCompile(`<a\b[^>]*data-step="` + step + `"[^>]*>`).FindString(html)
-		if !strings.Contains(tag, `aria-disabled="true"`) || strings.Contains(tag, "href=") || strings.Contains(tag, "hx-get") {
+		if !strings.Contains(tag, `aria-disabled="true"`) || strings.Contains(tag, "href=") || strings.Contains(tag, "ypy-get") {
 			t.Errorf("%s on the first page must be disabled and go nowhere: %s", step, tag)
 		}
 	}
@@ -501,19 +501,19 @@ func TestEveryTextTheTableDrawsIsEscaped(t *testing.T) {
 
 // Every control that replaces the region takes the region out of the answer by
 // the same selector. An endpoint that answers the whole page -- which is what
-// it answers without htmx -- then still swaps one list for one list, instead of
+// it answers without YPY -- then still swaps one list for one list, instead of
 // drawing the page inside itself.
 func TestEveryRegionSwapSelectsTheRegionFromTheAnswer(t *testing.T) {
 	props := listing()
 	props.HeaderMenu = true
 	html := string(components.DataTable(props))
 
-	swaps := regexp.MustCompile(`<[a-z]+\b[^>]*hx-target="#invoices"[^>]*>`).FindAllString(html, -1)
+	swaps := regexp.MustCompile(`<[a-z]+\b[^>]*ypy-target="#invoices"[^>]*>`).FindAllString(html, -1)
 	if len(swaps) < 12 {
 		t.Fatalf("expected the form, the headers, the facets, the columns, the sizes and the steps to swap the region, found %d", len(swaps))
 	}
 	for _, tag := range swaps {
-		for _, want := range []string{`hx-swap="outerHTML"`, `hx-select="#invoices"`, `hx-push-url="true"`, `hx-sync="closest [data-part=root]:replace"`} {
+		for _, want := range []string{`ypy-swap="outerHTML"`, `ypy-select="#invoices"`, `ypy-push-url="true"`, `ypy-sync="closest [data-part=root]:replace"`} {
 			if !strings.Contains(tag, want) {
 				t.Errorf("a control that swaps the region is missing %s:\n%s", want, tag)
 			}
@@ -521,8 +521,8 @@ func TestEveryRegionSwapSelectsTheRegionFromTheAnswer(t *testing.T) {
 	}
 	// And nothing asks for a swap without a target: the closest ancestor would
 	// answer, and that is a caller's own element.
-	for _, tag := range regexp.MustCompile(`<[a-z]+\b[^>]*hx-get="[^"]*"[^>]*>`).FindAllString(html, -1) {
-		if !strings.Contains(tag, `hx-target="#invoices"`) {
+	for _, tag := range regexp.MustCompile(`<[a-z]+\b[^>]*ypy-get="[^"]*"[^>]*>`).FindAllString(html, -1) {
+		if !strings.Contains(tag, `ypy-target="#invoices"`) {
 			t.Errorf("a control asks the server without saying what it swaps:\n%s", tag)
 		}
 	}

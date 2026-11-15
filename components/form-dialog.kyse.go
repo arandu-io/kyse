@@ -122,13 +122,13 @@ type FormDialogProps struct {
 	// Multipart encodes the form as multipart/form-data, for a form with a
 	// file in it.
 	Multipart bool
-	// NoBoost keeps htmx from boosting the form inside a layout that boosts
+	// NoBoost keeps YPY from boosting the form inside a layout that boosts
 	// its body: the browser posts it itself and loads the answer as a whole
 	// document. It is for the form whose answer must not pass through a swap --
 	// one that shows a secret once, an API token or a signing key, answered
 	// no-store and drawn as its own page. Empty leaves the form to the layout.
 	//
-	// It is a field because the caller cannot write it: hx- attributes are
+	// It is a field because the caller cannot write it: ypy- attributes are
 	// refused in Attrs, for the reason they are refused everywhere a name
 	// comes from a caller.
 	NoBoost bool
@@ -355,7 +355,7 @@ func (p FormDialogProps) PartNames() []string {
 			enctype="{{ .Encoding() }}"
 		@endif
 		@if(.NoBoost)
-			hx-boost="false"
+			ypy-boost="false"
 		@endif
 		class="{{ .PartClass("content", .WidthClass(), .SheetClass()) }}"
 		@attributes(.PartAttrs("content"))

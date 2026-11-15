@@ -35,10 +35,10 @@ type ButtonProps struct {
 	Name  string
 	Value string
 
-	// The HTMX attributes, written only when they carry something. An empty
-	// hx-post is an attribute HTMX acts on: it would post to the current URL.
+	// The YPY attributes, written only when they carry something. An empty
+	// ypy-post is an attribute YPY acts on: it would post to the current URL.
 	//
-	// HxTarget and HxSwap ask for a piece of the page back rather than a
+	// YpyTarget and YpySwap ask for a piece of the page back rather than a
 	// document, so what answers the request has to be a view that draws that
 	// piece and nothing around it -- one that extends no layout. Aimed at a
 	// view that extends one, the reply is a whole document: the swap drops its
@@ -46,21 +46,23 @@ type ButtonProps struct {
 	// holding a second copy of its own header and navigation.
 	//
 	// The status the answer carries decides whether the swap happens at all.
-	// A rejected form is answered 422, and 422 is not swapped unless the
-	// document says it is, so a button that narrows a swap and never seems to
-	// receive one is asking a question the page has not been configured to
-	// accept.
+	// A 204 or a 304 swaps nothing, and so does a response of 400 or more: the
+	// button draws ypy-error-swap="none", so a refusal or a failure leaves the
+	// page as it was and YPY announces it with ypy:response:error on the
+	// button, for a listener to show.
 	//
-	// HxConfirm is the question asked before the request. The view layer's
+	// YpyConfirm is the question asked before the request. The view layer's
 	// script draws it as a centred confirmation dialog (hesape v0.103.0 and
 	// later) and never as the browser's own box; the button's Variant is the
 	// variant of the button that goes through with it, so a destructive button
 	// asks with a destructive one.
-	HxPost    string
-	HxGet     string
-	HxTarget  string
-	HxSwap    string
-	HxConfirm string
+	YpyPost    string
+	YpyGet     string
+	YpyTarget  string
+	// YpySwap is the swap style. Empty leaves the default of YPY, which is
+	// morph: what the reader is typing, selecting or scrolling survives it.
+	YpySwap    string
+	YpyConfirm string
 }
 
 // ButtonType is the type attribute, defaulting to a button that does nothing on
@@ -93,20 +95,23 @@ func (p ButtonProps) PartNames() []string { return []string{"root"} }
 		name="{{ .Name }}"
 		value="{{ .Value }}"
 	@endif
-	@if(.HxPost != "")
-		hx-post="{{ .HxPost }}"
+	@if(.YpyPost != "")
+		ypy-post="{{ .YpyPost }}"
 	@endif
-	@if(.HxGet != "")
-		hx-get="{{ .HxGet }}"
+	@if(.YpyGet != "")
+		ypy-get="{{ .YpyGet }}"
 	@endif
-	@if(.HxTarget != "")
-		hx-target="{{ .HxTarget }}"
+	@if(.YpyTarget != "")
+		ypy-target="{{ .YpyTarget }}"
 	@endif
-	@if(.HxSwap != "")
-		hx-swap="{{ .HxSwap }}"
+	@if(.YpyPost != "" || .YpyGet != "")
+		ypy-error-swap="none"
 	@endif
-	@if(.HxConfirm != "")
-		hx-confirm="{{ .HxConfirm }}"
+	@if(.YpySwap != "")
+		ypy-swap="{{ .YpySwap }}"
+	@endif
+	@if(.YpyConfirm != "")
+		ypy-confirm="{{ .YpyConfirm }}"
 	@endif
 	@attributes(.RootAttrs())
 >{{ .Label }}</button>

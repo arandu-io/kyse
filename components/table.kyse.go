@@ -100,11 +100,13 @@ type TableProps struct {
 	// sentence in English.
 	SelectedLabel string
 
-	// The HTMX attributes for a sort link or a column menu, so the table can
+	// The YPY attributes for a sort link or a column menu, so the table can
 	// swap itself instead of loading a document. The links stay real
 	// addresses either way.
-	HxTarget string
-	HxSwap   string
+	YpyTarget string
+	// YpySwap is the swap style. Empty leaves the default of YPY, which is
+	// morph: what the reader is typing, selecting or scrolling survives it.
+	YpySwap   string
 
 	// Composed says this table is drawn inside another component, which has
 	// already mounted the behaviour and owns the region.
@@ -711,15 +713,16 @@ func (p TableProps) PartNames() []string {
 									@if(.SortName(column) != "")
 										aria-label="{{ .SortName(column) }}"
 									@endif
-									@if(.HxTarget != "")
-										hx-get="{{ .SortHref(column) }}"
-										hx-target="{{ .HxTarget }}"
+									@if(.YpyTarget != "")
+										ypy-get="{{ .SortHref(column) }}"
+										ypy-target="{{ .YpyTarget }}"
+										ypy-error-swap="none"
 									@endif
-									@if(.HxSwap != "")
-										hx-swap="{{ .HxSwap }}"
+									@if(.YpySwap != "")
+										ypy-swap="{{ .YpySwap }}"
 									@endif
-									@if(.HxSwap == "outerHTML" && .HxTarget != "")
-										hx-select="{{ .HxTarget }}"
+									@if(.YpySwap == "outerHTML" && .YpyTarget != "")
+										ypy-select="{{ .YpyTarget }}"
 									@endif
 									@attributes(.PartAttrs("sort"))
 								>

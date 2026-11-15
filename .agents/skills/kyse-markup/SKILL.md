@@ -57,7 +57,7 @@ stylesheet, in that repository, and the component here uses the name it defines.
 There is no `.js` file here either, and no component writes a `<script>`.
 Behaviour comes from the view layer's own script, which the framework embeds and
 serves: it binds once on `document` and dispatches by looking at `data-*`
-attributes on the element an event came from. Markup HTMX swaps in is live the
+attributes on the element an event came from. Markup YPY swaps in is live the
 moment it lands, because there is nothing to initialise.
 
 **So a component makes itself interactive by carrying the attributes that script
@@ -84,17 +84,27 @@ Nothing else in the toolchain would catch it: the markup is valid, the view
 compiles, and the smoke test still finds a class in the output. So the sources
 are read.
 
-`TestNoComponentEvaluatesAnExpression` at `tests/Unit/components_test.go:354`
+`TestNoComponentEvaluatesAnExpression` at `tests/Unit/components_test.go:596`
 globs `components/*.kyse.go` and `components/*.go`, and fails on any `x-name` or
 `@name=` it finds. Both halves are read: the source is where the directive would
 be written, the compiled file is what a browser is actually sent. The failure
 names the file, the line, the attribute, and what to do instead.
 
-`hx-get`, `hx-post` and `hx-target` are not matched and are correct here: their
-values are an address and a selector, which HTMX reads as data.
+`ypy-get`, `ypy-post` and `ypy-target` are not matched and are correct here: their
+values are an address and a selector, which YPY reads as data.
 
-**`hx-on` is forbidden all the same**, in every spelling — `hx-on:click`,
-`hx-on::after-request`, `data-hx-on:click`. Its value is JavaScript that HTMX
+**A component that asks the server for a fragment says what a refusal does.** A
+response of 400 or more is swapped by YPY by default, into the target, and a
+500 would replace a row, a list or a button with an error page. A component
+whose target is a region of the page writes `ypy-error-swap="none"` beside its
+`ypy-swap`: the page stays as it was and `ypy:response:error` fires on the
+element for a listener to show. A form that wants its own 422 back keeps the
+native rule and writes `ypy-status:5xx="swap:none"` for the rest. A 204 and a
+304 swap nothing, so a request that removes its target answers 200 with an
+empty body. An empty `ypy-swap` is not `innerHTML`: it is morph.
+
+**`ypy-on` is forbidden all the same**, in every spelling — `ypy-on:click`,
+`ypy-on::after:request`, `data-ypy-on:click`. Its value is JavaScript that YPY
 compiles and runs, exactly like `x-on:click`, so under `script-src 'self'` it is
 dead, and if the policy were ever loosened it would be script written into an
 attribute. The view compiler treats it as a code attribute and refuses any
@@ -155,7 +165,7 @@ somebody typed, converted, is stored cross-site scripting that runs for every
 reader of the page. In an application `aru doctor` also reports the shape as
 `raw-output-is-not-a-component`.
 
-`TestAPropIsEscaped` at `tests/Unit/components_test.go:131` renders twelve
+`TestAPropIsEscaped` at `tests/Unit/components_test.go:328` renders twelve
 components with `<script>alert(1)</script>` in a prop and fails if it survives.
 Add your component to that map when its props carry text.
 
@@ -177,7 +187,7 @@ The set is closed: `@extends` · `@section` / `@endsection` · `@yield` ·
 `@attributes`.
 
 A component uses `@if`, `@foreach`, `@for`, `@go` and `@attributes`, and nothing
-else — this returns nothing across all 37 of them:
+else — this returns nothing across all 80 of them:
 
 ```sh
 grep -ohE '@(extends|section|yield|include|csrf|while|forelse)' components/*.kyse.go

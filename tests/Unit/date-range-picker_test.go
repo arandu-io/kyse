@@ -213,7 +213,7 @@ func TestShortcutsCarryTheirSpan(t *testing.T) {
 // view layer's script answers to, and the panel starts closed.
 func TestThePickerWritesNoScriptNoHandlerNoStyle(t *testing.T) {
 	html := rangeMarkup(components.DateRangePickerProps{Name: "p", Label: "P", From: "2026-09-15", To: "2026-10-07", Presets: []components.DateRangePreset{{Label: "Hoje", Days: 1}}})
-	for _, not := range []string{"<script", " style=", "onclick", "x-on:", "@click", "hx-on"} {
+	for _, not := range []string{"<script", " style=", "onclick", "x-on:", "@click", "ypy-on"} {
 		if strings.Contains(html, not) {
 			t.Errorf("the picker writes %q", not)
 		}
