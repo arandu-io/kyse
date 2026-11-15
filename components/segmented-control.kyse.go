@@ -47,6 +47,8 @@ type SegmentedControlProps struct {
 	YpyGet     string
 	YpyPost    string
 	YpyTarget  string
+	// YpySwap is the swap style. Empty leaves the default of YPY, which is
+	// morph: what the reader is typing, selecting or scrolling survives it.
 	YpySwap    string
 	YpyTrigger string
 }
@@ -146,6 +148,9 @@ func (p SegmentedControlProps) ElementID() string {
 		@endif
 		@if(.YpyTarget != "")
 			ypy-target="{{ .YpyTarget }}"
+		@endif
+		@if(.Fetches())
+			ypy-error-swap="none"
 		@endif
 		@if(.YpySwap != "")
 			ypy-swap="{{ .YpySwap }}"

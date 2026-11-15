@@ -79,7 +79,9 @@ type ToolbarItem struct {
 	YpyPost   string
 	YpyGet    string
 	YpyTarget string
-	YpySwap   string
+	// YpySwap is the swap style. Empty leaves the default of YPY, which is
+	// morph: what the reader is typing, selecting or scrolling survives it.
+	YpySwap string
 }
 
 // Vertical is whether the arrow keys run up and down rather than left and
@@ -124,7 +126,7 @@ func (p ToolbarProps) PartNames() []string {
 	return []string{"root", "control", "separator"}
 }
 
-//line components/toolbar.go:128
+//line components/toolbar.go:130
 
 // Toolbar renders the toolbar component.
 func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
@@ -147,9 +149,9 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/toolbar.kyse.go:117
+//line components/toolbar.kyse.go:119
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("toolbar")))
-//line components/toolbar.go:153
+//line components/toolbar.go:155
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -161,9 +163,9 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\taria-label=\"")
 	}
 	if kyse__err == nil {
-//line components/toolbar.kyse.go:119
+//line components/toolbar.kyse.go:121
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Label))
-//line components/toolbar.go:167
+//line components/toolbar.go:169
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -172,9 +174,9 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\taria-orientation=\"")
 	}
 	if kyse__err == nil {
-//line components/toolbar.kyse.go:120
+//line components/toolbar.kyse.go:122
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Direction()))
-//line components/toolbar.go:178
+//line components/toolbar.go:180
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -183,20 +185,20 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tdata-orientation=\"")
 	}
 	if kyse__err == nil {
-//line components/toolbar.kyse.go:121
+//line components/toolbar.kyse.go:123
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Direction()))
-//line components/toolbar.go:189
+//line components/toolbar.go:191
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/toolbar.kyse.go:122
+//line components/toolbar.kyse.go:124
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/toolbar.go:198
+//line components/toolbar.go:200
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/toolbar.kyse.go:122", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/toolbar.kyse.go:124", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
@@ -204,28 +206,28 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, ">\n")
 	}
-//line components/toolbar.kyse.go:124
+//line components/toolbar.kyse.go:126
 	for at := 0; at < len(kyse__d.Items); at++ {
-//line components/toolbar.go:210
-//line components/toolbar.kyse.go:125
+//line components/toolbar.go:212
+//line components/toolbar.kyse.go:127
 		if kyse__d.Items[at].Separator {
-//line components/toolbar.go:213
+//line components/toolbar.go:215
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<hr\n")
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"separator\"\n")
 			}
-//line components/toolbar.kyse.go:128
+//line components/toolbar.kyse.go:130
 			if kyse__d.PartClass("separator") != "" {
-//line components/toolbar.go:222
+//line components/toolbar.go:224
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 				}
 				if kyse__err == nil {
-//line components/toolbar.kyse.go:129
+//line components/toolbar.kyse.go:131
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("separator")))
-//line components/toolbar.go:229
+//line components/toolbar.go:231
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -236,11 +238,11 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v2 string
-//line components/toolbar.kyse.go:132
+//line components/toolbar.kyse.go:134
 				kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("separator"))
-//line components/toolbar.go:242
+//line components/toolbar.go:244
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/toolbar.kyse.go:132", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/toolbar.kyse.go:134", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 				}
@@ -248,9 +250,9 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>\n")
 			}
-//line components/toolbar.kyse.go:134
+//line components/toolbar.kyse.go:136
 		} else if kyse__d.Items[at].URL != "" {
-//line components/toolbar.go:254
+//line components/toolbar.go:256
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<a\n")
 			}
@@ -261,9 +263,9 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/toolbar.kyse.go:137
+//line components/toolbar.kyse.go:139
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("control", "btn")))
-//line components/toolbar.go:267
+//line components/toolbar.go:269
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -273,11 +275,11 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v3 string
-//line components/toolbar.kyse.go:138
+//line components/toolbar.kyse.go:140
 				kyse__v3, kyse__err = kyse__view.TextURL(kyse__d.Items[at].URL)
-//line components/toolbar.go:279
+//line components/toolbar.go:281
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/toolbar.kyse.go:138", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/toolbar.kyse.go:140", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 				}
@@ -291,30 +293,30 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-size=\"sm\"\n")
 			}
-//line components/toolbar.kyse.go:141
+//line components/toolbar.kyse.go:143
 			if kyse__d.Stop(at) {
-//line components/toolbar.go:297
+//line components/toolbar.go:299
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\ttabindex=\"0\"\n")
 				}
 			}
-//line components/toolbar.kyse.go:144
+//line components/toolbar.kyse.go:146
 			if !kyse__d.Stop(at) {
-//line components/toolbar.go:304
+//line components/toolbar.go:306
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\ttabindex=\"-1\"\n")
 				}
 			}
-//line components/toolbar.kyse.go:147
+//line components/toolbar.kyse.go:149
 			if kyse__d.Items[at].IconOnly {
-//line components/toolbar.go:311
+//line components/toolbar.go:313
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-label=\"")
 				}
 				if kyse__err == nil {
-//line components/toolbar.kyse.go:148
+//line components/toolbar.kyse.go:150
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Items[at].Label))
-//line components/toolbar.go:318
+//line components/toolbar.go:320
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -322,11 +324,11 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v4 string
-//line components/toolbar.kyse.go:150
+//line components/toolbar.kyse.go:152
 				kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("control"))
-//line components/toolbar.go:328
+//line components/toolbar.go:330
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/toolbar.kyse.go:150", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/toolbar.kyse.go:152", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 				}
@@ -334,32 +336,32 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>\n")
 			}
-//line components/toolbar.kyse.go:152
+//line components/toolbar.kyse.go:154
 			if kyse__d.Items[at].Icon != "" {
-//line components/toolbar.go:340
+//line components/toolbar.go:342
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t")
 				}
 				if kyse__err == nil {
-//line components/toolbar.kyse.go:153
+//line components/toolbar.kyse.go:155
 					var kyse__v5 kyse__template.HTML = kyse__d.Items[at].Icon
-//line components/toolbar.go:347
+//line components/toolbar.go:349
 					_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v5))
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 				}
 			}
-//line components/toolbar.kyse.go:155
+//line components/toolbar.kyse.go:157
 			if !kyse__d.Items[at].IconOnly {
-//line components/toolbar.go:356
+//line components/toolbar.go:358
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t")
 				}
 				if kyse__err == nil {
-//line components/toolbar.kyse.go:156
+//line components/toolbar.kyse.go:158
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Items[at].Label)))
-//line components/toolbar.go:363
+//line components/toolbar.go:365
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
@@ -379,9 +381,9 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/toolbar.kyse.go:162
+//line components/toolbar.kyse.go:164
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("control", "btn")))
-//line components/toolbar.go:385
+//line components/toolbar.go:387
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -392,91 +394,91 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-size=\"sm\"\n")
 			}
-//line components/toolbar.kyse.go:165
+//line components/toolbar.kyse.go:167
 			if kyse__d.Items[at].Variant != "" {
-//line components/toolbar.go:398
+//line components/toolbar.go:400
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-variant=\"")
 				}
 				if kyse__err == nil {
-//line components/toolbar.kyse.go:166
+//line components/toolbar.kyse.go:168
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Items[at].Variant))
-//line components/toolbar.go:405
+//line components/toolbar.go:407
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 			}
-//line components/toolbar.kyse.go:168
+//line components/toolbar.kyse.go:170
 			if kyse__d.Items[at].Variant == "" {
-//line components/toolbar.go:413
+//line components/toolbar.go:415
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdata-variant=\"ghost\"\n")
 				}
 			}
-//line components/toolbar.kyse.go:171
+//line components/toolbar.kyse.go:173
 			if kyse__d.Stop(at) {
-//line components/toolbar.go:420
+//line components/toolbar.go:422
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\ttabindex=\"0\"\n")
 				}
 			}
-//line components/toolbar.kyse.go:174
+//line components/toolbar.kyse.go:176
 			if !kyse__d.Stop(at) {
-//line components/toolbar.go:427
+//line components/toolbar.go:429
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\ttabindex=\"-1\"\n")
 				}
 			}
-//line components/toolbar.kyse.go:177
+//line components/toolbar.kyse.go:179
 			if kyse__d.Items[at].Toggle && kyse__d.Items[at].Pressed {
-//line components/toolbar.go:434
+//line components/toolbar.go:436
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-pressed=\"true\"\n")
 				}
 			}
-//line components/toolbar.kyse.go:180
+//line components/toolbar.kyse.go:182
 			if kyse__d.Items[at].Toggle && !kyse__d.Items[at].Pressed {
-//line components/toolbar.go:441
+//line components/toolbar.go:443
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-pressed=\"false\"\n")
 				}
 			}
-//line components/toolbar.kyse.go:183
+//line components/toolbar.kyse.go:185
 			if kyse__d.Items[at].Disabled {
-//line components/toolbar.go:448
+//line components/toolbar.go:450
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tdisabled\n")
 				}
 			}
-//line components/toolbar.kyse.go:186
+//line components/toolbar.kyse.go:188
 			if kyse__d.Items[at].IconOnly {
-//line components/toolbar.go:455
+//line components/toolbar.go:457
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\taria-label=\"")
 				}
 				if kyse__err == nil {
-//line components/toolbar.kyse.go:187
+//line components/toolbar.kyse.go:189
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Items[at].Label))
-//line components/toolbar.go:462
+//line components/toolbar.go:464
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 			}
-//line components/toolbar.kyse.go:189
+//line components/toolbar.kyse.go:191
 			if kyse__d.Items[at].YpyPost != "" {
-//line components/toolbar.go:470
+//line components/toolbar.go:472
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\typy-post=\"")
 				}
 				if kyse__err == nil {
 					var kyse__v6 string
-//line components/toolbar.kyse.go:190
+//line components/toolbar.kyse.go:192
 					kyse__v6, kyse__err = kyse__view.TextURL(kyse__d.Items[at].YpyPost)
-//line components/toolbar.go:478
+//line components/toolbar.go:480
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/toolbar.kyse.go:190", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/toolbar.kyse.go:192", kyse__err)
 					} else {
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 					}
@@ -485,19 +487,19 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 			}
-//line components/toolbar.kyse.go:192
+//line components/toolbar.kyse.go:194
 			if kyse__d.Items[at].YpyGet != "" {
-//line components/toolbar.go:491
+//line components/toolbar.go:493
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\typy-get=\"")
 				}
 				if kyse__err == nil {
 					var kyse__v7 string
-//line components/toolbar.kyse.go:193
+//line components/toolbar.kyse.go:195
 					kyse__v7, kyse__err = kyse__view.TextURL(kyse__d.Items[at].YpyGet)
-//line components/toolbar.go:499
+//line components/toolbar.go:501
 					if kyse__err != nil {
-						kyse__err = kyse__fmt.Errorf("%s: %w", "components/toolbar.kyse.go:193", kyse__err)
+						kyse__err = kyse__fmt.Errorf("%s: %w", "components/toolbar.kyse.go:195", kyse__err)
 					} else {
 						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 					}
@@ -506,31 +508,38 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 			}
-//line components/toolbar.kyse.go:195
+//line components/toolbar.kyse.go:197
 			if kyse__d.Items[at].YpyTarget != "" {
-//line components/toolbar.go:512
+//line components/toolbar.go:514
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\typy-target=\"")
 				}
 				if kyse__err == nil {
-//line components/toolbar.kyse.go:196
+//line components/toolbar.kyse.go:198
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Items[at].YpyTarget))
-//line components/toolbar.go:519
+//line components/toolbar.go:521
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 			}
-//line components/toolbar.kyse.go:198
+//line components/toolbar.kyse.go:200
+			if kyse__d.Items[at].YpyPost != "" || kyse__d.Items[at].YpyGet != "" {
+//line components/toolbar.go:529
+				if kyse__err == nil {
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\typy-error-swap=\"none\"\n")
+				}
+			}
+//line components/toolbar.kyse.go:203
 			if kyse__d.Items[at].YpySwap != "" {
-//line components/toolbar.go:527
+//line components/toolbar.go:536
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\typy-swap=\"")
 				}
 				if kyse__err == nil {
-//line components/toolbar.kyse.go:199
+//line components/toolbar.kyse.go:204
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Items[at].YpySwap))
-//line components/toolbar.go:534
+//line components/toolbar.go:543
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -538,11 +547,11 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 			}
 			if kyse__err == nil {
 				var kyse__v8 string
-//line components/toolbar.kyse.go:201
+//line components/toolbar.kyse.go:206
 				kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("control"))
-//line components/toolbar.go:544
+//line components/toolbar.go:553
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/toolbar.kyse.go:201", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/toolbar.kyse.go:206", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 				}
@@ -550,32 +559,32 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>\n")
 			}
-//line components/toolbar.kyse.go:203
+//line components/toolbar.kyse.go:208
 			if kyse__d.Items[at].Icon != "" {
-//line components/toolbar.go:556
+//line components/toolbar.go:565
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t")
 				}
 				if kyse__err == nil {
-//line components/toolbar.kyse.go:204
+//line components/toolbar.kyse.go:209
 					var kyse__v9 kyse__template.HTML = kyse__d.Items[at].Icon
-//line components/toolbar.go:563
+//line components/toolbar.go:572
 					_, kyse__err = kyse__io.WriteString(kyse__w, string(kyse__v9))
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 				}
 			}
-//line components/toolbar.kyse.go:206
+//line components/toolbar.kyse.go:211
 			if !kyse__d.Items[at].IconOnly {
-//line components/toolbar.go:572
+//line components/toolbar.go:581
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t")
 				}
 				if kyse__err == nil {
-//line components/toolbar.kyse.go:207
+//line components/toolbar.kyse.go:212
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Items[at].Label)))
-//line components/toolbar.go:579
+//line components/toolbar.go:588
 				}
 				if kyse__err == nil {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\n")

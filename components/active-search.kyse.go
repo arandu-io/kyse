@@ -141,6 +141,7 @@ func (p ActiveSearchProps) PartNames() []string {
 			ypy-trigger="{{ .Trigger() }}"
 			ypy-target="#{{ .Region() }}"
 			ypy-swap="innerHTML"
+			ypy-error-swap="none"
 			ypy-sync="this:replace"
 			ypy-indicator="#{{ .Name }}-indicator"
 			@if(.Placeholder != "")

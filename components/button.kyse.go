@@ -46,10 +46,10 @@ type ButtonProps struct {
 	// holding a second copy of its own header and navigation.
 	//
 	// The status the answer carries decides whether the swap happens at all.
-	// A rejected form is answered 422, and 422 is not swapped unless the
-	// document says it is, so a button that narrows a swap and never seems to
-	// receive one is asking a question the page has not been configured to
-	// accept.
+	// A 204 or a 304 swaps nothing, and so does a response of 400 or more: the
+	// button draws ypy-error-swap="none", so a refusal or a failure leaves the
+	// page as it was and YPY announces it with ypy:response:error on the
+	// button, for a listener to show.
 	//
 	// YpyConfirm is the question asked before the request. The view layer's
 	// script draws it as a centred confirmation dialog (hesape v0.103.0 and
@@ -59,6 +59,8 @@ type ButtonProps struct {
 	YpyPost    string
 	YpyGet     string
 	YpyTarget  string
+	// YpySwap is the swap style. Empty leaves the default of YPY, which is
+	// morph: what the reader is typing, selecting or scrolling survives it.
 	YpySwap    string
 	YpyConfirm string
 }
@@ -101,6 +103,9 @@ func (p ButtonProps) PartNames() []string { return []string{"root"} }
 	@endif
 	@if(.YpyTarget != "")
 		ypy-target="{{ .YpyTarget }}"
+	@endif
+	@if(.YpyPost != "" || .YpyGet != "")
+		ypy-error-swap="none"
 	@endif
 	@if(.YpySwap != "")
 		ypy-swap="{{ .YpySwap }}"

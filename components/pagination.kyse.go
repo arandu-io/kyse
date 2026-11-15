@@ -81,6 +81,8 @@ type PaginationProps struct {
 	// way -- YPY takes the click and the URL is still there for everything
 	// else.
 	YpyTarget string
+	// YpySwap is the swap style. Empty leaves the default of YPY, which is
+	// morph: what the reader is typing, selecting or scrolling survives it.
 	YpySwap   string
 }
 
@@ -305,6 +307,7 @@ func (p PaginationProps) PartNames() []string {
 						@if(.YpyTarget != "")
 							ypy-get="{{ .PreviousHref() }}"
 							ypy-target="{{ .YpyTarget }}"
+							ypy-error-swap="none"
 						@endif
 						@if(.YpySwap != "")
 							ypy-swap="{{ .YpySwap }}"
@@ -348,6 +351,7 @@ func (p PaginationProps) PartNames() []string {
 							@if(.YpyTarget != "")
 								ypy-get="{{ .Href(entry.Number) }}"
 								ypy-target="{{ .YpyTarget }}"
+								ypy-error-swap="none"
 							@endif
 							@if(.YpySwap != "")
 								ypy-swap="{{ .YpySwap }}"
@@ -382,6 +386,7 @@ func (p PaginationProps) PartNames() []string {
 						@if(.YpyTarget != "")
 							ypy-get="{{ .NextHref() }}"
 							ypy-target="{{ .YpyTarget }}"
+							ypy-error-swap="none"
 						@endif
 						@if(.YpySwap != "")
 							ypy-swap="{{ .YpySwap }}"

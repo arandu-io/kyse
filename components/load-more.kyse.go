@@ -88,6 +88,7 @@ func (p LoadMoreProps) PartNames() []string { return []string{"root", "indicator
 		ypy-trigger="{{ .Trigger() }}"
 		ypy-target="this"
 		ypy-swap="outerHTML"
+		ypy-error-swap="none"
 		@if(.Size != "")
 			data-size="{{ .Size }}"
 		@endif

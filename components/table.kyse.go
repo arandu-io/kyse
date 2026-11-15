@@ -104,6 +104,8 @@ type TableProps struct {
 	// swap itself instead of loading a document. The links stay real
 	// addresses either way.
 	YpyTarget string
+	// YpySwap is the swap style. Empty leaves the default of YPY, which is
+	// morph: what the reader is typing, selecting or scrolling survives it.
 	YpySwap   string
 
 	// Composed says this table is drawn inside another component, which has
@@ -714,6 +716,7 @@ func (p TableProps) PartNames() []string {
 									@if(.YpyTarget != "")
 										ypy-get="{{ .SortHref(column) }}"
 										ypy-target="{{ .YpyTarget }}"
+										ypy-error-swap="none"
 									@endif
 									@if(.YpySwap != "")
 										ypy-swap="{{ .YpySwap }}"

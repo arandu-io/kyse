@@ -285,13 +285,12 @@ func small() string {
 
 func layout(title, body string) string {
 	return fmt.Sprintf(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>%s</title>
-<meta name="ypy-config" content='{"compat":"v2","includeIndicatorStyles":false,"allowEval":false}'>
 <link rel="stylesheet" href="/app.css">
 <script src="%s"></script><script src="%s"></script></head>
 <body ypy-boost="true" class="bg-background text-foreground antialiased">
 <nav class="flex gap-4 border-b p-4 text-sm"><a href="/invoices">Invoices</a><a href="/menu">Menu header</a><a href="/small">Small list</a><a href="/other">Other page</a></nav>
 <main class="mx-auto max-w-5xl p-6"><h1 class="mb-2 text-2xl font-semibold tracking-tight">%s</h1>%s</main>
-</body></html>`, title, view.Asset("ypy-compat.min.js"), view.Asset("ui.js"), title, body)
+</body></html>`, title, view.Asset("ypy.min.js"), view.Asset("ui.js"), title, body)
 }
 
 // fragment is whether the request wants the region alone: a YPY request that

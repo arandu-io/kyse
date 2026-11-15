@@ -127,6 +127,7 @@ func (p EditInPlaceProps) PartNames() []string {
 			ypy-get="{{ .EditURL }}"
 			ypy-target="#{{ .ID }}"
 			ypy-swap="outerHTML"
+			ypy-error-swap="none"
 			@attributes(.PartAttrs("edit"))
 		>{{ .EditName() }}</button>
 	</div>
@@ -143,6 +144,7 @@ func (p EditInPlaceProps) PartNames() []string {
 		ypy-put="{{ .SaveURL }}"
 		ypy-target="#{{ .ID }}"
 		ypy-swap="outerHTML"
+		ypy-status:5xx="swap:none"
 		@attributes(.RootAttrs())
 	>
 		<label
@@ -201,6 +203,7 @@ func (p EditInPlaceProps) PartNames() []string {
 				ypy-get="{{ .CancelURL }}"
 				ypy-target="#{{ .ID }}"
 				ypy-swap="outerHTML"
+				ypy-error-swap="none"
 				@attributes(.PartAttrs("cancel"))
 			>{{ .CancelName() }}</button>
 		@endif

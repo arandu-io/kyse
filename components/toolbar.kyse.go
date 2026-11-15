@@ -66,6 +66,8 @@ type ToolbarItem struct {
 	YpyPost   string
 	YpyGet    string
 	YpyTarget string
+	// YpySwap is the swap style. Empty leaves the default of YPY, which is
+	// morph: what the reader is typing, selecting or scrolling survives it.
 	YpySwap   string
 }
 
@@ -194,6 +196,9 @@ func (p ToolbarProps) PartNames() []string {
 				@endif
 				@if(.Items[at].YpyTarget != "")
 					ypy-target="{{ .Items[at].YpyTarget }}"
+				@endif
+				@if(.Items[at].YpyPost != "" || .Items[at].YpyGet != "")
+					ypy-error-swap="none"
 				@endif
 				@if(.Items[at].YpySwap != "")
 					ypy-swap="{{ .Items[at].YpySwap }}"

@@ -235,6 +235,9 @@ func (p DropdownMenuProps) PartNames() []string {
 						@if(.Items[at].YpyTarget != "")
 							ypy-target="{{ .Items[at].YpyTarget }}"
 						@endif
+						@if(.Items[at].YpyPost != "" || .Items[at].YpyGet != "")
+							ypy-error-swap="none"
+						@endif
 						@if(.Items[at].YpyConfirm != "")
 							ypy-confirm="{{ .Items[at].YpyConfirm }}"
 						@endif

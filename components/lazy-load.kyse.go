@@ -63,6 +63,7 @@ func (p LazyLoadProps) PartNames() []string { return []string{"root", "placehold
 	ypy-trigger="{{ .Trigger() }}"
 	ypy-target="this"
 	ypy-swap="outerHTML"
+	ypy-error-swap="none"
 	@attributes(.RootAttrs())
 >
 	<div

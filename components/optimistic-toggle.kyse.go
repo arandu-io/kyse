@@ -106,6 +106,7 @@ func (p OptimisticToggleProps) PartNames() []string {
 	ypy-post="{{ .URL }}"
 	ypy-target="this"
 	ypy-swap="outerHTML"
+	ypy-error-swap="none"
 	@if(.Variant != "")
 		data-variant="{{ .Variant }}"
 	@endif

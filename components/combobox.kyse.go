@@ -254,6 +254,7 @@ func (p ComboboxProps) ElementID() string {
 				ypy-target="{{ .ListboxTarget() }}"
 				ypy-select="{{ .ListboxTarget() }}"
 				ypy-swap="outerHTML"
+				ypy-error-swap="none"
 				ypy-sync="this:replace"
 				@if(.Placeholder != "")
 					placeholder="{{ .Placeholder }}"

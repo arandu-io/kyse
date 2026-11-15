@@ -93,8 +93,18 @@ names the file, the line, the attribute, and what to do instead.
 `ypy-get`, `ypy-post` and `ypy-target` are not matched and are correct here: their
 values are an address and a selector, which YPY reads as data.
 
+**A component that asks the server for a fragment says what a refusal does.** A
+response of 400 or more is swapped by YPY by default, into the target, and a
+500 would replace a row, a list or a button with an error page. A component
+whose target is a region of the page writes `ypy-error-swap="none"` beside its
+`ypy-swap`: the page stays as it was and `ypy:response:error` fires on the
+element for a listener to show. A form that wants its own 422 back keeps the
+native rule and writes `ypy-status:5xx="swap:none"` for the rest. A 204 and a
+304 swap nothing, so a request that removes its target answers 200 with an
+empty body. An empty `ypy-swap` is not `innerHTML`: it is morph.
+
 **`ypy-on` is forbidden all the same**, in every spelling — `ypy-on:click`,
-`ypy-on::after-request`, `data-ypy-on:click`. Its value is JavaScript that YPY
+`ypy-on::after:request`, `data-ypy-on:click`. Its value is JavaScript that YPY
 compiles and runs, exactly like `x-on:click`, so under `script-src 'self'` it is
 dead, and if the policy were ever loosened it would be script written into an
 attribute. The view compiler treats it as a code attribute and refuses any

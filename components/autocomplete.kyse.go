@@ -158,6 +158,7 @@ func (p AutocompleteProps) ElementID() string {
 			ypy-trigger="{{ .Trigger() }}"
 			ypy-target="#{{ .ListID() }}"
 			ypy-swap="innerHTML"
+			ypy-error-swap="none"
 			ypy-sync="this:replace"
 		@endif
 		@if(.Placeholder != "")
