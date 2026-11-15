@@ -1129,15 +1129,15 @@ func TestEveryPublishedPartWritesTheCallersAttributes(t *testing.T) {
 //
 // The refusal is loud: the render stops with a *RefusedAttribute naming the
 // attribute, on the root and on every part the component publishes. It used
-// to be an empty component -- a FormDialog given hx-boost in Attrs drew
+// to be an empty component -- a FormDialog given ypy-boost in Attrs drew
 // nothing, and nothing anywhere said why.
 func TestAnAttrCannotCarryAScript(t *testing.T) {
 	for _, c := range extensible {
 		t.Run(c.name, func(t *testing.T) {
 			for _, attrs := range []components.Attrs{
 				{"onclick": "alert(1)"},
-				{"hx-on:click": "alert(1)"},
-				{"hx-boost": "false"},
+				{"ypy-on:click": "alert(1)"},
+				{"ypy-boost": "false"},
 				{"x-data": "{}"},
 				{"style": "display:none"},
 				{"href": "javascript:alert(1)"},

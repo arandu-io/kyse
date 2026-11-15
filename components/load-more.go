@@ -135,7 +135,7 @@ func LoadMore(kyse__props LoadMoreProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\thx-get=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\typy-get=\"")
 		}
 		if kyse__err == nil {
 			var kyse__v1 string
@@ -152,13 +152,13 @@ func LoadMore(kyse__props LoadMoreProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\thx-trigger=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\typy-trigger=\"")
 		}
 		if kyse__err == nil {
 //line components/load-more.kyse.go:88
 			if kyse__v2 := kyse__view.Text(kyse__d.Trigger()); kyse__strings.ContainsAny(kyse__v2, "[]") {
 //line components/load-more.go:161
-				kyse__err = kyse__errors.New("components/load-more.kyse.go:88: the value interpolated into an HTMX trigger holds a square bracket, and HTMX evaluates what a trigger holds between square brackets as a script")
+				kyse__err = kyse__errors.New("components/load-more.kyse.go:88: the value interpolated into a YPY trigger holds a square bracket, and YPY evaluates what a trigger holds between square brackets as a script")
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__v2))
 			}
@@ -167,10 +167,10 @@ func LoadMore(kyse__props LoadMoreProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\thx-target=\"this\"\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\typy-target=\"this\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\thx-swap=\"outerHTML\"\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\typy-swap=\"outerHTML\"\n")
 		}
 //line components/load-more.kyse.go:91
 		if kyse__d.Size != "" {

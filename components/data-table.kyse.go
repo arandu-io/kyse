@@ -39,7 +39,7 @@ import (
 //
 // On the server. A table ordered in the browser is ordered only within the page
 // that was fetched, and a filter over the rows in hand hides matches that were
-// never sent. So the endpoint answers with this component, htmx swaps the
+// never sent. So the endpoint answers with this component, YPY swaps the
 // region, and the address bar says what is on screen: a filtered, sorted page
 // three can be linked to, bookmarked, reloaded and gone back to.
 //
@@ -176,7 +176,7 @@ type DataTableProps struct {
 	// A complete list still keeps its addresses. The headers are still links
 	// and the search is still a form, so the page works with no script -- the
 	// behaviour takes the click before the link is followed, and the links ask
-	// htmx to leave them alone so a boosted page does not follow them either.
+	// YPY to leave them alone so a boosted page does not follow them either.
 	Complete bool
 	// PageSize is how many rows a page holds when State says nothing: the size
 	// of a complete list's window, and the size the chooser starts on. Zero
@@ -1663,7 +1663,7 @@ func (p DataTableProps) PartNames() []string {
 		@attributes(.PartAttrs("toolbar"))
 	>
 		{{-- The search and the facets are one form. With no script
-		     it is a native GET; with htmx it is the single request every one of
+		     it is a native GET; with YPY it is the single request every one of
 		     them makes. The order and the hidden columns ride in it as fields,
 		     once each, from the state. --}}
 		<form
@@ -1676,17 +1676,17 @@ func (p DataTableProps) PartNames() []string {
 				role="search"
 			@endif
 			@if(.Complete)
-				hx-boost="false"
+				ypy-boost="false"
 			@endif
 			@if(!.Complete)
-				hx-get="{{ .QueryAction() }}"
-				hx-trigger="submit, change"
-				hx-target="{{ .Target() }}"
-				hx-swap="outerHTML"
-				hx-select="{{ .Target() }}"
-				hx-push-url="true"
-				hx-sync="closest [data-part=root]:replace"
-				hx-indicator="{{ .Target() }}"
+				ypy-get="{{ .QueryAction() }}"
+				ypy-trigger="submit, change"
+				ypy-target="{{ .Target() }}"
+				ypy-swap="outerHTML"
+				ypy-select="{{ .Target() }}"
+				ypy-push-url="true"
+				ypy-sync="closest [data-part=root]:replace"
+				ypy-indicator="{{ .Target() }}"
 			@endif
 			@attributes(.PartAttrs("query"))
 		>
@@ -1833,16 +1833,16 @@ func (p DataTableProps) PartNames() []string {
 									class="flex cursor-pointer items-center justify-center rounded-sm px-2 py-1.5 text-center text-sm select-none hover:bg-accent hover:text-accent-foreground"
 									href="{{ .ClearFacetHref(filter) }}"
 									@if(.Complete)
-										hx-boost="false"
+										ypy-boost="false"
 									@endif
 									@if(!.Complete)
-										hx-get="{{ .ClearFacetHref(filter) }}"
-										hx-target="{{ .Target() }}"
-										hx-swap="outerHTML"
-										hx-select="{{ .Target() }}"
-										hx-push-url="true"
-										hx-sync="closest [data-part=root]:replace"
-										hx-indicator="{{ .Target() }}"
+										ypy-get="{{ .ClearFacetHref(filter) }}"
+										ypy-target="{{ .Target() }}"
+										ypy-swap="outerHTML"
+										ypy-select="{{ .Target() }}"
+										ypy-push-url="true"
+										ypy-sync="closest [data-part=root]:replace"
+										ypy-indicator="{{ .Target() }}"
 									@endif
 									data-facet-clear-link
 								>{{ .lines().ClearFilters }}</a>
@@ -1913,16 +1913,16 @@ func (p DataTableProps) PartNames() []string {
 					class="{{ .PartClass("reset", "inline-flex group/button shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none h-8 gap-1.5 px-2.5 hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:hover:bg-muted/50") }}"
 					href="{{ .ResetHref() }}"
 					@if(.Complete)
-						hx-boost="false"
+						ypy-boost="false"
 					@endif
 					@if(!.Complete)
-						hx-get="{{ .ResetHref() }}"
-						hx-target="{{ .Target() }}"
-						hx-swap="outerHTML"
-						hx-select="{{ .Target() }}"
-						hx-push-url="true"
-						hx-sync="closest [data-part=root]:replace"
-						hx-indicator="{{ .Target() }}"
+						ypy-get="{{ .ResetHref() }}"
+						ypy-target="{{ .Target() }}"
+						ypy-swap="outerHTML"
+						ypy-select="{{ .Target() }}"
+						ypy-push-url="true"
+						ypy-sync="closest [data-part=root]:replace"
+						ypy-indicator="{{ .Target() }}"
 					@endif
 					@attributes(.PartAttrs("reset"))
 				>{{ .lines().Reset }}{!! icons.X(icons.Props{}) !!}</a>
@@ -1962,16 +1962,16 @@ func (p DataTableProps) PartNames() []string {
 								aria-checked="{{ !.Off(column) }}"
 								href="{{ .ColumnHref(column) }}"
 								@if(.Complete)
-									hx-boost="false"
+									ypy-boost="false"
 								@endif
 								@if(!.Complete)
-									hx-get="{{ .ColumnHref(column) }}"
-									hx-target="{{ .Target() }}"
-									hx-swap="outerHTML"
-									hx-select="{{ .Target() }}"
-									hx-push-url="true"
-									hx-sync="closest [data-part=root]:replace"
-									hx-indicator="{{ .Target() }}"
+									ypy-get="{{ .ColumnHref(column) }}"
+									ypy-target="{{ .Target() }}"
+									ypy-swap="outerHTML"
+									ypy-select="{{ .Target() }}"
+									ypy-push-url="true"
+									ypy-sync="closest [data-part=root]:replace"
+									ypy-indicator="{{ .Target() }}"
 								@endif
 								@attributes(.PartAttrs("toggle"))
 							>
@@ -2006,7 +2006,7 @@ func (p DataTableProps) PartNames() []string {
 				hidden
 			@endif
 			@if(.Complete)
-				hx-boost="false"
+				ypy-boost="false"
 			@endif
 			@attributes(.PartAttrs("bulk"))
 		>
@@ -2021,7 +2021,7 @@ func (p DataTableProps) PartNames() []string {
 
 	<div
 		data-part="wrapper"
-		class="{{ .PartClass("wrapper", "overflow-hidden rounded-md border transition-opacity group-[.htmx-request]/dt:opacity-60", .card().Wrapper) }}"
+		class="{{ .PartClass("wrapper", "overflow-hidden rounded-md border transition-opacity group-[.ypy-request]/dt:opacity-60", .card().Wrapper) }}"
 		@attributes(.PartAttrs("wrapper"))
 	>
 		<div class="{{ "relative w-full overflow-x-auto " + .card().Scroller }}">
@@ -2088,16 +2088,16 @@ func (p DataTableProps) PartNames() []string {
 										aria-label="{{ .SortName(column) }}"
 										data-sort-key="{{ column.Key }}"
 										@if(.Complete)
-											hx-boost="false"
+											ypy-boost="false"
 										@endif
 										@if(!.Complete)
-											hx-get="{{ .SortHref(column) }}"
-											hx-target="{{ .Target() }}"
-											hx-swap="outerHTML"
-											hx-select="{{ .Target() }}"
-											hx-push-url="true"
-											hx-sync="closest [data-part=root]:replace"
-											hx-indicator="{{ .Target() }}"
+											ypy-get="{{ .SortHref(column) }}"
+											ypy-target="{{ .Target() }}"
+											ypy-swap="outerHTML"
+											ypy-select="{{ .Target() }}"
+											ypy-push-url="true"
+											ypy-sync="closest [data-part=root]:replace"
+											ypy-indicator="{{ .Target() }}"
 										@endif
 										@attributes(.PartAttrs("sort"))
 									>
@@ -2169,16 +2169,16 @@ func (p DataTableProps) PartNames() []string {
 													class="{{ "relative flex w-full cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4" }}"
 													href="{{ .AscHref(column) }}"
 													@if(.Complete)
-														hx-boost="false"
+														ypy-boost="false"
 													@endif
 													@if(!.Complete)
-														hx-get="{{ .AscHref(column) }}"
-														hx-target="{{ .Target() }}"
-														hx-swap="outerHTML"
-														hx-select="{{ .Target() }}"
-														hx-push-url="true"
-														hx-sync="closest [data-part=root]:replace"
-														hx-indicator="{{ .Target() }}"
+														ypy-get="{{ .AscHref(column) }}"
+														ypy-target="{{ .Target() }}"
+														ypy-swap="outerHTML"
+														ypy-select="{{ .Target() }}"
+														ypy-push-url="true"
+														ypy-sync="closest [data-part=root]:replace"
+														ypy-indicator="{{ .Target() }}"
 													@endif
 												>{!! icons.ArrowUp(icons.Props{}) !!}{{ .lines().Asc }}</a>
 												<a
@@ -2188,16 +2188,16 @@ func (p DataTableProps) PartNames() []string {
 													class="{{ "relative flex w-full cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4" }}"
 													href="{{ .DescHref(column) }}"
 													@if(.Complete)
-														hx-boost="false"
+														ypy-boost="false"
 													@endif
 													@if(!.Complete)
-														hx-get="{{ .DescHref(column) }}"
-														hx-target="{{ .Target() }}"
-														hx-swap="outerHTML"
-														hx-select="{{ .Target() }}"
-														hx-push-url="true"
-														hx-sync="closest [data-part=root]:replace"
-														hx-indicator="{{ .Target() }}"
+														ypy-get="{{ .DescHref(column) }}"
+														ypy-target="{{ .Target() }}"
+														ypy-swap="outerHTML"
+														ypy-select="{{ .Target() }}"
+														ypy-push-url="true"
+														ypy-sync="closest [data-part=root]:replace"
+														ypy-indicator="{{ .Target() }}"
 													@endif
 												>{!! icons.ArrowDown(icons.Props{}) !!}{{ .lines().Desc }}</a>
 												@if(column.Hideable)
@@ -2208,16 +2208,16 @@ func (p DataTableProps) PartNames() []string {
 														class="{{ "relative flex w-full cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4" }}"
 														href="{{ .HideHref(column) }}"
 														@if(.Complete)
-															hx-boost="false"
+															ypy-boost="false"
 														@endif
 														@if(!.Complete)
-															hx-get="{{ .HideHref(column) }}"
-															hx-target="{{ .Target() }}"
-															hx-swap="outerHTML"
-															hx-select="{{ .Target() }}"
-															hx-push-url="true"
-															hx-sync="closest [data-part=root]:replace"
-															hx-indicator="{{ .Target() }}"
+															ypy-get="{{ .HideHref(column) }}"
+															ypy-target="{{ .Target() }}"
+															ypy-swap="outerHTML"
+															ypy-select="{{ .Target() }}"
+															ypy-push-url="true"
+															ypy-sync="closest [data-part=root]:replace"
+															ypy-indicator="{{ .Target() }}"
 														@endif
 													>{!! icons.EyeSlash(icons.Props{}) !!}{{ .lines().Hide }}</a>
 												@endif
@@ -2368,17 +2368,17 @@ func (p DataTableProps) PartNames() []string {
 															@if(row.Actions[n].Disabled)
 																aria-disabled="true"
 															@endif
-															@if(row.Actions[n].HxPost != "")
-																hx-post="{{ row.Actions[n].HxPost }}"
+															@if(row.Actions[n].YpyPost != "")
+																ypy-post="{{ row.Actions[n].YpyPost }}"
 															@endif
-															@if(row.Actions[n].HxGet != "")
-																hx-get="{{ row.Actions[n].HxGet }}"
+															@if(row.Actions[n].YpyGet != "")
+																ypy-get="{{ row.Actions[n].YpyGet }}"
 															@endif
-															@if(row.Actions[n].HxTarget != "")
-																hx-target="{{ row.Actions[n].HxTarget }}"
+															@if(row.Actions[n].YpyTarget != "")
+																ypy-target="{{ row.Actions[n].YpyTarget }}"
 															@endif
-															@if(row.Actions[n].HxConfirm != "")
-																hx-confirm="{{ row.Actions[n].HxConfirm }}"
+															@if(row.Actions[n].YpyConfirm != "")
+																ypy-confirm="{{ row.Actions[n].YpyConfirm }}"
 															@endif
 														>
 															{{ row.Actions[n].Label }}
@@ -2495,16 +2495,16 @@ func (p DataTableProps) PartNames() []string {
 										class="{{ "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pe-8 ps-1.5 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground" }}"
 										href="{{ .SizeHref(size) }}"
 										@if(.Complete)
-											hx-boost="false"
+											ypy-boost="false"
 										@endif
 										@if(!.Complete)
-											hx-get="{{ .SizeHref(size) }}"
-											hx-target="{{ .Target() }}"
-											hx-swap="outerHTML"
-											hx-select="{{ .Target() }}"
-											hx-push-url="true"
-											hx-sync="closest [data-part=root]:replace"
-											hx-indicator="{{ .Target() }}"
+											ypy-get="{{ .SizeHref(size) }}"
+											ypy-target="{{ .Target() }}"
+											ypy-swap="outerHTML"
+											ypy-select="{{ .Target() }}"
+											ypy-push-url="true"
+											ypy-sync="closest [data-part=root]:replace"
+											ypy-indicator="{{ .Target() }}"
 										@endif
 									>
 										{{ size }}
@@ -2553,16 +2553,16 @@ func (p DataTableProps) PartNames() []string {
 									tabindex="-1"
 								@endif
 								@if(.Complete)
-									hx-boost="false"
+									ypy-boost="false"
 								@endif
 								@if(!.Complete && .HasPrevious())
-									hx-get="{{ .FirstHref() }}"
-									hx-target="{{ .Target() }}"
-									hx-swap="outerHTML"
-									hx-select="{{ .Target() }}"
-									hx-push-url="true"
-									hx-sync="closest [data-part=root]:replace"
-									hx-indicator="{{ .Target() }}"
+									ypy-get="{{ .FirstHref() }}"
+									ypy-target="{{ .Target() }}"
+									ypy-swap="outerHTML"
+									ypy-select="{{ .Target() }}"
+									ypy-push-url="true"
+									ypy-sync="closest [data-part=root]:replace"
+									ypy-indicator="{{ .Target() }}"
 								@endif
 								@attributes(.PartAttrs("first"))
 							>{!! icons.CaretDoubleLeft(icons.Props{}) !!}</a>
@@ -2585,16 +2585,16 @@ func (p DataTableProps) PartNames() []string {
 								tabindex="-1"
 							@endif
 							@if(.Complete)
-								hx-boost="false"
+								ypy-boost="false"
 							@endif
 							@if(!.Complete && .HasPrevious())
-								hx-get="{{ .PreviousHref() }}"
-								hx-target="{{ .Target() }}"
-								hx-swap="outerHTML"
-								hx-select="{{ .Target() }}"
-								hx-push-url="true"
-								hx-sync="closest [data-part=root]:replace"
-								hx-indicator="{{ .Target() }}"
+								ypy-get="{{ .PreviousHref() }}"
+								ypy-target="{{ .Target() }}"
+								ypy-swap="outerHTML"
+								ypy-select="{{ .Target() }}"
+								ypy-push-url="true"
+								ypy-sync="closest [data-part=root]:replace"
+								ypy-indicator="{{ .Target() }}"
 							@endif
 							@attributes(.PartAttrs("previous"))
 						>
@@ -2623,16 +2623,16 @@ func (p DataTableProps) PartNames() []string {
 								tabindex="-1"
 							@endif
 							@if(.Complete)
-								hx-boost="false"
+								ypy-boost="false"
 							@endif
 							@if(!.Complete && .HasNext())
-								hx-get="{{ .NextHref() }}"
-								hx-target="{{ .Target() }}"
-								hx-swap="outerHTML"
-								hx-select="{{ .Target() }}"
-								hx-push-url="true"
-								hx-sync="closest [data-part=root]:replace"
-								hx-indicator="{{ .Target() }}"
+								ypy-get="{{ .NextHref() }}"
+								ypy-target="{{ .Target() }}"
+								ypy-swap="outerHTML"
+								ypy-select="{{ .Target() }}"
+								ypy-push-url="true"
+								ypy-sync="closest [data-part=root]:replace"
+								ypy-indicator="{{ .Target() }}"
 							@endif
 							@attributes(.PartAttrs("next"))
 						>
@@ -2657,16 +2657,16 @@ func (p DataTableProps) PartNames() []string {
 									tabindex="-1"
 								@endif
 								@if(.Complete)
-									hx-boost="false"
+									ypy-boost="false"
 								@endif
 								@if(!.Complete && .HasNext())
-									hx-get="{{ .LastHref() }}"
-									hx-target="{{ .Target() }}"
-									hx-swap="outerHTML"
-									hx-select="{{ .Target() }}"
-									hx-push-url="true"
-									hx-sync="closest [data-part=root]:replace"
-									hx-indicator="{{ .Target() }}"
+									ypy-get="{{ .LastHref() }}"
+									ypy-target="{{ .Target() }}"
+									ypy-swap="outerHTML"
+									ypy-select="{{ .Target() }}"
+									ypy-push-url="true"
+									ypy-sync="closest [data-part=root]:replace"
+									ypy-indicator="{{ .Target() }}"
 								@endif
 								@attributes(.PartAttrs("last"))
 							>{!! icons.CaretDoubleRight(icons.Props{}) !!}</a>

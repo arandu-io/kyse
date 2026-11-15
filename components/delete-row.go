@@ -150,7 +150,7 @@ func DeleteRow(kyse__props DeleteRowProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-delete=\"")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\typy-delete=\"")
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
@@ -167,7 +167,7 @@ func DeleteRow(kyse__props DeleteRowProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-confirm=\"")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\typy-confirm=\"")
 	}
 	if kyse__err == nil {
 //line components/delete-row.kyse.go:105
@@ -178,7 +178,7 @@ func DeleteRow(kyse__props DeleteRowProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-target=\"")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\typy-target=\"")
 	}
 	if kyse__err == nil {
 //line components/delete-row.kyse.go:106
@@ -189,7 +189,7 @@ func DeleteRow(kyse__props DeleteRowProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-swap=\"outerHTML swap:200ms\"\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\typy-swap=\"outerHTML swap:200ms\"\n")
 	}
 //line components/delete-row.kyse.go:108
 	if kyse__d.Size != "" {

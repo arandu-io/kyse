@@ -83,7 +83,7 @@ func (p ActiveSearchProps) Region() string {
 //
 // It is three things at once, and each one is load-bearing. "input changed"
 // runs only when the text actually differs, so an arrow key or a modifier does
-// not search again. "delay" waits for typing to stop. "search" is HTMX's own
+// not search again. "delay" waits for typing to stop. "search" is YPY's own
 // event for the box being cleared with the native clear button, which fires no
 // input event in some engines.
 func (p ActiveSearchProps) Trigger() string {
@@ -338,7 +338,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tautocomplete=\"off\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-get=\"")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-get=\"")
 	}
 	if kyse__err == nil {
 		var kyse__v5 string
@@ -355,13 +355,13 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-trigger=\"")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-trigger=\"")
 	}
 	if kyse__err == nil {
 //line components/active-search.kyse.go:141
 		if kyse__v6 := kyse__view.Text(kyse__d.Trigger()); kyse__strings.ContainsAny(kyse__v6, "[]") {
 //line components/active-search.go:364
-			kyse__err = kyse__errors.New("components/active-search.kyse.go:141: the value interpolated into an HTMX trigger holds a square bracket, and HTMX evaluates what a trigger holds between square brackets as a script")
+			kyse__err = kyse__errors.New("components/active-search.kyse.go:141: the value interpolated into a YPY trigger holds a square bracket, and YPY evaluates what a trigger holds between square brackets as a script")
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__v6))
 		}
@@ -370,7 +370,7 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-target=\"#")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-target=\"#")
 	}
 	if kyse__err == nil {
 //line components/active-search.kyse.go:142
@@ -381,13 +381,13 @@ func ActiveSearch(kyse__props ActiveSearchProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-swap=\"innerHTML\"\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-swap=\"innerHTML\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-sync=\"this:replace\"\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-sync=\"this:replace\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-indicator=\"#")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-indicator=\"#")
 	}
 	if kyse__err == nil {
 //line components/active-search.kyse.go:145

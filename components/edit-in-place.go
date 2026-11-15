@@ -255,7 +255,7 @@ func EditInPlace(kyse__props EditInPlaceProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-get=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-get=\"")
 		}
 		if kyse__err == nil {
 			var kyse__v3 string
@@ -272,7 +272,7 @@ func EditInPlace(kyse__props EditInPlaceProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-target=\"#")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-target=\"#")
 		}
 		if kyse__err == nil {
 //line components/edit-in-place.kyse.go:128
@@ -283,7 +283,7 @@ func EditInPlace(kyse__props EditInPlaceProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-swap=\"outerHTML\"\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-swap=\"outerHTML\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v4 string
@@ -346,7 +346,7 @@ func EditInPlace(kyse__props EditInPlaceProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\thx-put=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\typy-put=\"")
 		}
 		if kyse__err == nil {
 			var kyse__v5 string
@@ -363,7 +363,7 @@ func EditInPlace(kyse__props EditInPlaceProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\thx-target=\"#")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\typy-target=\"#")
 		}
 		if kyse__err == nil {
 //line components/edit-in-place.kyse.go:144
@@ -374,7 +374,7 @@ func EditInPlace(kyse__props EditInPlaceProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\thx-swap=\"outerHTML\"\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\typy-swap=\"outerHTML\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v6 string
@@ -702,7 +702,7 @@ func EditInPlace(kyse__props EditInPlaceProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-size=\"sm\"\n")
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-get=\"")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-get=\"")
 			}
 			if kyse__err == nil {
 				var kyse__v11 string
@@ -719,7 +719,7 @@ func EditInPlace(kyse__props EditInPlaceProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-target=\"#")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-target=\"#")
 			}
 			if kyse__err == nil {
 //line components/edit-in-place.kyse.go:202
@@ -730,7 +730,7 @@ func EditInPlace(kyse__props EditInPlaceProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-swap=\"outerHTML\"\n")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-swap=\"outerHTML\"\n")
 			}
 			if kyse__err == nil {
 				var kyse__v12 string

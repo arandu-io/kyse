@@ -99,7 +99,7 @@ func TestAListWithOnlyControlsIsAQueryForm(t *testing.T) {
 	p := controlled()
 	p.Searchable, p.Filters = false, nil
 	html := string(components.DataTable(p))
-	for _, want := range []string{`hx-get="/invoices"`, `hx-trigger="submit, change"`, `<noscript>`, `data-part="query"`} {
+	for _, want := range []string{`ypy-get="/invoices"`, `ypy-trigger="submit, change"`, `<noscript>`, `data-part="query"`} {
 		if !strings.Contains(html, want) {
 			t.Errorf("a list with only controls lacks %s", want)
 		}
@@ -130,7 +130,7 @@ func TestTheControlsOfACompleteListAreNotRequests(t *testing.T) {
 	p.Rows = []components.TableRow{{Key: "1", Facets: map[string]string{"kind": "b", "code": "AB-1", "de": "2026-10-05"},
 		Cells: []components.TableCell{{Text: "1"}, {Text: "2"}}}}
 	html := string(components.DataTable(p))
-	if strings.Contains(html, `id="invoices-query"`) && strings.Contains(html[strings.Index(html, `id="invoices-query"`):strings.Index(html, `</form>`)], "hx-get") {
+	if strings.Contains(html, `id="invoices-query"`) && strings.Contains(html[strings.Index(html, `id="invoices-query"`):strings.Index(html, `</form>`)], "ypy-get") {
 		t.Error("the form of a complete list asks the server")
 	}
 	for _, want := range []string{`data-facet-kind="b"`, `data-facet-code="AB-1"`, `data-facet-de="2026-10-05"`, `data-complete="true"`} {

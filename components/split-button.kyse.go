@@ -43,13 +43,13 @@ type SplitButtonProps struct {
 	// Items are the entries of the menu, in the order they read.
 	Items []MenuItem
 
-	// The HTMX attributes of the acting half, written only when they carry
-	// something. An empty hx-post is an attribute HTMX acts on: it would post
+	// The YPY attributes of the acting half, written only when they carry
+	// something. An empty ypy-post is an attribute YPY acts on: it would post
 	// to the current URL.
-	HxPost   string
-	HxGet    string
-	HxTarget string
-	HxSwap   string
+	YpyPost   string
+	YpyGet    string
+	YpyTarget string
+	YpySwap   string
 }
 
 // ButtonType is the type attribute of the acting half, defaulting to a button
@@ -120,17 +120,17 @@ func (p SplitButtonProps) PartNames() []string {
 			@if(.Size != "")
 				data-size="{{ .Size }}"
 			@endif
-			@if(.HxPost != "")
-				hx-post="{{ .HxPost }}"
+			@if(.YpyPost != "")
+				ypy-post="{{ .YpyPost }}"
 			@endif
-			@if(.HxGet != "")
-				hx-get="{{ .HxGet }}"
+			@if(.YpyGet != "")
+				ypy-get="{{ .YpyGet }}"
 			@endif
-			@if(.HxTarget != "")
-				hx-target="{{ .HxTarget }}"
+			@if(.YpyTarget != "")
+				ypy-target="{{ .YpyTarget }}"
 			@endif
-			@if(.HxSwap != "")
-				hx-swap="{{ .HxSwap }}"
+			@if(.YpySwap != "")
+				ypy-swap="{{ .YpySwap }}"
 			@endif
 			@attributes(.PartAttrs("action"))
 		>{{ .Label }}</button>

@@ -57,7 +57,7 @@ stylesheet, in that repository, and the component here uses the name it defines.
 There is no `.js` file here either, and no component writes a `<script>`.
 Behaviour comes from the view layer's own script, which the framework embeds and
 serves: it binds once on `document` and dispatches by looking at `data-*`
-attributes on the element an event came from. Markup HTMX swaps in is live the
+attributes on the element an event came from. Markup YPY swaps in is live the
 moment it lands, because there is nothing to initialise.
 
 **So a component makes itself interactive by carrying the attributes that script
@@ -90,11 +90,11 @@ globs `components/*.kyse.go` and `components/*.go`, and fails on any `x-name` or
 be written, the compiled file is what a browser is actually sent. The failure
 names the file, the line, the attribute, and what to do instead.
 
-`hx-get`, `hx-post` and `hx-target` are not matched and are correct here: their
-values are an address and a selector, which HTMX reads as data.
+`ypy-get`, `ypy-post` and `ypy-target` are not matched and are correct here: their
+values are an address and a selector, which YPY reads as data.
 
-**`hx-on` is forbidden all the same**, in every spelling — `hx-on:click`,
-`hx-on::after-request`, `data-hx-on:click`. Its value is JavaScript that HTMX
+**`ypy-on` is forbidden all the same**, in every spelling — `ypy-on:click`,
+`ypy-on::after-request`, `data-ypy-on:click`. Its value is JavaScript that YPY
 compiles and runs, exactly like `x-on:click`, so under `script-src 'self'` it is
 dead, and if the policy were ever loosened it would be script written into an
 attribute. The view compiler treats it as a code attribute and refuses any

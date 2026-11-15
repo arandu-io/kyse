@@ -171,11 +171,11 @@ func (p FileUploadProps) ElementID() string {
 				multiple
 			@endif
 			@if(.UploadURL != "")
-				hx-post="{{ .UploadURL }}"
-				hx-encoding="multipart/form-data"
-				hx-trigger="change"
-				hx-target="#{{ .Region() }}"
-				hx-swap="beforeend"
+				ypy-post="{{ .UploadURL }}"
+				ypy-encoding="multipart/form-data"
+				ypy-trigger="change"
+				ypy-target="#{{ .Region() }}"
+				ypy-swap="beforeend"
 			@endif
 			@if(.DescribedBy() != "")
 				aria-describedby="{{ .DescribedBy() }}"

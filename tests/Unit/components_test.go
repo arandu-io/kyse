@@ -386,12 +386,12 @@ func TestAPropIsEscaped(t *testing.T) {
 
 // TestAnEmptyOptionalAttributeIsNotWritten.
 //
-// `hx-post=""` is not the absence of hx-post: HTMX acts on it and posts to the
+// `ypy-post=""` is not the absence of ypy-post: YPY acts on it and posts to the
 // current URL. The same for data-variant, which the stylesheet matches on.
 func TestAnEmptyOptionalAttributeIsNotWritten(t *testing.T) {
 	plain := string(components.Button(components.ButtonProps{Label: "Save"}))
 
-	for _, attr := range []string{"data-variant", "data-size", "hx-post", "hx-get", "hx-target", "disabled"} {
+	for _, attr := range []string{"data-variant", "data-size", "ypy-post", "ypy-get", "ypy-target", "disabled"} {
 		if strings.Contains(plain, attr) {
 			t.Errorf("a button with no %s wrote it anyway:\n%s", attr, plain)
 		}
@@ -399,9 +399,9 @@ func TestAnEmptyOptionalAttributeIsNotWritten(t *testing.T) {
 
 	// And when they are set, they are there.
 	full := string(components.Button(components.ButtonProps{
-		Label: "Save", Variant: "destructive", Size: "sm", HxPost: "/x", Disabled: true,
+		Label: "Save", Variant: "destructive", Size: "sm", YpyPost: "/x", Disabled: true,
 	}))
-	for _, want := range []string{`data-variant="destructive"`, `data-size="sm"`, `hx-post="/x"`, "disabled"} {
+	for _, want := range []string{`data-variant="destructive"`, `data-size="sm"`, `ypy-post="/x"`, "disabled"} {
 		if !strings.Contains(full, want) {
 			t.Errorf("%s is missing:\n%s", want, full)
 		}
@@ -569,8 +569,8 @@ func TestATextareaAsksThePageToo(t *testing.T) {
 // a directive named x-something, and the @ shorthand for the event form.
 //
 // The character before the name has to be one that does not continue a name, so
-// hx-get is not matched -- it is an HTMX request attribute and it stays. hx-on is
-// not matched here either, but not because it is safe: HTMX evaluates it as
+// ypy-get is not matched -- it is a YPY request attribute and it stays. ypy-on is
+// not matched here either, but not because it is safe: YPY evaluates it as
 // script, the view compiler refuses it, and this pattern only looks for the
 // Alpine shapes.
 // Requiring an `=` after the @ form is what separates it from the view

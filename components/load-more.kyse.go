@@ -84,10 +84,10 @@ func (p LoadMoreProps) PartNames() []string { return []string{"root", "indicator
 		class="{{ .RootClass("btn") }}"
 		type="button"
 		data-variant="{{ .Look() }}"
-		hx-get="{{ .URL }}"
-		hx-trigger="{{ .Trigger() }}"
-		hx-target="this"
-		hx-swap="outerHTML"
+		ypy-get="{{ .URL }}"
+		ypy-trigger="{{ .Trigger() }}"
+		ypy-target="this"
+		ypy-swap="outerHTML"
 		@if(.Size != "")
 			data-size="{{ .Size }}"
 		@endif

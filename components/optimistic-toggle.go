@@ -163,7 +163,7 @@ func OptimisticToggle(kyse__props OptimisticToggleProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-post=\"")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\typy-post=\"")
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
@@ -180,10 +180,10 @@ func OptimisticToggle(kyse__props OptimisticToggleProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-target=\"this\"\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\typy-target=\"this\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-swap=\"outerHTML\"\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\typy-swap=\"outerHTML\"\n")
 	}
 //line components/optimistic-toggle.kyse.go:109
 	if kyse__d.Variant != "" {

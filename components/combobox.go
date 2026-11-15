@@ -438,7 +438,7 @@ func Combobox(kyse__props ComboboxProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-get=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-get=\"")
 		}
 		if kyse__err == nil {
 			var kyse__v4 string
@@ -455,13 +455,13 @@ func Combobox(kyse__props ComboboxProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-trigger=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-trigger=\"")
 		}
 		if kyse__err == nil {
 //line components/combobox.kyse.go:253
 			if kyse__v5 := kyse__view.Text(kyse__d.Trigger()); kyse__strings.ContainsAny(kyse__v5, "[]") {
 //line components/combobox.go:464
-				kyse__err = kyse__errors.New("components/combobox.kyse.go:253: the value interpolated into an HTMX trigger holds a square bracket, and HTMX evaluates what a trigger holds between square brackets as a script")
+				kyse__err = kyse__errors.New("components/combobox.kyse.go:253: the value interpolated into a YPY trigger holds a square bracket, and YPY evaluates what a trigger holds between square brackets as a script")
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__v5))
 			}
@@ -470,7 +470,7 @@ func Combobox(kyse__props ComboboxProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-target=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-target=\"")
 		}
 		if kyse__err == nil {
 //line components/combobox.kyse.go:254
@@ -481,7 +481,7 @@ func Combobox(kyse__props ComboboxProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-select=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-select=\"")
 		}
 		if kyse__err == nil {
 //line components/combobox.kyse.go:255
@@ -492,10 +492,10 @@ func Combobox(kyse__props ComboboxProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-swap=\"outerHTML\"\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-swap=\"outerHTML\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-sync=\"this:replace\"\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-sync=\"this:replace\"\n")
 		}
 //line components/combobox.kyse.go:258
 		if kyse__d.Placeholder != "" {

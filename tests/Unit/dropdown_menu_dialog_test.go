@@ -8,8 +8,8 @@ import (
 )
 
 // An entry of a menu asks "are you sure" by opening a Dialog drawn beside the
-// menu. Before MenuItem.Dialog the only way to ask from a menu was HxConfirm,
-// which htmx turns into the browser's own confirm box -- and a menu entry had
+// menu. Before MenuItem.Dialog the only way to ask from a menu was YpyConfirm,
+// which YPY turns into the browser's own confirm box -- and a menu entry had
 // no way to name a Kyse Dialog at all.
 //
 // The entry has to name the dialog the way DialogTrigger does, because the
@@ -21,7 +21,7 @@ func TestAMenuEntryOpensADialogAndSendsNothing(t *testing.T) {
 		ID: "actions", Label: "Actions",
 		Items: []components.MenuItem{
 			{Label: "Archive", Variant: "destructive", Dialog: "archive-meter"},
-			{Label: "Rename", HxGet: "/rename"},
+			{Label: "Rename", YpyGet: "/rename"},
 		},
 	}))
 
@@ -31,7 +31,7 @@ func TestAMenuEntryOpensADialogAndSendsNothing(t *testing.T) {
 			t.Errorf("the entry lacks %s:\n%s", want, entry)
 		}
 	}
-	for _, refused := range []string{"hx-post", "hx-get", "hx-confirm", "href="} {
+	for _, refused := range []string{"ypy-post", "ypy-get", "ypy-confirm", "href="} {
 		if strings.Contains(entry, refused) {
 			t.Errorf("an entry that opens a dialog also carries %s:\n%s", refused, entry)
 		}
@@ -44,7 +44,7 @@ func TestAMenuEntryOpensADialogAndSendsNothing(t *testing.T) {
 }
 
 // A link that opens a dialog is left out of a boosted layout, as DialogTrigger
-// does: htmx answers the click on the link itself, before the document the
+// does: YPY answers the click on the link itself, before the document the
 // dialog script listens on hears it, and the page would navigate instead.
 func TestALinkEntryThatOpensADialogIsNotBoosted(t *testing.T) {
 	html := string(components.DropdownMenu(components.DropdownMenuProps{
@@ -52,7 +52,7 @@ func TestALinkEntryThatOpensADialogIsNotBoosted(t *testing.T) {
 		Items: []components.MenuItem{{Label: "Archive", URL: "/meters/1/archive", Dialog: "archive-meter"}},
 	}))
 	entry := between(t, html, `id="actions-item-0"`, `</a>`)
-	for _, want := range []string{`href="/meters/1/archive"`, `data-dialog-open="archive-meter"`, `hx-boost="false"`} {
+	for _, want := range []string{`href="/meters/1/archive"`, `data-dialog-open="archive-meter"`, `ypy-boost="false"`} {
 		if !strings.Contains(entry, want) {
 			t.Errorf("the link entry lacks %s:\n%s", want, entry)
 		}

@@ -30,7 +30,7 @@ func passwordBox() string {
 }
 
 // passwordApp serves the box under the policy an application serves, and the
-// same box as a fragment an htmx swap brings in. The stylesheet is the one the
+// same box as a fragment a YPY swap brings in. The stylesheet is the one the
 // other tests measure: it is built from the component sources and carries no
 // Basecoat file, so the meter has no rule of the application to lean on.
 func passwordApp(t *testing.T) *app {
@@ -54,7 +54,7 @@ func passwordApp(t *testing.T) *app {
 	mux.HandleFunc("GET /password/swap", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-store")
-		fmt.Fprint(w, layout("Swap", `<button type="button" class="btn" hx-get="/password/fragment" hx-target="#slot" hx-swap="innerHTML">Choose a password</button><form id="slot" class="flex max-w-sm flex-col gap-4"></form>`))
+		fmt.Fprint(w, layout("Swap", `<button type="button" class="btn" ypy-get="/password/fragment" ypy-target="#slot" ypy-swap="innerHTML">Choose a password</button><form id="slot" class="flex max-w-sm flex-col gap-4"></form>`))
 	})
 	mux.HandleFunc("GET /password/fragment", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -194,7 +194,7 @@ func TestAPastedPasswordTicksEveryRuleItMeets(t *testing.T) {
 	requireChecklist(t, page, "", "after clearing the box")
 }
 
-// A box an htmx swap brings in is mounted by the swap and ticks as one drawn
+// A box a YPY swap brings in is mounted by the swap and ticks as one drawn
 // with the page.
 func TestAPasswordBoxBroughtByASwapTicksToo(t *testing.T) {
 	app := passwordApp(t)

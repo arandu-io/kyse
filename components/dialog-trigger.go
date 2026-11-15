@@ -26,7 +26,7 @@ import (
 // script follows the link, and the form is posted and refused there like any
 // other: nothing about the dialog has to work for the form to.
 //
-// It opts out of hx-boost: a boosted link is answered by htmx before the
+// It opts out of ypy-boost: a boosted link is answered by YPY before the
 // script that opens the dialog ever sees the click.
 //
 // Without Href it is a button, for a dialog that has no page behind it -- a
@@ -120,7 +120,7 @@ func DialogTrigger(kyse__props DialogTriggerProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\taria-haspopup=\"dialog\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\thx-boost=\"false\"\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\typy-boost=\"false\"\n")
 		}
 //line components/dialog-trigger.kyse.go:61
 		if kyse__d.Variant != "" {

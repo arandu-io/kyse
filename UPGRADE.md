@@ -209,7 +209,7 @@ answers the second. The replacements are `Href(DataTableChange{...})`, `Active`,
 | `BulkAction` empty posted the selection to `URL`, which answered 204 and did nothing | the bar is drawn only when `BulkAction` is set | `BulkAction: "/invoices/bulk"` |
 | every bulk button posted the same fields | `ButtonProps.Name` and `Value` are written on the button, so the server can tell which was pressed | `ButtonProps{Label: "Archive", Type: "submit", Name: "do", Value: "archive"}` |
 | the rows ticked belonged to the page shown | the browser keeps the keys ticked per table across a search, an order, a facet and a page, and the bar posts all of them | nothing |
-| a complete list's links could be boosted into a request | a complete list's links and form say `hx-boost="false"` and the behaviour takes the click | nothing |
+| a complete list's links could be boosted into a request | a complete list's links and form say `ypy-boost="false"` and the behaviour takes the click | nothing |
 | a sort, a page step or a search lost the hidden columns | the hidden columns are `State.Hidden()`, travel as `hide`, and survive a swap and a reload | `TableColumn{Hideable: true}`; `TableColumn.Hidden` is where a list with no `State` starts |
 | `PageSizes` drew a chooser on a complete list only | the chooser, a menu of addresses, is drawn on both, and a new size keeps the first row on screen | `PageSizes: []int{10, 20, 50}` |
 
@@ -302,7 +302,7 @@ before.
 ## v0.39.0
 
 Nothing stops a build, and one thing stops a render that used to come out
-empty. An attribute the view layer refuses -- `hx-*`, `on*`, `style`, an
+empty. An attribute the view layer refuses -- `ypy-*`, `on*`, `style`, an
 address, `class`, `role`, `aria-*` -- written in `Attrs` or in
 `Parts[...].Attrs` used to make the whole component render as nothing. It now
 panics with a `*components.RefusedAttribute` naming the part, the attribute and
@@ -311,7 +311,7 @@ handler turns into an error page.
 
 | it was | it is | write instead |
 | --- | --- | --- |
-| `Attrs{"hx-boost": "false"}` on a `FormDialog` drew no dialog | a panic naming `hx-boost` on `content` | `NoBoost: true` |
+| `Attrs{"ypy-boost": "false"}` on a `FormDialog` drew no dialog | a panic naming `ypy-boost` on `content` | `NoBoost: true` |
 | any refused name in `Attrs` drew an empty component | a panic naming it | the component's own field for it, or nothing |
 
 A value the escapers refuse because it arrived as data -- an address whose
@@ -347,7 +347,7 @@ Hesape v0.54.1, whose script works the facets and the pager.
 ## v0.34.2
 
 Nothing to change. A data table's search, facets, sortable headers and pages
-now take the region out of the answer (`hx-select` equal to `hx-target`), so
+now take the region out of the answer (`ypy-select` equal to `ypy-target`), so
 an endpoint that answers the whole page swaps one list for one list instead
 of drawing the page inside the table.
 
@@ -584,7 +584,7 @@ utility beats a component class there. Utility against utility is the one case
 that needs the importance marker: `p-8!`.
 
 Attributes go through a check that refuses every name whose value a browser or a
-library would act on — `on*`, `hx-on*`, `x-*`, `style`, `href` and the other
+library would act on — `on*`, `ypy-on*`, `x-*`, `style`, `href` and the other
 address attributes, and the `class`, `role` and `aria-*` the component owns. A
 refused name is an error at render, naming the attribute and the view's line.
 

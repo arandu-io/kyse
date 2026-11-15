@@ -82,20 +82,20 @@ type SelectProps struct {
 	// -- which for a rejected form is what the handler parsed out of it.
 	Values []string
 
-	// The HTMX attributes, written only when they carry something. An empty
-	// hx-get is an attribute HTMX acts on: it would get the current URL.
+	// The YPY attributes, written only when they carry something. An empty
+	// ypy-get is an attribute YPY acts on: it would get the current URL.
 	//
 	// They are what makes one list fill another: the first names the endpoint,
 	// the endpoint answers with the second's options, and the dependent pair
-	// needs no script. HxTrigger defaults to change, because a list that
+	// needs no script. YpyTrigger defaults to change, because a list that
 	// fetched on anything else would fetch while somebody is still arrowing
 	// through it towards what they meant.
-	HxGet     string
-	HxPost    string
-	HxTarget  string
-	HxSwap    string
-	HxTrigger string
-	HxInclude string
+	YpyGet     string
+	YpyPost    string
+	YpyTarget  string
+	YpySwap    string
+	YpyTrigger string
+	YpyInclude string
 }
 
 // SelectOption is one line of the list.
@@ -151,14 +151,14 @@ func (p SelectProps) DescribedBy() string {
 // Trigger is when the request is made, and is change unless the caller said
 // otherwise.
 func (p SelectProps) Trigger() string {
-	if p.HxTrigger != "" {
-		return p.HxTrigger
+	if p.YpyTrigger != "" {
+		return p.YpyTrigger
 	}
 	return "change"
 }
 
 // Fetches is whether this list asks the server for anything at all.
-func (p SelectProps) Fetches() bool { return p.HxGet != "" || p.HxPost != "" }
+func (p SelectProps) Fetches() bool { return p.YpyGet != "" || p.YpyPost != "" }
 
 // FieldName is what the control submits under. A multiple select submits once
 // per chosen line, and the bracket is what tells a form parser to keep them as
@@ -359,15 +359,15 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 		}
 	}
 //line components/select.kyse.go:207
-	if kyse__d.HxGet != "" {
+	if kyse__d.YpyGet != "" {
 //line components/select.go:364
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-get=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-get=\"")
 		}
 		if kyse__err == nil {
 			var kyse__v3 string
 //line components/select.kyse.go:208
-			kyse__v3, kyse__err = kyse__view.TextURL(kyse__d.HxGet)
+			kyse__v3, kyse__err = kyse__view.TextURL(kyse__d.YpyGet)
 //line components/select.go:372
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/select.kyse.go:208", kyse__err)
@@ -380,15 +380,15 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 		}
 	}
 //line components/select.kyse.go:210
-	if kyse__d.HxPost != "" {
+	if kyse__d.YpyPost != "" {
 //line components/select.go:385
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-post=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-post=\"")
 		}
 		if kyse__err == nil {
 			var kyse__v4 string
 //line components/select.kyse.go:211
-			kyse__v4, kyse__err = kyse__view.TextURL(kyse__d.HxPost)
+			kyse__v4, kyse__err = kyse__view.TextURL(kyse__d.YpyPost)
 //line components/select.go:393
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/select.kyse.go:211", kyse__err)
@@ -404,13 +404,13 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	if kyse__d.Fetches() {
 //line components/select.go:406
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-trigger=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-trigger=\"")
 		}
 		if kyse__err == nil {
 //line components/select.kyse.go:214
 			if kyse__v5 := kyse__view.Text(kyse__d.Trigger()); kyse__strings.ContainsAny(kyse__v5, "[]") {
 //line components/select.go:413
-				kyse__err = kyse__errors.New("components/select.kyse.go:214: the value interpolated into an HTMX trigger holds a square bracket, and HTMX evaluates what a trigger holds between square brackets as a script")
+				kyse__err = kyse__errors.New("components/select.kyse.go:214: the value interpolated into a YPY trigger holds a square bracket, and YPY evaluates what a trigger holds between square brackets as a script")
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__v5))
 			}
@@ -420,14 +420,14 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 		}
 	}
 //line components/select.kyse.go:216
-	if kyse__d.HxTarget != "" {
+	if kyse__d.YpyTarget != "" {
 //line components/select.go:425
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-target=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-target=\"")
 		}
 		if kyse__err == nil {
 //line components/select.kyse.go:217
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxTarget))
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.YpyTarget))
 //line components/select.go:432
 		}
 		if kyse__err == nil {
@@ -435,14 +435,14 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 		}
 	}
 //line components/select.kyse.go:219
-	if kyse__d.HxSwap != "" {
+	if kyse__d.YpySwap != "" {
 //line components/select.go:440
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-swap=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-swap=\"")
 		}
 		if kyse__err == nil {
 //line components/select.kyse.go:220
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxSwap))
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.YpySwap))
 //line components/select.go:447
 		}
 		if kyse__err == nil {
@@ -450,14 +450,14 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 		}
 	}
 //line components/select.kyse.go:222
-	if kyse__d.HxInclude != "" {
+	if kyse__d.YpyInclude != "" {
 //line components/select.go:455
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-include=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-include=\"")
 		}
 		if kyse__err == nil {
 //line components/select.kyse.go:223
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxInclude))
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.YpyInclude))
 //line components/select.go:462
 		}
 		if kyse__err == nil {

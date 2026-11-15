@@ -55,13 +55,13 @@ type SegmentedControlProps struct {
 	// Size is "sm" or "lg". Empty is the default.
 	Size string
 
-	// The HTMX attributes, written only when they carry something. A segmented
-	// control usually fetches on change, and HxTrigger defaults to that.
-	HxGet     string
-	HxPost    string
-	HxTarget  string
-	HxSwap    string
-	HxTrigger string
+	// The YPY attributes, written only when they carry something. A segmented
+	// control usually fetches on change, and YpyTrigger defaults to that.
+	YpyGet     string
+	YpyPost    string
+	YpyTarget  string
+	YpySwap    string
+	YpyTrigger string
 }
 
 // SegmentedOption is one segment of the bar.
@@ -101,15 +101,15 @@ func (p SegmentedControlProps) OptionID(option SegmentedOption) string {
 // anything but change would fetch on the arrow key that is passing over an
 // option on the way to another.
 func (p SegmentedControlProps) Trigger() string {
-	if p.HxTrigger != "" {
-		return p.HxTrigger
+	if p.YpyTrigger != "" {
+		return p.YpyTrigger
 	}
 	return "change"
 }
 
 // Fetches is whether this bar asks the server for anything at all.
 func (p SegmentedControlProps) Fetches() bool {
-	return p.HxGet != "" || p.HxPost != ""
+	return p.YpyGet != "" || p.YpyPost != ""
 }
 
 // PartNames are the parts this component publishes.
@@ -263,15 +263,15 @@ func SegmentedControl(kyse__props SegmentedControlProps) kyse__template.HTML {
 		}
 	}
 //line components/segmented-control.kyse.go:138
-	if kyse__d.HxGet != "" {
+	if kyse__d.YpyGet != "" {
 //line components/segmented-control.go:268
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-get=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-get=\"")
 		}
 		if kyse__err == nil {
 			var kyse__v3 string
 //line components/segmented-control.kyse.go:139
-			kyse__v3, kyse__err = kyse__view.TextURL(kyse__d.HxGet)
+			kyse__v3, kyse__err = kyse__view.TextURL(kyse__d.YpyGet)
 //line components/segmented-control.go:276
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/segmented-control.kyse.go:139", kyse__err)
@@ -284,15 +284,15 @@ func SegmentedControl(kyse__props SegmentedControlProps) kyse__template.HTML {
 		}
 	}
 //line components/segmented-control.kyse.go:141
-	if kyse__d.HxPost != "" {
+	if kyse__d.YpyPost != "" {
 //line components/segmented-control.go:289
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-post=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-post=\"")
 		}
 		if kyse__err == nil {
 			var kyse__v4 string
 //line components/segmented-control.kyse.go:142
-			kyse__v4, kyse__err = kyse__view.TextURL(kyse__d.HxPost)
+			kyse__v4, kyse__err = kyse__view.TextURL(kyse__d.YpyPost)
 //line components/segmented-control.go:297
 			if kyse__err != nil {
 				kyse__err = kyse__fmt.Errorf("%s: %w", "components/segmented-control.kyse.go:142", kyse__err)
@@ -308,13 +308,13 @@ func SegmentedControl(kyse__props SegmentedControlProps) kyse__template.HTML {
 	if kyse__d.Fetches() {
 //line components/segmented-control.go:310
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-trigger=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-trigger=\"")
 		}
 		if kyse__err == nil {
 //line components/segmented-control.kyse.go:145
 			if kyse__v5 := kyse__view.Text(kyse__d.Trigger()); kyse__strings.ContainsAny(kyse__v5, "[]") {
 //line components/segmented-control.go:317
-				kyse__err = kyse__errors.New("components/segmented-control.kyse.go:145: the value interpolated into an HTMX trigger holds a square bracket, and HTMX evaluates what a trigger holds between square brackets as a script")
+				kyse__err = kyse__errors.New("components/segmented-control.kyse.go:145: the value interpolated into a YPY trigger holds a square bracket, and YPY evaluates what a trigger holds between square brackets as a script")
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__v5))
 			}
@@ -324,14 +324,14 @@ func SegmentedControl(kyse__props SegmentedControlProps) kyse__template.HTML {
 		}
 	}
 //line components/segmented-control.kyse.go:147
-	if kyse__d.HxTarget != "" {
+	if kyse__d.YpyTarget != "" {
 //line components/segmented-control.go:329
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-target=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-target=\"")
 		}
 		if kyse__err == nil {
 //line components/segmented-control.kyse.go:148
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxTarget))
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.YpyTarget))
 //line components/segmented-control.go:336
 		}
 		if kyse__err == nil {
@@ -339,14 +339,14 @@ func SegmentedControl(kyse__props SegmentedControlProps) kyse__template.HTML {
 		}
 	}
 //line components/segmented-control.kyse.go:150
-	if kyse__d.HxSwap != "" {
+	if kyse__d.YpySwap != "" {
 //line components/segmented-control.go:344
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-swap=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-swap=\"")
 		}
 		if kyse__err == nil {
 //line components/segmented-control.kyse.go:151
-			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxSwap))
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.YpySwap))
 //line components/segmented-control.go:351
 		}
 		if kyse__err == nil {

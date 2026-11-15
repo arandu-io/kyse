@@ -42,13 +42,13 @@ type SegmentedControlProps struct {
 	// Size is "sm" or "lg". Empty is the default.
 	Size string
 
-	// The HTMX attributes, written only when they carry something. A segmented
-	// control usually fetches on change, and HxTrigger defaults to that.
-	HxGet     string
-	HxPost    string
-	HxTarget  string
-	HxSwap    string
-	HxTrigger string
+	// The YPY attributes, written only when they carry something. A segmented
+	// control usually fetches on change, and YpyTrigger defaults to that.
+	YpyGet     string
+	YpyPost    string
+	YpyTarget  string
+	YpySwap    string
+	YpyTrigger string
 }
 
 // SegmentedOption is one segment of the bar.
@@ -88,15 +88,15 @@ func (p SegmentedControlProps) OptionID(option SegmentedOption) string {
 // anything but change would fetch on the arrow key that is passing over an
 // option on the way to another.
 func (p SegmentedControlProps) Trigger() string {
-	if p.HxTrigger != "" {
-		return p.HxTrigger
+	if p.YpyTrigger != "" {
+		return p.YpyTrigger
 	}
 	return "change"
 }
 
 // Fetches is whether this bar asks the server for anything at all.
 func (p SegmentedControlProps) Fetches() bool {
-	return p.HxGet != "" || p.HxPost != ""
+	return p.YpyGet != "" || p.YpyPost != ""
 }
 
 // PartNames are the parts this component publishes.
@@ -135,20 +135,20 @@ func (p SegmentedControlProps) ElementID() string {
 		@if(.Size != "")
 			data-size="{{ .Size }}"
 		@endif
-		@if(.HxGet != "")
-			hx-get="{{ .HxGet }}"
+		@if(.YpyGet != "")
+			ypy-get="{{ .YpyGet }}"
 		@endif
-		@if(.HxPost != "")
-			hx-post="{{ .HxPost }}"
+		@if(.YpyPost != "")
+			ypy-post="{{ .YpyPost }}"
 		@endif
 		@if(.Fetches())
-			hx-trigger="{{ .Trigger() }}"
+			ypy-trigger="{{ .Trigger() }}"
 		@endif
-		@if(.HxTarget != "")
-			hx-target="{{ .HxTarget }}"
+		@if(.YpyTarget != "")
+			ypy-target="{{ .YpyTarget }}"
 		@endif
-		@if(.HxSwap != "")
-			hx-swap="{{ .HxSwap }}"
+		@if(.YpySwap != "")
+			ypy-swap="{{ .YpySwap }}"
 		@endif
 		@attributes(.PartAttrs("group"))
 	>

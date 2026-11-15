@@ -307,7 +307,7 @@ func Autocomplete(kyse__props AutocompleteProps) kyse__template.HTML {
 	if kyse__d.SearchURL != "" {
 //line components/autocomplete.go:309
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-get=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-get=\"")
 		}
 		if kyse__err == nil {
 			var kyse__v3 string
@@ -324,13 +324,13 @@ func Autocomplete(kyse__props AutocompleteProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-trigger=\"")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-trigger=\"")
 		}
 		if kyse__err == nil {
 //line components/autocomplete.kyse.go:158
 			if kyse__v4 := kyse__view.Text(kyse__d.Trigger()); kyse__strings.ContainsAny(kyse__v4, "[]") {
 //line components/autocomplete.go:333
-				kyse__err = kyse__errors.New("components/autocomplete.kyse.go:158: the value interpolated into an HTMX trigger holds a square bracket, and HTMX evaluates what a trigger holds between square brackets as a script")
+				kyse__err = kyse__errors.New("components/autocomplete.kyse.go:158: the value interpolated into a YPY trigger holds a square bracket, and YPY evaluates what a trigger holds between square brackets as a script")
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__v4))
 			}
@@ -339,7 +339,7 @@ func Autocomplete(kyse__props AutocompleteProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-target=\"#")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-target=\"#")
 		}
 		if kyse__err == nil {
 //line components/autocomplete.kyse.go:159
@@ -350,10 +350,10 @@ func Autocomplete(kyse__props AutocompleteProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-swap=\"innerHTML\"\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-swap=\"innerHTML\"\n")
 		}
 		if kyse__err == nil {
-			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\thx-sync=\"this:replace\"\n")
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\typy-sync=\"this:replace\"\n")
 		}
 	}
 //line components/autocomplete.kyse.go:163

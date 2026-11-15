@@ -159,12 +159,12 @@ of their own (`ID: "cancel-subscription-reason"`): the page answers by field
 name, and without the scope a refusal in one dialog draws its message and its
 typed value in every field of that name. `HiddenInput` carries a value nobody
 types -- the record a dialog acts on -- and takes the same scoped page. The
-trigger link writes `hx-boost="false"`, so a layout with a boosted body does
+trigger link writes `ypy-boost="false"`, so a layout with a boosted body does
 not navigate to the form page instead of opening the dialog.
 
 A form whose answer must be a whole document -- one that shows a secret once,
 an API token or a signing key, answered `no-store` -- sets `NoBoost: true`, and
-the form carries `hx-boost="false"` inside a boosted layout. `hx-*` cannot be
+the form carries `ypy-boost="false"` inside a boosted layout. `ypy-*` cannot be
 written through `Attrs`: a refused name there stops the render with a
 `*components.RefusedAttribute` that names it, instead of drawing nothing.
 
@@ -226,7 +226,7 @@ it writes.
 
 ## Where this came from
 
-The component set, the `data-variant` / `data-size` attribute API and the HTMX
+The component set, the `data-variant` / `data-size` attribute API and the YPY
 patterns are adapted from [shadcn-htmx](https://github.com/productdevbook/shadcn-htmx)
 (MIT). The stylesheet is [Basecoat](https://github.com/hunvreus/basecoat) (MIT).
 The icons are [Phosphor](https://github.com/phosphor-icons/core) (MIT). Every

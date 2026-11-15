@@ -32,7 +32,7 @@ import (
 // An endpoint that answers in place, without navigating, returns this fragment
 // instead, and
 //
-//	hx-target="#toaster" hx-swap="beforeend"
+//	ypy-target="#toaster" ypy-swap="beforeend"
 //
 // appends it to the tray the layout already has. The two are one toast reached
 // from the two answers an action can give; neither needs a template deciding
@@ -381,7 +381,7 @@ func Toast(kyse__props ToastProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\tdata-toast-action\n")
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thx-post=\"")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\typy-post=\"")
 				}
 				if kyse__err == nil {
 					var kyse__v5 string
@@ -398,7 +398,7 @@ func Toast(kyse__props ToastProps) kyse__template.HTML {
 					_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 				}
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\thx-swap=\"none\"\n")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\typy-swap=\"none\"\n")
 				}
 				if kyse__err == nil {
 					var kyse__v6 string

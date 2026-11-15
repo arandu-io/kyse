@@ -54,13 +54,13 @@ type SplitButtonProps struct {
 	// Items are the entries of the menu, in the order they read.
 	Items []MenuItem
 
-	// The HTMX attributes of the acting half, written only when they carry
-	// something. An empty hx-post is an attribute HTMX acts on: it would post
+	// The YPY attributes of the acting half, written only when they carry
+	// something. An empty ypy-post is an attribute YPY acts on: it would post
 	// to the current URL.
-	HxPost   string
-	HxGet    string
-	HxTarget string
-	HxSwap   string
+	YpyPost   string
+	YpyGet    string
+	YpyTarget string
+	YpySwap   string
 }
 
 // ButtonType is the type attribute of the acting half, defaulting to a button
@@ -310,15 +310,15 @@ func SplitButton(kyse__props SplitButtonProps) kyse__template.HTML {
 			}
 		}
 //line components/split-button.kyse.go:123
-		if kyse__d.HxPost != "" {
+		if kyse__d.YpyPost != "" {
 //line components/split-button.go:315
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-post=\"")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-post=\"")
 			}
 			if kyse__err == nil {
 				var kyse__v4 string
 //line components/split-button.kyse.go:124
-				kyse__v4, kyse__err = kyse__view.TextURL(kyse__d.HxPost)
+				kyse__v4, kyse__err = kyse__view.TextURL(kyse__d.YpyPost)
 //line components/split-button.go:323
 				if kyse__err != nil {
 					kyse__err = kyse__fmt.Errorf("%s: %w", "components/split-button.kyse.go:124", kyse__err)
@@ -331,15 +331,15 @@ func SplitButton(kyse__props SplitButtonProps) kyse__template.HTML {
 			}
 		}
 //line components/split-button.kyse.go:126
-		if kyse__d.HxGet != "" {
+		if kyse__d.YpyGet != "" {
 //line components/split-button.go:336
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-get=\"")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-get=\"")
 			}
 			if kyse__err == nil {
 				var kyse__v5 string
 //line components/split-button.kyse.go:127
-				kyse__v5, kyse__err = kyse__view.TextURL(kyse__d.HxGet)
+				kyse__v5, kyse__err = kyse__view.TextURL(kyse__d.YpyGet)
 //line components/split-button.go:344
 				if kyse__err != nil {
 					kyse__err = kyse__fmt.Errorf("%s: %w", "components/split-button.kyse.go:127", kyse__err)
@@ -352,14 +352,14 @@ func SplitButton(kyse__props SplitButtonProps) kyse__template.HTML {
 			}
 		}
 //line components/split-button.kyse.go:129
-		if kyse__d.HxTarget != "" {
+		if kyse__d.YpyTarget != "" {
 //line components/split-button.go:357
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-target=\"")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-target=\"")
 			}
 			if kyse__err == nil {
 //line components/split-button.kyse.go:130
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxTarget))
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.YpyTarget))
 //line components/split-button.go:364
 			}
 			if kyse__err == nil {
@@ -367,14 +367,14 @@ func SplitButton(kyse__props SplitButtonProps) kyse__template.HTML {
 			}
 		}
 //line components/split-button.kyse.go:132
-		if kyse__d.HxSwap != "" {
+		if kyse__d.YpySwap != "" {
 //line components/split-button.go:372
 			if kyse__err == nil {
-				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\thx-swap=\"")
+				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-swap=\"")
 			}
 			if kyse__err == nil {
 //line components/split-button.kyse.go:133
-				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxSwap))
+				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.YpySwap))
 //line components/split-button.go:379
 			}
 			if kyse__err == nil {

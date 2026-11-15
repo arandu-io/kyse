@@ -103,9 +103,9 @@ func (p OptimisticToggleProps) PartNames() []string {
 	type="button"
 	aria-pressed="{{ .State() }}"
 	aria-label="{{ .Label }}"
-	hx-post="{{ .URL }}"
-	hx-target="this"
-	hx-swap="outerHTML"
+	ypy-post="{{ .URL }}"
+	ypy-target="this"
+	ypy-swap="outerHTML"
 	@if(.Variant != "")
 		data-variant="{{ .Variant }}"
 	@endif

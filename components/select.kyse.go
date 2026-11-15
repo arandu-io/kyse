@@ -69,20 +69,20 @@ type SelectProps struct {
 	// -- which for a rejected form is what the handler parsed out of it.
 	Values []string
 
-	// The HTMX attributes, written only when they carry something. An empty
-	// hx-get is an attribute HTMX acts on: it would get the current URL.
+	// The YPY attributes, written only when they carry something. An empty
+	// ypy-get is an attribute YPY acts on: it would get the current URL.
 	//
 	// They are what makes one list fill another: the first names the endpoint,
 	// the endpoint answers with the second's options, and the dependent pair
-	// needs no script. HxTrigger defaults to change, because a list that
+	// needs no script. YpyTrigger defaults to change, because a list that
 	// fetched on anything else would fetch while somebody is still arrowing
 	// through it towards what they meant.
-	HxGet     string
-	HxPost    string
-	HxTarget  string
-	HxSwap    string
-	HxTrigger string
-	HxInclude string
+	YpyGet     string
+	YpyPost    string
+	YpyTarget  string
+	YpySwap    string
+	YpyTrigger string
+	YpyInclude string
 }
 
 // SelectOption is one line of the list.
@@ -137,14 +137,14 @@ func (p SelectProps) DescribedBy() string {
 // Trigger is when the request is made, and is change unless the caller said
 // otherwise.
 func (p SelectProps) Trigger() string {
-	if p.HxTrigger != "" {
-		return p.HxTrigger
+	if p.YpyTrigger != "" {
+		return p.YpyTrigger
 	}
 	return "change"
 }
 
 // Fetches is whether this list asks the server for anything at all.
-func (p SelectProps) Fetches() bool { return p.HxGet != "" || p.HxPost != "" }
+func (p SelectProps) Fetches() bool { return p.YpyGet != "" || p.YpyPost != "" }
 
 // FieldName is what the control submits under. A multiple select submits once
 // per chosen line, and the bracket is what tells a form parser to keep them as
@@ -204,23 +204,23 @@ func (p SelectProps) PartNames() []string {
 		@if(.Size > 0)
 			size="{{ .Size }}"
 		@endif
-		@if(.HxGet != "")
-			hx-get="{{ .HxGet }}"
+		@if(.YpyGet != "")
+			ypy-get="{{ .YpyGet }}"
 		@endif
-		@if(.HxPost != "")
-			hx-post="{{ .HxPost }}"
+		@if(.YpyPost != "")
+			ypy-post="{{ .YpyPost }}"
 		@endif
 		@if(.Fetches())
-			hx-trigger="{{ .Trigger() }}"
+			ypy-trigger="{{ .Trigger() }}"
 		@endif
-		@if(.HxTarget != "")
-			hx-target="{{ .HxTarget }}"
+		@if(.YpyTarget != "")
+			ypy-target="{{ .YpyTarget }}"
 		@endif
-		@if(.HxSwap != "")
-			hx-swap="{{ .HxSwap }}"
+		@if(.YpySwap != "")
+			ypy-swap="{{ .YpySwap }}"
 		@endif
-		@if(.HxInclude != "")
-			hx-include="{{ .HxInclude }}"
+		@if(.YpyInclude != "")
+			ypy-include="{{ .YpyInclude }}"
 		@endif
 		@if(.DescribedBy() != "")
 			aria-describedby="{{ .DescribedBy() }}"

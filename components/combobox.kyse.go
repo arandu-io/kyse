@@ -249,12 +249,12 @@ func (p ComboboxProps) ElementID() string {
 				aria-autocomplete="list"
 				aria-expanded="false"
 				aria-controls="{{ .ListboxID() }}"
-				hx-get="{{ .SearchURL }}"
-				hx-trigger="{{ .Trigger() }}"
-				hx-target="{{ .ListboxTarget() }}"
-				hx-select="{{ .ListboxTarget() }}"
-				hx-swap="outerHTML"
-				hx-sync="this:replace"
+				ypy-get="{{ .SearchURL }}"
+				ypy-trigger="{{ .Trigger() }}"
+				ypy-target="{{ .ListboxTarget() }}"
+				ypy-select="{{ .ListboxTarget() }}"
+				ypy-swap="outerHTML"
+				ypy-sync="this:replace"
 				@if(.Placeholder != "")
 					placeholder="{{ .Placeholder }}"
 				@endif

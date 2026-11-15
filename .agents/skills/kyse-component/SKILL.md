@@ -163,7 +163,7 @@ component library is the whole point.
   `Variant` empty is the default variant; `Type` empty is `"button"`, because a
   button inside a form that does not say otherwise submits it.
 - **An optional attribute is written only when it carries something.**
-  `hx-post=""` is not the absence of `hx-post` — HTMX acts on it and posts to
+  `ypy-post=""` is not the absence of `ypy-post` — YPY acts on it and posts to
   the current URL. `TestAnEmptyOptionalAttributeIsNotWritten` at
   `tests/Unit/components_test.go:341` holds `Button` to this.
 - **An input asks the page rather than being handed its message.** Take

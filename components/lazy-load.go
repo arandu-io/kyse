@@ -110,7 +110,7 @@ func LazyLoad(kyse__props LazyLoadProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\taria-busy=\"true\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-get=\"")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\typy-get=\"")
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
@@ -127,13 +127,13 @@ func LazyLoad(kyse__props LazyLoadProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-trigger=\"")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\typy-trigger=\"")
 	}
 	if kyse__err == nil {
 //line components/lazy-load.kyse.go:63
 		if kyse__v2 := kyse__view.Text(kyse__d.Trigger()); kyse__strings.ContainsAny(kyse__v2, "[]") {
 //line components/lazy-load.go:136
-			kyse__err = kyse__errors.New("components/lazy-load.kyse.go:63: the value interpolated into an HTMX trigger holds a square bracket, and HTMX evaluates what a trigger holds between square brackets as a script")
+			kyse__err = kyse__errors.New("components/lazy-load.kyse.go:63: the value interpolated into a YPY trigger holds a square bracket, and YPY evaluates what a trigger holds between square brackets as a script")
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__v2))
 		}
@@ -142,10 +142,10 @@ func LazyLoad(kyse__props LazyLoadProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-target=\"this\"\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\typy-target=\"this\"\n")
 	}
 	if kyse__err == nil {
-		_, kyse__err = kyse__io.WriteString(kyse__w, "\thx-swap=\"outerHTML\"\n")
+		_, kyse__err = kyse__io.WriteString(kyse__w, "\typy-swap=\"outerHTML\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v3 string

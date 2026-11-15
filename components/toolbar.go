@@ -74,12 +74,12 @@ type ToolbarItem struct {
 	// IconOnly draws the label as the accessible name rather than as text.
 	IconOnly bool
 
-	// The HTMX attributes, written only when they carry something. An empty
-	// hx-post is an attribute HTMX acts on: it would post to the current URL.
-	HxPost   string
-	HxGet    string
-	HxTarget string
-	HxSwap   string
+	// The YPY attributes, written only when they carry something. An empty
+	// ypy-post is an attribute YPY acts on: it would post to the current URL.
+	YpyPost   string
+	YpyGet    string
+	YpyTarget string
+	YpySwap   string
 }
 
 // Vertical is whether the arrow keys run up and down rather than left and
@@ -465,15 +465,15 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 				}
 			}
 //line components/toolbar.kyse.go:189
-			if kyse__d.Items[at].HxPost != "" {
+			if kyse__d.Items[at].YpyPost != "" {
 //line components/toolbar.go:470
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\thx-post=\"")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\typy-post=\"")
 				}
 				if kyse__err == nil {
 					var kyse__v6 string
 //line components/toolbar.kyse.go:190
-					kyse__v6, kyse__err = kyse__view.TextURL(kyse__d.Items[at].HxPost)
+					kyse__v6, kyse__err = kyse__view.TextURL(kyse__d.Items[at].YpyPost)
 //line components/toolbar.go:478
 					if kyse__err != nil {
 						kyse__err = kyse__fmt.Errorf("%s: %w", "components/toolbar.kyse.go:190", kyse__err)
@@ -486,15 +486,15 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 				}
 			}
 //line components/toolbar.kyse.go:192
-			if kyse__d.Items[at].HxGet != "" {
+			if kyse__d.Items[at].YpyGet != "" {
 //line components/toolbar.go:491
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\thx-get=\"")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\typy-get=\"")
 				}
 				if kyse__err == nil {
 					var kyse__v7 string
 //line components/toolbar.kyse.go:193
-					kyse__v7, kyse__err = kyse__view.TextURL(kyse__d.Items[at].HxGet)
+					kyse__v7, kyse__err = kyse__view.TextURL(kyse__d.Items[at].YpyGet)
 //line components/toolbar.go:499
 					if kyse__err != nil {
 						kyse__err = kyse__fmt.Errorf("%s: %w", "components/toolbar.kyse.go:193", kyse__err)
@@ -507,14 +507,14 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 				}
 			}
 //line components/toolbar.kyse.go:195
-			if kyse__d.Items[at].HxTarget != "" {
+			if kyse__d.Items[at].YpyTarget != "" {
 //line components/toolbar.go:512
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\thx-target=\"")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\typy-target=\"")
 				}
 				if kyse__err == nil {
 //line components/toolbar.kyse.go:196
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Items[at].HxTarget))
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Items[at].YpyTarget))
 //line components/toolbar.go:519
 				}
 				if kyse__err == nil {
@@ -522,14 +522,14 @@ func Toolbar(kyse__props ToolbarProps) kyse__template.HTML {
 				}
 			}
 //line components/toolbar.kyse.go:198
-			if kyse__d.Items[at].HxSwap != "" {
+			if kyse__d.Items[at].YpySwap != "" {
 //line components/toolbar.go:527
 				if kyse__err == nil {
-					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\thx-swap=\"")
+					_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\typy-swap=\"")
 				}
 				if kyse__err == nil {
 //line components/toolbar.kyse.go:199
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Items[at].HxSwap))
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Items[at].YpySwap))
 //line components/toolbar.go:534
 				}
 				if kyse__err == nil {

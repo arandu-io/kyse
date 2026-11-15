@@ -109,11 +109,11 @@ type TableProps struct {
 	// sentence in English.
 	SelectedLabel string
 
-	// The HTMX attributes for a sort link or a column menu, so the table can
+	// The YPY attributes for a sort link or a column menu, so the table can
 	// swap itself instead of loading a document. The links stay real
 	// addresses either way.
-	HxTarget string
-	HxSwap   string
+	YpyTarget string
+	YpySwap   string
 
 	// Composed says this table is drawn inside another component, which has
 	// already mounted the behaviour and owns the region.
@@ -1312,10 +1312,10 @@ func Table(kyse__props TableProps) kyse__template.HTML {
 					}
 				}
 //line components/table.kyse.go:714
-				if kyse__d.HxTarget != "" {
+				if kyse__d.YpyTarget != "" {
 //line components/table.go:1317
 					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-get=\"")
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\typy-get=\"")
 					}
 					if kyse__err == nil {
 						var kyse__v15 string
@@ -1332,11 +1332,11 @@ func Table(kyse__props TableProps) kyse__template.HTML {
 						_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 					}
 					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-target=\"")
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\typy-target=\"")
 					}
 					if kyse__err == nil {
 //line components/table.kyse.go:716
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxTarget))
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.YpyTarget))
 //line components/table.go:1341
 					}
 					if kyse__err == nil {
@@ -1344,14 +1344,14 @@ func Table(kyse__props TableProps) kyse__template.HTML {
 					}
 				}
 //line components/table.kyse.go:718
-				if kyse__d.HxSwap != "" {
+				if kyse__d.YpySwap != "" {
 //line components/table.go:1349
 					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-swap=\"")
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\typy-swap=\"")
 					}
 					if kyse__err == nil {
 //line components/table.kyse.go:719
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxSwap))
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.YpySwap))
 //line components/table.go:1356
 					}
 					if kyse__err == nil {
@@ -1359,14 +1359,14 @@ func Table(kyse__props TableProps) kyse__template.HTML {
 					}
 				}
 //line components/table.kyse.go:721
-				if kyse__d.HxSwap == "outerHTML" && kyse__d.HxTarget != "" {
+				if kyse__d.YpySwap == "outerHTML" && kyse__d.YpyTarget != "" {
 //line components/table.go:1364
 					if kyse__err == nil {
-						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\thx-select=\"")
+						_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\t\t\t\t\t\typy-select=\"")
 					}
 					if kyse__err == nil {
 //line components/table.kyse.go:722
-						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.HxTarget))
+						_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.YpyTarget))
 //line components/table.go:1371
 					}
 					if kyse__err == nil {

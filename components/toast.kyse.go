@@ -23,7 +23,7 @@ import (
 // An endpoint that answers in place, without navigating, returns this fragment
 // instead, and
 //
-//	hx-target="#toaster" hx-swap="beforeend"
+//	ypy-target="#toaster" ypy-swap="beforeend"
 //
 // appends it to the tray the layout already has. The two are one toast reached
 // from the two answers an action can give; neither needs a template deciding
@@ -162,8 +162,8 @@ func (p ToastProps) PartNames() []string {
 						type="button"
 						data-size="sm"
 						data-toast-action
-						hx-post="{{ .ActionURL }}"
-						hx-swap="none"
+						ypy-post="{{ .ActionURL }}"
+						ypy-swap="none"
 						@attributes(.PartAttrs("action"))
 					>{{ .ActionLabel }}</button>
 					@endif
