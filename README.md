@@ -76,14 +76,14 @@ space and a 500.
 | group | components |
 |---|---|
 | Actions | `Button` `ButtonGroup` `SplitButton` `CopyButton` `Link` `DeleteRow` `OptimisticToggle` `DialogTrigger` |
-| Forms | `Field` `Input` `HiddenInput` `Label` `Textarea` `Checkbox` `RadioGroup` `Switch` `Select` `Combobox` `Autocomplete` `InputGroup` `RangeSlider` `NumberInput` `Password` `Masked` `OneTimeCode` `DateTimePicker` `Calendar` `ColorPicker` `FileUpload` `SegmentedControl` `Rating` `EditInPlace` `Output` `ActiveSearch` |
+| Forms | `Field` `Input` `HiddenInput` `Label` `Textarea` `Checkbox` `RadioGroup` `Switch` `Select` `Combobox` `Autocomplete` `InputGroup` `RangeSlider` `NumberInput` `Password` `Masked` `OneTimeCode` `DateTimePicker` `DateRangePicker` `Calendar` `ColorPicker` `FileUpload` `SegmentedControl` `Rating` `EditInPlace` `Output` `ActiveSearch` |
 | Layout | `Card` `ContainerCard` `Item` `Separator` `Sidebar` `Toolbar` `Menubar` `Figure` |
 | Display | `Avatar` `Badge` `Kbd` `Skeleton` `Table` `DataTable` `StatCard` `Status` `Meter` `Highlight` `RelativeTime` `ResponsiveImage` `MediaPlayer` `Carousel` `Feed` `Tree` |
 | Feedback | `Alert` `Toast` `Progress` `Empty` `Dialog` `FormDialog` |
 | Overlays | `Drawer` `Popover` `HoverCard` `Tooltip` `DropdownMenu` `Command` `Collapsible` |
 | Navigation | `Accordion` `Breadcrumb` `Tabs` `Pagination` `SkipLink` `ThemeToggle` `LoadMore` `LazyLoad` |
 
-Seventy-nine, one per `components/*.kyse.go`. What is here is what has been
+Eighty, one per `components/*.kyse.go`. What is here is what has been
 adapted, not what is planned.
 
 An alert dialog is not a component of its own: it is the `Alert` field on

@@ -84,7 +84,7 @@ Nothing else in the toolchain would catch it: the markup is valid, the view
 compiles, and the smoke test still finds a class in the output. So the sources
 are read.
 
-`TestNoComponentEvaluatesAnExpression` at `tests/Unit/components_test.go:354`
+`TestNoComponentEvaluatesAnExpression` at `tests/Unit/components_test.go:596`
 globs `components/*.kyse.go` and `components/*.go`, and fails on any `x-name` or
 `@name=` it finds. Both halves are read: the source is where the directive would
 be written, the compiled file is what a browser is actually sent. The failure
@@ -165,7 +165,7 @@ somebody typed, converted, is stored cross-site scripting that runs for every
 reader of the page. In an application `aru doctor` also reports the shape as
 `raw-output-is-not-a-component`.
 
-`TestAPropIsEscaped` at `tests/Unit/components_test.go:131` renders twelve
+`TestAPropIsEscaped` at `tests/Unit/components_test.go:328` renders twelve
 components with `<script>alert(1)</script>` in a prop and fails if it survives.
 Add your component to that map when its props carry text.
 
@@ -187,7 +187,7 @@ The set is closed: `@extends` · `@section` / `@endsection` · `@yield` ·
 `@attributes`.
 
 A component uses `@if`, `@foreach`, `@for`, `@go` and `@attributes`, and nothing
-else — this returns nothing across all 37 of them:
+else — this returns nothing across all 80 of them:
 
 ```sh
 grep -ohE '@(extends|section|yield|include|csrf|while|forelse)' components/*.kyse.go

@@ -20,18 +20,25 @@ before their first patch.
 ## Before you open a pull request
 
 ```
+aru view:build
 gofmt -l $(find . -name '*.go' -not -path '*/testdata/*' -not -name '*.kyse.go')
+go build ./...
 go vet ./...
 go test -race ./...
+bash tests/test-layout-guard.sh
 ```
 
-CI runs these three, and then a number of checks this file does not list --
-`.github/workflows/ci.yml` is the one that decides, and a copy of it here would
-only be a second list to keep in step. One of those checks is worth knowing
-before you write the patch: this module requires `arandu-io/framework` and
-nothing else, because it is imported by every project that draws a button, and
-a second require is a download for all of them. A pull request that adds a
-dependency needs to argue for it first, in an issue.
+`aru view:build` comes first because the compiled `.go` beside each `.kyse.go`
+is committed, and CI fails a pull request whose compiled files are stale. The
+`gofmt` line prints nothing when the tree is formatted; `AGENTS.md` explains the
+gates and the `GOWORK=off` they run under. CI runs these, and then a number of checks
+this file does not list -- `.github/workflows/ci.yml` is the one that decides,
+and a copy of it here would only be a second list to keep in step. One of those
+checks is worth knowing before you write the patch: this module has two direct
+requirements, `arandu-io/framework` and `arandu-io/hesape`, because it is
+imported by every project that draws a button, and a third require is a download
+for all of them. A pull request that adds a dependency needs to argue for it
+first, in an issue.
 
 ## Where a test goes
 

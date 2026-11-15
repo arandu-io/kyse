@@ -70,7 +70,7 @@ export GOWORK=off
 aru view:build
 ```
 
-It reports how many views it compiled — `kyse: 76 view(s) compiled` before you
+It reports how many views it compiled — `kyse: 80 view(s) compiled` before you
 added yours — and writes the `.go` beside each source. **Commit what it
 writes.** `go get` has no build step to run, so the compiled
 files in the repository are the ones every consumer imports; a missing one is a
@@ -80,7 +80,7 @@ source says something else. `TestTheGeneratedFilesMatchTheirSources` in
 rebuilds everything and fails if the tree moved.
 
 **3. Add the row to the smoke table.** `TestEveryComponentRenders` in
-`tests/Unit/components_test.go:76` is a table, one line per component, each one
+`tests/Unit/components_test.go:98` is a table, one line per component, each one
 calling it with the smallest props that make sense:
 
 ```go
@@ -88,12 +88,12 @@ calling it with the smallest props that make sense:
 ```
 
 This is not optional and it is not on your honour.
-`TestEveryComponentIsInTheTable` at `tests/Unit/components_test.go:584` globs
+`TestEveryComponentIsInTheTable` at `tests/Unit/components_test.go:659` globs
 `components/*.kyse.go`, turns each file name into the function name, and fails
 when the table has no row starting `{"StatCard",`. The library went from twelve
 components to thirty-seven in one change and the table stayed green at sixteen,
 because nothing compared it to anything. Now something does, and it has held
-through everything added since: seventy-six components, seventy-six rows.
+through everything added since: eighty components, eighty rows.
 
 The row also asserts three things about what came back: it is not empty, it
 contains a `<`, and it contains a `class="`. The last one is why a component
@@ -165,7 +165,7 @@ component library is the whole point.
 - **An optional attribute is written only when it carries something.**
   `ypy-post=""` is not the absence of `ypy-post` — YPY acts on it and posts to
   the current URL. `TestAnEmptyOptionalAttributeIsNotWritten` at
-  `tests/Unit/components_test.go:341` holds `Button` to this.
+  `tests/Unit/components_test.go:391` holds `Button` to this.
 - **An input asks the page rather than being handed its message.** Take
   `Page Page` and look the message and the typed value up by the `Name` the
   component already has. The alternative writes the field's name three times in
