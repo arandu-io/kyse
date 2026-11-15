@@ -22,8 +22,8 @@ plain Go by the compiler in `aru/internal/kyse` — a build step, run by
 repository: the library of components, written in that language, that a view
 imports to draw a screen.
 
-The components themselves are adapted from shadcn/ui by way of shadcn-htmx, and
-importing the second is how a view writes the first.
+The components themselves are adapted from shadcn/ui, and importing them is how
+a view writes the first.
 
 ## Install
 
@@ -226,16 +226,12 @@ it writes.
 
 ## Where this came from
 
-The component set, the `data-variant` / `data-size` attribute API and the YPY
-patterns are adapted from [shadcn-htmx](https://github.com/productdevbook/shadcn-htmx)
-(MIT). The stylesheet is [Basecoat](https://github.com/hunvreus/basecoat) (MIT).
-The icons are [Phosphor](https://github.com/phosphor-icons/core) (MIT). Every
+The stylesheet is [Basecoat](https://github.com/hunvreus/basecoat) (MIT). The
+icons are [Phosphor](https://github.com/phosphor-icons/core) (MIT). Every
 licence travels with what was taken, and [THIRD_PARTY.md](THIRD_PARTY.md) says
 what came from where: Basecoat's notice sits beside the vendored CSS in the
-skeleton, Phosphor's in [icons/LICENSE.md](icons/LICENSE.md), and shadcn-htmx's
-in THIRD_PARTY.md, because what was taken from it is a shape rather than a file
-and there is no directory to put it next to. This project's own is in
-[LICENSE.md](LICENSE.md).
+skeleton, and Phosphor's in [icons/LICENSE.md](icons/LICENSE.md). This project's
+own is in [LICENSE.md](LICENSE.md).
 
 Nothing arrives through npm and nothing is fetched from a CDN. There is no
 `package.json` in an Arandu project and the Content-Security-Policy is
