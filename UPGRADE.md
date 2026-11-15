@@ -21,6 +21,21 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## v0.53.0 — the request props and attributes are YPY's
+
+Every field of a props struct that carried the old library's prefix
+(`...Post`, `...Get`, `...Target`, `...Swap`, `...Confirm`, `...Boost` and the
+rest of the family) is now spelled `Ypy...`, and every component draws
+`ypy-*` attributes. A call that sets the old field no longer compiles.
+
+- **Convert the application with `ypy migrate --write .`**, which renames the
+  fields and the attributes in the view sources and in the compiled files.
+- **Needs hesape with `ypy-compat.min.js` and the framework that embeds it**:
+  a page drawn by this release asks the view layer for `ypy-*`, and an older
+  hesape refuses nothing but serves a script that reads none of them.
+- The generator (`aru view:build`) must be converted before the compiled files
+  are regenerated, or the URL check on the request verbs is lost.
+
 ## v0.50.0
 
 Nothing stops compiling. One thing changes in what is drawn, and it undoes a
