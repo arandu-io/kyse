@@ -136,7 +136,9 @@ func (p EditInPlaceProps) PartNames() []string {
 @if(.Editing)
 	{{-- autofocus, because the whole interaction is "press edit and type": a
 	     field that opens without the caret in it costs a click nobody expects
-	     to have to make. --}}
+	     to have to make. The form arrives by a swap, and the request library
+	     moves the focus into swapped content only for a field that carries
+	     ypy-focus, so the field says so. --}}
 	<form
 		data-part="root"
 		class="{{ .RootClass("edit-in-place") }}"
@@ -161,6 +163,7 @@ func (p EditInPlaceProps) PartNames() []string {
 				id="{{ .ID }}-input"
 				name="{{ .Name }}"
 				autofocus
+				ypy-focus="auto"
 				@if(.Message != "")
 					aria-invalid="true"
 					aria-describedby="{{ .ID }}-error"
@@ -177,6 +180,7 @@ func (p EditInPlaceProps) PartNames() []string {
 				name="{{ .Name }}"
 				value="{{ .Value }}"
 				autofocus
+				ypy-focus="auto"
 				@if(.Message != "")
 					aria-invalid="true"
 					aria-describedby="{{ .ID }}-error"

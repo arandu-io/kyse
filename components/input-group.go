@@ -422,14 +422,17 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tautofocus\n")
 		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\typy-focus=\"auto\"\n")
+		}
 	}
 	if kyse__err == nil {
 		var kyse__v4 string
-//line components/input-group.kyse.go:196
+//line components/input-group.kyse.go:197
 		kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/input-group.go:431
+//line components/input-group.go:434
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/input-group.kyse.go:196", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/input-group.kyse.go:197", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 		}
@@ -440,25 +443,25 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/input-group.kyse.go:199
+//line components/input-group.kyse.go:200
 	if kyse__d.Start != "" {
-//line components/input-group.go:446
+//line components/input-group.go:449
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<span\n")
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"addon\"\n")
 		}
-//line components/input-group.kyse.go:202
+//line components/input-group.kyse.go:203
 		if kyse__d.PartClass("addon") != "" {
-//line components/input-group.go:455
+//line components/input-group.go:458
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/input-group.kyse.go:203
+//line components/input-group.kyse.go:204
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("addon")))
-//line components/input-group.go:462
+//line components/input-group.go:465
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -468,9 +471,9 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tid=\"")
 		}
 		if kyse__err == nil {
-//line components/input-group.kyse.go:205
+//line components/input-group.kyse.go:206
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.StartID()))
-//line components/input-group.go:474
+//line components/input-group.go:477
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -480,11 +483,11 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 			var kyse__v5 string
-//line components/input-group.kyse.go:207
+//line components/input-group.kyse.go:208
 			kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("addon"))
-//line components/input-group.go:486
+//line components/input-group.go:489
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/input-group.kyse.go:207", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/input-group.kyse.go:208", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 			}
@@ -493,33 +496,33 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 		}
 		if kyse__err == nil {
-//line components/input-group.kyse.go:208
+//line components/input-group.kyse.go:209
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Start)))
-//line components/input-group.go:499
+//line components/input-group.go:502
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
 		}
 	}
-//line components/input-group.kyse.go:210
+//line components/input-group.kyse.go:211
 	if kyse__d.End != "" {
-//line components/input-group.go:507
+//line components/input-group.go:510
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<span\n")
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"addon\"\n")
 		}
-//line components/input-group.kyse.go:213
+//line components/input-group.kyse.go:214
 		if kyse__d.PartClass("addon") != "" {
-//line components/input-group.go:516
+//line components/input-group.go:519
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/input-group.kyse.go:214
+//line components/input-group.kyse.go:215
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("addon")))
-//line components/input-group.go:523
+//line components/input-group.go:526
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -529,9 +532,9 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tid=\"")
 		}
 		if kyse__err == nil {
-//line components/input-group.kyse.go:216
+//line components/input-group.kyse.go:217
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.EndID()))
-//line components/input-group.go:535
+//line components/input-group.go:538
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -541,11 +544,11 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 			var kyse__v6 string
-//line components/input-group.kyse.go:218
+//line components/input-group.kyse.go:219
 			kyse__v6, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("addon"))
-//line components/input-group.go:547
+//line components/input-group.go:550
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/input-group.kyse.go:218", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/input-group.kyse.go:219", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v6)
 			}
@@ -554,33 +557,33 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 		}
 		if kyse__err == nil {
-//line components/input-group.kyse.go:219
+//line components/input-group.kyse.go:220
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.End)))
-//line components/input-group.go:560
+//line components/input-group.go:563
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</span>\n")
 		}
 	}
-//line components/input-group.kyse.go:221
+//line components/input-group.kyse.go:222
 	if kyse__d.Shortcut != "" {
-//line components/input-group.go:568
+//line components/input-group.go:571
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<span\n")
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tdata-part=\"addon\"\n")
 		}
-//line components/input-group.kyse.go:224
+//line components/input-group.kyse.go:225
 		if kyse__d.PartClass("addon") != "" {
-//line components/input-group.go:577
+//line components/input-group.go:580
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/input-group.kyse.go:225
+//line components/input-group.kyse.go:226
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("addon")))
-//line components/input-group.go:584
+//line components/input-group.go:587
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -591,11 +594,11 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 		}
 		if kyse__err == nil {
 			var kyse__v7 string
-//line components/input-group.kyse.go:228
+//line components/input-group.kyse.go:229
 			kyse__v7, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("addon"))
-//line components/input-group.go:597
+//line components/input-group.go:600
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/input-group.kyse.go:228", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/input-group.kyse.go:229", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v7)
 			}
@@ -604,9 +607,9 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t><kbd>")
 		}
 		if kyse__err == nil {
-//line components/input-group.kyse.go:229
+//line components/input-group.kyse.go:230
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Shortcut)))
-//line components/input-group.go:610
+//line components/input-group.go:613
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</kbd></span>\n")
@@ -618,9 +621,9 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\n")
 	}
-//line components/input-group.kyse.go:233
+//line components/input-group.kyse.go:234
 	if kyse__d.Message() != "" {
-//line components/input-group.go:624
+//line components/input-group.go:627
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<p\n")
 		}
@@ -631,9 +634,9 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
 		}
 		if kyse__err == nil {
-//line components/input-group.kyse.go:236
+//line components/input-group.kyse.go:237
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/input-group.go:637
+//line components/input-group.go:640
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "-error\"\n")
@@ -642,20 +645,20 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/input-group.kyse.go:237
+//line components/input-group.kyse.go:238
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("message", "text-destructive text-sm")))
-//line components/input-group.go:648
+//line components/input-group.go:651
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v8 string
-//line components/input-group.kyse.go:238
+//line components/input-group.kyse.go:239
 			kyse__v8, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("message"))
-//line components/input-group.go:657
+//line components/input-group.go:660
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/input-group.kyse.go:238", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/input-group.kyse.go:239", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v8)
 			}
@@ -664,20 +667,20 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
 		}
 		if kyse__err == nil {
-//line components/input-group.kyse.go:239
+//line components/input-group.kyse.go:240
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message())))
-//line components/input-group.go:670
+//line components/input-group.go:673
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
 		}
 	}
-//line components/input-group.kyse.go:241
-	if kyse__d.Message() == "" {
-//line components/input-group.go:678
 //line components/input-group.kyse.go:242
-		if kyse__d.Hint != "" {
+	if kyse__d.Message() == "" {
 //line components/input-group.go:681
+//line components/input-group.kyse.go:243
+		if kyse__d.Hint != "" {
+//line components/input-group.go:684
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<p\n")
 			}
@@ -688,9 +691,9 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tid=\"")
 			}
 			if kyse__err == nil {
-//line components/input-group.kyse.go:245
+//line components/input-group.kyse.go:246
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/input-group.go:694
+//line components/input-group.go:697
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "-hint\"\n")
@@ -699,20 +702,20 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/input-group.kyse.go:246
+//line components/input-group.kyse.go:247
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("hint", "text-muted-foreground text-sm")))
-//line components/input-group.go:705
+//line components/input-group.go:708
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 			if kyse__err == nil {
 				var kyse__v9 string
-//line components/input-group.kyse.go:247
+//line components/input-group.kyse.go:248
 				kyse__v9, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("hint"))
-//line components/input-group.go:714
+//line components/input-group.go:717
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/input-group.kyse.go:247", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/input-group.kyse.go:248", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v9)
 				}
@@ -721,9 +724,9 @@ func InputGroup(kyse__props InputGroupProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/input-group.kyse.go:248
+//line components/input-group.kyse.go:249
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Hint)))
-//line components/input-group.go:727
+//line components/input-group.go:730
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")

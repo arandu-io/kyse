@@ -138,6 +138,7 @@ func (p InputProps) PartNames() []string { return []string{"root"} }
 	@endif
 	@if(.Autofocus)
 		autofocus
+		ypy-focus="auto"
 	@endif
 	@attributes(.RootAttrs())
 >

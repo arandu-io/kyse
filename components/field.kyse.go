@@ -146,6 +146,7 @@ func (p FieldProps) ElementID() string {
 		@endif
 		@if(.Autofocus)
 			autofocus
+			ypy-focus="auto"
 		@endif
 		@attributes(.PartAttrs("input"))
 	>
