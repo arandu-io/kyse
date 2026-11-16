@@ -313,6 +313,7 @@ func (p OneTimeCodeProps) PartNames() []string { return []string{"root", "square
 		@endif
 		@if(.Autofocus)
 			autofocus
+			ypy-focus="auto"
 		@endif
 		@attributes(.PartAttrs("raw"))
 	>

@@ -285,14 +285,17 @@ func Input(kyse__props InputProps) kyse__template.HTML {
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tautofocus\n")
 		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\typy-focus=\"auto\"\n")
+		}
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/input.kyse.go:142
+//line components/input.kyse.go:143
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/input.go:294
+//line components/input.go:297
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/input.kyse.go:142", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/input.kyse.go:143", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}

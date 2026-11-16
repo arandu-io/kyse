@@ -21,6 +21,24 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## v0.53.1 — swapped content says where the focus goes
+
+Requires hesape v0.109.0, which serves YPY v0.1.1. Since that version a swap
+focuses the `[autofocus]` element of the content it brings in only when that
+element carries `ypy-focus` (or the application turns `config.autofocus` on).
+Nothing here turns it on for you, and nothing needs to compile differently.
+
+The components that draw an `[autofocus]` element now write `ypy-focus="auto"`
+on it, so the cursor lands where it did before, also when the markup arrives by
+a swap or a boosted link: `EditInPlace` (the field and the textarea) and the
+field of every component with an `Autofocus` prop (`Field`, `Input`,
+`InputGroup`, `Password`, `Masked`, `Combobox`, `OneTimeCode`). The cancel button
+of an alert `Dialog` or `FormDialog` is left alone: the browser focuses it when
+the dialog opens as a modal.
+
+If you draw an `[autofocus]` element of your own into content a swap brings in,
+add `ypy-focus="auto"` to it. Rebuild your views with `aru view:build`.
+
 ## v0.53.0 — the request props and attributes are YPY's
 
 This release stops compiling in every application that sets a request prop, and
