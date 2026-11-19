@@ -21,6 +21,36 @@ CI, and an incompatible change with no entry here fails the build.
 
 ---
 
+## v0.54.0 — `FileUpload` draws the list of what was chosen
+
+Requires hesape v0.110.0, which carries the behaviour that fills the list. No
+field was removed or renamed and nothing needs to compile differently. What
+changes is what a field that leaves its files to the form draws, and what a
+screen that worked around the empty list can now delete.
+
+| it was | it is |
+| --- | --- |
+| an empty `<ul data-part="list" aria-live="polite">` | the same list without `aria-live`, a `<p data-part="summary" role="status">` before it that is the polite announcement, and a `<template data-file-template>` after it with the row |
+| the files chosen were not shown | one row per file, drawn by the `file-upload` behaviour: a thumbnail for an image, the name, the size, and a count in the status line |
+| no limits | `MaxFiles` and `MaxBytes`, warned before the submit |
+
+A field with an `UploadURL` is not changed.
+
+- **Remove your own script and rules.** An application that listed the files
+  with a script of its own (a `change` listener that fills `[data-part="list"]`)
+  deletes it: left in place it redraws the list after the behaviour does, with
+  its own sentences. The classes the old rules named (`file-upload-summary`,
+  `file-upload-item`, `file-upload-name`, `file-upload-size`) are not drawn any
+  more, so those rules do nothing.
+- **Pass the limits where you validated them.** `MaxFiles: 6, MaxBytes: 5 << 20`
+  is what the page warns about; keep the server's check, which stays the rule.
+- **A project with its own `Behavior` on the props** is given no props by this
+  component: pass `FileUploadProps{...}.BehaviorProps()` as `Behavior.Props` to
+  keep the limits and the sentences.
+- **Translate the sentences** in `lang/<locale>/kyse.json` under
+  `file_upload`, or write them on the props. Rebuild your views with
+  `aru view:build`.
+
 ## v0.53.1 — swapped content says where the focus goes
 
 Requires hesape v0.109.0, which serves YPY v0.1.1. Since that version a swap
