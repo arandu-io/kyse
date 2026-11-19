@@ -1,5 +1,9 @@
 # Release Notes
 
+## [v0.54.0](https://github.com/arandu-io/kyse/compare/v0.53.1...v0.54.0) - 2026-11-19
+
+**Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.53.1...v0.54.0
+
 ## v0.54.0
 
 - `FileUpload` lists what was chosen. The component drew an empty list under its drop area and nothing filled it, so a person who picked or dropped photos saw the screen not change. A field that leaves its files to the form now writes a `data-part="summary"` status line (`role="status"`, polite, atomic) and a `<template data-file-template>` holding one row, and the `file-upload` behaviour of hesape v0.110.0 draws the list from them after every pick, drop or reset: a thumbnail for an image, the name, the size in the page's language, and the count in the status line. The row is built from the component's own classes (`group flex min-w-0 items-center gap-3`, `bg-muted size-12 rounded-md object-cover`, `truncate`, `group-data-[over=true]:text-destructive`), so it is drawn in both themes by the stylesheet an application already builds from these sources and needs no rule of its own.
