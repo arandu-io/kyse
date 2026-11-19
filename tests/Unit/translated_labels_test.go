@@ -143,6 +143,7 @@ func everyLabel(page components.Page) string {
 		string(components.Toast(components.ToastProps{Title: "Saved.", Dismissible: true, Page: page})),
 		string(components.ThemeToggle(components.ThemeToggleProps{Page: page})),
 		string(components.OneTimeCode(components.OneTimeCodeProps{Name: "code", Label: "Code", Page: page})),
+		string(components.FileUpload(components.FileUploadProps{Name: "photos", Label: "Photos", Multiple: true, MaxFiles: 6, MaxBytes: 5 << 20, Page: page})),
 		string(components.Table(components.TableProps{
 			ID: "plain", Columns: columns, Rows: rows, SelectName: "ids", BulkActions: bulk,
 			SortKey: "number", SortDir: "asc", SortURL: "/x?sort={sort}&dir={dir}", Page: page,

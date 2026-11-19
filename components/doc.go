@@ -60,8 +60,8 @@
 //   - [FlashPage]: what the request before this one said. Toast draws it when
 //     its Title is empty.
 //   - [TranslatorPage]: the application's catalogue and the request's locale.
-//     Pagination, Dialog, FormDialog, Toast, ThemeToggle, Table, DataTable and
-//     OneTimeCode read their own words from it when the label for them is empty, and say
+//     Pagination, Dialog, FormDialog, Toast, ThemeToggle, Table, DataTable,
+//     OneTimeCode and FileUpload read their own words from it when the label for them is empty, and say
 //     the English they always said when it carries no line. Pagination and
 //     DataTable take the page as PageData, because their Page is a number.
 //
@@ -104,6 +104,11 @@
 //	kyse.table.ascending          {column}, sorted ascending
 //	kyse.table.descending         {column}, sorted descending
 //	kyse.table.unsorted           {column}, not sorted
+//	kyse.file_upload.chosen_one   1 file chosen
+//	kyse.file_upload.chosen_many  {n} files chosen
+//	kyse.file_upload.too_many     Send up to {max} files at a time: choose again.
+//	kyse.file_upload.too_big_one  One file is over {size}: replace it before sending.
+//	kyse.file_upload.too_big_many {n} files are over {size}: replace them before sending.
 //	kyse.data_table.filter        Filter {label}...
 //	kyse.data_table.search        Search {label}
 //	kyse.data_table.no_result     No results.

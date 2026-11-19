@@ -1,5 +1,14 @@
 # Release Notes
 
+## v0.54.0
+
+- `FileUpload` lists what was chosen. The component drew an empty list under its drop area and nothing filled it, so a person who picked or dropped photos saw the screen not change. A field that leaves its files to the form now writes a `data-part="summary"` status line (`role="status"`, polite, atomic) and a `<template data-file-template>` holding one row, and the `file-upload` behaviour of hesape v0.110.0 draws the list from them after every pick, drop or reset: a thumbnail for an image, the name, the size in the page's language, and the count in the status line. The row is built from the component's own classes (`group flex min-w-0 items-center gap-3`, `bg-muted size-12 rounded-md object-cover`, `truncate`, `group-data-[over=true]:text-destructive`), so it is drawn in both themes by the stylesheet an application already builds from these sources and needs no rule of its own.
+- `FileUploadProps.MaxFiles` and `MaxBytes` (a count and bytes per file, zero for none) are the limits of one submit. A pick over either is not refused, and is warned before the submit: the status line says what is wrong in the destructive colour, the rows over the size are marked, and the browser holds the form with its own message. The server still decides; the page only says it first.
+- The sentences are the page's own words. `ChosenOne`, `ChosenMany`, `TooMany`, `TooBigOne` and `TooBigMany` on the props win, then `kyse.file_upload.chosen_one`, `chosen_many`, `too_many`, `too_big_one` and `too_big_many` from the catalogue (listed in the package doc, with `{n}`, `{max}` and `{size}`), then English. `FileUpload` is a `TranslatorPage` reader now.
+- New parts: `summary`, `file`, `thumbnail`, `file-name` and `file-size`. The last four style the row the behaviour copies, so a class or an attribute on them reaches every file.
+- A field with an `UploadURL` is as it was: it posts each file as it is chosen and the server's answer fills its list, so it writes no status line, no template and no props, and its list stays a polite region.
+- Requires hesape v0.110.0, which carries the behaviour. Tests: the markup, the props and the catalogue in `tests/Unit`, and in `tests/E2E` a real browser under `script-src 'self'` and `img-src 'self' data:` with the stylesheet built from the sources, in both themes and at 390 px, after a boosted navigation.
+
 ## [v0.53.1](https://github.com/arandu-io/kyse/compare/v0.53.0...v0.53.1) - 2026-11-16
 
 **Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.53.0...v0.53.1
