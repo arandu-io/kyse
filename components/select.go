@@ -310,7 +310,7 @@ func Select(kyse__props SelectProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 //line components/select.kyse.go:200
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("input", "select")))
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("input", "select w-full")))
 //line components/select.go:315
 	}
 	if kyse__err == nil {

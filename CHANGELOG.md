@@ -1,5 +1,12 @@
 # Release Notes
 
+## v0.54.1
+
+- `Select` and `FileUpload` fill their field. The stylesheet an application builds gives a native select `width: fit-content` (`select.select`, `.field > select`) and a label inside a field the same (`.field > label`), in the components layer, by selectors more specific than the field's own `.field > * { width: 100% }`. So a select in a field was only as wide as its longest option, a multiple one as wide as a scrollbar, and the drop area of a `FileUpload` as wide as its prompt, and an application had to repair both in its own sheet. The select now draws with `select w-full` and the drop area with `file-upload w-full`: a utility is in the layer above, so it wins whatever the specificity. A caller who wants another width writes it on the part with the important marker against the utility (`Parts: {"input": {Class: "w-48!"}}`), as `ComponentProps` documents for two utilities of the same layer. Rebuild the stylesheet with `aru view:build`.
+- `FieldProps` gains `InputMode`, `Pattern`, `MaxLength` and `MinLength`, written on the input as `inputmode`, `pattern`, `maxlength` and `minlength` (`Autocomplete` was there already). They were reachable only through `Parts{"input": {Attrs: ...}}`, which still works and still takes any attribute with no prop; where both name the same attribute the component's comes first, as for every other attribute it writes.
+- The `DataTable` search box that sits beside facets gives way when its card is narrower than its 150 px (`max-w-full min-w-0`) instead of pushing out of the card. It had a fixed width and nothing to say that the card came first.
+- Tests: `tests/Unit/field_attributes_test.go` for the props, Parts and the width classes; in `tests/E2E`, a real browser with the part of Basecoat that sets those widths (copied into the test stylesheet, in the components layer) holds a text box, a select, a multiple select and the drop area to the width of the form at 1280 and 390 px, and the search box inside a 10 rem card.
+
 ## [v0.54.0](https://github.com/arandu-io/kyse/compare/v0.53.1...v0.54.0) - 2026-11-19
 
 **Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.53.1...v0.54.0

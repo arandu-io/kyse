@@ -342,7 +342,7 @@ func FileUpload(kyse__props FileUploadProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 //line components/file-upload.kyse.go:243
-		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("dropzone", "file-upload")))
+		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("dropzone", "file-upload w-full")))
 //line components/file-upload.go:347
 	}
 	if kyse__err == nil {

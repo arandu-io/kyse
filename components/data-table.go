@@ -1982,7 +1982,7 @@ func DataTable(kyse__props DataTableProps) kyse__template.HTML {
 				}
 				if kyse__err == nil {
 //line components/data-table.kyse.go:1702
-					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("search", "h-8 w-[150px] lg:w-[250px] rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30")))
+					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("search", "h-8 w-[150px] max-w-full min-w-0 lg:w-[250px] rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30")))
 //line components/data-table.go:1987
 				}
 				if kyse__err == nil {

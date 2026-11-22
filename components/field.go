@@ -68,6 +68,18 @@ type FieldProps struct {
 	// Autocomplete is the browser hint: "email", "current-password",
 	// "new-password", "off".
 	Autocomplete string
+	// InputMode is the keyboard a phone offers: "numeric", "decimal", "tel",
+	// "email", "url", "search" or "text". It changes the keys and nothing the
+	// input accepts; Pattern and the server decide that.
+	InputMode string
+	// Pattern is the regular expression the browser checks the value against
+	// before it submits, written as the pattern attribute is: matched against
+	// the whole value, with no slashes.
+	Pattern string
+	// MaxLength is the most characters the box takes. Zero writes none.
+	MaxLength int
+	// MinLength is the fewest characters the browser accepts. Zero writes none.
+	MinLength int
 }
 
 // InputType is the type attribute, defaulting to text.
@@ -125,7 +137,7 @@ func (p FieldProps) ElementID() string {
 	return p.Name
 }
 
-//line components/field.go:129
+//line components/field.go:141
 
 // Field renders the field component.
 func Field(kyse__props FieldProps) kyse__template.HTML {
@@ -148,20 +160,20 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/field.kyse.go:116
+//line components/field.kyse.go:128
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.RootClass("field")))
-//line components/field.go:154
+//line components/field.go:166
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v1 string
-//line components/field.kyse.go:117
+//line components/field.kyse.go:129
 		kyse__v1, kyse__err = kyse__view.Attributes(kyse__d.RootAttrs())
-//line components/field.go:163
+//line components/field.go:175
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/field.kyse.go:117", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/field.kyse.go:129", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v1)
 		}
@@ -179,9 +191,9 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/field.kyse.go:121
+//line components/field.kyse.go:133
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("label", "label")))
-//line components/field.go:185
+//line components/field.go:197
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -190,20 +202,20 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tfor=\"")
 	}
 	if kyse__err == nil {
-//line components/field.kyse.go:122
+//line components/field.kyse.go:134
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/field.go:196
+//line components/field.go:208
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
 	if kyse__err == nil {
 		var kyse__v2 string
-//line components/field.kyse.go:123
+//line components/field.kyse.go:135
 		kyse__v2, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("label"))
-//line components/field.go:205
+//line components/field.go:217
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/field.kyse.go:123", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/field.kyse.go:135", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v2)
 		}
@@ -212,9 +224,9 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>")
 	}
 	if kyse__err == nil {
-//line components/field.kyse.go:124
+//line components/field.kyse.go:136
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Label)))
-//line components/field.go:218
+//line components/field.go:230
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "</label>\n")
@@ -229,9 +241,9 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tclass=\"")
 	}
 	if kyse__err == nil {
-//line components/field.kyse.go:127
+//line components/field.kyse.go:139
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("input", "input")))
-//line components/field.go:235
+//line components/field.go:247
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -240,9 +252,9 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\ttype=\"")
 	}
 	if kyse__err == nil {
-//line components/field.kyse.go:128
+//line components/field.kyse.go:140
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.InputType()))
-//line components/field.go:246
+//line components/field.go:258
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -251,9 +263,9 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tid=\"")
 	}
 	if kyse__err == nil {
-//line components/field.kyse.go:129
+//line components/field.kyse.go:141
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/field.go:257
+//line components/field.go:269
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -262,9 +274,9 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tname=\"")
 	}
 	if kyse__err == nil {
-//line components/field.kyse.go:130
+//line components/field.kyse.go:142
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Name))
-//line components/field.go:268
+//line components/field.go:280
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
@@ -273,75 +285,135 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t\tvalue=\"")
 	}
 	if kyse__err == nil {
-//line components/field.kyse.go:131
+//line components/field.kyse.go:143
 		_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Current()))
-//line components/field.go:279
+//line components/field.go:291
 	}
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 	}
-//line components/field.kyse.go:132
+//line components/field.kyse.go:144
 	if kyse__d.Placeholder != "" {
-//line components/field.go:286
+//line components/field.go:298
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tplaceholder=\"")
 		}
 		if kyse__err == nil {
-//line components/field.kyse.go:133
+//line components/field.kyse.go:145
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Placeholder))
-//line components/field.go:293
+//line components/field.go:305
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/field.kyse.go:135
+//line components/field.kyse.go:147
 	if kyse__d.Autocomplete != "" {
-//line components/field.go:301
+//line components/field.go:313
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tautocomplete=\"")
 		}
 		if kyse__err == nil {
-//line components/field.kyse.go:136
+//line components/field.kyse.go:148
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Autocomplete))
-//line components/field.go:308
+//line components/field.go:320
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/field.kyse.go:138
+//line components/field.kyse.go:150
+	if kyse__d.InputMode != "" {
+//line components/field.go:328
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tinputmode=\"")
+		}
+		if kyse__err == nil {
+//line components/field.kyse.go:151
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.InputMode))
+//line components/field.go:335
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+//line components/field.kyse.go:153
+	if kyse__d.Pattern != "" {
+//line components/field.go:343
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tpattern=\"")
+		}
+		if kyse__err == nil {
+//line components/field.kyse.go:154
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.Pattern))
+//line components/field.go:350
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+//line components/field.kyse.go:156
+	if kyse__d.MaxLength > 0 {
+//line components/field.go:358
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tmaxlength=\"")
+		}
+		if kyse__err == nil {
+//line components/field.kyse.go:157
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.MaxLength))
+//line components/field.go:365
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+//line components/field.kyse.go:159
+	if kyse__d.MinLength > 0 {
+//line components/field.go:373
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tminlength=\"")
+		}
+		if kyse__err == nil {
+//line components/field.kyse.go:160
+			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.MinLength))
+//line components/field.go:380
+		}
+		if kyse__err == nil {
+			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
+		}
+	}
+//line components/field.kyse.go:162
 	if kyse__d.DescribedBy() != "" {
-//line components/field.go:316
+//line components/field.go:388
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-describedby=\"")
 		}
 		if kyse__err == nil {
-//line components/field.kyse.go:139
+//line components/field.kyse.go:163
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.DescribedBy()))
-//line components/field.go:323
+//line components/field.go:395
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 	}
-//line components/field.kyse.go:141
+//line components/field.kyse.go:165
 	if kyse__d.Message() != "" {
-//line components/field.go:331
+//line components/field.go:403
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\taria-invalid=\"true\"\n")
 		}
 	}
-//line components/field.kyse.go:144
+//line components/field.kyse.go:168
 	if kyse__d.Required {
-//line components/field.go:338
+//line components/field.go:410
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\trequired\n")
 		}
 	}
-//line components/field.kyse.go:147
+//line components/field.kyse.go:171
 	if kyse__d.Autofocus {
-//line components/field.go:345
+//line components/field.go:417
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tautofocus\n")
 		}
@@ -351,11 +423,11 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 	}
 	if kyse__err == nil {
 		var kyse__v3 string
-//line components/field.kyse.go:151
+//line components/field.kyse.go:175
 		kyse__v3, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("input"))
-//line components/field.go:357
+//line components/field.go:429
 		if kyse__err != nil {
-			kyse__err = kyse__fmt.Errorf("%s: %w", "components/field.kyse.go:151", kyse__err)
+			kyse__err = kyse__fmt.Errorf("%s: %w", "components/field.kyse.go:175", kyse__err)
 		} else {
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v3)
 		}
@@ -363,9 +435,9 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 	if kyse__err == nil {
 		_, kyse__err = kyse__io.WriteString(kyse__w, "\t>\n")
 	}
-//line components/field.kyse.go:153
+//line components/field.kyse.go:177
 	if kyse__d.Message() != "" {
-//line components/field.go:369
+//line components/field.go:441
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t<p\n")
 		}
@@ -376,9 +448,9 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tid=\"")
 		}
 		if kyse__err == nil {
-//line components/field.kyse.go:156
+//line components/field.kyse.go:180
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/field.go:382
+//line components/field.go:454
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "-error\"\n")
@@ -387,20 +459,20 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\tclass=\"")
 		}
 		if kyse__err == nil {
-//line components/field.kyse.go:157
+//line components/field.kyse.go:181
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("message", "text-destructive text-sm")))
-//line components/field.go:393
+//line components/field.go:465
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 		}
 		if kyse__err == nil {
 			var kyse__v4 string
-//line components/field.kyse.go:158
+//line components/field.kyse.go:182
 			kyse__v4, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("message"))
-//line components/field.go:402
+//line components/field.go:474
 			if kyse__err != nil {
-				kyse__err = kyse__fmt.Errorf("%s: %w", "components/field.kyse.go:158", kyse__err)
+				kyse__err = kyse__fmt.Errorf("%s: %w", "components/field.kyse.go:182", kyse__err)
 			} else {
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v4)
 			}
@@ -409,20 +481,20 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t>")
 		}
 		if kyse__err == nil {
-//line components/field.kyse.go:159
+//line components/field.kyse.go:183
 			_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Message())))
-//line components/field.go:415
+//line components/field.go:487
 		}
 		if kyse__err == nil {
 			_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
 		}
 	}
-//line components/field.kyse.go:161
+//line components/field.kyse.go:185
 	if kyse__d.Message() == "" {
-//line components/field.go:423
-//line components/field.kyse.go:162
+//line components/field.go:495
+//line components/field.kyse.go:186
 		if kyse__d.Hint != "" {
-//line components/field.go:426
+//line components/field.go:498
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t<p\n")
 			}
@@ -433,9 +505,9 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tid=\"")
 			}
 			if kyse__err == nil {
-//line components/field.kyse.go:165
+//line components/field.kyse.go:189
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.ElementID()))
-//line components/field.go:439
+//line components/field.go:511
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "-hint\"\n")
@@ -444,20 +516,20 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t\tclass=\"")
 			}
 			if kyse__err == nil {
-//line components/field.kyse.go:166
+//line components/field.kyse.go:190
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__view.TextAttr(kyse__d.PartClass("hint", "text-muted-foreground text-sm")))
-//line components/field.go:450
+//line components/field.go:522
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\"\n")
 			}
 			if kyse__err == nil {
 				var kyse__v5 string
-//line components/field.kyse.go:167
+//line components/field.kyse.go:191
 				kyse__v5, kyse__err = kyse__view.Attributes(kyse__d.PartAttrs("hint"))
-//line components/field.go:459
+//line components/field.go:531
 				if kyse__err != nil {
-					kyse__err = kyse__fmt.Errorf("%s: %w", "components/field.kyse.go:167", kyse__err)
+					kyse__err = kyse__fmt.Errorf("%s: %w", "components/field.kyse.go:191", kyse__err)
 				} else {
 					_, kyse__err = kyse__io.WriteString(kyse__w, kyse__v5)
 				}
@@ -466,9 +538,9 @@ func Field(kyse__props FieldProps) kyse__template.HTML {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "\t\t\t>")
 			}
 			if kyse__err == nil {
-//line components/field.kyse.go:168
+//line components/field.kyse.go:192
 				_, kyse__err = kyse__io.WriteString(kyse__w, kyse__template.HTMLEscapeString(kyse__view.Text(kyse__d.Hint)))
-//line components/field.go:472
+//line components/field.go:544
 			}
 			if kyse__err == nil {
 				_, kyse__err = kyse__io.WriteString(kyse__w, "</p>\n")
