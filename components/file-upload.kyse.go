@@ -240,7 +240,7 @@ func (p FileUploadProps) ElementID() string {
 	     keyboard and a screen reader find it. --}}
 	<label
 		data-part="dropzone"
-		class="{{ .PartClass("dropzone", "file-upload") }}"
+		class="{{ .PartClass("dropzone", "file-upload w-full") }}"
 		for="{{ .ElementID() }}"
 		data-dropzone
 		@attributes(.PartAttrs("dropzone"))

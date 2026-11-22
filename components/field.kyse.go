@@ -56,6 +56,18 @@ type FieldProps struct {
 	// Autocomplete is the browser hint: "email", "current-password",
 	// "new-password", "off".
 	Autocomplete string
+	// InputMode is the keyboard a phone offers: "numeric", "decimal", "tel",
+	// "email", "url", "search" or "text". It changes the keys and nothing the
+	// input accepts; Pattern and the server decide that.
+	InputMode string
+	// Pattern is the regular expression the browser checks the value against
+	// before it submits, written as the pattern attribute is: matched against
+	// the whole value, with no slashes.
+	Pattern string
+	// MaxLength is the most characters the box takes. Zero writes none.
+	MaxLength int
+	// MinLength is the fewest characters the browser accepts. Zero writes none.
+	MinLength int
 }
 
 // InputType is the type attribute, defaulting to text.
@@ -134,6 +146,18 @@ func (p FieldProps) ElementID() string {
 		@endif
 		@if(.Autocomplete != "")
 			autocomplete="{{ .Autocomplete }}"
+		@endif
+		@if(.InputMode != "")
+			inputmode="{{ .InputMode }}"
+		@endif
+		@if(.Pattern != "")
+			pattern="{{ .Pattern }}"
+		@endif
+		@if(.MaxLength > 0)
+			maxlength="{{ .MaxLength }}"
+		@endif
+		@if(.MinLength > 0)
+			minlength="{{ .MinLength }}"
 		@endif
 		@if(.DescribedBy() != "")
 			aria-describedby="{{ .DescribedBy() }}"

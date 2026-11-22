@@ -197,7 +197,7 @@ func (p SelectProps) PartNames() []string {
 	>{{ .Label }}</label>
 	<select
 		data-part="input"
-		class="{{ .PartClass("input", "select") }}"
+		class="{{ .PartClass("input", "select w-full") }}"
 		id="{{ .ElementID() }}"
 		name="{{ .FieldName() }}"
 		@if(.Multiple)

@@ -1699,7 +1699,7 @@ func (p DataTableProps) PartNames() []string {
 				@if(.Faceted())
 					<input
 						data-part="search"
-						class="{{ .PartClass("search", "h-8 w-[150px] lg:w-[250px] rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30") }}"
+						class="{{ .PartClass("search", "h-8 w-[150px] max-w-full min-w-0 lg:w-[250px] rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30") }}"
 						type="text"
 						role="searchbox"
 						id="{{ .SearchID() }}"

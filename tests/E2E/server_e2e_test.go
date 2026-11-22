@@ -377,6 +377,7 @@ func stylesheet() ([]byte, error) {
   body { background: var(--background); color: var(--foreground); }
 }
 `, filepath.Join(root, "components")+"/**/*.go", filepath.Dir(file)+"/**/*.go")
+		source += basecoatFixture
 		if err := os.WriteFile(input, []byte(source), 0o644); err != nil {
 			cssErr = err
 			return
@@ -390,6 +391,28 @@ func stylesheet() ([]byte, error) {
 	})
 	return cssBody, cssErr
 }
+
+// basecoatFixture is the part of Basecoat that decides the width of what sits
+// in a field, as an application's stylesheet carries it: in the components
+// layer, which the utilities layer beats whatever the specificity. The rules are
+// copied from the skeleton's resources/css/basecoat (components/field.css and
+// the native select of styles/vega.css), keeping only the declaration that
+// matters here, so a component that leaves its width to the stylesheet is drawn
+// the way a real page draws it.
+const basecoatFixture = `
+@layer components {
+  .field { display: flex; flex-direction: column; width: 100%; }
+  .field > * { width: 100%; }
+  .field > .sr-only { width: auto; }
+  .field > label, .field > section > label, label:has(> .field) { width: fit-content; }
+  .field > select, select.select { width: fit-content; height: 2.25rem; }
+  .file-upload {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 8rem; gap: 0.5rem; padding: 1.5rem; text-align: center;
+    border: 1px dashed var(--input); border-radius: 0.5rem;
+  }
+}
+`
 
 // serve starts the server under test. A test that needs pixels asks for the
 // stylesheet; one that does not still gets a working page.
@@ -469,6 +492,18 @@ func serve(t *testing.T, needStyles bool) *app {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-store")
 		fmt.Fprint(w, layout("Foot", footTable()))
+	})
+	mux.HandleFunc("GET /fields", func(w http.ResponseWriter, r *http.Request) {
+		a.record(r)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-store")
+		fmt.Fprint(w, layout("Fields", fieldsForm()))
+	})
+	mux.HandleFunc("GET /narrow", func(w http.ResponseWriter, r *http.Request) {
+		a.record(r)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-store")
+		fmt.Fprint(w, layout("Narrow", `<div id="card" class="w-40 rounded-lg border p-3">`+table("/narrow", url.Values{}, false)+`</div>`))
 	})
 	mux.HandleFunc("GET /wide", func(w http.ResponseWriter, r *http.Request) {
 		a.record(r)
