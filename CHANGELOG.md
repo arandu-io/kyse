@@ -1,5 +1,9 @@
 # Release Notes
 
+## [v0.54.1](https://github.com/arandu-io/kyse/compare/v0.54.0...v0.54.1) - 2026-11-22
+
+**Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.54.0...v0.54.1
+
 ## v0.54.1
 
 - `Select` and `FileUpload` fill their field. The stylesheet an application builds gives a native select `width: fit-content` (`select.select`, `.field > select`) and a label inside a field the same (`.field > label`), in the components layer, by selectors more specific than the field's own `.field > * { width: 100% }`. So a select in a field was only as wide as its longest option, a multiple one as wide as a scrollbar, and the drop area of a `FileUpload` as wide as its prompt, and an application had to repair both in its own sheet. The select now draws with `select w-full` and the drop area with `file-upload w-full`: a utility is in the layer above, so it wins whatever the specificity. A caller who wants another width writes it on the part with the important marker against the utility (`Parts: {"input": {Class: "w-48!"}}`), as `ComponentProps` documents for two utilities of the same layer. Rebuild the stylesheet with `aru view:build`.
