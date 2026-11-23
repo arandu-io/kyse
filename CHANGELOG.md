@@ -1,5 +1,9 @@
 # Release Notes
 
+## [v0.55.0](https://github.com/arandu-io/kyse/compare/v0.54.1...v0.55.0) - 2026-11-23
+
+**Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.54.1...v0.55.0
+
 ## v0.55.0
 
 - `DataTableProps.CardBelow` chooses what a `DataTable` in the auto mode measures to turn into cards. Empty is `DataTableBreakScreen`, a screen narrower than 600px, and a table that does not set it draws exactly what it drew, class for class, with no container on its root. `DataTableBreakBlock` and `DataTableBreakBlockWide` ask the width of the block the table sits in instead, with a container query on the root (`@container/dt`, then `@max-[640px]/dt:` or `@max-[720px]/dt:` on each card class): cards when the table's own region is narrower than 640px or 720px, whatever the screen. It is the answer where an open menu takes room from the page: a window of 768px with a menu of 256px leaves 464px to the content, too narrow for a table of six columns, and the screen is wider than 600px. 640px suits a table of up to five columns; six or more want the 720px, which a window of 1024px leaves beside that menu.
