@@ -113,6 +113,12 @@ description is drawn. Whoever uses it does not mark one table at a time.
 the list that must stay a table on a phone or cards on a desktop. See
 `UPGRADE.md` (v0.50.0).
 
+`CardBelow` is the other exception, for a list beside an open menu, where the
+screen is wider than 600px and the room left for the table is not:
+`DataTableBreakBlock` and `DataTableBreakBlockWide` turn into cards when the
+table's own block is narrower than 640px or 720px, with a container query on the
+table's root, and only when asked. Empty is the screen, as above.
+
 ## A form in a dialog
 
 `FormDialog` is a create or edit form drawn over the list it belongs to -- "New

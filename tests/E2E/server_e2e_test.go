@@ -487,6 +487,20 @@ func serve(t *testing.T, needStyles bool) *app {
 		w.Header().Set("Cache-Control", "no-store")
 		fmt.Fprint(w, layout("Modes", modeBoxes()))
 	})
+	mux.HandleFunc("GET /break", func(w http.ResponseWriter, r *http.Request) {
+		a.record(r)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-store")
+		fmt.Fprint(w, layout("Breaks", breakBoxes()))
+	})
+	mux.HandleFunc("GET /beside", func(w http.ResponseWriter, r *http.Request) {
+		a.record(r)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-store")
+		// The page's own column has a width limit; this page is the whole window,
+		// so the menu and the content are what the window is divided into.
+		fmt.Fprint(w, strings.Replace(layout("Beside a menu", breakBeside()), `<main class="mx-auto max-w-5xl p-6">`, `<main>`, 1))
+	})
 	mux.HandleFunc("GET /foot", func(w http.ResponseWriter, r *http.Request) {
 		a.record(r)
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")

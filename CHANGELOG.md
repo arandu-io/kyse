@@ -1,5 +1,13 @@
 # Release Notes
 
+## v0.55.0
+
+- `DataTableProps.CardBelow` chooses what a `DataTable` in the auto mode measures to turn into cards. Empty is `DataTableBreakScreen`, a screen narrower than 600px, and a table that does not set it draws exactly what it drew, class for class, with no container on its root. `DataTableBreakBlock` and `DataTableBreakBlockWide` ask the width of the block the table sits in instead, with a container query on the root (`@container/dt`, then `@max-[640px]/dt:` or `@max-[720px]/dt:` on each card class): cards when the table's own region is narrower than 640px or 720px, whatever the screen. It is the answer where an open menu takes room from the page: a window of 768px with a menu of 256px leaves 464px to the content, too narrow for a table of six columns, and the screen is wider than 600px. 640px suits a table of up to five columns; six or more want the 720px, which a window of 1024px leaves beside that menu.
+- An application that worked around this with its own stylesheet, writing each `max-[600px]:` utility of the data table again for a range of screen widths, can delete it and set `CardBelow` on its lists. Rebuild the stylesheet with `aru view:build`, so the container classes are compiled.
+- The default stays the screen, on purpose: v0.48.0 asked the block for every list and a short list in a card of a dashboard became cards on any desktop. `CardBelow` is opt-in, `DataTableModeTable` keeps a short list a table in a narrow card, and `Mode` table and cards ignore `CardBelow`, since they ask nothing. A value that is none of the three breaks is the screen.
+- The markup is the same in the three breaks apart from the classes (and the root's container class), so a row put in as it arrives (see `RowTemplate`) is drawn like the others.
+- Tests: the classes of the two block sets held to the screen set under their query, the root, the table and cards modes, the row template and the absence of an inline style or script in `tests/Unit`; in `tests/E2E`, a real browser holds the same list to the break in boxes of 600, 680 and 800px on a window of 1280px and 390px, and beside a menu of 256px at 768, 1024 and 1280px.
+
 ## [v0.54.1](https://github.com/arandu-io/kyse/compare/v0.54.0...v0.54.1) - 2026-11-22
 
 **Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.54.0...v0.54.1
