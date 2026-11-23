@@ -102,7 +102,7 @@ import (
 // page: at 768px a menu of 256px leaves 464px, no room for a table of six columns,
 // and the screen is wider than 600px. CardBelow says what to ask instead.
 // [DataTableBreakBlock] and [DataTableBreakBlockWide] draw cards when the table's
-// own region is narrower than 640px or 720px, whatever the screen, with a
+// own region is narrower than 640px or 680px, whatever the screen, with a
 // container query on the root (the element named dt). Empty is
 // [DataTableBreakScreen], 600px of screen, and draws exactly what it always did.
 // The choice needs no script and no inline style, and it is only in the classes:
@@ -243,7 +243,7 @@ type DataTableProps struct {
 	// CardBelow is what [DataTableModeAuto] measures to turn into cards. Empty is
 	// [DataTableBreakScreen]: a screen narrower than 600px. [DataTableBreakBlock] and
 	// [DataTableBreakBlockWide] ask the width of the block the table sits in
-	// instead, 640px and 720px, which is the question where a menu takes room from
+	// instead, 640px and 680px, which is the question where a menu takes room from
 	// the page. It does nothing in the table and cards modes, which do not ask.
 	CardBelow DataTableBreak
 	// RowTemplate draws, after the table, an inert <template data-part="row-template">
@@ -1283,9 +1283,10 @@ const (
 // They are written out whole for the reason above, and a test holds each one to
 // its twin.
 //
-// The first set asks 640px and the second 720px. A table of up to five columns
-// is a table at 640px; one of six or more wants the 720px of the second, which is
-// what a window of 1024px leaves beside an open menu of 256px.
+// The first set asks 640px and the second 680px. A table of up to five columns
+// is a table at 640px; one of six or more wants the 680px of the second. A window
+// of 1024px with a menu of 256px open leaves 720px to the content, and 703px where
+// the scrollbar takes room, so the second is a table there too.
 const (
 	blockWrapper     = "@max-[640px]/dt:overflow-visible @max-[640px]/dt:rounded-none @max-[640px]/dt:border-0"
 	blockScroller    = "@max-[640px]/dt:overflow-visible"
@@ -1310,26 +1311,26 @@ const (
 )
 
 const (
-	blockWideWrapper     = "@max-[720px]/dt:overflow-visible @max-[720px]/dt:rounded-none @max-[720px]/dt:border-0"
-	blockWideScroller    = "@max-[720px]/dt:overflow-visible"
-	blockWideTable       = "@max-[720px]/dt:block"
-	blockWideCaption     = "@max-[720px]/dt:block"
-	blockWideHead        = "@max-[720px]/dt:block"
-	blockWideHeadRow     = "@max-[720px]/dt:flex @max-[720px]/dt:flex-wrap @max-[720px]/dt:items-center @max-[720px]/dt:gap-2 @max-[720px]/dt:border-b-0 @max-[720px]/dt:pb-3"
-	blockWideHeadCell    = "@max-[720px]/dt:block @max-[720px]/dt:h-auto @max-[720px]/dt:p-0"
-	blockWideHeadSelect  = "@max-[720px]/dt:block @max-[720px]/dt:h-auto @max-[720px]/dt:w-auto @max-[720px]/dt:p-0 @max-[720px]/dt:pe-1"
-	blockWideHeadOff     = "@max-[720px]/dt:hidden"
-	blockWideBody        = "@max-[720px]/dt:flex @max-[720px]/dt:flex-col @max-[720px]/dt:gap-3 @max-[720px]/dt:[&_tr:last-child]:border"
-	blockWideRow         = "@max-[720px]/dt:relative @max-[720px]/dt:flex @max-[720px]/dt:flex-col @max-[720px]/dt:gap-1.5 @max-[720px]/dt:rounded-lg @max-[720px]/dt:border @max-[720px]/dt:bg-card @max-[720px]/dt:p-3"
-	blockWideCell        = "@max-[720px]/dt:flex @max-[720px]/dt:items-baseline @max-[720px]/dt:gap-x-3 @max-[720px]/dt:p-0 @max-[720px]/dt:text-start @max-[720px]/dt:whitespace-normal @max-[720px]/dt:before:w-2/5 @max-[720px]/dt:before:shrink-0 @max-[720px]/dt:before:text-xs @max-[720px]/dt:before:text-muted-foreground @max-[720px]/dt:before:content-[attr(data-label)]"
-	blockWideNoLabel     = "@max-[720px]/dt:before:hidden"
-	blockWideTitle       = "@max-[720px]/dt:order-first @max-[720px]/dt:text-base @max-[720px]/dt:font-medium @max-[720px]/dt:before:hidden"
-	blockWideTitleSelect = "@max-[720px]/dt:ps-8"
-	blockWideLeft        = "@max-[720px]/dt:hidden"
-	blockWideSelect      = "@max-[720px]/dt:absolute @max-[720px]/dt:start-3 @max-[720px]/dt:top-3 @max-[720px]/dt:p-0"
-	blockWideActionCell  = "@max-[720px]/dt:order-last @max-[720px]/dt:flex @max-[720px]/dt:items-center @max-[720px]/dt:justify-end @max-[720px]/dt:gap-x-3 @max-[720px]/dt:border-t @max-[720px]/dt:p-0 @max-[720px]/dt:pt-2 @max-[720px]/dt:text-start @max-[720px]/dt:whitespace-normal @max-[720px]/dt:before:hidden"
-	blockWideActions     = "@max-[720px]/dt:order-last @max-[720px]/dt:flex @max-[720px]/dt:justify-end @max-[720px]/dt:border-t @max-[720px]/dt:p-0 @max-[720px]/dt:pt-2"
-	blockWideFull        = "@max-[720px]/dt:block"
+	blockWideWrapper     = "@max-[680px]/dt:overflow-visible @max-[680px]/dt:rounded-none @max-[680px]/dt:border-0"
+	blockWideScroller    = "@max-[680px]/dt:overflow-visible"
+	blockWideTable       = "@max-[680px]/dt:block"
+	blockWideCaption     = "@max-[680px]/dt:block"
+	blockWideHead        = "@max-[680px]/dt:block"
+	blockWideHeadRow     = "@max-[680px]/dt:flex @max-[680px]/dt:flex-wrap @max-[680px]/dt:items-center @max-[680px]/dt:gap-2 @max-[680px]/dt:border-b-0 @max-[680px]/dt:pb-3"
+	blockWideHeadCell    = "@max-[680px]/dt:block @max-[680px]/dt:h-auto @max-[680px]/dt:p-0"
+	blockWideHeadSelect  = "@max-[680px]/dt:block @max-[680px]/dt:h-auto @max-[680px]/dt:w-auto @max-[680px]/dt:p-0 @max-[680px]/dt:pe-1"
+	blockWideHeadOff     = "@max-[680px]/dt:hidden"
+	blockWideBody        = "@max-[680px]/dt:flex @max-[680px]/dt:flex-col @max-[680px]/dt:gap-3 @max-[680px]/dt:[&_tr:last-child]:border"
+	blockWideRow         = "@max-[680px]/dt:relative @max-[680px]/dt:flex @max-[680px]/dt:flex-col @max-[680px]/dt:gap-1.5 @max-[680px]/dt:rounded-lg @max-[680px]/dt:border @max-[680px]/dt:bg-card @max-[680px]/dt:p-3"
+	blockWideCell        = "@max-[680px]/dt:flex @max-[680px]/dt:items-baseline @max-[680px]/dt:gap-x-3 @max-[680px]/dt:p-0 @max-[680px]/dt:text-start @max-[680px]/dt:whitespace-normal @max-[680px]/dt:before:w-2/5 @max-[680px]/dt:before:shrink-0 @max-[680px]/dt:before:text-xs @max-[680px]/dt:before:text-muted-foreground @max-[680px]/dt:before:content-[attr(data-label)]"
+	blockWideNoLabel     = "@max-[680px]/dt:before:hidden"
+	blockWideTitle       = "@max-[680px]/dt:order-first @max-[680px]/dt:text-base @max-[680px]/dt:font-medium @max-[680px]/dt:before:hidden"
+	blockWideTitleSelect = "@max-[680px]/dt:ps-8"
+	blockWideLeft        = "@max-[680px]/dt:hidden"
+	blockWideSelect      = "@max-[680px]/dt:absolute @max-[680px]/dt:start-3 @max-[680px]/dt:top-3 @max-[680px]/dt:p-0"
+	blockWideActionCell  = "@max-[680px]/dt:order-last @max-[680px]/dt:flex @max-[680px]/dt:items-center @max-[680px]/dt:justify-end @max-[680px]/dt:gap-x-3 @max-[680px]/dt:border-t @max-[680px]/dt:p-0 @max-[680px]/dt:pt-2 @max-[680px]/dt:text-start @max-[680px]/dt:whitespace-normal @max-[680px]/dt:before:hidden"
+	blockWideActions     = "@max-[680px]/dt:order-last @max-[680px]/dt:flex @max-[680px]/dt:justify-end @max-[680px]/dt:border-t @max-[680px]/dt:p-0 @max-[680px]/dt:pt-2"
+	blockWideFull        = "@max-[680px]/dt:block"
 )
 
 // DataTableMode is how a [DataTable] lays its rows out.
@@ -1370,9 +1371,10 @@ const (
 	// columns. A short list that must stay a table in a narrow card is
 	// [DataTableModeTable], not this.
 	DataTableBreakBlock DataTableBreak = "block"
-	// DataTableBreakBlockWide is [DataTableBreakBlock] at 720px, for a table of six
-	// columns or more: a window of 1024px with a menu of 256px open leaves 768px, so
-	// the table is a table there and cards from the next step narrower.
+	// DataTableBreakBlockWide is [DataTableBreakBlock] at 680px, for a table of six
+	// columns or more: a window of 1024px with a menu of 256px open leaves 720px, or
+	// 703px with a scrollbar, so the table is a table there and cards from the next
+	// step narrower.
 	DataTableBreakBlockWide DataTableBreak = "block-wide"
 )
 

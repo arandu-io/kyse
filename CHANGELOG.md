@@ -1,5 +1,9 @@
 # Release Notes
 
+## v0.55.1
+
+- `DataTableBreakBlockWide` asks 680px and not 720px. A window of 1024px with a menu of 256px open leaves exactly 720px to the content, and 703px where the scrollbar takes room, so at 720 the same list was a table or cards by one pixel and by the browser. It was measured on the panel of an application at 768, 957, 1024 and 1280px: with the cell wrapping the panel has, tables of five and six columns fit with no sideways scroll from 640px up. 680px keeps a table of six columns a table at 1024px with 23px to spare, and a list of six columns is cards in a window of 957px (653px of content). `DataTableBreakBlock` stays at 640px. Rebuild the stylesheet with `aru view:build`.
+
 ## [v0.55.0](https://github.com/arandu-io/kyse/compare/v0.54.1...v0.55.0) - 2026-11-23
 
 **Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.54.1...v0.55.0

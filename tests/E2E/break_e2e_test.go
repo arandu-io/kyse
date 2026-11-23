@@ -70,7 +70,7 @@ func whatItDraws(t *testing.T, page interface{ Evaluate(string, any) }, id strin
 
 // The block decides and not the screen: on a window of 1280px the same list is
 // cards in a box under the break and a table in a box over it, at 640px for
-// DataTableBreakBlock and at 720px for DataTableBreakBlockWide, and the default
+// DataTableBreakBlock and at 680px for DataTableBreakBlockWide, and the default
 // is a table in all three because the screen is wide.
 func TestTheBlockDecidesWhereCardBelowAsksIt(t *testing.T) {
 	app := serve(t, true)

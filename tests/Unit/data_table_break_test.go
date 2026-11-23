@@ -10,7 +10,7 @@ import (
 
 // CardBelow says what a data table in the auto mode measures to turn into cards:
 // the screen at 600px, which is what every list drew before it existed, or the
-// block the table sits in, at 640px or at 720px. The three are the same markup
+// block the table sits in, at 640px or at 680px. The three are the same markup
 // under three sets of classes.
 
 func broken(mode components.DataTableMode, below components.DataTableBreak) string {
@@ -45,7 +45,7 @@ func TestTheBlockSetsAreTheScreenSetUnderAContainerQuery(t *testing.T) {
 		query string
 	}{
 		{components.DataTableBreakBlock, "@max-[640px]/dt:"},
-		{components.DataTableBreakBlockWide, "@max-[720px]/dt:"},
+		{components.DataTableBreakBlockWide, "@max-[680px]/dt:"},
 	}
 	for _, c := range cases {
 		html := broken(components.DataTableModeAuto, c.below)

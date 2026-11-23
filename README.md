@@ -116,7 +116,7 @@ the list that must stay a table on a phone or cards on a desktop. See
 `CardBelow` is the other exception, for a list beside an open menu, where the
 screen is wider than 600px and the room left for the table is not:
 `DataTableBreakBlock` and `DataTableBreakBlockWide` turn into cards when the
-table's own block is narrower than 640px or 720px, with a container query on the
+table's own block is narrower than 640px or 680px, with a container query on the
 table's root, and only when asked. Empty is the screen, as above.
 
 ## A form in a dialog
