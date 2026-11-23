@@ -96,6 +96,20 @@ import (
 // data-label, drawn by CSS, so the text of a cell is still only its value and a
 // screen reader reads the name with it.
 //
+// # Turning into cards by the block, beside a menu
+//
+// The screen is the wrong thing to ask where an open menu takes room from the
+// page: at 768px a menu of 256px leaves 464px, no room for a table of six columns,
+// and the screen is wider than 600px. CardBelow says what to ask instead.
+// [DataTableBreakBlock] and [DataTableBreakBlockWide] draw cards when the table's
+// own region is narrower than 640px or 720px, whatever the screen, with a
+// container query on the root (the element named dt). Empty is
+// [DataTableBreakScreen], 600px of screen, and draws exactly what it always did.
+// The choice needs no script and no inline style, and it is only in the classes:
+// the markup is the same, so a row put in as it arrives (see RowTemplate) is
+// drawn like the others. A short list in a narrow card that must stay a table
+// is [DataTableModeTable], which asks nothing.
+//
 // # Keeping the table on a phone, or the cards on a desktop
 //
 // A list of lines that is short and in a narrow block, a plate and when it was
@@ -226,6 +240,12 @@ type DataTableProps struct {
 	// block the table is in. [DataTableModeTable] keeps the table on a phone too;
 	// [DataTableModeCards] keeps the cards on a desktop. See "On a phone" above.
 	Mode DataTableMode
+	// CardBelow is what [DataTableModeAuto] measures to turn into cards. Empty is
+	// [DataTableBreakScreen]: a screen narrower than 600px. [DataTableBreakBlock] and
+	// [DataTableBreakBlockWide] ask the width of the block the table sits in
+	// instead, 640px and 720px, which is the question where a menu takes room from
+	// the page. It does nothing in the table and cards modes, which do not ask.
+	CardBelow DataTableBreak
 	// RowTemplate draws, after the table, an inert <template data-part="row-template">
 	// holding one row drawn exactly as the rows are: the same classes on the row
 	// and on each cell, the same data-column and data-label, in the mode the table
@@ -1164,6 +1184,12 @@ func (p DataTableProps) RowAttrs(row TableRow) map[string]string {
 	return out
 }
 
+// cardRegion makes the region of the table the container the block queries ask.
+// It is on the root only when CardBelow asks the block: containment by inline size
+// stops an element sizing itself to its content, and a table that has never been
+// asked to must not start.
+const cardRegion = "@container/dt"
+
 // The classes that draw the table as a list of cards. Every one of them is the
 // same utility written under a media query on the screen -- "max-[600px]:" is
 // "when the screen is narrower than 600px" -- so above the breakpoint none of
@@ -1174,7 +1200,8 @@ func (p DataTableProps) RowAttrs(row TableRow) map[string]string {
 // The screen decides and not the block the table sits in. v0.48.0 asked the block
 // (a container query on the region) and a short list in a card of a dashboard,
 // narrower than 600px on any desktop, was drawn as cards; the width of the
-// window is also what Ayra's DataTable asks.
+// window is also what Ayra's DataTable asks. That is still the default; CardBelow
+// asks the block on purpose, for a list that sits beside a menu.
 const (
 	// cardWrapper, cardScroller and cardTable stop being a bordered, scrolling
 	// table: the cards carry their own border and nothing scrolls sideways.
@@ -1249,6 +1276,62 @@ const (
 	cardsFull        = "min-[0px]:block"
 )
 
+// The same classes again under a container query, for a table that stacks by the
+// width of the block it sits in and not by the width of the screen
+// ([DataTableBreakBlock] and [DataTableBreakBlockWide]). "@max-[640px]/dt:" is
+// "when the region of the table, the element named dt, is narrower than 640px".
+// They are written out whole for the reason above, and a test holds each one to
+// its twin.
+//
+// The first set asks 640px and the second 720px. A table of up to five columns
+// is a table at 640px; one of six or more wants the 720px of the second, which is
+// what a window of 1024px leaves beside an open menu of 256px.
+const (
+	blockWrapper     = "@max-[640px]/dt:overflow-visible @max-[640px]/dt:rounded-none @max-[640px]/dt:border-0"
+	blockScroller    = "@max-[640px]/dt:overflow-visible"
+	blockTable       = "@max-[640px]/dt:block"
+	blockCaption     = "@max-[640px]/dt:block"
+	blockHead        = "@max-[640px]/dt:block"
+	blockHeadRow     = "@max-[640px]/dt:flex @max-[640px]/dt:flex-wrap @max-[640px]/dt:items-center @max-[640px]/dt:gap-2 @max-[640px]/dt:border-b-0 @max-[640px]/dt:pb-3"
+	blockHeadCell    = "@max-[640px]/dt:block @max-[640px]/dt:h-auto @max-[640px]/dt:p-0"
+	blockHeadSelect  = "@max-[640px]/dt:block @max-[640px]/dt:h-auto @max-[640px]/dt:w-auto @max-[640px]/dt:p-0 @max-[640px]/dt:pe-1"
+	blockHeadOff     = "@max-[640px]/dt:hidden"
+	blockBody        = "@max-[640px]/dt:flex @max-[640px]/dt:flex-col @max-[640px]/dt:gap-3 @max-[640px]/dt:[&_tr:last-child]:border"
+	blockRow         = "@max-[640px]/dt:relative @max-[640px]/dt:flex @max-[640px]/dt:flex-col @max-[640px]/dt:gap-1.5 @max-[640px]/dt:rounded-lg @max-[640px]/dt:border @max-[640px]/dt:bg-card @max-[640px]/dt:p-3"
+	blockCell        = "@max-[640px]/dt:flex @max-[640px]/dt:items-baseline @max-[640px]/dt:gap-x-3 @max-[640px]/dt:p-0 @max-[640px]/dt:text-start @max-[640px]/dt:whitespace-normal @max-[640px]/dt:before:w-2/5 @max-[640px]/dt:before:shrink-0 @max-[640px]/dt:before:text-xs @max-[640px]/dt:before:text-muted-foreground @max-[640px]/dt:before:content-[attr(data-label)]"
+	blockNoLabel     = "@max-[640px]/dt:before:hidden"
+	blockTitle       = "@max-[640px]/dt:order-first @max-[640px]/dt:text-base @max-[640px]/dt:font-medium @max-[640px]/dt:before:hidden"
+	blockTitleSelect = "@max-[640px]/dt:ps-8"
+	blockLeft        = "@max-[640px]/dt:hidden"
+	blockSelect      = "@max-[640px]/dt:absolute @max-[640px]/dt:start-3 @max-[640px]/dt:top-3 @max-[640px]/dt:p-0"
+	blockActionCell  = "@max-[640px]/dt:order-last @max-[640px]/dt:flex @max-[640px]/dt:items-center @max-[640px]/dt:justify-end @max-[640px]/dt:gap-x-3 @max-[640px]/dt:border-t @max-[640px]/dt:p-0 @max-[640px]/dt:pt-2 @max-[640px]/dt:text-start @max-[640px]/dt:whitespace-normal @max-[640px]/dt:before:hidden"
+	blockActions     = "@max-[640px]/dt:order-last @max-[640px]/dt:flex @max-[640px]/dt:justify-end @max-[640px]/dt:border-t @max-[640px]/dt:p-0 @max-[640px]/dt:pt-2"
+	blockFull        = "@max-[640px]/dt:block"
+)
+
+const (
+	blockWideWrapper     = "@max-[720px]/dt:overflow-visible @max-[720px]/dt:rounded-none @max-[720px]/dt:border-0"
+	blockWideScroller    = "@max-[720px]/dt:overflow-visible"
+	blockWideTable       = "@max-[720px]/dt:block"
+	blockWideCaption     = "@max-[720px]/dt:block"
+	blockWideHead        = "@max-[720px]/dt:block"
+	blockWideHeadRow     = "@max-[720px]/dt:flex @max-[720px]/dt:flex-wrap @max-[720px]/dt:items-center @max-[720px]/dt:gap-2 @max-[720px]/dt:border-b-0 @max-[720px]/dt:pb-3"
+	blockWideHeadCell    = "@max-[720px]/dt:block @max-[720px]/dt:h-auto @max-[720px]/dt:p-0"
+	blockWideHeadSelect  = "@max-[720px]/dt:block @max-[720px]/dt:h-auto @max-[720px]/dt:w-auto @max-[720px]/dt:p-0 @max-[720px]/dt:pe-1"
+	blockWideHeadOff     = "@max-[720px]/dt:hidden"
+	blockWideBody        = "@max-[720px]/dt:flex @max-[720px]/dt:flex-col @max-[720px]/dt:gap-3 @max-[720px]/dt:[&_tr:last-child]:border"
+	blockWideRow         = "@max-[720px]/dt:relative @max-[720px]/dt:flex @max-[720px]/dt:flex-col @max-[720px]/dt:gap-1.5 @max-[720px]/dt:rounded-lg @max-[720px]/dt:border @max-[720px]/dt:bg-card @max-[720px]/dt:p-3"
+	blockWideCell        = "@max-[720px]/dt:flex @max-[720px]/dt:items-baseline @max-[720px]/dt:gap-x-3 @max-[720px]/dt:p-0 @max-[720px]/dt:text-start @max-[720px]/dt:whitespace-normal @max-[720px]/dt:before:w-2/5 @max-[720px]/dt:before:shrink-0 @max-[720px]/dt:before:text-xs @max-[720px]/dt:before:text-muted-foreground @max-[720px]/dt:before:content-[attr(data-label)]"
+	blockWideNoLabel     = "@max-[720px]/dt:before:hidden"
+	blockWideTitle       = "@max-[720px]/dt:order-first @max-[720px]/dt:text-base @max-[720px]/dt:font-medium @max-[720px]/dt:before:hidden"
+	blockWideTitleSelect = "@max-[720px]/dt:ps-8"
+	blockWideLeft        = "@max-[720px]/dt:hidden"
+	blockWideSelect      = "@max-[720px]/dt:absolute @max-[720px]/dt:start-3 @max-[720px]/dt:top-3 @max-[720px]/dt:p-0"
+	blockWideActionCell  = "@max-[720px]/dt:order-last @max-[720px]/dt:flex @max-[720px]/dt:items-center @max-[720px]/dt:justify-end @max-[720px]/dt:gap-x-3 @max-[720px]/dt:border-t @max-[720px]/dt:p-0 @max-[720px]/dt:pt-2 @max-[720px]/dt:text-start @max-[720px]/dt:whitespace-normal @max-[720px]/dt:before:hidden"
+	blockWideActions     = "@max-[720px]/dt:order-last @max-[720px]/dt:flex @max-[720px]/dt:justify-end @max-[720px]/dt:border-t @max-[720px]/dt:p-0 @max-[720px]/dt:pt-2"
+	blockWideFull        = "@max-[720px]/dt:block"
+)
+
 // DataTableMode is how a [DataTable] lays its rows out.
 //
 // The names are the ones of Ayra's DataTable (ModeAuto, ModeTable, ModeCards),
@@ -1268,9 +1351,35 @@ const (
 	DataTableModeCards DataTableMode = "cards"
 )
 
+// DataTableBreak is where a [DataTable] in [DataTableModeAuto] turns into cards,
+// and what it measures to decide: the screen or the block the table sits in.
+//
+// The screen is the default and what every list drew before this existed. It is
+// wrong where a menu sits beside the page: a window of 768px with a menu 256px
+// wide leaves 464px to the content, too narrow for a table of six columns, and
+// the screen is still wider than 600px. The block is what the table has, so it
+// asks that instead.
+type DataTableBreak string
+
+const (
+	// DataTableBreakScreen turns into cards on a screen narrower than 600px, however
+	// wide the block is. It is the zero value.
+	DataTableBreakScreen DataTableBreak = ""
+	// DataTableBreakBlock turns into cards when the table's own region is narrower
+	// than 640px, however wide the screen is. Right for a table of up to five
+	// columns. A short list that must stay a table in a narrow card is
+	// [DataTableModeTable], not this.
+	DataTableBreakBlock DataTableBreak = "block"
+	// DataTableBreakBlockWide is [DataTableBreakBlock] at 720px, for a table of six
+	// columns or more: a window of 1024px with a menu of 256px open leaves 768px, so
+	// the table is a table there and cards from the next step narrower.
+	DataTableBreakBlockWide DataTableBreak = "block-wide"
+)
+
 // cardClasses are the classes that draw a table as cards, for one mode. In the
 // table mode every one of them is empty.
 type cardClasses struct {
+	Region                                           string
 	Wrapper, Scroller, Table, Caption, Head, HeadRow string
 	HeadCell, HeadSelect, HeadOff, Body, Row, Cell, NoLabel  string
 	Title, TitleSelect, Left, Select, ActionCell, Actions    string
@@ -1290,17 +1399,38 @@ var (
 		Body: cardsBody, Row: cardsRow, Cell: cardsCell, NoLabel: cardsNoLabel, Title: cardsTitle, TitleSelect: cardsTitleSelect,
 		Left: cardsLeft, Select: cardsSelect, ActionCell: cardsActionCell, Actions: cardsActions, Full: cardsFull,
 	}
+	cardsBlock = cardClasses{
+		Region:  cardRegion,
+		Wrapper: blockWrapper, Scroller: blockScroller, Table: blockTable, Caption: blockCaption,
+		Head: blockHead, HeadRow: blockHeadRow, HeadCell: blockHeadCell, HeadSelect: blockHeadSelect, HeadOff: blockHeadOff,
+		Body: blockBody, Row: blockRow, Cell: blockCell, NoLabel: blockNoLabel, Title: blockTitle, TitleSelect: blockTitleSelect,
+		Left: blockLeft, Select: blockSelect, ActionCell: blockActionCell, Actions: blockActions, Full: blockFull,
+	}
+	cardsBlockWide = cardClasses{
+		Region:  cardRegion,
+		Wrapper: blockWideWrapper, Scroller: blockWideScroller, Table: blockWideTable, Caption: blockWideCaption,
+		Head: blockWideHead, HeadRow: blockWideHeadRow, HeadCell: blockWideHeadCell, HeadSelect: blockWideHeadSelect, HeadOff: blockWideHeadOff,
+		Body: blockWideBody, Row: blockWideRow, Cell: blockWideCell, NoLabel: blockWideNoLabel, Title: blockWideTitle, TitleSelect: blockWideTitleSelect,
+		Left: blockWideLeft, Select: blockWideSelect, ActionCell: blockWideActionCell, Actions: blockWideActions, Full: blockWideFull,
+	}
 )
 
-// card is the classes that draw the table as cards, for the mode it is in: under
-// 600px for auto, at every width for cards, and none for a table. A value that is
-// none of the three is auto, so a misspelling draws what a list always drew.
+// card is the classes that draw the table as cards, for the mode it is in: where
+// CardBelow says for auto, at every width for cards, and none for a table. A value
+// that is none of the three modes is auto, and one that is none of the breaks is
+// the screen, so a misspelling draws what a list always drew.
 func (p DataTableProps) card() cardClasses {
 	switch p.Mode {
 	case DataTableModeTable:
 		return cardClasses{}
 	case DataTableModeCards:
 		return cardsAlways
+	}
+	switch p.CardBelow {
+	case DataTableBreakBlock:
+		return cardsBlock
+	case DataTableBreakBlockWide:
+		return cardsBlockWide
 	}
 	return cardsAuto
 }
@@ -1640,7 +1770,7 @@ func (p DataTableProps) PartNames() []string {
      are all rebuilt from the same state on the way back. --}}
 <div
 	data-part="root"
-	class="{{ .RootClass("group/dt w-full") }}"
+	class="{{ .RootClass("group/dt w-full", .card().Region) }}"
 	id="{{ .ID }}"
 	role="region"
 	@if(.Complete)
