@@ -1,5 +1,10 @@
 # Release Notes
 
+## v0.55.2
+
+- The check mark of the `DataTable` menus draws both layers of the icon. The column menu (the "Columns" button) and the page-size menu marked the chosen entry with `icons.Check` and hid its shade with `[&_path[opacity]]:hidden`, so the one icon of the library that is drawn in two layers was drawn in one there. The two classes are gone; the icon is the same `icons.Check` every other component uses, and its shade (the 20% layer) shows. Rebuild the stylesheet with `aru view:build`.
+- Test: `tests/Unit/icons_duotone_visible_test.go` fails on a component source that selects the path of an icon (`path[opacity]`, `[&_path`, `[&>path`).
+
 ## [v0.55.1](https://github.com/arandu-io/kyse/compare/v0.55.0...v0.55.1) - 2026-11-23
 
 **Full Changelog**: https://github.com/arandu-io/kyse/compare/v0.55.0...v0.55.1
