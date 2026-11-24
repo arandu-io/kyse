@@ -2113,7 +2113,7 @@ func (p DataTableProps) PartNames() []string {
 							>
 								{{ column.Label }}
 								<span
-									class="pointer-events-none absolute end-2 flex items-center justify-center [&_svg]:size-4 [&_path[opacity]]:hidden"
+									class="pointer-events-none absolute end-2 flex items-center justify-center [&_svg]:size-4"
 									data-indicator
 									@if(.Off(column))
 										hidden
@@ -2653,7 +2653,7 @@ func (p DataTableProps) PartNames() []string {
 									>
 										{{ size }}
 										<span
-											class="pointer-events-none absolute end-2 flex items-center justify-center [&_svg]:size-4 [&_path[opacity]]:hidden"
+											class="pointer-events-none absolute end-2 flex items-center justify-center [&_svg]:size-4"
 											data-indicator
 											@if(size != .Size())
 												hidden
